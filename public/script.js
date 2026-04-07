@@ -1,0 +1,1382 @@
+﻿/* ============================================================
+   ITSafe - script.js
+   Laravel API + Leaflet (OSM / Satelit / Dark / Topo)
+   Heatmap - Titik - Cluster - Basemap switcher
+============================================================ */
+
+// --- API CONFIG ---------------------------------------------
+const API_BASE = `${window.location.origin}/api`;
+const REALTIME_INTERVAL = 15000;
+
+// --- STATE --------------------------------------------------
+let reports     = [];   // diisi dari API
+let realtimeTimer = null;
+let isRealtimeRefreshing = false;
+let activeLayer = 'semua';
+let visHeatmap  = true;
+let visPoint    = false;
+let visCluster  = false;
+
+// --- LEAFLET INSTANCES --------------------------------------
+let leafletMap   = null;
+let pickerMap    = null;
+let pickerMarker = null;
+let baseTile     = null;
+let heatLayer    = null;
+let pointLayer   = null;
+let clusterLayer = null;
+let fixedLocationLayerMain = null;
+let fixedLocationLayerPicker = null;
+let boundaryLayerMain = null;
+let boundaryLayerPicker = null;
+let boundaryGeoJSON = null;
+let boundaryPolygons = null;
+let currentBm    = 'osm';
+
+const BOUNDARY_SRC_CRS = 'EPSG:32749';
+const BOUNDARY_SRC_DEF = '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs';
+const BOUNDARY_DST_CRS = 'EPSG:4326';
+const BOUNDARY_DST_DEF = '+proj=longlat +datum=WGS84 +no_defs';
+const BOUNDARY_ZIP_B64 = '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';
+
+// --- BASEMAP CONFIGS ----------------------------------------
+const BASEMAPS = {
+  osm:       { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',                                                                attr: '© <a href="https://www.openstreetmap.org">OpenStreetMap</a>', opt: {} },
+  satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',                    attr: 'Tiles © Esri',                                                opt: {} },
+  dark:      { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',                                                    attr: '© <a href="https://carto.com">CARTO</a>',                    opt: { subdomains: 'abcd' } },
+  topo:      { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',                                                                 attr: '© <a href="https://opentopomap.org">OpenTopoMap</a>',       opt: {} },
+};
+
+const ITS  = [-7.2756, 112.7951];
+const ZOOM = 15;
+const QR_URL = 'https://its.id/m/ITSafe_Kelompok7FieldCamp2026';
+
+const FACULTY_COLORS = {
+  'FSAD':   '#4E79A7', // blue
+  'FTIRS':  '#F28E2B', // orange
+  'FTSPK':  '#76B7B2', // teal
+  'FDKBD':  '#59A14F', // green
+  'FV':     '#E15759', // red
+  'FKK':    '#B07AA1', // purple
+  'Lainnya':'#BAB0AC', // gray
+};
+
+const RISK_COLORS = {
+  1: '#84A59D',
+  2: '#A7C4BC',
+  3: '#F6BD60',
+  4: '#F28482',
+  5: '#D56A6A',
+};
+
+let locationFacultyMap = {};
+
+// --- LOCATION DATA ------------------------------------------
+const DEFAULT_LOCATIONS = [
+  { id:1,  name:'Perpustakaan Pusat ITS',         desc:'Area parkir dan lobi utama perpustakaan, zona keluar-masuk yang minim pengawasan.',    status:'terpasang', count:3,  icon:'fa-book-open',        lat:-7.2748, lng:112.7944, gmaps:'https://maps.google.com/?q=-7.2748,112.7944' },
+  { id:2,  name:'Gedung Teknik Sipil (FTSP)',      desc:'Koridor lantai 2 dan area tangga belakang gedung.',                                    status:'terpasang', count:5,  icon:'fa-building-columns', lat:-7.2771, lng:112.7963, gmaps:'https://maps.google.com/?q=-7.2771,112.7963' },
+  { id:3,  name:'Kantin Pusat (Food Court)',       desc:'Area sekitar kantin pusat, terutama pada jam-jam sepi.',                               status:'terpasang', count:2,  icon:'fa-utensils',         lat:-7.2756, lng:112.7951, gmaps:'https://maps.google.com/?q=-7.2756,112.7951' },
+  { id:4,  name:'Asrama Mahasiswa Putra',          desc:'Koridor dan area parkir depan asrama putra ITS.',                                      status:'terpasang', count:4,  icon:'fa-house-user',       lat:-7.2735, lng:112.7938, gmaps:'https://maps.google.com/?q=-7.2735,112.7938' },
+  { id:5,  name:'Asrama Mahasiswa Putri',          desc:'Pintu masuk utama dan taman asrama putri.',                                            status:'terpasang', count:4,  icon:'fa-house-user',       lat:-7.2745, lng:112.7955, gmaps:'https://maps.google.com/?q=-7.2745,112.7955' },
+  { id:6,  name:'Laboratorium Kimia (FMIPA)',      desc:'Lorong penghubung antar laboratorium di gedung FMIPA.',                                status:'rencana',   count:1,  icon:'fa-flask',            lat:-7.2780, lng:112.7969, gmaps:'https://maps.google.com/?q=-7.2780,112.7969' },
+  { id:7,  name:'Lapangan Olahraga / GOR',         desc:'Area tribun dan ruang ganti GOR ITS.',                                                 status:'rencana',   count:0,  icon:'fa-person-running',   lat:-7.2790, lng:112.7920, gmaps:'https://maps.google.com/?q=-7.2790,112.7920' },
+  { id:8,  name:'Gedung Robotika (Teknik Elektro)',desc:'Basement dan area parkir motor gedung Teknik Elektro.',                                status:'rencana',   count:0,  icon:'fa-microchip',        lat:-7.2760, lng:112.7980, gmaps:'https://maps.google.com/?q=-7.2760,112.7980' },
+  { id:9,  name:'Masjid Manarul Ilmi ITS',         desc:'Area wudhu dan parkir belakang masjid.',                                               status:'terpasang', count:1,  icon:'fa-mosque',           lat:-7.2765, lng:112.7925, gmaps:'https://maps.google.com/?q=-7.2765,112.7925' },
+  { id:10, name:'Gedung Rektorat ITS',             desc:'Area lobby dan lorong menuju ruang tunggu layanan mahasiswa.',                         status:'rencana',   count:0,  icon:'fa-landmark',         lat:-7.2770, lng:112.7940, gmaps:'https://maps.google.com/?q=-7.2770,112.7940' },
+  { id:11, name:'Co-working Space / Ruang Bersama',desc:'Area kerja bersama yang buka hingga larut malam.',                                     status:'terpasang', count:2,  icon:'fa-laptop',           lat:-7.2753, lng:112.7985, gmaps:'https://maps.google.com/?q=-7.2753,112.7985' },
+  { id:12, name:'Area Parkir Timur',               desc:'Parkiran motor dan mobil bagian timur kampus, minim pencahayaan malam.',               status:'rencana',   count:0,  icon:'fa-square-parking',   lat:-7.2762, lng:112.7978, gmaps:'https://maps.google.com/?q=-7.2762,112.7978' },
+];
+let LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
+
+const TEAM = [
+  { name:'Wisnu Aditya Duane',      nrp:'5016221087', initial:'W', photo:'assets/Wisnu.png' },
+  { name:'Josephine Novellia A.',   nrp:'5016231044', initial:'J', photo:'assets/Josephine.png' },
+  { name:'Duta Satrio Wibowo',      nrp:'5016231047', initial:'D', photo:'assets/Duta.png' },
+  { name:'Muhammad Farid Farhan',   nrp:'5016231069', initial:'M', photo:'assets/Muhammad.png' },
+  { name:'Farrel Valentino Y.',     nrp:'5016231075', initial:'F', photo:'assets/Farrel.png' },
+  { name:'Ananda Adellia C. S.',    nrp:'5016231092', initial:'A', photo:'assets/Adellia.png' },
+];
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  initNav();
+  initForm();
+  buildLocationFacultyMap();
+  fetchReports();       // ambil data dari API
+  fetchStats();         // ambil statistik dari API
+  fetchLocations();     // ambil lokasi titik pengaduan
+  startRealtimeSync();  // sinkronisasi realtime (polling)
+  renderTeam();
+  generateQR();
+  initPickerMap();
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { stopRealtimeSync(); return; }
+  refreshRealtime();
+  startRealtimeSync();
+});
+
+// ============================================================
+// API FUNCTIONS
+// ============================================================
+
+// Ambil semua laporan dari Laravel
+async function fetchReports() {
+  try {
+    const res = await fetch(`${API_BASE}/reports`);
+    const data = await res.json();
+    // Sesuaikan field dari API ke format lokal
+    reports = data.map(r => ({
+      id:               r.id,
+      createdAt:        r.created_at,
+      kelamin:          r.jenis_kelamin,
+      peran:            r.peran_kampus,
+      pencahayaan:      r.pencahayaan,
+      kepadatan:        r.kepadatan,
+      cctv:             r.cctv,
+      petugas:          r.petugas_keamanan,
+      vegetasi:         r.vegetasi,
+      waktu:            r.waktu_rawan,
+      hariRawan:        r.hari_rawan,
+      skorNyaman:       r.skor_nyaman ? parseInt(r.skor_nyaman, 10) : null,
+      skorRawan:        r.skor_rawan ? parseInt(r.skor_rawan, 10) : null,
+      alasanTidakNyaman:r.alasan_tidak_nyaman,
+      pernahHindari:    r.pernah_hindari,
+      orangLain:        r.orang_lain,
+      situasiMencurigakan:r.situasi_mencurigakan,
+      fungsiRuang:      r.fungsi_ruang,
+      lokasi:           r.lokasi_kejadian,
+      lokasiDeskripsi:  r.lokasi_deskripsi,
+      lat:              r.latitude ? parseFloat(r.latitude) : null,
+      lng:              r.longitude ? parseFloat(r.longitude) : null,
+      fotoPath:         r.foto_path,
+      status:           r.status,
+      fakultas:         getFacultyFromLocationName(r.lokasi_kejadian),
+    }));
+    updateLayerCounts();
+    if (leafletMap) renderLeafletMap();
+  } catch (e) {
+    console.error('Gagal ambil data laporan:', e);
+  }
+}
+
+// Ambil statistik dari Laravel
+async function fetchStats() {
+  try {
+    const res  = await fetch(`${API_BASE}/reports/stats`);
+    const data = await res.json();
+    document.getElementById('totalLaporan').textContent  = data.total       || 0;
+    document.getElementById('bulanIni').textContent      = data.bulan_ini   || 0;
+    document.getElementById('terverifikasi').textContent = data.terverifikasi|| 0;
+  } catch (e) {
+    console.error('Gagal ambil statistik:', e);
+  }
+}
+
+// Ambil lokasi titik pengaduan dari API
+async function fetchLocations() {
+  try {
+    const res = await fetch(`${API_BASE}/locations`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (Array.isArray(data) && data.length) {
+      LOCATIONS = data.map(l => ({
+        id: l.id,
+        name: l.name,
+        desc: l.desc || '',
+        status: l.status || 'rencana',
+        count: l.count || 0,
+        icon: l.icon || 'fa-location-dot',
+        lat: l.lat,
+        lng: l.lng,
+        gmaps: l.gmaps || '',
+        photo: l.photo || null,
+      }));
+    } else {
+      LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
+    }
+  } catch (e) {
+    LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
+  }
+  const active = document.querySelector('.loc-filter-btn.active');
+  renderLocationCards(active?.dataset.filter || 'all');
+}
+
+// ============================================================
+// REALTIME SYNC (polling)
+// ============================================================
+async function refreshRealtime() {
+  if (isRealtimeRefreshing) return;
+  isRealtimeRefreshing = true;
+  try {
+    await Promise.all([fetchReports(), fetchStats(), fetchLocations()]);
+  } finally {
+    isRealtimeRefreshing = false;
+  }
+}
+
+function startRealtimeSync() {
+  stopRealtimeSync();
+  realtimeTimer = setInterval(() => {
+    if (document.hidden) return;
+    refreshRealtime();
+  }, REALTIME_INTERVAL);
+}
+
+function stopRealtimeSync() {
+  if (realtimeTimer) clearInterval(realtimeTimer);
+  realtimeTimer = null;
+}
+
+// Kirim laporan ke Laravel
+async function submitToAPI(payload) {
+  const isFormData = payload instanceof FormData;
+  const options = {
+    method: 'POST',
+    headers: { 'Accept': 'application/json' },
+    body: isFormData ? payload : JSON.stringify(payload),
+  };
+  if (!isFormData) {
+    options.headers['Content-Type'] = 'application/json';
+  }
+  const res = await fetch(`${API_BASE}/reports`, options);
+  return await res.json();
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function initNav() {
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      navigateTo(link.dataset.page);
+      document.getElementById('navLinks').classList.remove('open');
+    });
+  });
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('navLinks').classList.toggle('open');
+  });
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+  });
+}
+
+function navigateTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById(page)?.classList.add('active');
+  document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (page === 'peta') {
+    updateLayerCounts();
+    setTimeout(() => { initLeafletMap(); renderLeafletMap(); }, 100);
+  }
+}
+
+function scrollToForm() {
+  navigateTo('home');
+  setTimeout(() => document.getElementById('formSection').scrollIntoView({ behavior:'smooth' }), 100);
+}
+
+// ============================================================
+// FORM
+// ============================================================
+function initForm() {
+  document.getElementById('reportForm').addEventListener('submit', handleSubmit);
+  document.getElementById('lokasiInsiden')?.addEventListener('change', handleLocationPreset);
+}
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  const required = [
+    "emailIts",
+    "peranKampus",
+    "lokasiInsiden",
+    "lokasiDeskripsi",
+    "pencahayaan",
+    "kepadatan",
+    "cctv",
+    "petugasKeamanan",
+    "waktuInsiden",
+    "skorNyaman",
+    "skorRawan",
+  ];
+  let valid = true;
+  required.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.style.borderColor = '#F28482'; valid = false; }
+    else el.style.borderColor = '';
+  });
+  if (!document.getElementById('consent').checked) { showToast('Harap setujui pernyataan persetujuan.','error'); return; }
+  if (!valid) { showToast('Harap lengkapi semua field wajib.','error'); return; }
+
+  const lat = parseFloat(document.getElementById('lat').value);
+  const lng = parseFloat(document.getElementById('lng').value);
+  const lokasiSelect = document.getElementById('lokasiInsiden');
+  const lokasiVal    = lokasiSelect.value;
+  if (/Lainnya/i.test(lokasiVal) && (isNaN(lat) || isNaN(lng))) {
+    showToast('Pin lokasi wajib diisi jika memilih Lainnya.', 'error');
+    return;
+  }
+
+  const kelaminVal = document.getElementById('jenisKelamin').value.trim();
+  const skorNyamanVal = parseInt(document.getElementById('skorNyaman').value, 10);
+  const skorRawanVal = parseInt(document.getElementById('skorRawan').value, 10);
+
+  const payload = {
+    email_its:            document.getElementById('emailIts').value.trim(),
+    peran_kampus:         document.getElementById('peranKampus').value,
+    jenis_kelamin:        kelaminVal || null,
+    lokasi_kejadian:      lokasiVal,
+    lokasi_deskripsi:     document.getElementById('lokasiDeskripsi').value.trim() || null,
+    latitude:             isNaN(lat) ? null : lat,
+    longitude:            isNaN(lng) ? null : lng,
+    pencahayaan:          document.getElementById('pencahayaan').value,
+    kepadatan:            document.getElementById('kepadatan').value,
+    cctv:                 document.getElementById('cctv').value,
+    petugas_keamanan:     document.getElementById('petugasKeamanan').value,
+    vegetasi:             document.getElementById('vegetasi').value || null,
+    waktu_rawan:          document.getElementById('waktuInsiden').value,
+    hari_rawan:           document.getElementById('hariRawan').value || null,
+    skor_nyaman:          isNaN(skorNyamanVal) ? null : skorNyamanVal,
+    alasan_tidak_nyaman:  document.getElementById('alasanTidakNyaman').value || null,
+    skor_rawan:           isNaN(skorRawanVal) ? null : skorRawanVal,
+    pernah_hindari:       document.getElementById('pernahHindari').value || null,
+    orang_lain:           document.getElementById('orangLain').value || null,
+    situasi_mencurigakan: document.getElementById('situasiMencurigakan').value || null,
+    fungsi_ruang:         document.getElementById('fungsiRuang').value || null,
+    kronologi:            document.getElementById('kronologi').value.trim() || null,
+    kontak_pelapor:       document.getElementById('kontakPelapor').value.trim() || null,
+  };
+  const fotoInput = document.getElementById('fotoLokasi');
+  const fotoFile = fotoInput && fotoInput.files && fotoInput.files[0] ? fotoInput.files[0] : null;
+  const formData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === '') return;
+    formData.append(key, value);
+  });
+  if (fotoFile) {
+    formData.append('foto_lokasi', fotoFile);
+  }
+
+  try {
+    showToast('Mengirim laporan...', 'success');
+    const result = await submitToAPI(formData);
+    if (result.success) {
+      e.target.reset();
+      clearPin();
+      await fetchReports();
+      await fetchStats();
+      showToast(`Laporan terkirim! Kode: ${result.report_code}`, 'success');
+    } else {
+      showToast('Gagal mengirim laporan. Coba lagi.', 'error');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Tidak dapat terhubung ke server.', 'error');
+  }
+}
+
+function handleLocationPreset() {
+  const sel = document.getElementById('lokasiInsiden');
+  if (!sel) return;
+  const opt = sel.options[sel.selectedIndex];
+  const lat = opt?.dataset?.lat;
+  const lng = opt?.dataset?.lng;
+  if (lat && lng) {
+    setPin(parseFloat(lat), parseFloat(lng), { fromPreset: true });
+  } else if (opt && /Lainnya/i.test(opt.value)) {
+    clearPin();
+  }
+}
+
+function setLokasiToLainnya() {
+  const sel = document.getElementById('lokasiInsiden');
+  if (!sel) return;
+  const opt = Array.from(sel.options).find(o => /Lainnya/i.test(o.textContent || o.value));
+  if (opt) sel.value = opt.value;
+}
+
+function buildLocationFacultyMap() {
+  locationFacultyMap = {};
+  document.querySelectorAll('#lokasiInsiden option').forEach(opt => {
+    if (!opt.value) return;
+    locationFacultyMap[opt.value] = getFacultyFromOption(opt);
+  });
+}
+
+function getFacultyFromOption(opt) {
+  const parent = opt?.parentElement;
+  if (parent && parent.tagName === 'OPTGROUP') return parent.label;
+  return 'Lainnya';
+}
+
+function getFacultyColor(faculty) {
+  return FACULTY_COLORS[faculty] || FACULTY_COLORS.Lainnya;
+}
+
+function getFacultyFromLocationName(name) {
+  return locationFacultyMap[name] || 'Lainnya';
+}
+
+function createFacultyIcon(color) {
+  return L.divIcon({
+    className: 'faculty-pin-wrap',
+    html: `<div class="faculty-pin" style="--pin-color:${color}"></div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 24],
+    popupAnchor: [0, -24],
+  });
+}
+
+function createCaseIcon(color) {
+  return L.divIcon({
+    className: 'case-dot-wrap',
+    html: `<div class="case-dot" style="--case-color:${color}"></div>`,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+    popupAnchor: [0, -9],
+  });
+}
+
+// ============================================================
+// PICKER MAP (mini Leaflet di form)
+// ============================================================
+function initPickerMap() {
+  if (pickerMap) return;
+  pickerMap = L.map('pickerMap', { zoomControl: true }).setView(ITS, ZOOM);
+  L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
+  fixedLocationLayerPicker = L.layerGroup().addTo(pickerMap);
+  renderFixedLocations(fixedLocationLayerPicker);
+  loadBoundaryLayer(pickerMap, 'picker');
+  pickerMap.on('click', e => setPin(e.latlng.lat, e.latlng.lng, { fromPreset: false }));
+}
+
+function setPin(lat, lng, opts = {}) {
+  const fromPreset = opts.fromPreset === true;
+  if (!fromPreset && !isPointInBoundary(lat, lng)) {
+    showToast('Pin berada di luar batas area ITS. Silakan pilih lokasi di dalam boundary.', 'error');
+    return;
+  }
+  document.getElementById('lat').value = lat.toFixed(6);
+  document.getElementById('lng').value = lng.toFixed(6);
+  document.getElementById('locStatus').textContent = `Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  if (pickerMarker) pickerMarker.remove();
+  pickerMarker = L.marker([lat, lng], {
+    icon: L.divIcon({
+      className: '',
+      html: `<div style="width:16px;height:16px;background:#F28482;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)"></div>`,
+      iconAnchor: [8, 8]
+    })
+  }).addTo(pickerMap);
+  pickerMap.setView([lat, lng], Math.max(pickerMap.getZoom(), 16));
+
+  if (!fromPreset) {
+    setLokasiToLainnya();
+  }
+}
+
+function clearPin() {
+  document.getElementById('lat').value = '';
+  document.getElementById('lng').value = '';
+  document.getElementById('locStatus').textContent = '';
+  if (pickerMarker) { pickerMarker.remove(); pickerMarker = null; }
+}
+
+function getLocation() {
+  if (!navigator.geolocation) { showToast('Geolokasi tidak didukung browser ini.', 'error'); return; }
+  document.getElementById('locStatus').textContent = 'Mendapatkan lokasi...';
+  navigator.geolocation.getCurrentPosition(
+    pos => setPin(pos.coords.latitude, pos.coords.longitude, { fromPreset: false }),
+    ()  => { showToast('Gagal mendapatkan lokasi.','error'); document.getElementById('locStatus').textContent = ''; }
+  );
+}
+
+// ============================================================
+// MAIN LEAFLET MAP (halaman Peta)
+// ============================================================
+function initLeafletMap() {
+  if (leafletMap) return;
+  leafletMap = L.map('leafletMap').setView(ITS, ZOOM);
+  baseTile = L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(leafletMap);
+  fixedLocationLayerMain = L.layerGroup().addTo(leafletMap);
+  renderFixedLocations(fixedLocationLayerMain);
+  loadBoundaryLayer(leafletMap, 'main');
+}
+
+function renderLeafletMap() {
+  if (!leafletMap) return;
+  renderFixedLocations(fixedLocationLayerMain);
+
+  if (heatLayer)    { leafletMap.removeLayer(heatLayer);    heatLayer = null; }
+  if (pointLayer)   { leafletMap.removeLayer(pointLayer);   pointLayer = null; }
+  if (clusterLayer) { leafletMap.removeLayer(clusterLayer); clusterLayer = null; }
+
+  const filterBulan = document.getElementById('filterBulan')?.value || '';
+  const filterWaktu = document.getElementById('filterWaktu')?.value || '';
+
+  let data = reports.filter(r => r.lat && r.lng);
+  if (activeLayer !== 'semua') {
+    data = data.filter(r => matchesLayer(r, activeLayer));
+  }
+  if (filterWaktu) data = data.filter(r => r.waktu === filterWaktu);
+  if (filterBulan) {
+    data = data.filter(r => {
+      const d = parseReportDate(r);
+      return d && (d.getMonth() + 1) === parseInt(filterBulan);
+    });
+  }
+
+  updateTopAreas(data);
+  updateHeatmapAnalysis(data, filterWaktu, filterBulan);
+
+  const overlay = document.getElementById('mapOverlay');
+  const hasFixed = fixedLocationLayerMain && fixedLocationLayerMain.getLayers().length > 0;
+  overlay.style.display = (data.length === 0 && !hasFixed) ? 'flex' : 'none';
+  if (!data.length) return;
+
+  if (visHeatmap && L.heatLayer) {
+    heatLayer = L.heatLayer(
+      data.map(r => [r.lat, r.lng, 1]),
+      { radius: 35, blur: 22, maxZoom: 18, gradient: { 0.1:'#84A59D', 0.4:'#F6BD60', 0.7:'#F5CAC3', 1.0:'#F28482' } }
+    ).addTo(leafletMap);
+  }
+
+  if (visPoint) {
+    pointLayer = L.layerGroup();
+    data.forEach(r => {
+      const color = getRiskColor(r.skorRawan);
+      L.circleMarker([r.lat, r.lng], {
+        radius: 9, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: .9
+      }).bindPopup(buildPopup(r)).addTo(pointLayer);
+    });
+    leafletMap.addLayer(pointLayer);
+  }
+
+  if (visCluster && L.markerClusterGroup) {
+    clusterLayer = L.markerClusterGroup({ chunkedLoading: true });
+    data.forEach(r => {
+      const color = getRiskColor(r.skorRawan);
+      L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
+        .bindPopup(buildPopup(r))
+        .addTo(clusterLayer);
+    });
+    leafletMap.addLayer(clusterLayer);
+  }
+}
+
+async function loadBoundaryLayer(map, target) {
+  if (!map || typeof shp === 'undefined') return;
+  try {
+    if (target === 'main' && boundaryLayerMain) return;
+    if (target === 'picker' && boundaryLayerPicker) return;
+    let buf = null;
+    try {
+      const res = await fetch('assets/its_boundary.zip');
+      if (res.ok) buf = await res.arrayBuffer();
+    } catch (e) {
+      console.warn('[boundary] fetch failed', e);
+    }
+    if (!isZipBuffer(buf)) {
+      buf = base64ToArrayBuffer(BOUNDARY_ZIP_B64);
+    }
+    const gj  = await shp(buf);
+    let data = gj.type ? gj : gj[Object.keys(gj)[0]];
+    if (!data || !data.features || !data.features.length) {
+      console.warn('[boundary] empty geojson', gj);
+      return;
+    }
+    data = reprojectGeoJSONIfNeeded(data);
+    if (!boundaryGeoJSON) {
+      boundaryGeoJSON = data;
+      boundaryPolygons = extractPolygonsFromGeoJSON(data);
+    }
+    const layer = L.geoJSON(data, {
+      style: { color:'#EF4444', weight:3, fill:true, fillOpacity:0.08, dashArray:'6 4' }
+    }).addTo(map);
+    layer.bringToFront();
+    const bounds = layer.getBounds?.();
+    if (bounds && bounds.isValid && bounds.isValid()) {
+      if (!map.__boundaryFitted) {
+        map.fitBounds(bounds, { padding: [20, 20] });
+        map.__boundaryFitted = true;
+      }
+    }
+    if (target === 'main')   boundaryLayerMain   = layer;
+    if (target === 'picker') boundaryLayerPicker = layer;
+  } catch (e) {
+    console.warn('[boundary] load failed', e);
+  }
+}
+
+function reprojectGeoJSONIfNeeded(gj) {
+  if (!gj || typeof proj4 === 'undefined') return gj;
+  const first = getFirstCoord(gj);
+  if (!first) return gj;
+  const x = first[0];
+  const y = first[1];
+  const looksProjected = Math.abs(x) > 180 || Math.abs(y) > 90;
+  if (!looksProjected) return gj;
+  if (!proj4.defs(BOUNDARY_SRC_CRS)) proj4.defs(BOUNDARY_SRC_CRS, BOUNDARY_SRC_DEF);
+  if (!proj4.defs(BOUNDARY_DST_CRS)) proj4.defs(BOUNDARY_DST_CRS, BOUNDARY_DST_DEF);
+  const from = proj4(BOUNDARY_SRC_CRS);
+  const to = proj4(BOUNDARY_DST_CRS);
+  return mapGeoJSONCoords(gj, coord => {
+    const out = proj4(from, to, coord);
+    return [out[0], out[1]];
+  });
+}
+
+function isZipBuffer(buf) {
+  if (!buf || buf.byteLength < 4) return false;
+  const b = new Uint8Array(buf, 0, 4);
+  return b[0] === 0x50 && b[1] === 0x4B; // 'PK'
+}
+
+function base64ToArrayBuffer(b64) {
+  const binary = atob(b64);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+
+function extractPolygonsFromGeoJSON(gj) {
+  const polys = [];
+  const addPolygon = coords => {
+    if (Array.isArray(coords) && coords.length) polys.push(coords);
+  };
+  const walk = geom => {
+    if (!geom) return;
+    if (geom.type === 'FeatureCollection') {
+      (geom.features || []).forEach(f => walk(f));
+      return;
+    }
+    if (geom.type === 'Feature') {
+      walk(geom.geometry);
+      return;
+    }
+    if (geom.type === 'GeometryCollection') {
+      (geom.geometries || []).forEach(g => walk(g));
+      return;
+    }
+    if (geom.type === 'Polygon') {
+      addPolygon(geom.coordinates);
+      return;
+    }
+    if (geom.type === 'MultiPolygon') {
+      (geom.coordinates || []).forEach(p => addPolygon(p));
+    }
+  };
+  walk(gj);
+  return polys;
+}
+
+function isPointInBoundary(lat, lng) {
+  if (!boundaryPolygons || !boundaryPolygons.length) return true;
+  const pt = [lng, lat];
+  return boundaryPolygons.some(poly => pointInPolygon(pt, poly));
+}
+
+function pointInPolygon(pt, polygon) {
+  if (!polygon || !polygon.length) return false;
+  if (!pointInRing(pt, polygon[0])) return false;
+  for (let i = 1; i < polygon.length; i++) {
+    if (pointInRing(pt, polygon[i])) return false;
+  }
+  return true;
+}
+
+function pointInRing(pt, ring) {
+  let inside = false;
+  const x = pt[0];
+  const y = pt[1];
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1];
+    const xj = ring[j][0], yj = ring[j][1];
+    const intersect = ((yi > y) !== (yj > y)) &&
+      (x < (xj - xi) * (y - yi) / (yj - yi + 0.0) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function getFirstCoord(gj) {
+  if (!gj) return null;
+  if (gj.type === 'FeatureCollection') {
+    for (const f of gj.features || []) {
+      const c = getFirstCoord(f);
+      if (c) return c;
+    }
+    return null;
+  }
+  if (gj.type === 'Feature') return getFirstCoord(gj.geometry);
+  if (gj.type === 'GeometryCollection') {
+    for (const g of gj.geometries || []) {
+      const c = getFirstCoord(g);
+      if (c) return c;
+    }
+    return null;
+  }
+  const coords = gj.coordinates;
+  if (!coords) return null;
+  if (gj.type === 'Point') return coords;
+  if (gj.type === 'MultiPoint' || gj.type === 'LineString') return coords[0] || null;
+  if (gj.type === 'MultiLineString' || gj.type === 'Polygon') return (coords[0] && coords[0][0]) || null;
+  if (gj.type === 'MultiPolygon') return (coords[0] && coords[0][0] && coords[0][0][0]) || null;
+  return null;
+}
+
+function mapGeoJSONCoords(gj, fn) {
+  if (!gj) return gj;
+  if (gj.type === 'FeatureCollection') {
+    return {
+      ...gj,
+      features: (gj.features || []).map(f => mapGeoJSONCoords(f, fn))
+    };
+  }
+  if (gj.type === 'Feature') {
+    return {
+      ...gj,
+      geometry: gj.geometry ? mapGeoJSONCoords(gj.geometry, fn) : gj.geometry
+    };
+  }
+  if (gj.type === 'GeometryCollection') {
+    return {
+      ...gj,
+      geometries: (gj.geometries || []).map(g => mapGeoJSONCoords(g, fn))
+    };
+  }
+  const coords = gj.coordinates;
+  if (!coords) return gj;
+  switch (gj.type) {
+    case 'Point':
+      return { ...gj, coordinates: fn(coords) };
+    case 'MultiPoint':
+    case 'LineString':
+      return { ...gj, coordinates: coords.map(fn) };
+    case 'MultiLineString':
+    case 'Polygon':
+      return { ...gj, coordinates: coords.map(ring => ring.map(fn)) };
+    case 'MultiPolygon':
+      return { ...gj, coordinates: coords.map(poly => poly.map(ring => ring.map(fn))) };
+    default:
+      return gj;
+  }
+}
+
+function buildPopup(r) {
+  const faculty = r.fakultas || getFacultyFromLocationName(r.lokasi);
+  return `<div style="font-family:'DM Sans',sans-serif;min-width:175px;font-size:.85rem">
+    <strong style="color:#F28482">${esc(r.lokasi)}</strong><br/>
+    <span style="color:#555">${esc(faculty)}</span>
+    <hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/>
+    <span>Skor Rawan: ${r.skorRawan ?? '-'}</span><br/>
+    <span>Waktu Rawan: ${r.waktu || '-'}</span><br/>
+    <span>Kelamin: ${r.kelamin || '-'}</span><br/>
+    <span>Pencahayaan: ${r.pencahayaan || '-'}</span><br/>
+    <span>Kepadatan: ${r.kepadatan || '-'}</span><br/>
+    <span>CCTV: ${r.cctv || '-'}</span><br/>
+    <span>Petugas: ${r.petugas || '-'}</span>
+  </div>`;
+}
+
+function renderFixedLocations(layer) {
+  if (!layer) return;
+  layer.clearLayers();
+  const opts = Array.from(document.querySelectorAll('#lokasiInsiden option[data-lat][data-lng]'));
+  const seen = new Set();
+  opts.forEach(opt => {
+    const lat = opt.dataset.lat;
+    const lng = opt.dataset.lng;
+    if (!lat || !lng) return;
+    const key = `${lat},${lng},${opt.textContent}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    const faculty = getFacultyFromOption(opt);
+    const color   = getFacultyColor(faculty);
+    L.marker([parseFloat(lat), parseFloat(lng)], { icon: createFacultyIcon(color) })
+      .bindPopup(`<strong>${esc(opt.textContent)}</strong><br/><span>${esc(faculty)}</span>`)
+      .addTo(layer);
+  });
+}
+
+function switchPetaTab(tab) {
+  // Update active tab button
+  document.querySelectorAll('.peta-tab').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+
+  // Update judul & deskripsi panel
+  const titles = {
+    sebaran:   { title: 'Peta 1 — Sebaran Titik Lokasi Rawan',  desc: 'Menampilkan sebaran titik lokasi area rawan berdasarkan jumlah laporan masuk dari warga kampus ITS.' },
+    heatmap:   { title: 'Peta 2 — Heatmap Kerawanan',           desc: 'Menampilkan konsentrasi area rawan berdasarkan skor kerawanan yang diberikan oleh pelapor.' },
+    fasilitas: { title: 'Peta 3 — Kelayakan Fasilitas',         desc: 'Menampilkan penilaian kondisi fisik area berdasarkan parameter pencahayaan, CCTV, kepadatan, petugas keamanan, dan vegetasi.' },
+  };
+
+  // Update tampilan layer sesuai tab
+  if (tab === 'sebaran') {
+    // Titik + Cluster aktif, heatmap off
+    visHeatmap = false;
+    visPoint   = true;
+    visCluster = false;
+    document.querySelector('#tog-heatmap input').checked = false;
+    document.querySelector('#tog-point input').checked   = true;
+    document.querySelector('#tog-cluster input').checked = false;
+  } else if (tab === 'heatmap') {
+    // Heatmap aktif, titik off
+    visHeatmap = true;
+    visPoint   = false;
+    visCluster = false;
+    document.querySelector('#tog-heatmap input').checked = true;
+    document.querySelector('#tog-point input').checked   = false;
+    document.querySelector('#tog-cluster input').checked = false;
+  } else if (tab === 'fasilitas') {
+    // Titik aktif dengan simbologi kondisi fisik
+    visHeatmap = false;
+    visPoint   = true;
+    visCluster = false;
+    document.querySelector('#tog-heatmap input').checked = false;
+    document.querySelector('#tog-point input').checked   = true;
+    document.querySelector('#tog-cluster input').checked = false;
+  }
+
+  renderLeafletMap();
+}
+
+function switchBasemap(btn) {
+  const bm = btn.dataset.bm;
+  currentBm = bm;
+  document.querySelectorAll('.bm-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (!leafletMap) return;
+  leafletMap.eachLayer(l => { if (l === baseTile) leafletMap.removeLayer(l); });
+  const cfg = BASEMAPS[bm];
+  baseTile = L.tileLayer(cfg.url, { attribution: cfg.attr, ...cfg.opt }).addTo(leafletMap);
+  baseTile.bringToBack();
+}
+
+function switchLayer(radio) {
+  activeLayer = radio.value;
+  document.querySelectorAll('.layer-card').forEach(c => c.classList.toggle('active', c.dataset.layer === activeLayer));
+  const el = document.getElementById('activeLayerName');
+  if (el) el.textContent = getLayerLabel(activeLayer);
+  renderLeafletMap();
+}
+
+function toggleVis(type, cb) {
+  if (type === 'heatmap') visHeatmap = cb.checked;
+  if (type === 'point')   visPoint   = cb.checked;
+  if (type === 'cluster') visCluster = cb.checked;
+  document.getElementById('tog-' + type)?.classList.toggle('active', cb.checked);
+  renderLeafletMap();
+}
+
+// ============================================================
+// STATS & COUNTS
+// ============================================================
+function updateStats() {
+  fetchStats();
+}
+
+function updateLayerCounts() {
+  const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+  set('cnt-semua',  reports.length);
+  set('cnt-tinggi', reports.filter(r => isRawanTinggi(r.skorRawan)).length);
+  set('cnt-sedang', reports.filter(r => isRawanSedang(r.skorRawan)).length);
+  set('cnt-rendah', reports.filter(r => isRawanRendah(r.skorRawan)).length);
+  set('cnt-gelap',  reports.filter(r => r.pencahayaan === 'Gelap').length);
+  set('cnt-sepi',   reports.filter(r => isSepi(r.kepadatan)).length);
+  set('cnt-nocctv', reports.filter(r => r.cctv === 'Tidak ada').length);
+  set('cnt-minim',  reports.filter(r => isMinimPetugas(r.petugas)).length);
+}
+
+function updateTopAreas(data) {
+  const list = document.getElementById('topAreasList');
+  if (!list) return;
+  const rows = Array.isArray(data) ? data : reports;
+  const counts = {};
+  rows.forEach(r => {
+    const key = (r.lokasi || '').trim();
+    if (!key) return;
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  if (!sorted.length) {
+    list.innerHTML = '<li class="analysis-empty">Belum ada data untuk analisis.</li>';
+    return;
+  }
+  list.innerHTML = sorted.map(([name, count], idx) => `
+    <li>
+      <span class="rank-badge">${idx + 1}</span>
+      <span class="area-name">${esc(name)}</span>
+      <span class="area-count">${count}</span>
+    </li>`).join('');
+}
+
+function updateHeatmapAnalysis(data, filterWaktu, filterBulan) {
+  const el = document.getElementById('heatmapAnalysis');
+  if (!el) return;
+  if (!data || data.length === 0) { el.textContent = 'Belum ada data untuk analisis heatmap.'; return; }
+  const counts = {};
+  data.forEach(r => {
+    const key = (r.lokasi || '').trim();
+    if (!key) return;
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  if (!sorted.length) { el.textContent = 'Belum ada lokasi untuk analisis heatmap.'; return; }
+  const names  = sorted.map(([n, c]) => `${n} (${c})`);
+  const period = [];
+  if (filterWaktu) period.push(filterWaktu.toLowerCase());
+  if (filterBulan) period.push(`bulan ${getMonthName(filterBulan)}`);
+  const suffix = period.length ? ` (filter ${period.join(', ')})` : '';
+  const scores = data.map(r => r.skorRawan).filter(v => typeof v === 'number' && !isNaN(v));
+  const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : null;
+  const avgText = avg ? ` Rata-rata skor kerawanan: ${avg}.` : '';
+  el.textContent = `Hotspot tertinggi${suffix}: ${names.join(', ')}.${avgText}`;
+}
+
+function getMonthName(n) {
+  const names = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  return names[parseInt(n, 10) - 1] || '';
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function exportGeoJSON() {
+  const pts = reports.filter(r => r.lat && r.lng);
+  if (!pts.length) { showToast('Tidak ada data koordinat.', 'error'); return; }
+  const gj = {
+    type: 'FeatureCollection',
+    features: pts.map(r => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [r.lng, r.lat] },
+      properties: {
+        id: r.id,
+        peran_kampus: r.peran,
+        jenis_kelamin: r.kelamin,
+        pencahayaan: r.pencahayaan,
+        kepadatan: r.kepadatan,
+        cctv: r.cctv,
+        petugas_keamanan: r.petugas,
+        waktu_rawan: r.waktu,
+        skor_rawan: r.skorRawan,
+        skor_nyaman: r.skorNyaman,
+        lokasi: r.lokasi,
+        fakultas: r.fakultas || getFacultyFromLocationName(r.lokasi),
+        created_at: r.createdAt,
+        status: r.status,
+        lokasi_deskripsi: r.lokasiDeskripsi || null,
+        foto_path: r.fotoPath || null,
+      }
+    }))
+  };
+  dlFile(JSON.stringify(gj, null, 2), 'itsafe_area_rawan.geojson', 'application/json');
+  showToast('GeoJSON diunduh - siap buka di QGIS.', 'success');
+}
+
+function dlFile(content, filename, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = filename; a.click();
+}
+
+// ============================================================
+// DEMO DATA (tetap ada untuk testing)
+// ============================================================
+function loadDemoData() {
+  const demo = [
+    { lat:-7.2756, lng:112.7951, lokasi:'Kantin Pusat ITS',     waktu:'Malam',  pencahayaan:'Remang-remang', kepadatan:'Sepi',         cctv:'Tidak ada',                petugas:'Jarang ada',  skorRawan:4, skorNyaman:2, createdAt:'2026-03-10T10:00:00Z' },
+    { lat:-7.2771, lng:112.7963, lokasi:'Gedung Teknik Sipil',  waktu:'Malam',  pencahayaan:'Gelap',          kepadatan:'Sangat sepi', cctv:'Ada tapi tidak yakin aktif', petugas:'Kadang ada', skorRawan:5, skorNyaman:1, createdAt:'2026-03-22T10:00:00Z' },
+    { lat:-7.2748, lng:112.7944, lokasi:'Perpustakaan ITS',     waktu:'Siang',  pencahayaan:'Terang',         kepadatan:'Cukup ramai', cctv:'Ada dan terlihat jelas', petugas:'Sering ada', skorRawan:2, skorNyaman:4, createdAt:'2026-04-05T10:00:00Z' },
+  ];
+  demo.forEach((d, i) => reports.push({
+    id: Date.now() + i,
+    createdAt: d.createdAt || new Date().toISOString(),
+    kelamin: d.kelamin || null,
+    peran: d.peran || null,
+    pencahayaan: d.pencahayaan,
+    kepadatan: d.kepadatan,
+    cctv: d.cctv,
+    petugas: d.petugas,
+    waktu: d.waktu,
+    skorRawan: d.skorRawan,
+    skorNyaman: d.skorNyaman,
+    lokasi: d.lokasi,
+    lat: d.lat,
+    lng: d.lng,
+    fakultas: getFacultyFromLocationName(d.lokasi), isDemo: true,
+  }));
+  updateLayerCounts();
+  if (leafletMap) renderLeafletMap();
+  showToast('Data demo dimuat.', 'success');
+}
+
+function clearDemoData() {
+  const before = reports.length;
+  reports = reports.filter(r => !r.isDemo);
+  const removed = before - reports.length;
+  updateLayerCounts();
+  if (leafletMap) renderLeafletMap();
+  showToast(removed ? 'Data demo dihapus.' : 'Tidak ada data demo.', removed ? 'success' : 'error');
+}
+
+// ============================================================
+// QR CODE
+// ============================================================
+let qrInstance = null;
+function generateQR() {
+  const cont = document.getElementById('qrCodeContainer');
+  const url  = QR_URL;
+  if (!cont) return;
+  cont.innerHTML = '';
+  try {
+    qrInstance = new QRCode(cont, { text: url, width: 220, height: 220, colorDark:'#000', colorLight:'#fff', correctLevel: QRCode.CorrectLevel.H });
+  } catch(e) {
+    cont.innerHTML = `<div class="qr-placeholder-inner"><i class="fas fa-qrcode"></i><p>QR Code</p></div>`;
+  }
+  const d = document.getElementById('qrUrlDisplay');
+  if (d) d.textContent = url;
+}
+
+// ============================================================
+// LOCATION CARDS
+// ============================================================
+function gmapsLink(name) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ITS Surabaya')}`;
+}
+
+function renderLocationCards(filter) {
+  const grid = document.getElementById('locationGrid');
+  if (!grid) return;
+  const list = filter === 'all' ? LOCATIONS : LOCATIONS.filter(l => l.status === filter);
+  grid.innerHTML = list.map(loc => `
+    <div class="location-card" data-status="${loc.status}">
+      ${loc.photo
+        ? `<div class="location-img"><img src="${loc.photo}" alt="Foto ${esc(loc.name)}" onerror="this.parentElement.innerHTML='<div class=&quot;location-img-placeholder&quot;><i class=&quot;fas ${loc.icon || 'fa-location-dot'}&quot;></i><span>Foto lokasi</span></div>'"/></div>`
+        : `<div class="location-img-placeholder"><i class="fas ${loc.icon || 'fa-location-dot'}"></i><span>Foto lokasi</span></div>`
+      }
+      <div class="location-body">
+        <div class="location-name">${loc.name}</div>
+        <div class="location-desc">${loc.desc}</div>
+        <div class="location-meta">
+          <span class="location-status status-${loc.status}">
+            <i class="fas ${loc.status === 'terpasang' ? 'fa-circle-check' : 'fa-clock'}"></i>
+            ${loc.status === 'terpasang' ? 'Terpasang' : 'Rencana'}
+          </span>
+          ${loc.count > 0 ? `<span class="location-count"><i class="fas fa-file-lines"></i> ${loc.count} laporan</span>` : ''}
+        </div>
+        <a href="${loc.gmaps || gmapsLink(loc.name)}" target="_blank" rel="noopener" class="location-gmaps-link"><i class="fas fa-map-location-dot"></i> Buka di Google Maps</a>
+      </div>
+    </div>`).join('');
+}
+
+function filterLocations(btn) {
+  document.querySelectorAll('.loc-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLocationCards(btn.dataset.filter);
+}
+
+// ============================================================
+// TEAM
+// ============================================================
+function renderTeam() {
+  const g = document.getElementById('teamGrid');
+  if (!g) return;
+  g.innerHTML = TEAM.map(m => `
+    <div class="team-card">
+      <div class="team-avatar">
+        ${m.photo ? `<img src="${m.photo}" alt="Foto ${esc(m.name)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+        <div class="team-avatar-fallback" ${m.photo ? 'style="display:none"' : ''}>${m.initial}</div>
+      </div>
+      <div class="team-name">${m.name}</div>
+      <div class="team-nrp">${m.nrp}</div>
+    </div>`).join('');
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getRiskColor(score) {
+  const s = parseInt(score, 10);
+  return RISK_COLORS[s] || '#A78BFA';
+}
+
+function isRawanTinggi(score) {
+  const s = parseInt(score, 10);
+  return !isNaN(s) && s >= 4;
+}
+
+function isRawanSedang(score) {
+  const s = parseInt(score, 10);
+  return s === 3;
+}
+
+function isRawanRendah(score) {
+  const s = parseInt(score, 10);
+  return !isNaN(s) && s <= 2;
+}
+
+function isSepi(val) {
+  return val === 'Sepi' || val === 'Sangat sepi';
+}
+
+function isMinimPetugas(val) {
+  return val === 'Jarang ada' || val === 'Tidak pernah ada';
+}
+
+function matchesLayer(r, layer) {
+  switch (layer) {
+    case 'rawan-tinggi':
+      return isRawanTinggi(r.skorRawan);
+    case 'rawan-sedang':
+      return isRawanSedang(r.skorRawan);
+    case 'rawan-rendah':
+      return isRawanRendah(r.skorRawan);
+    case 'gelap':
+      return r.pencahayaan === 'Gelap';
+    case 'sepi':
+      return isSepi(r.kepadatan);
+    case 'nocctv':
+      return r.cctv === 'Tidak ada';
+    case 'minim-petugas':
+      return isMinimPetugas(r.petugas);
+    default:
+      return true;
+  }
+}
+
+function getLayerLabel(layer) {
+  const labels = {
+    'semua': 'Semua Laporan',
+    'rawan-tinggi': 'Rawan Tinggi',
+    'rawan-sedang': 'Rawan Sedang',
+    'rawan-rendah': 'Rawan Rendah',
+    'gelap': 'Area Gelap',
+    'sepi': 'Area Sepi',
+    'nocctv': 'Tanpa CCTV',
+    'minim-petugas': 'Minim Petugas',
+  };
+  return labels[layer] || layer;
+}
+
+function parseReportDate(r) {
+  if (r && r.createdAt) {
+    const d = new Date(r.createdAt);
+    if (!isNaN(d.getTime())) return d;
+  }
+  if (r && r.tanggal) return parseTanggal(r.tanggal);
+  return null;
+}
+
+function normalizeTanggalInput(str) {
+  const d = parseTanggal(str);
+  if (!d || isNaN(d.getTime())) return '';
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function parseTanggal(str) {
+  if (!str) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return new Date(str + 'T00:00:00');
+  const m = String(str).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!m) return null;
+  return new Date(`${m[3]}-${m[2]}-${m[1]}T00:00:00`);
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.className = 'toast'; }, 3500);
+}
+
+window.addEventListener('resize', () => {
+  if (leafletMap) leafletMap.invalidateSize();
+  if (pickerMap)  pickerMap.invalidateSize();
+});
+
+/* ============================================================
+   ITSafe – Form UX Enhancements
+   Progress bar · Star ratings · Pill buttons · Fill highlight
+============================================================ */
+
+(function() {
+
+  /* ── Progress bar ─────────────────────────────────────── */
+  const REQUIRED_IDS = [
+    'emailIts','peranKampus','lokasiInsiden','lokasiDeskripsi',
+    'pencahayaan','kepadatan','cctv','petugasKeamanan','waktuInsiden',
+    'skorNyaman','skorRawan'
+  ];
+  const OPTIONAL_IDS = [
+    'jenisKelamin','vegetasi','hariRawan','alasanTidakNyaman',
+    'pernahHindari','orangLain','situasiMencurigakan','fungsiRuang',
+    'kronologi','kontakPelapor','fotoLokasi'
+  ];
+  const ALL_IDS = [...REQUIRED_IDS, ...OPTIONAL_IDS];
+
+  function isFilled(el) {
+    if (!el) return false;
+    if (el.type === 'file') return !!(el.files && el.files.length);
+    if (el.type === 'checkbox') return el.checked;
+    return !!(el.value && el.value.trim() !== '');
+  }
+
+  function calcProgress() {
+    let filled = 0;
+    ALL_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (isFilled(el)) filled++;
+    });
+    return Math.round((filled / ALL_IDS.length) * 100);
+  }
+
+  function updateProgress() {
+    const pct = calcProgress();
+    const fill = document.getElementById('progressFill');
+    const label = document.getElementById('progressPercent');
+    if (fill)  fill.style.width = pct + '%';
+    if (label) {
+      let msg = pct === 0 ? '0% terisi' :
+                pct < 40  ? `${pct}% — Lanjutkan pengisian.` :
+                pct < 70  ? `${pct}% — Sudah mendekati setengah.` :
+                pct < 100 ? `${pct}% — Hampir selesai.` :
+                            `100% — Siap dikirim.`;
+      label.textContent = msg;
+    }
+    /* highlight filled inputs */
+    ALL_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (isFilled(el)) {
+        el.classList.add('filled');
+      } else {
+        el.classList.remove('filled');
+      }
+    });
+  }
+
+  /* ── Star ratings ─────────────────────────────────────── */
+  function initStarRating(rowEl) {
+    const targetId = rowEl.dataset.target;
+    const type     = rowEl.dataset.type; // 'comfort' | 'danger'
+    const btns     = rowEl.querySelectorAll('.star-btn');
+    const select   = document.getElementById(targetId);
+    const hintEl   = rowEl.closest('.star-rating-group')
+                       .querySelector('.star-hint');
+
+    const labels = {
+      comfort: ['Sangat tidak nyaman','Tidak nyaman','Cukup nyaman','Nyaman','Sangat nyaman'],
+      danger:  ['Tidak rawan','Sedikit rawan','Cukup rawan','Rawan','Sangat rawan']
+    };
+
+    function paint(val) {
+      btns.forEach((b, i) => {
+        b.classList.remove('active', 'active-red');
+        if (i < val) {
+          b.classList.add(type === 'danger' ? 'active-red' : 'active');
+        }
+      });
+      if (hintEl && val > 0) {
+        hintEl.textContent = (labels[type] || [])[val - 1] || '';
+      }
+    }
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = parseInt(btn.dataset.val);
+        if (select) { select.value = val; }
+        paint(val);
+        updateProgress();
+      });
+      btn.addEventListener('mouseenter', () => paint(parseInt(btn.dataset.val)));
+      btn.addEventListener('mouseleave', () => paint(select ? parseInt(select.value) || 0 : 0));
+    });
+  }
+
+  /* ── Pill buttons ─────────────────────────────────────── */
+  function initPillGroup(groupEl) {
+    const btns = groupEl.querySelectorAll('.pill-btn');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const val      = btn.dataset.val;
+        /* deselect all in group */
+        btns.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        /* sync hidden select */
+        const sel = document.getElementById(targetId);
+        if (sel) {
+          for (let opt of sel.options) {
+            if (opt.value === val || opt.text === val) {
+              sel.value = opt.value; break;
+            }
+          }
+        }
+        /* little bounce animation */
+        btn.style.transform = 'scale(1.08)';
+        setTimeout(() => btn.style.transform = '', 150);
+        updateProgress();
+      });
+    });
+  }
+
+  /* ── Animate panels in on scroll ─────────────────────── */
+  function initScrollAnimate() {
+    const panels = document.querySelectorAll('.form-col-panel.animate-in');
+    if (!panels.length) return;
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.animationPlayState = 'running';
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    panels.forEach(p => {
+      p.style.animationPlayState = 'paused';
+      obs.observe(p);
+    });
+  }
+
+  /* ── Boot ─────────────────────────────────────────────── */
+  function boot() {
+    /* star rows */
+    document.querySelectorAll('.star-row').forEach(initStarRating);
+    /* pill groups */
+    document.querySelectorAll('.pill-group').forEach(initPillGroup);
+    /* progress: listen to all form fields */
+    ALL_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', updateProgress);
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+        el.addEventListener('input', updateProgress);
+      }
+    });
+    /* scroll animate */
+    initScrollAnimate();
+    /* initial paint */
+    updateProgress();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+})();
