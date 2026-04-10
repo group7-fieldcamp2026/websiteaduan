@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ReportSubmittedNotification;
 use App\Models\Report;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -50,6 +52,16 @@ class ReportController extends Controller
         $validated['status'] = 'pending';
 
         $report = Report::create($validated);
+
+        // Kirim email notifikasi ke kelompok7fieldcamp2026@gmail.com
+        try {
+            Mail::to('kelompok7fieldcamp2026@gmail.com')->send(
+                new ReportSubmittedNotification($report)
+            );
+        } catch (\Exception $e) {
+            // Log error tapi jangan hentikan proses
+            \Log::error('Failed to send report notification email: ' . $e->getMessage());
+        }
 
         return response()->json([
             'success'     => true,
