@@ -32,6 +32,7 @@
       <li><a href="#peta"           class="nav-link" data-page="peta"><i class="fas fa-map-location-dot"></i><span>Peta Persebaran</span></a></li>
       <li><a href="#titikpengaduan" class="nav-link" data-page="titikpengaduan"><i class="fas fa-location-crosshairs"></i><span>Titik Pengaduan</span></a></li>
       <li><a href="#tentang"        class="nav-link" data-page="tentang"><i class="fas fa-circle-info"></i><span>Tentang</span></a></li>
+      <li><a href="/admin" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
     </ul>
   </nav>
 
@@ -53,6 +54,7 @@
           <div class="hero-actions">
             <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Buat Laporan</button>
             <button class="btn btn-outline" onclick="navigateTo('peta')"><i class="fas fa-map"></i> Lihat Peta</button>
+            <a class="btn btn-admin-entry" href="/admin"><i class="fas fa-user-shield"></i> Masuk Admin</a>
           </div>
         </div>
         <div class="hero-stats">
@@ -137,49 +139,49 @@
                     <select id="lokasiInsiden" required>
                       <option value="">-- Pilih Fakultas/Departemen --</option>
                       <optgroup label="FSAD">
-                        <option data-lat="-7.283584734269549" data-lng="112.79415871801066">Fisika</option>
-                        <option data-lat="-7.28388690704827" data-lng="112.79508258186094">Matematika</option>
-                        <option data-lat="-7.285110532400192" data-lng="112.79441679915816">Statistika</option>
-                        <option data-lat="-7.283077628956593" data-lng="112.79486799914876">Kimia</option>
-                        <option data-lat="-7.2850367351199194" data-lng="112.79409553488048">Biologi</option>
-                        <option>Aktuaria</option>
+                        <option data-lat="-7.284437162277566" data-lng="112.79433544850234">Fisika</option>
+                        <option data-lat="-7.285001233743833" data-lng="112.79495118903387">Matematika</option>
+                        <option data-lat="-7.285450093499036" data-lng="112.79443183067619">Statistika</option>
+                        <option data-lat="-7.28289973006884" data-lng="112.7962414370814">Kimia</option>
+                        <option data-lat="-7.285704629177749" data-lng="112.79395172710939">Biologi</option>
+                        <option data-lat="-7.2849648086627345" data-lng="112.79399562993318">Aktuaria</option>
                       </optgroup>
                       <optgroup label="FTIRS">
-                        <option data-lat="-7.283550388209697" data-lng="112.79619080613044">Teknik Mesin</option>
-                        <option data-lat="-7.282145374176077" data-lng="112.79649121056292">Teknik Kimia</option>
-                        <option data-lat="-7.28286049966704" data-lng="112.79554834183367">Teknik Fisika</option>
-                        <option data-lat="-7.2828602665540725" data-lng="112.79756536011283">Teknik Sistem dan Industri</option>
-                        <option data-lat="-7.284425192593574" data-lng="112.79725610718006">Teknik Material dan Metalurgi</option>
+                        <option data-lat="-7.284391894314269" data-lng="112.79634078308158">Teknik Mesin</option>
+                        <option data-lat="-7.282926829652622" data-lng="112.79624475435307">Teknik Kimia</option>
+                        <option data-lat="-7.283663578367927" data-lng="112.79572536447594">Teknik Fisika</option>
+                        <option data-lat="-7.283869207526128" data-lng="112.79742968580324">Teknik Sistem dan Industri</option>
+                        <option data-lat="-7.285230073288948" data-lng="112.79739357622515">Teknik Material dan Metalurgi</option>
                         <option>Teknik Pangan</option>
                       </optgroup>
                       <optgroup label="FTSPK">
-                        <option data-lat="-7.280173490970638" data-lng="112.79318119715495">Teknik Sipil</option>
-                        <option data-lat="-7.279796311139403" data-lng="112.79224101251326">Teknik Lingkungan</option>
-                        <option data-lat="-7.279852341717515" data-lng="112.79391315321769">Arsitektur</option>
-                        <option data-lat="-7.279091094757972" data-lng="112.79471466114049">Teknik Geomatika</option>
-                        <option data-lat="-7.279269903254721" data-lng="112.7951609457943">Teknik Geofisika</option>
-                        <option data-lat="-7.278992141657263" data-lng="112.79400970717882">Perencanaan Wilayah Kota</option>
+                        <option data-lat="-7.279993456695265" data-lng="112.79321675774976">Teknik Sipil</option>
+                        <option data-lat="-7.279687141196478" data-lng="112.79230713069009">Teknik Lingkungan</option>
+                        <option data-lat="-7.280820903885579" data-lng="112.7939132117059">Arsitektur</option>
+                        <option data-lat="-7.2799092854853935" data-lng="112.79477371044557">Teknik Geomatika</option>
+                        <option data-lat="-7.279908479545509" data-lng="112.79543321981633">Teknik Geofisika</option>
+                        <option data-lat="-7.279540339959484" data-lng="112.79411169325438">Perencanaan Wilayah Kota</option>
                       </optgroup>
                       <optgroup label="FDKBD">
-                        <option data-lat="-7.277694305516472" data-lng="112.7962641071787">Desain Produk</option>
-                        <option data-lat="-7.278843450572832" data-lng="112.79596369676483">Desain Interior</option>
-                        <option data-lat="-7.2778924411731145" data-lng="112.79699588480831">Desain Komunikasi Visual</option>
-                        <option data-lat="-7.27737137659325" data-lng="112.79256371183126">Manajemen Bisnis</option>
-                        <option data-lat="-7.281749976377451" data-lng="112.7953944378718">Studi Pembangunan</option>
+                        <option data-lat="-7.278841932712574" data-lng="112.79634964378052">Desain Produk</option>
+                        <option data-lat="-7.279402409095227" data-lng="112.795802550722">Desain Interior</option>
+                        <option data-lat="-7.2783370386861375" data-lng="112.7969756590487">Desain Komunikasi Visual</option>
+                        <option data-lat="-7.277831659732373" data-lng="112.79266999660578">Manajemen Bisnis</option>
+                        <option data-lat="-7.282434055454827" data-lng="112.7953945137717">Studi Pembangunan</option>
                         <option>Bisnis Digital</option>
                         <option>Sains Komunikasi</option>
                       </optgroup>
                       <optgroup label="FV">
-                        <option data-lat="-7.277809200921026" data-lng="112.79136393044786">Teknik Mesin Industri</option>
-                        <option data-lat="-7.278228845627631" data-lng="112.79224018848593">Teknik Elektro Otomasi</option>
+                        <option data-lat="-7.278530023306551" data-lng="112.79166650587894">Teknik Mesin Industri</option>
+                        <option data-lat="-7.278824288801641" data-lng="112.79250094727662">Teknik Elektro Otomasi</option>
                         <option data-lat="-7.276831678983027" data-lng="112.7920206699127">Teknik Kimia Industri</option>
-                        <option data-lat="-7.277256041011594" data-lng="112.79189425864926">Teknik Instrumentasi</option>
+                        <option data-lat="-7.27835360382274" data-lng="112.7920965398264">Teknik Instrumentasi</option>
                         <option data-lat="-7.277298843596413" data-lng="112.79262382252475">Statistika Bisnis</option>
                       </optgroup>
                       <optgroup label="FKK">
-                        <option data-lat="-7.279587718323314" data-lng="112.79557902994848">Teknologi Kedokteran</option>
-                        <option data-lat="-7.279587718323314" data-lng="112.79557902994848">Kedokteran</option>
-                        <option data-lat="-7.279587718323314" data-lng="112.79557902994848">Pendidikan Profesi Dokter</option>
+                        <option data-lat="-7.280602473598071" data-lng="112.79523935712085">Teknologi Kedokteran</option>
+                        <option data-lat="-7.280602473598071" data-lng="112.79523935712085">Kedokteran</option>
+                        <option data-lat="-7.280602473598071" data-lng="112.79523935712085">Pendidikan Profesi Dokter</option>
                       </optgroup>
                       <option>Lainnya (Pilih langsung di MAP)</option>
                     </select>
