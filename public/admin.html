@@ -1572,11 +1572,11 @@ let reportPhotoObjectUrl = null;
 function getPhotoUrl(path) {
   if (!path) return '';
   if (/^https?:\/\//i.test(path)) return path;
-  const clean = path.replace(/^\/?storage\//, '');
+  const clean = path.replace(/^\/?storage\//, '').replace(/^\/+/, '');
   const base = (window.location.origin && window.location.origin !== 'null')
     ? window.location.origin
     : API_BASE.replace(/\/api$/, '');
-  return `${base}/storage/${clean}`;
+  return `${base}/media/${encodeURI(clean)}`;
 }
 
 function setReportPhoto(url) {

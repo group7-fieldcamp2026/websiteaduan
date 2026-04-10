@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ReportController extends Controller
@@ -174,5 +175,33 @@ class ReportController extends Controller
         $report->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    // Sajikan foto laporan via Laravel (fallback bila /storage diblokir hosting)
+    public function showPhoto(string $path)
+    {
+        $normalized = ltrim(str_replace('\\', '/', $path), '/');
+
+        if (
+            $normalized === '' ||
+            str_contains($normalized, '..') ||
+            !str_starts_with($normalized, 'report-photos/')
+        ) {
+            abort(404);
+        }
+
+        $disk = Storage::disk('public');
+
+        if (!$disk->exists($normalized)) {
+            abort(404);
+        }
+
+        return response()->file(
+            $disk->path($normalized),
+            [
+                'Content-Type' => $disk->mimeType($normalized) ?: 'application/octet-stream',
+                'Cache-Control' => 'public, max-age=86400',
+            ]
+        );
     }
 }
