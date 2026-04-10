@@ -128,7 +128,12 @@
             </div>
 
             <div class="info-section">
-                <span class="label">Waktu Pengiriman:</span> {{ $report->created_at->format('d-m-Y H:i:s') }}
+                <span class="label">Waktu Pengiriman:</span> 
+                @if($report->created_at)
+                    {{ $report->created_at->format('d-m-Y H:i:s') }}
+                @else
+                    {{ now()->format('d-m-Y H:i:s') }}
+                @endif
             </div>
         </div>
 
