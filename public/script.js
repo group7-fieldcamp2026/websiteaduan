@@ -58,6 +58,7 @@ const FACULTY_COLORS = {
   'FDKBD':  '#59A14F', // green
   'FV':     '#E15759', // red
   'FKK':    '#B07AA1', // purple
+  'FTEIC':  '#20B2AA', // cyan
   'Lainnya':'#BAB0AC', // gray
 };
 
