@@ -1090,7 +1090,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 // ─── CONFIG ─────────────────────────────────────────────────
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = `${window.location.origin}/api`;
 const ADMIN_REPORTS_ENDPOINT = `${API_BASE}/reports/admin`;
 const LOCATION_ENDPOINT = `${API_BASE}/locations`;
 const AUTO_REFRESH_MS = 15000;
@@ -1126,7 +1126,7 @@ const DEFAULT_LOCATIONS = [
   { id:11, name:'Co-working Space / Ruang Bersama',desc:'Area kerja bersama yang buka hingga larut malam.',                                     status:'terpasang', count:2,  icon:'fa-laptop',           lat:-7.2753, lng:112.7985, gmaps:'https://maps.google.com/?q=-7.2753,112.7985' },
   { id:12, name:'Area Parkir Timur',               desc:'Parkiran motor dan mobil bagian timur kampus, minim pencahayaan malam.',               status:'rencana',   count:0,  icon:'fa-square-parking',   lat:-7.2762, lng:112.7978, gmaps:'https://maps.google.com/?q=-7.2762,112.7978' },
 ];
-let LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
+let LOCATIONS = [];
 
 const STATUS_LABELS = {
   pending:   'Pending',
@@ -1177,6 +1177,7 @@ async function fetchReports({ skipIfModal = false } = {}) {
   isFetchingReports = true;
   try {
     const res = await fetch(ADMIN_REPORTS_ENDPOINT);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     reports = data.map(r => ({
       id:                r.id,
@@ -1208,8 +1209,8 @@ async function fetchReports({ skipIfModal = false } = {}) {
       status:            normalizeStatus(r.status),
     }));
   } catch(e) {
-    // Demo data jika API tidak tersedia
-    reports = generateDemoData();
+    reports = [];
+    console.error('Gagal memuat laporan admin:', e);
   } finally {
     isFetchingReports = false;
   }
@@ -1241,10 +1242,11 @@ async function fetchLocations({ skipIfModal = false } = {}) {
         photo: l.photo || null,
       }));
     } else {
-      LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
+      LOCATIONS = [];
     }
   } catch (e) {
-    LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
+    LOCATIONS = [];
+    console.error('Gagal memuat titik pengaduan:', e);
   } finally {
     isFetchingLocations = false;
   }
@@ -1534,13 +1536,26 @@ async function saveReport() {
   });
   if (fotoFile) formData.append('foto_lokasi', fotoFile);
   formData.append('_method', 'PUT');
+  let res;
   try {
-    await fetch(`${API_BASE}/reports/${editingId}`, {
+    res = await fetch(`${API_BASE}/reports/${editingId}`, {
       method: 'POST',
       headers: { 'Accept':'application/json' },
       body: formData
     });
-  } catch(e) {}
+  } catch (e) {
+    showToast('Tidak bisa terhubung ke server', 'error');
+    return;
+  }
+  if (!res.ok) {
+    let msg = 'Gagal memperbarui laporan';
+    try {
+      const body = await res.json();
+      if (body?.message) msg = body.message;
+    } catch (e) {}
+    showToast(msg, 'error');
+    return;
+  }
   await fetchReports();
   closeModal('detailModal');
   showToast('Laporan berhasil diperbarui', 'success');
@@ -1558,11 +1573,23 @@ function closeConfirm()  { document.getElementById('confirmOverlay').classList.r
 function deleteReport() { if (editingId) openDeleteConfirm(editingId); closeModal('detailModal'); }
 
 async function doDelete(id) {
-  try { await fetch(`${API_BASE}/reports/${id}`, { method:'DELETE' }); } catch(e) {}
-  reports = reports.filter(r=>r.id!==id);
-  filteredReports = filteredReports.filter(r=>r.id!==id);
-  renderDashboard();
-  renderTable();
+  let res;
+  try {
+    res = await fetch(`${API_BASE}/reports/${id}`, { method:'DELETE' });
+  } catch (e) {
+    showToast('Tidak bisa terhubung ke server', 'error');
+    return;
+  }
+  if (!res.ok) {
+    let msg = 'Gagal menghapus laporan';
+    try {
+      const body = await res.json();
+      if (body?.message) msg = body.message;
+    } catch (e) {}
+    showToast(msg, 'error');
+    return;
+  }
+  await fetchReports();
   showToast('Laporan dihapus', 'error');
 }
 
@@ -1875,4 +1902,3 @@ document.addEventListener('visibilitychange', () => {
 </script>
 </body>
 </html>
-

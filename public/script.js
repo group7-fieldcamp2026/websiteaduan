@@ -196,13 +196,20 @@ async function fetchLocations() {
         photo: l.photo || null,
       }));
     } else {
-      LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
+      LOCATIONS = [];
     }
   } catch (e) {
-    LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
+    LOCATIONS = [];
+    console.error('Gagal ambil titik pengaduan:', e);
   }
   const active = document.querySelector('.loc-filter-btn.active');
   renderLocationCards(active?.dataset.filter || 'all');
+  if (fixedLocationLayerMain && leafletMap) {
+    renderFixedLocations(fixedLocationLayerMain);
+  }
+  if (fixedLocationLayerPicker && pickerMap) {
+    renderFixedLocations(fixedLocationLayerPicker);
+  }
 }
 
 // ============================================================
@@ -803,6 +810,21 @@ function renderFixedLocations(layer) {
     L.marker([parseFloat(lat), parseFloat(lng)], { icon: createFacultyIcon(color) })
       .bindPopup(`<strong>${esc(opt.textContent)}</strong><br/><span>${esc(faculty)}</span>`)
       .addTo(layer);
+  });
+
+  LOCATIONS.forEach(loc => {
+    const lat = parseFloat(loc.lat);
+    const lng = parseFloat(loc.lng);
+    if (isNaN(lat) || isNaN(lng)) return;
+    const status = loc.status === 'terpasang' ? 'Terpasang' : 'Rencana';
+    const markerColor = loc.status === 'terpasang' ? '#10B981' : '#F59E0B';
+    L.circleMarker([lat, lng], {
+      radius: 7,
+      color: markerColor,
+      fillColor: markerColor,
+      fillOpacity: 0.85,
+      weight: 2
+    }).bindPopup(`<strong>${esc(loc.name || 'Titik Pengaduan')}</strong><br/><span>${status}</span>`).addTo(layer);
   });
 }
 
