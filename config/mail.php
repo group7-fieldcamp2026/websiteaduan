@@ -1,5 +1,25 @@
 <?php
 
+$mailScheme = env('MAIL_SCHEME');
+$mailEncryption = env('MAIL_ENCRYPTION');
+
+// Backward-compatible normalization:
+// - MAIL_ENCRYPTION=tls   -> keep SMTP (STARTTLS on port 587)
+// - MAIL_ENCRYPTION=ssl   -> use SMTPS
+if (!$mailScheme && $mailEncryption) {
+    $enc = strtolower((string) $mailEncryption);
+    $mailScheme = $enc === 'ssl' ? 'smtps' : null;
+}
+
+if ($mailScheme) {
+    $normalizedScheme = strtolower((string) $mailScheme);
+    if (in_array($normalizedScheme, ['tls', 'starttls'], true)) {
+        $mailScheme = 'smtp';
+    } elseif ($normalizedScheme === 'ssl') {
+        $mailScheme = 'smtps';
+    }
+}
+
 return [
 
     /*
@@ -39,7 +59,7 @@ return [
 
         'smtp' => [
             'transport' => 'smtp',
-            'scheme' => env('MAIL_SCHEME'),
+            'scheme' => $mailScheme,
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
             'port' => env('MAIL_PORT', 2525),
@@ -114,5 +134,8 @@ return [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
+
+    // Recipient for new report notification emails.
+    'notification_to' => env('MAIL_NOTIFICATION_TO', 'kelompok7fieldcamp2026@gmail.com'),
 
 ];

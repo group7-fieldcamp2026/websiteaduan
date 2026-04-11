@@ -11,6 +11,7 @@ Route::get('/reports/stats', [ReportController::class, 'stats']);
 Route::get('/reports/status/{code}', [ReportController::class, 'checkStatus']);
 Route::put('/reports/{id}', [ReportController::class, 'update']);
 Route::delete('/reports/{id}', [ReportController::class, 'destroy']);
+Route::post('/mail/health-check', [ReportController::class, 'mailHealthCheck'])->middleware('throttle:5,1');
 
 // Locations (titik pengaduan)
 Route::get('/locations', [LocationController::class, 'index']);

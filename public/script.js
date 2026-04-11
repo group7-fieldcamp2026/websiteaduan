@@ -380,7 +380,11 @@ async function handleSubmit(e) {
       clearPin();
       await fetchReports();
       await fetchStats();
-      showToast(`Laporan terkirim! Kode: ${result.report_code}`, 'success');
+      if (result.mail_sent === false) {
+        showToast(`Laporan tersimpan (kode: ${result.report_code}), tapi email admin belum terkirim.`, 'error');
+      } else {
+        showToast(`Laporan terkirim! Kode: ${result.report_code}`, 'success');
+      }
     } else {
       showToast('Gagal mengirim laporan. Coba lagi.', 'error');
     }

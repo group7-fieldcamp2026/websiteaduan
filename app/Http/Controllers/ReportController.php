@@ -5,12 +5,49 @@ namespace App\Http\Controllers;
 use App\Mail\ReportSubmittedNotification;
 use App\Models\Report;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ReportController extends Controller
 {
+    // Uji koneksi SMTP + notifikasi email tanpa membuat laporan baru
+    public function mailHealthCheck()
+    {
+        $mailTo = config('mail.notification_to', 'kelompok7fieldcamp2026@gmail.com');
+        $checkedAt = now();
+
+        try {
+            Mail::raw(
+                "ITSafe SMTP health-check berhasil pada {$checkedAt->format('Y-m-d H:i:s')} WIB.",
+                function ($message) use ($mailTo, $checkedAt) {
+                    $message
+                        ->to($mailTo)
+                        ->subject('ITSafe SMTP Health Check - ' . $checkedAt->format('Y-m-d H:i:s'));
+                }
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Health-check email berhasil dikirim.',
+                'to' => $mailTo,
+                'checked_at' => $checkedAt->toIso8601String(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SMTP health-check failed', [
+                'to' => $mailTo,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Health-check email gagal dikirim.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     // Terima laporan dari form
     public function store(Request $request)
     {
@@ -53,20 +90,32 @@ class ReportController extends Controller
 
         $report = Report::create($validated);
 
-        // Kirim email notifikasi ke kelompok7fieldcamp2026@gmail.com
+        $mailSent = false;
+        $mailTo = config('mail.notification_to', 'kelompok7fieldcamp2026@gmail.com');
+
+        // Kirim email notifikasi ke alamat admin (configurable via .env)
         try {
-            Mail::to('kelompok7fieldcamp2026@gmail.com')->send(
+            Mail::to($mailTo)->send(
                 new ReportSubmittedNotification($report)
             );
-        } catch (\Exception $e) {
-            // Log error tapi jangan hentikan proses
-            \Log::error('Failed to send report notification email: ' . $e->getMessage());
+            $mailSent = true;
+        } catch (\Throwable $e) {
+            // Log detail agar mudah tracing di hosting production
+            Log::error('Failed to send report notification email', [
+                'report_id' => $report->id,
+                'report_code' => $report->report_code,
+                'to' => $mailTo,
+                'error' => $e->getMessage(),
+            ]);
         }
 
         return response()->json([
             'success'     => true,
-            'message'     => 'Laporan berhasil dikirim!',
+            'message'     => $mailSent
+                ? 'Laporan berhasil dikirim!'
+                : 'Laporan tersimpan, tetapi notifikasi email belum terkirim.',
             'report_code' => $report->report_code,
+            'mail_sent'   => $mailSent,
         ], 201);
     }
 

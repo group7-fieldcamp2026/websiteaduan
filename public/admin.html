@@ -192,6 +192,17 @@
     }
     .topbar-title { font-size: 1rem; font-weight: 600; }
     .topbar-right { display: flex; align-items: center; gap: 1rem; }
+    .topbar-right .btn {
+      padding: .4rem .8rem;
+      font-size: .75rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(var(--bg-rgb), .8);
+    }
+    .topbar-right .btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
     .topbar-badge {
       display: flex; align-items: center; gap: .4rem;
       background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.25);
@@ -608,6 +619,9 @@
     <div class="topbar">
       <span class="topbar-title" id="topbarTitle">Dashboard</span>
       <div class="topbar-right">
+        <button class="btn btn-outline" id="btnMailHealth" onclick="testMailHealth()">
+          <i class="fas fa-envelope"></i> Test Email
+        </button>
         <div class="topbar-badge"><span class="dot"></span> Online</div>
       </div>
     </div>
@@ -1096,6 +1110,7 @@
 const API_BASE = `${window.location.origin}/api`;
 const ADMIN_REPORTS_ENDPOINT = `${API_BASE}/reports/admin`;
 const LOCATION_ENDPOINT = `${API_BASE}/locations`;
+const MAIL_HEALTH_ENDPOINT = `${API_BASE}/mail/health-check`;
 const AUTO_REFRESH_MS = 15000;
 const ADMIN_USER = 'tujuhfieldcamp'; // Ganti sesuai kebutuhan
 const ADMIN_PASS = 'itsafe2026'; // Ganti sesuai kebutuhan
@@ -1114,6 +1129,7 @@ let confirmCallback = null;
 let isFetchingReports = false;
 let isFetchingLocations = false;
 let autoRefreshTimer = null;
+let isMailChecking = false;
 
 const DEFAULT_LOCATIONS = [
   { id:1,  name:'Perpustakaan Pusat ITS',         desc:'Area parkir dan lobi utama perpustakaan, zona keluar-masuk yang minim pengawasan.',    status:'terpasang', count:3,  icon:'fa-book-open',        lat:-7.2748, lng:112.7944, gmaps:'https://maps.google.com/?q=-7.2748,112.7944' },
@@ -1172,6 +1188,41 @@ function initAdmin() {
   fetchReports();
   fetchLocations();
   startAutoRefresh();
+}
+
+async function testMailHealth() {
+  if (isMailChecking) return;
+  isMailChecking = true;
+
+  const btn = document.getElementById('btnMailHealth');
+  const originalBtnHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+  }
+
+  try {
+    const res = await fetch(MAIL_HEALTH_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.message || `HTTP ${res.status}`);
+    }
+
+    showToast(`Health-check email terkirim ke ${data.to || 'admin'}.`, 'success');
+  } catch (e) {
+    console.error('Gagal test health-check email:', e);
+    showToast(`Health-check email gagal: ${e.message || 'unknown error'}`, 'error');
+  } finally {
+    isMailChecking = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHtml;
+    }
+  }
 }
 
 async function fetchReports({ skipIfModal = false } = {}) {
