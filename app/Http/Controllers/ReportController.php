@@ -31,13 +31,114 @@ class ReportController extends Controller
         return 'Lihat storage/logs/laravel.log untuk detail error SMTP.';
     }
 
+    private function readEnvValueFromFile(string $key): ?string
+    {
+        $envPath = base_path('.env');
+        if (!is_readable($envPath)) {
+            return null;
+        }
+
+        $contents = file_get_contents($envPath);
+        if ($contents === false) {
+            return null;
+        }
+
+        $pattern = '/^' . preg_quote($key, '/') . '=(.*)$/m';
+        if (!preg_match($pattern, $contents, $matches)) {
+            return null;
+        }
+
+        $value = trim((string) ($matches[1] ?? ''));
+        if ($value === '' || strtolower($value) === 'null') {
+            return null;
+        }
+
+        if (
+            (str_starts_with($value, '"') && str_ends_with($value, '"')) ||
+            (str_starts_with($value, "'") && str_ends_with($value, "'"))
+        ) {
+            $value = substr($value, 1, -1);
+        }
+
+        return $value;
+    }
+
+    private function applySmtpRuntimeFallback(): array
+    {
+        $smtpHost = (string) config('mail.mailers.smtp.host', '');
+        $smtpPort = (int) config('mail.mailers.smtp.port', 0);
+
+        $isDefaultSmtp =
+            in_array($smtpHost, ['', '127.0.0.1', 'localhost'], true) ||
+            $smtpPort === 0 ||
+            $smtpPort === 2525;
+
+        if (!$isDefaultSmtp) {
+            return [
+                'host' => $smtpHost,
+                'port' => $smtpPort,
+                'source' => 'config',
+            ];
+        }
+
+        $envHost = $this->readEnvValueFromFile('MAIL_HOST');
+        if (!$envHost) {
+            return [
+                'host' => $smtpHost,
+                'port' => $smtpPort,
+                'source' => 'config_default',
+            ];
+        }
+
+        $envPort = $this->readEnvValueFromFile('MAIL_PORT');
+        $envUser = $this->readEnvValueFromFile('MAIL_USERNAME');
+        $envPass = $this->readEnvValueFromFile('MAIL_PASSWORD');
+        $envEncryption = strtolower((string) ($this->readEnvValueFromFile('MAIL_ENCRYPTION') ?? ''));
+        $envFromAddress = $this->readEnvValueFromFile('MAIL_FROM_ADDRESS');
+        $envFromName = $this->readEnvValueFromFile('MAIL_FROM_NAME');
+        $envNotificationTo = $this->readEnvValueFromFile('MAIL_NOTIFICATION_TO');
+
+        $smtpScheme = null;
+        if ($envEncryption === 'ssl') {
+            $smtpScheme = 'smtps';
+        } elseif (in_array($envEncryption, ['tls', 'starttls'], true)) {
+            $smtpScheme = 'smtp';
+        }
+
+        config([
+            'mail.mailers.smtp.host' => $envHost,
+            'mail.mailers.smtp.port' => is_numeric($envPort ?? null) ? (int) $envPort : 587,
+            'mail.mailers.smtp.username' => $envUser ?? config('mail.mailers.smtp.username'),
+            'mail.mailers.smtp.password' => $envPass ?? config('mail.mailers.smtp.password'),
+            'mail.mailers.smtp.scheme' => $smtpScheme,
+        ]);
+
+        if ($envFromAddress) {
+            config(['mail.from.address' => $envFromAddress]);
+        }
+        if ($envFromName) {
+            config(['mail.from.name' => $envFromName]);
+        }
+        if ($envNotificationTo) {
+            config(['mail.notification_to' => $envNotificationTo]);
+        }
+
+        return [
+            'host' => (string) config('mail.mailers.smtp.host', ''),
+            'port' => (int) config('mail.mailers.smtp.port', 0),
+            'source' => 'env_file',
+        ];
+    }
+
     // Uji koneksi SMTP + notifikasi email tanpa membuat laporan baru
     public function mailHealthCheck()
     {
+        $smtpRuntime = $this->applySmtpRuntimeFallback();
         $mailTo = config('mail.notification_to', 'kelompok7fieldcamp2026@gmail.com');
         $checkedAt = now();
-        $smtpHost = (string) config('mail.mailers.smtp.host', '');
-        $smtpPort = (int) config('mail.mailers.smtp.port', 0);
+        $smtpHost = (string) ($smtpRuntime['host'] ?? config('mail.mailers.smtp.host', ''));
+        $smtpPort = (int) ($smtpRuntime['port'] ?? config('mail.mailers.smtp.port', 0));
+        $smtpSource = (string) ($smtpRuntime['source'] ?? 'config');
         $smtpMailer = (string) config('mail.default', 'unknown');
 
         // Strong signal that server .env / config cache is not loading SMTP settings.
@@ -48,6 +149,7 @@ class ReportController extends Controller
                 'hint' => 'Pastikan .env di server terisi MAIL_HOST/MAIL_PORT, lalu jalankan php artisan optimize:clear.',
                 'smtp_host' => $smtpHost,
                 'smtp_port' => $smtpPort,
+                'smtp_source' => $smtpSource,
                 'mailer' => $smtpMailer,
             ], 500);
         }
@@ -69,6 +171,7 @@ class ReportController extends Controller
                 'mailer' => 'smtp',
                 'smtp_host' => $smtpHost,
                 'smtp_port' => $smtpPort,
+                'smtp_source' => $smtpSource,
                 'message_id' => $sentMessage?->getMessageId(),
                 'checked_at' => $checkedAt->toIso8601String(),
             ]);
@@ -86,6 +189,9 @@ class ReportController extends Controller
                 'message' => 'Health-check email gagal dikirim.',
                 'error' => $e->getMessage(),
                 'hint' => $hint,
+                'smtp_host' => $smtpHost,
+                'smtp_port' => $smtpPort,
+                'smtp_source' => $smtpSource,
             ], 500);
         }
     }
@@ -132,6 +238,7 @@ class ReportController extends Controller
 
         $report = Report::create($validated);
 
+        $smtpRuntime = $this->applySmtpRuntimeFallback();
         $mailSent = false;
         $mailTo = config('mail.notification_to', 'kelompok7fieldcamp2026@gmail.com');
 
@@ -148,6 +255,9 @@ class ReportController extends Controller
                 'report_code' => $report->report_code,
                 'to' => $mailTo,
                 'error' => $e->getMessage(),
+                'smtp_host' => $smtpRuntime['host'] ?? null,
+                'smtp_port' => $smtpRuntime['port'] ?? null,
+                'smtp_source' => $smtpRuntime['source'] ?? null,
             ]);
         }
 

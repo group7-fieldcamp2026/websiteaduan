@@ -1209,12 +1209,17 @@ async function testMailHealth() {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || data.success === false) {
-      const detail = [data.message, data.error, data.hint].filter(Boolean).join(' | ');
+      const runtimeText = data.smtp_host && data.smtp_port
+        ? `SMTP ${data.smtp_host}:${data.smtp_port}${data.smtp_source ? ` (${data.smtp_source})` : ''}`
+        : '';
+      const detail = [data.message, data.error, data.hint, runtimeText].filter(Boolean).join(' | ');
       throw new Error(detail || `HTTP ${res.status}`);
     }
 
     const msgIdText = data.message_id ? ` (msg: ${String(data.message_id).slice(0, 20)}...)` : '';
-    const smtpText = data.smtp_host && data.smtp_port ? ` via ${data.smtp_host}:${data.smtp_port}` : '';
+    const smtpText = data.smtp_host && data.smtp_port
+      ? ` via ${data.smtp_host}:${data.smtp_port}${data.smtp_source ? ` (${data.smtp_source})` : ''}`
+      : '';
     showToast(`Health-check email terkirim ke ${data.to || 'admin'}${smtpText}${msgIdText}`, 'success');
   } catch (e) {
     console.error('Gagal test health-check email:', e);
