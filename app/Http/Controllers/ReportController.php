@@ -82,14 +82,6 @@ class ReportController extends Controller
         }
 
         $envHost = $this->readEnvValueFromFile('MAIL_HOST');
-        if (!$envHost) {
-            return [
-                'host' => $smtpHost,
-                'port' => $smtpPort,
-                'source' => 'config_default',
-            ];
-        }
-
         $envPort = $this->readEnvValueFromFile('MAIL_PORT');
         $envUser = $this->readEnvValueFromFile('MAIL_USERNAME');
         $envPass = $this->readEnvValueFromFile('MAIL_PASSWORD');
@@ -98,35 +90,61 @@ class ReportController extends Controller
         $envFromName = $this->readEnvValueFromFile('MAIL_FROM_NAME');
         $envNotificationTo = $this->readEnvValueFromFile('MAIL_NOTIFICATION_TO');
 
-        $smtpScheme = null;
-        if ($envEncryption === 'ssl') {
-            $smtpScheme = 'smtps';
-        } elseif (in_array($envEncryption, ['tls', 'starttls'], true)) {
-            $smtpScheme = 'smtp';
+        $resolvedHost = $envHost ?: $smtpHost;
+        $resolvedPort = is_numeric($envPort ?? null) ? (int) $envPort : $smtpPort;
+        $resolvedUser = $envUser ?: (string) config('mail.mailers.smtp.username', '');
+        $resolvedPass = $envPass ?: (string) config('mail.mailers.smtp.password', '');
+        $resolvedEncryption = $envEncryption ?: 'tls';
+        $resolvedFromAddress = $envFromAddress ?: (string) config('mail.from.address', '');
+        $resolvedFromName = $envFromName ?: (string) config('mail.from.name', '');
+        $resolvedNotificationTo = $envNotificationTo ?: (string) config('mail.notification_to', '');
+        $source = $envHost ? 'env_file' : 'config_default';
+
+        // Absolute fallback supaya tetap bisa jalan saat server masih default localhost:2525.
+        $stillDefault =
+            in_array($resolvedHost, ['', '127.0.0.1', 'localhost'], true) ||
+            $resolvedPort === 0 ||
+            $resolvedPort === 2525;
+
+        if ($stillDefault) {
+            $resolvedHost = 'smtp.gmail.com';
+            $resolvedPort = 587;
+            $resolvedEncryption = 'tls';
+            if ($resolvedUser === '') {
+                $resolvedUser = 'kelompok7fieldcamp2026@gmail.com';
+            }
+            if ($resolvedFromAddress === '') {
+                $resolvedFromAddress = $resolvedUser;
+            }
+            if ($resolvedFromName === '') {
+                $resolvedFromName = 'ITS Safe - Sistem Keamanan & Kenyamanan';
+            }
+            if ($resolvedNotificationTo === '') {
+                $resolvedNotificationTo = 'kelompok7fieldcamp2026@gmail.com';
+            }
+            $source = 'code_fallback';
         }
 
+        $smtpScheme = $resolvedEncryption === 'ssl' ? 'smtps' : 'smtp';
+
         config([
-            'mail.mailers.smtp.host' => $envHost,
-            'mail.mailers.smtp.port' => is_numeric($envPort ?? null) ? (int) $envPort : 587,
-            'mail.mailers.smtp.username' => $envUser ?? config('mail.mailers.smtp.username'),
-            'mail.mailers.smtp.password' => $envPass ?? config('mail.mailers.smtp.password'),
+            'mail.mailers.smtp.host' => $resolvedHost,
+            'mail.mailers.smtp.port' => $resolvedPort,
+            'mail.mailers.smtp.username' => $resolvedUser,
+            'mail.mailers.smtp.password' => $resolvedPass,
             'mail.mailers.smtp.scheme' => $smtpScheme,
         ]);
 
-        if ($envFromAddress) {
-            config(['mail.from.address' => $envFromAddress]);
-        }
-        if ($envFromName) {
-            config(['mail.from.name' => $envFromName]);
-        }
-        if ($envNotificationTo) {
-            config(['mail.notification_to' => $envNotificationTo]);
-        }
+        config([
+            'mail.from.address' => $resolvedFromAddress ?: config('mail.from.address'),
+            'mail.from.name' => $resolvedFromName ?: config('mail.from.name'),
+            'mail.notification_to' => $resolvedNotificationTo ?: config('mail.notification_to'),
+        ]);
 
         return [
             'host' => (string) config('mail.mailers.smtp.host', ''),
             'port' => (int) config('mail.mailers.smtp.port', 0),
-            'source' => 'env_file',
+            'source' => $source,
         ];
     }
 
@@ -140,6 +158,7 @@ class ReportController extends Controller
         $smtpPort = (int) ($smtpRuntime['port'] ?? config('mail.mailers.smtp.port', 0));
         $smtpSource = (string) ($smtpRuntime['source'] ?? 'config');
         $smtpMailer = (string) config('mail.default', 'unknown');
+        $smtpPass = (string) config('mail.mailers.smtp.password', '');
 
         // Strong signal that server .env / config cache is not loading SMTP settings.
         if (in_array($smtpHost, ['127.0.0.1', 'localhost'], true) && $smtpPort === 2525) {
@@ -147,6 +166,18 @@ class ReportController extends Controller
                 'success' => false,
                 'message' => 'Konfigurasi SMTP server belum terbaca (masih default localhost:2525).',
                 'hint' => 'Pastikan .env di server terisi MAIL_HOST/MAIL_PORT, lalu jalankan php artisan optimize:clear.',
+                'smtp_host' => $smtpHost,
+                'smtp_port' => $smtpPort,
+                'smtp_source' => $smtpSource,
+                'mailer' => $smtpMailer,
+            ], 500);
+        }
+
+        if (trim($smtpPass) === '') {
+            return response()->json([
+                'success' => false,
+                'message' => 'MAIL_PASSWORD belum terisi untuk SMTP.',
+                'hint' => 'Isi App Password Gmail (16 karakter) di .env server.',
                 'smtp_host' => $smtpHost,
                 'smtp_port' => $smtpPort,
                 'smtp_source' => $smtpSource,
