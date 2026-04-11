@@ -1214,7 +1214,8 @@ async function testMailHealth() {
     }
 
     const msgIdText = data.message_id ? ` (msg: ${String(data.message_id).slice(0, 20)}...)` : '';
-    showToast(`Health-check email terkirim ke ${data.to || 'admin'}${msgIdText}`, 'success');
+    const smtpText = data.smtp_host && data.smtp_port ? ` via ${data.smtp_host}:${data.smtp_port}` : '';
+    showToast(`Health-check email terkirim ke ${data.to || 'admin'}${smtpText}${msgIdText}`, 'success');
   } catch (e) {
     console.error('Gagal test health-check email:', e);
     showToast(`Health-check email gagal: ${e.message || 'unknown error'}`, 'error');

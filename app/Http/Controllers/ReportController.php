@@ -36,6 +36,21 @@ class ReportController extends Controller
     {
         $mailTo = config('mail.notification_to', 'kelompok7fieldcamp2026@gmail.com');
         $checkedAt = now();
+        $smtpHost = (string) config('mail.mailers.smtp.host', '');
+        $smtpPort = (int) config('mail.mailers.smtp.port', 0);
+        $smtpMailer = (string) config('mail.default', 'unknown');
+
+        // Strong signal that server .env / config cache is not loading SMTP settings.
+        if (in_array($smtpHost, ['127.0.0.1', 'localhost'], true) && $smtpPort === 2525) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Konfigurasi SMTP server belum terbaca (masih default localhost:2525).',
+                'hint' => 'Pastikan .env di server terisi MAIL_HOST/MAIL_PORT, lalu jalankan php artisan optimize:clear.',
+                'smtp_host' => $smtpHost,
+                'smtp_port' => $smtpPort,
+                'mailer' => $smtpMailer,
+            ], 500);
+        }
 
         try {
             $sentMessage = Mail::mailer('smtp')->raw(
@@ -52,6 +67,8 @@ class ReportController extends Controller
                 'message' => 'Health-check email berhasil dikirim.',
                 'to' => $mailTo,
                 'mailer' => 'smtp',
+                'smtp_host' => $smtpHost,
+                'smtp_port' => $smtpPort,
                 'message_id' => $sentMessage?->getMessageId(),
                 'checked_at' => $checkedAt->toIso8601String(),
             ]);
