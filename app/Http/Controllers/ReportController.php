@@ -12,6 +12,25 @@ use Illuminate\Support\Str;
 
 class ReportController extends Controller
 {
+    private function buildMailErrorHint(string $errorMessage): string
+    {
+        $msg = strtolower($errorMessage);
+
+        if (str_contains($msg, 'timed out') || str_contains($msg, 'unable to connect') || str_contains($msg, 'connection could not be established')) {
+            return 'Koneksi ke SMTP gagal. Cek firewall/hosting, atau coba MAIL_PORT=465 dan MAIL_ENCRYPTION=ssl.';
+        }
+
+        if (str_contains($msg, 'authentication') || str_contains($msg, 'username') || str_contains($msg, 'password') || str_contains($msg, '535')) {
+            return 'Autentikasi SMTP gagal. Periksa MAIL_USERNAME dan App Password Gmail.';
+        }
+
+        if (str_contains($msg, 'certificate') || str_contains($msg, 'tls') || str_contains($msg, 'ssl')) {
+            return 'Masalah TLS/SSL. Coba kombinasi port/enkripsi yang sesuai (587+tls atau 465+ssl).';
+        }
+
+        return 'Lihat storage/logs/laravel.log untuk detail error SMTP.';
+    }
+
     // Uji koneksi SMTP + notifikasi email tanpa membuat laporan baru
     public function mailHealthCheck()
     {
@@ -37,15 +56,19 @@ class ReportController extends Controller
                 'checked_at' => $checkedAt->toIso8601String(),
             ]);
         } catch (\Throwable $e) {
+            $hint = $this->buildMailErrorHint($e->getMessage());
+
             Log::error('SMTP health-check failed', [
                 'to' => $mailTo,
                 'error' => $e->getMessage(),
+                'hint' => $hint,
             ]);
 
             return response()->json([
                 'success' => false,
                 'message' => 'Health-check email gagal dikirim.',
                 'error' => $e->getMessage(),
+                'hint' => $hint,
             ], 500);
         }
     }

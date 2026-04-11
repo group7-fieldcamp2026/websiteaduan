@@ -1209,7 +1209,8 @@ async function testMailHealth() {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || data.success === false) {
-      throw new Error(data.message || `HTTP ${res.status}`);
+      const detail = [data.message, data.error, data.hint].filter(Boolean).join(' | ');
+      throw new Error(detail || `HTTP ${res.status}`);
     }
 
     const msgIdText = data.message_id ? ` (msg: ${String(data.message_id).slice(0, 20)}...)` : '';
