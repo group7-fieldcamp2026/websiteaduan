@@ -1212,7 +1212,8 @@ async function testMailHealth() {
       throw new Error(data.message || `HTTP ${res.status}`);
     }
 
-    showToast(`Health-check email terkirim ke ${data.to || 'admin'}.`, 'success');
+    const msgIdText = data.message_id ? ` (msg: ${String(data.message_id).slice(0, 20)}...)` : '';
+    showToast(`Health-check email terkirim ke ${data.to || 'admin'}${msgIdText}`, 'success');
   } catch (e) {
     console.error('Gagal test health-check email:', e);
     showToast(`Health-check email gagal: ${e.message || 'unknown error'}`, 'error');

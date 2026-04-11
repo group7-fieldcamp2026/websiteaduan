@@ -19,7 +19,7 @@ class ReportController extends Controller
         $checkedAt = now();
 
         try {
-            Mail::raw(
+            $sentMessage = Mail::mailer('smtp')->raw(
                 "ITSafe SMTP health-check berhasil pada {$checkedAt->format('Y-m-d H:i:s')} WIB.",
                 function ($message) use ($mailTo, $checkedAt) {
                     $message
@@ -32,6 +32,8 @@ class ReportController extends Controller
                 'success' => true,
                 'message' => 'Health-check email berhasil dikirim.',
                 'to' => $mailTo,
+                'mailer' => 'smtp',
+                'message_id' => $sentMessage?->getMessageId(),
                 'checked_at' => $checkedAt->toIso8601String(),
             ]);
         } catch (\Throwable $e) {
@@ -95,10 +97,10 @@ class ReportController extends Controller
 
         // Kirim email notifikasi ke alamat admin (configurable via .env)
         try {
-            Mail::to($mailTo)->send(
+            $sentMessage = Mail::mailer('smtp')->to($mailTo)->send(
                 new ReportSubmittedNotification($report)
             );
-            $mailSent = true;
+            $mailSent = $sentMessage !== null;
         } catch (\Throwable $e) {
             // Log detail agar mudah tracing di hosting production
             Log::error('Failed to send report notification email', [
