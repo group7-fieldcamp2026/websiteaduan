@@ -521,6 +521,8 @@ function initLeafletMap() {
   fixedLocationLayerMain = L.layerGroup().addTo(leafletMap);
   renderFixedLocations(fixedLocationLayerMain);
   loadBoundaryLayer(leafletMap, 'main');
+  // Pasang event listener toggle pin (lebih andal dari inline onclick)
+  initPinToggles();
 }
 
 function renderLeafletMap() {
@@ -898,16 +900,7 @@ function buildPopup(r) {
     
   let fotoHtml = '';
   if (r.fotoPath) {
-    // Gunakan route /media/ karena /storage/ diblokir di hosting
-    let fotoUrl;
-    const fp = String(r.fotoPath);
-    if (fp.startsWith('http://') || fp.startsWith('https://')) {
-      fotoUrl = fp; // URL penuh (misal dari picsum demo)
-    } else {
-      // Hapus prefix storage/ atau report-photos jika sudah ada, kirim ke /media/
-      const clean = fp.replace(/^\/?storage\//, '').replace(/^\//, '');
-      fotoUrl = '/media/' + clean;
-    }
+    const fotoUrl = getPhotoUrl(r.fotoPath);
     const safeUrl = fotoUrl.replace(/'/g, "\\'");
     fotoHtml = `<div style="margin-top:8px; text-align:center;" class="popup-foto-wrap">
       <img src="${fotoUrl}"
@@ -1133,6 +1126,31 @@ function openLightbox(url) {
 function closeLightbox() {
   const lb = document.getElementById('photoLightbox');
   if (lb) { lb.style.display = 'none'; document.getElementById('lightboxImg').src = ''; }
+}
+
+// Identical to admin.html getPhotoUrl — use /media/ route (storage/ blocked on hosting)
+function getPhotoUrl(path) {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path)) return path;
+  const clean = path.replace(/^\/?storage\//, '').replace(/^\/+/, '');
+  const base = (window.location.origin && window.location.origin !== 'null')
+    ? window.location.origin
+    : '';
+  return `${base}/media/${encodeURI(clean)}`;
+}
+
+// Init pin toggle buttons via addEventListener (more robust than inline onclick)
+function initPinToggles() {
+  ['tog-fixedpin', 'tog-jurusan'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const type = id === 'tog-fixedpin' ? 'fixedpin' : 'jurusan';
+      handlePinToggle(type, this);
+    });
+  });
 }
 
 // ============================================================
