@@ -898,14 +898,15 @@ function buildPopup(r) {
     
   let fotoHtml = '';
   if (r.fotoPath) {
+    // Gunakan route /media/ karena /storage/ diblokir di hosting
     let fotoUrl;
-    const fp = r.fotoPath;
+    const fp = String(r.fotoPath);
     if (fp.startsWith('http://') || fp.startsWith('https://')) {
-      fotoUrl = fp;
-    } else if (fp.startsWith('/storage/') || fp.startsWith('storage/')) {
-      fotoUrl = '/' + fp.replace(/^\//, '');
+      fotoUrl = fp; // URL penuh (misal dari picsum demo)
     } else {
-      fotoUrl = '/storage/' + fp;
+      // Hapus prefix storage/ atau report-photos jika sudah ada, kirim ke /media/
+      const clean = fp.replace(/^\/?storage\//, '').replace(/^\//, '');
+      fotoUrl = '/media/' + clean;
     }
     const safeUrl = fotoUrl.replace(/'/g, "\\'");
     fotoHtml = `<div style="margin-top:8px; text-align:center;" class="popup-foto-wrap">
@@ -1090,30 +1091,34 @@ function toggleVis(type, cb) {
 }
 
 function handlePinToggle(type, el) {
-  const isActive = el.dataset.active !== 'false'; // default true
-  const nowActive = !isActive;
-  el.dataset.active = nowActive;
+  // Baca state saat ini: jika data-active belum diset atau 'true', maka aktif
+  const currentlyActive = el.dataset.active !== 'false';
+  const nowActive = !currentlyActive;
+  el.dataset.active = nowActive ? 'true' : 'false';
 
-  // Visual: active = colored pill, inactive = grayed out
+  // Update ikon: gunakan i:first-child agar lebih andal
+  const icon = el.querySelector('i');
+  if (icon) {
+    icon.className = nowActive ? 'fas fa-check-circle' : 'fas fa-times-circle';
+    icon.style.fontSize = '0.85rem';
+  }
+
+  // Update gaya visual
   if (nowActive) {
     el.style.background = 'rgba(242,132,130,.14)';
     el.style.border = '1px solid rgba(242,132,130,.45)';
     el.style.color = '#D56A6A';
     el.style.opacity = '1';
-    el.querySelector('.fa-check-circle, .fa-circle').className = 'fas fa-check-circle';
   } else {
-    el.style.background = 'rgba(0,0,0,.04)';
-    el.style.border = '1px solid rgba(0,0,0,.12)';
-    el.style.color = '#999';
-    el.style.opacity = '0.7';
-    el.querySelector('.fa-check-circle, .fa-circle').className = 'fas fa-circle';
+    el.style.background = 'rgba(0,0,0,.05)';
+    el.style.border = '1px solid rgba(0,0,0,.15)';
+    el.style.color = '#aaa';
+    el.style.opacity = '0.65';
   }
 
-  if (type === 'fixedpin') {
-    visFixedPin = nowActive;
-  } else if (type === 'jurusan') {
-    visJurusan = nowActive;
-  }
+  if (type === 'fixedpin') visFixedPin = nowActive;
+  else if (type === 'jurusan') visJurusan = nowActive;
+
   renderFixedLocations(fixedLocationLayerMain);
 }
 
