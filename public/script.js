@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    ITSafe - script.js
    Laravel API + Leaflet (OSM / Satelit / Dark / Topo)
    Heatmap - Titik - Cluster - Basemap switcher
@@ -59,7 +59,7 @@ const FACULTY_COLORS = {
   'FV':     '#E15759', // red
   'FKK':    '#B07AA1', // purple
   'FTEIC':  '#20B2AA', // cyan
-  'Lainnya':'#BAB0AC', // gray
+  'FTK':  '#BAB0AC', // gray
 };
 
 const RISK_COLORS = {
@@ -153,16 +153,17 @@ async function fetchReports() {
       lokasiDeskripsi:  r.lokasi_deskripsi,
       lat:              r.latitude ? parseFloat(r.latitude) : null,
       lng:              r.longitude ? parseFloat(r.longitude) : null,
-      fotoPath:         r.foto_path,
-      status:           r.status,
-      fakultas:         getFacultyFromLocationName(r.lokasi_kejadian),
-    }));
-    updateLayerCounts();
-    if (leafletMap) renderLeafletMap();
-  } catch (e) {
-    console.error('Gagal ambil data laporan:', e);
+        fotoPath:         r.foto_path,
+        status:           r.status,
+        fakultas:         getFacultyFromLocationName(r.lokasi_kejadian),
+      }));
+      updateLayerCounts();
+      if (leafletMap) renderLeafletMap();
+      renderLaporanChart();
+    } catch (e) {
+      console.error('Gagal ambil data laporan:', e);
+    }
   }
-}
 
 // Ambil statistik dari Laravel
 async function fetchStats() {
@@ -357,7 +358,6 @@ async function handleSubmit(e) {
     pernah_hindari:       document.getElementById('pernahHindari').value || null,
     orang_lain:           document.getElementById('orangLain').value || null,
     situasi_mencurigakan: document.getElementById('situasiMencurigakan').value || null,
-    fungsi_ruang:         document.getElementById('fungsiRuang').value || null,
     kronologi:            document.getElementById('kronologi').value.trim() || null,
     kontak_pelapor:       document.getElementById('kontakPelapor').value.trim() || null,
   };
@@ -572,13 +572,57 @@ function renderLeafletMap() {
 
   if (visCluster && L.markerClusterGroup) {
     clusterLayer = L.markerClusterGroup({ chunkedLoading: true });
+    
+    // PETA 3 Logic: Kelayakan Fasilitas
+    const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
+    
     data.forEach(r => {
-      const color = getRiskColor(r.skorRawan);
+      let color = getRiskColor(r.skorRawan);
+      let popupHtml = buildPopup(r);
+      
+      if (isPeta3) {
+        const kel = calcKelayakan(r);
+        if (kel.status === 'Layak') color = '#10B981'; // Green
+        else if (kel.status === 'Cukup Layak') color = '#F59E0B'; // Orange
+        else color = '#EF4444'; // Red
+        
+        let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
+        let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
+        popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
+      }
+      
       L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
-        .bindPopup(buildPopup(r))
+        .bindPopup(popupHtml)
         .addTo(clusterLayer);
     });
     leafletMap.addLayer(clusterLayer);
+  }
+  
+  if (visPoint && !visCluster) {
+     // Apply Peta 3 Logic to points too if visCluster is false but visPoint is true
+     const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
+     if (!pointLayer) pointLayer = L.layerGroup().addTo(leafletMap);
+     pointLayer.clearLayers();
+     
+     data.forEach(r => {
+      let color = getRiskColor(r.skorRawan);
+      let popupHtml = buildPopup(r);
+      
+      if (isPeta3) {
+        const kel = calcKelayakan(r);
+        if (kel.status === 'Layak') color = '#10B981';
+        else if (kel.status === 'Cukup Layak') color = '#F59E0B';
+        else color = '#EF4444'; 
+        
+        let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
+        let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
+        popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
+      }
+
+      L.circleMarker([r.lat, r.lng], {
+        radius: 9, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: .9
+      }).bindPopup(popupHtml).addTo(pointLayer);
+     });
   }
 }
 
@@ -782,20 +826,118 @@ function mapGeoJSONCoords(gj, fn) {
   }
 }
 
+function getNyamanLabel(val) {
+  if (val === 1) return '<div style="text-align:center; padding: 5px 0; color:#EF4444; font-size:1.1rem; font-weight:bold;">TIDAK NYAMAN!</div>';
+  if (val === 2) return '<div style="text-align:center; padding: 5px 0; color:#F59E0B; font-size:1.1rem; font-weight:bold;">KURANG NYAMAN!</div>';
+  if (val === 3) return '<div style="text-align:center; padding: 5px 0; color:#10B981; font-size:1.1rem; font-weight:bold;">NYAMAN!</div>';
+  return '';
+}
+
+function getRawanLabel(val) {
+  if (val >= 4 || val === 3) return '<span style="color:#EF4444; font-weight:bold;">RAWAN TINGGI !</span>';
+  if (val === 2) return '<span style="color:#F59E0B; font-weight:bold;">RAWAN SEDANG !</span>';
+  if (val <= 1) return '<span style="color:#10B981; font-weight:bold;">RAWAN RENDAH !</span>';
+  return '-';
+}
+
+function getScoreHtml(val, type) {
+  let color = '#F59E0B'; // kuning
+  
+  if (type === 'pencahayaan') {
+    if (val === 'Terang') { color = '#10B981'; } // hijau
+    else if (val === 'Gelap') { color = '#EF4444'; } // merah
+  }
+  else if (type === 'kepadatan') {
+    if (val === 'Ramai') { color = '#10B981'; }
+    else if (val === 'Sepi' || val === 'Sangat sepi') { color = '#EF4444'; }
+  }
+  else if (type === 'cctv') {
+    if ((val || '').includes('jelas')) { color = '#10B981'; }
+    else if ((val || '').includes('Tidak ada') || (val || '').includes('Tidak tahu')) { color = '#EF4444'; }
+  }
+  else if (type === 'petugas') {
+    if (val === 'Sering ada') { color = '#10B981'; }
+    else if (val === 'Tidak pernah ada') { color = '#EF4444'; }
+  }
+  else if (type === 'vegetasi') {
+     if ((val || '').includes('Terbuka')) { color = '#10B981'; }
+     else if ((val || '').includes('Tertutup')) { color = '#EF4444'; }
+  }
+  
+  if (!val || val === '-') return '-';
+  return `<span style="color:${color}; font-weight:bold">${val}</span>`;
+}
+
 function buildPopup(r) {
   const faculty = r.fakultas || getFacultyFromLocationName(r.lokasi);
-  return `<div style="font-family:'DM Sans',sans-serif;min-width:175px;font-size:.85rem">
-    <strong style="color:#F28482">${esc(r.lokasi)}</strong><br/>
-    <span style="color:#555">${esc(faculty)}</span>
-    <hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/>
-    <span>Skor Rawan: ${r.skorRawan ?? '-'}</span><br/>
-    <span>Waktu Rawan: ${r.waktu || '-'}</span><br/>
-    <span>Kelamin: ${r.kelamin || '-'}</span><br/>
-    <span>Pencahayaan: ${r.pencahayaan || '-'}</span><br/>
-    <span>Kepadatan: ${r.kepadatan || '-'}</span><br/>
-    <span>CCTV: ${r.cctv || '-'}</span><br/>
-    <span>Petugas: ${r.petugas || '-'}</span>
+  const isPeta2 = document.getElementById('tab-heatmap') && document.getElementById('tab-heatmap').classList.contains('active');
+
+  let headerHtml = `<strong style="color:#F28482">${esc(r.lokasi)}</strong><br/>
+    <span style="color:#555">${esc(faculty)}</span><br/>
+    <span style="font-size:0.75rem; color:#888;">Koordinat: ${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</span><hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/>`;
+    
+  let descHtml = r.lokasiDeskripsi ? `<i>"${esc(r.lokasiDeskripsi)}"</i><br/>` : '';
+  if (r.kronologi) descHtml += `<span style="color:#666; font-size:0.8rem">Ket Lain: ${esc(r.kronologi)}</span><br/>`;
+
+  let bodyHtml = '';
+  const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
+  if (isPeta2) {
+    bodyHtml += `<div style="text-align:center; padding: 5px 0;">${getRawanLabel(r.skorRawan)}</div>`;
+  } else if (!isPeta3) {
+    bodyHtml += getNyamanLabel(r.skorNyaman);
+  }
+
+  bodyHtml += `<span>Waktu Rawan: ${r.waktu || '-'} (${r.hariRawan || '-'})</span><br/>
+    <span>Pencahayaan: ${getScoreHtml(r.pencahayaan, 'pencahayaan')}</span><br/>
+    <span>Kepadatan: ${getScoreHtml(r.kepadatan, 'kepadatan')}</span><br/>
+    <span>CCTV: ${getScoreHtml(r.cctv, 'cctv')}</span><br/>
+    <span>Petugas: ${getScoreHtml(r.petugas, 'petugas')}</span><br/>
+    <span>Keterbukaan: ${getScoreHtml(r.vegetasi, 'vegetasi')}</span>`;
+    
+  let fotoHtml = '';
+  if (r.fotoPath) {
+    const fotoUrl = r.fotoPath.startsWith('http') ? r.fotoPath : `/storage/${r.fotoPath}`;
+    fotoHtml = `<div style="margin-top:8px; text-align:center;"><img src="${fotoUrl}" style="max-width:100%; max-height:140px; border-radius:4px; object-fit:cover;" alt="Foto Lokasi" onerror="this.style.display='none'"></div>`;
+  }
+  
+  return `<div style="font-family:'DM Sans',sans-serif;min-width:200px;font-size:.85rem">
+    ${headerHtml}
+    ${descHtml}
+    ${bodyHtml}
+    ${fotoHtml}
   </div>`;
+}
+
+// Map 3 Logic (Kelayakan)
+function calcKelayakan(r) {
+  let score = 0;
+  let alasan = [];
+  
+  if (r.pencahayaan === 'Terang') score += 3;
+  else if (r.pencahayaan === 'Remang-remang') { score += 2; alasan.push('Pencahayaan kurang memadai'); }
+  else { score += 1; alasan.push('Area sangat gelap'); }
+
+  if (r.kepadatan === 'Ramai') score += 3;
+  else if (r.kepadatan === 'Cukup ramai') score += 2;
+  else { score += 1; alasan.push('Area sepi'); }
+
+  if (r.cctv === 'Ada dan terlihat jelas') score += 3;
+  else if (r.cctv === 'Ada tapi tidak yakin aktif') { score += 2; alasan.push('CCTV belum pasti aktif'); }
+  else { score += 1; alasan.push('Tidak ada pengawasan CCTV'); }
+
+  if (r.petugas === 'Sering ada') score += 3;
+  else if (r.petugas === 'Kadang ada' || r.petugas === 'Jarang ada') { score += 2; alasan.push('Jarang ada petugas keamanan'); }
+  else { score += 1; alasan.push('Tidak pernah ada petugas keamanan'); }
+
+  if ((r.vegetasi || '').includes('Terbuka')) score += 3;
+  else if ((r.vegetasi || '').includes('Tertutup')) { score += 1; alasan.push('Area tertutup / kurang akses pandang'); }
+  else score += 2;
+
+  let status = 'Layak';
+  if (score < 10) status = 'Kurang Layak';
+  else if (score <= 13) status = 'Cukup Layak';
+  
+  return { score, status, alasan };
 }
 
 function renderFixedLocations(layer) {
@@ -854,6 +996,12 @@ function switchPetaTab(tab) {
     document.querySelector('#tog-heatmap input').checked = false;
     document.querySelector('#tog-point input').checked   = true;
     document.querySelector('#tog-cluster input').checked = false;
+    
+    // Tampilkan tombol layer Peta 1
+    document.querySelectorAll('.layer-card').forEach(l => l.style.display = 'none');
+    document.querySelectorAll('.layer-p1').forEach(l => l.style.display = 'flex');
+    activeLayer = 'semua';
+    document.querySelector('.layer-p1[data-layer="semua"] input').checked = true;
   } else if (tab === 'heatmap') {
     // Heatmap aktif, titik off
     visHeatmap = true;
@@ -862,6 +1010,12 @@ function switchPetaTab(tab) {
     document.querySelector('#tog-heatmap input').checked = true;
     document.querySelector('#tog-point input').checked   = false;
     document.querySelector('#tog-cluster input').checked = false;
+    
+    // Tampilkan tombol layer Peta 2
+    document.querySelectorAll('.layer-card').forEach(l => l.style.display = 'none');
+    document.querySelectorAll('.layer-p2').forEach(l => l.style.display = 'flex');
+    activeLayer = 'semua-2';
+    document.querySelector('.layer-p2[data-layer="semua-2"] input').checked = true;
   } else if (tab === 'fasilitas') {
     // Titik aktif dengan simbologi kondisi fisik
     visHeatmap = false;
@@ -870,6 +1024,12 @@ function switchPetaTab(tab) {
     document.querySelector('#tog-heatmap input').checked = false;
     document.querySelector('#tog-point input').checked   = true;
     document.querySelector('#tog-cluster input').checked = false;
+    
+    // Tampilkan tombol layer Peta 3
+    document.querySelectorAll('.layer-card').forEach(l => l.style.display = 'none');
+    document.querySelectorAll('.layer-p3').forEach(l => l.style.display = 'flex');
+    activeLayer = 'semua-3';
+    document.querySelector('.layer-p3[data-layer="semua-3"] input').checked = true;
   }
 
   renderLeafletMap();
@@ -888,7 +1048,7 @@ function switchBasemap(btn) {
 }
 
 function switchLayer(radio) {
-  activeLayer = radio.value;
+  activeLayer = radio.parentElement.dataset.layer;
   document.querySelectorAll('.layer-card').forEach(c => c.classList.toggle('active', c.dataset.layer === activeLayer));
   const el = document.getElementById('activeLayerName');
   if (el) el.textContent = getLayerLabel(activeLayer);
@@ -913,6 +1073,8 @@ function updateStats() {
 function updateLayerCounts() {
   const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
   set('cnt-semua',  reports.length);
+  set('cnt-semua-2',  reports.length);
+  set('cnt-semua-3',  reports.length);
   set('cnt-tinggi', reports.filter(r => isRawanTinggi(r.skorRawan)).length);
   set('cnt-sedang', reports.filter(r => isRawanSedang(r.skorRawan)).length);
   set('cnt-rendah', reports.filter(r => isRawanRendah(r.skorRawan)).length);
@@ -920,6 +1082,10 @@ function updateLayerCounts() {
   set('cnt-sepi',   reports.filter(r => isSepi(r.kepadatan)).length);
   set('cnt-nocctv', reports.filter(r => r.cctv === 'Tidak ada').length);
   set('cnt-minim',  reports.filter(r => isMinimPetugas(r.petugas)).length);
+  
+  set('cnt-layak', reports.filter(r => calcKelayakan(r).status === 'Layak').length);
+  set('cnt-cukup-layak', reports.filter(r => calcKelayakan(r).status === 'Cukup Layak').length);
+  set('cnt-kurang-layak', reports.filter(r => calcKelayakan(r).status === 'Kurang Layak').length);
 }
 
 function updateTopAreas(data) {
@@ -974,6 +1140,79 @@ function getMonthName(n) {
 }
 
 // ============================================================
+// CHART TREN LAPORAN (Chart.js)
+// ============================================================
+let laporanChartInstance = null;
+
+if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+  Chart.register(ChartDataLabels);
+}
+
+function renderLaporanChart() {
+  const ctx = document.getElementById('laporanChart');
+  if (!ctx) return;
+  
+  const filterWaktu = document.getElementById('laporanChartFilter')?.value || '';
+  let data = reports;
+  if (filterWaktu) data = data.filter(r => r.waktu === filterWaktu);
+
+  // Hitung jumlah per bulan
+  const monthCounts = new Array(12).fill(0);
+  data.forEach(r => {
+    const d = parseReportDate(r);
+    if (d) monthCounts[d.getMonth()]++;
+  });
+
+  const monthLabels = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+
+  if (typeof Chart === 'undefined' || typeof ChartDataLabels === 'undefined') {
+    setTimeout(renderLaporanChart, 500);
+    return;
+  }
+  
+  Chart.register(ChartDataLabels);
+
+  if (laporanChartInstance) {
+    laporanChartInstance.destroy();
+  }
+
+  laporanChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: monthLabels,
+      datasets: [{
+        label: 'Jumlah Laporan',
+        data: monthCounts,
+        backgroundColor: '#84A59D',
+        borderColor: '#4A615C',
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'end',
+          color: '#555',
+          font: { weight: 'bold' },
+          formatter: Math.round
+        }
+      },
+      scales: {
+        y: { 
+          beginAtZero: true, 
+          ticks: { stepSize: 1 } 
+        }
+      }
+    }
+  });
+}
+
+// ============================================================
 // EXPORT
 // ============================================================
 function exportGeoJSON() {
@@ -1014,18 +1253,83 @@ function dlFile(content, filename, type) {
   a.download = filename; a.click();
 }
 
+function exportMarkersCSV() {
+  const pts = reports.filter(r => r.lat && r.lng);
+  if (!pts.length) { showToast('Tidak ada data koordinat.', 'error'); return; }
+  
+  // Headers
+  let csv = "ID,Peran Kampus,Jenis Kelamin,Pencahayaan,Kepadatan,CCTV,Petugas Keamanan,Waktu Rawan,Skor Rawan,Skor Nyaman,Lokasi,Fakultas,Deskripsi,Status\n";
+  
+  pts.forEach(r => {
+    const row = [
+      r.id,
+      r.peran || '',
+      r.kelamin || '',
+      r.pencahayaan || '',
+      r.kepadatan || '',
+      r.cctv || '',
+      r.petugas || '',
+      r.waktu || '',
+      r.skorRawan || '',
+      r.skorNyaman || '',
+      `"${r.lokasi || ''}"`,
+      r.fakultas || '',
+      `"${(r.lokasiDeskripsi || '').replace(/"/g, '""')}"`,
+      r.status || ''
+    ];
+    csv += row.join(',') + '\n';
+  });
+  
+  dlFile(csv, 'itsafe_area_rawan.csv', 'text/csv;charset=utf-8;');
+  showToast('CSV diunduh.', 'success');
+}
+
 // ============================================================
 // DEMO DATA (tetap ada untuk testing)
 // ============================================================
 function loadDemoData() {
-  const demo = [
-    { lat:-7.2756, lng:112.7951, lokasi:'Kantin Pusat ITS',     waktu:'Malam',  pencahayaan:'Remang-remang', kepadatan:'Sepi',         cctv:'Tidak ada',                petugas:'Jarang ada',  skorRawan:4, skorNyaman:2, createdAt:'2026-03-10T10:00:00Z' },
-    { lat:-7.2771, lng:112.7963, lokasi:'Gedung Teknik Sipil',  waktu:'Malam',  pencahayaan:'Gelap',          kepadatan:'Sangat sepi', cctv:'Ada tapi tidak yakin aktif', petugas:'Kadang ada', skorRawan:5, skorNyaman:1, createdAt:'2026-03-22T10:00:00Z' },
-    { lat:-7.2748, lng:112.7944, lokasi:'Perpustakaan ITS',     waktu:'Siang',  pencahayaan:'Terang',         kepadatan:'Cukup ramai', cctv:'Ada dan terlihat jelas', petugas:'Sering ada', skorRawan:2, skorNyaman:4, createdAt:'2026-04-05T10:00:00Z' },
-  ];
+  const demo = [];
+  const pencahayaanOpts = ['Terang', 'Remang-remang', 'Gelap'];
+  const kepadatanOpts = ['Ramai', 'Cukup ramai', 'Sepi', 'Sangat sepi'];
+  const cctvOpts = ['Ada dan terlihat jelas', 'Ada tapi tidak yakin aktif', 'Tidak ada'];
+  const petugasOpts = ['Sering ada', 'Kadang ada', 'Jarang ada', 'Tidak pernah ada'];
+  const waktuOpts = ['Pagi', 'Siang', 'Sore', 'Malam'];
+  const lokOpts = ['Gedung Kuliah Bersama', 'Perpustakaan ITS', 'Taman Alumni', 'Area Parkir', 'Koridor Kampus', 'Masjid Manarul Ilmi', 'Fasor ITS', 'Kantin Teknik', 'Jalan Raya Kampus', 'Bundaran ITS'];
+
+  for (let i = 0; i < 40; i++) {
+    let lat = -7.283 + (Math.random() * 0.01 - 0.005);
+    let lng = 112.795 + (Math.random() * 0.008 - 0.004);
+    let attempts = 0;
+    while(attempts < 100) {
+      lat = -7.283 + (Math.random() * 0.01 - 0.005);
+      lng = 112.795 + (Math.random() * 0.008 - 0.004);
+      if (typeof isPointInBoundary === 'function' && boundaryPolygons && boundaryPolygons.length) {
+         if (isPointInBoundary(lat, lng)) break;
+      } else {
+         break;
+      }
+      attempts++;
+    }
+    
+    demo.push({
+        lat: lat,
+        lng: lng,
+        lokasi: lokOpts[Math.floor(Math.random() * lokOpts.length)],
+        waktu: waktuOpts[Math.floor(Math.random() * waktuOpts.length)],
+        pencahayaan: pencahayaanOpts[Math.floor(Math.random() * pencahayaanOpts.length)],
+        kepadatan: kepadatanOpts[Math.floor(Math.random() * kepadatanOpts.length)],
+        cctv: cctvOpts[Math.floor(Math.random() * cctvOpts.length)],
+        petugas: petugasOpts[Math.floor(Math.random() * petugasOpts.length)],
+        skorRawan: Math.floor(Math.random() * 5) + 1,
+        skorNyaman: Math.floor(Math.random() * 3) + 1,
+        createdAt: new Date(Date.now() - Math.random()*10000000000).toISOString(),
+        lokasiDeskripsi: 'Ini adalah data demo tersebar secara acak.'
+    });
+  }
+
   demo.forEach((d, i) => reports.push({
     id: Date.now() + i,
-    createdAt: d.createdAt || new Date().toISOString(),
+    createdAt: d.createdAt,
     kelamin: d.kelamin || null,
     peran: d.peran || null,
     pencahayaan: d.pencahayaan,
@@ -1036,13 +1340,15 @@ function loadDemoData() {
     skorRawan: d.skorRawan,
     skorNyaman: d.skorNyaman,
     lokasi: d.lokasi,
+    lokasiDeskripsi: d.lokasiDeskripsi,
     lat: d.lat,
     lng: d.lng,
     fakultas: getFacultyFromLocationName(d.lokasi), isDemo: true,
   }));
   updateLayerCounts();
   if (leafletMap) renderLeafletMap();
-  showToast('Data demo dimuat.', 'success');
+  if (typeof renderLaporanChart === 'function') renderLaporanChart();
+  showToast(demo.length + ' Data demo disebar.', 'success');
 }
 
 function clearDemoData() {
@@ -1174,6 +1480,12 @@ function matchesLayer(r, layer) {
       return r.cctv === 'Tidak ada';
     case 'minim-petugas':
       return isMinimPetugas(r.petugas);
+    case 'layak':
+      return calcKelayakan(r).status === 'Layak';
+    case 'cukup-layak':
+      return calcKelayakan(r).status === 'Cukup Layak';
+    case 'kurang-layak':
+      return calcKelayakan(r).status === 'Kurang Layak';
     default:
       return true;
   }
@@ -1182,6 +1494,8 @@ function matchesLayer(r, layer) {
 function getLayerLabel(layer) {
   const labels = {
     'semua': 'Semua Laporan',
+    'semua-2': 'Semua Laporan',
+    'semua-3': 'Semua Fasilitas',
     'rawan-tinggi': 'Rawan Tinggi',
     'rawan-sedang': 'Rawan Sedang',
     'rawan-rendah': 'Rawan Rendah',
@@ -1189,6 +1503,9 @@ function getLayerLabel(layer) {
     'sepi': 'Area Sepi',
     'nocctv': 'Tanpa CCTV',
     'minim-petugas': 'Minim Petugas',
+    'layak': 'Layak',
+    'cukup-layak': 'Cukup Layak',
+    'kurang-layak': 'Kurang Layak',
   };
   return labels[layer] || layer;
 }
@@ -1247,12 +1564,12 @@ window.addEventListener('resize', () => {
   const REQUIRED_IDS = [
     'emailIts','peranKampus','lokasiInsiden','lokasiDeskripsi',
     'pencahayaan','kepadatan','cctv','petugasKeamanan','waktuInsiden',
-    'skorNyaman','skorRawan'
+    'skorNyaman','skorRawan','kronologi'
   ];
   const OPTIONAL_IDS = [
     'jenisKelamin','vegetasi','hariRawan','alasanTidakNyaman',
-    'pernahHindari','orangLain','situasiMencurigakan','fungsiRuang',
-    'kronologi','kontakPelapor','fotoLokasi'
+    'pernahHindari','orangLain','situasiMencurigakan',
+    'kontakPelapor','fotoLokasi'
   ];
   const ALL_IDS = [...REQUIRED_IDS, ...OPTIONAL_IDS];
 
@@ -1380,6 +1697,43 @@ window.addEventListener('resize', () => {
     });
   }
 
+  /* ── Pop-up animations on scroll ──────────────────────– */
+  function initPopUpAnimations() {
+    // Auto-add animate-pop to stat-cards, team-cards, location-cards, etc
+    const elementsToAnimate = document.querySelectorAll(
+      '.stat-card, .team-card, .location-card, .about-info-card, .hero-content h1, .hero-actions, .info-card'
+    );
+    
+    let delayCounter = 0;
+    elementsToAnimate.forEach(el => {
+      if (el.classList.contains('animate-pop')) return; // Skip if already has it
+      el.classList.add('animate-pop');
+      const delayClass = `delay-${(delayCounter % 5) + 1}`;
+      el.classList.add(delayClass);
+      delayCounter++;
+    });
+
+    // Intersection Observer untuk trigger animasi
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.target.classList.contains('animate-pop')) {
+          // Already animated from CSS, just make sure opacity is 1
+          if (window.getComputedStyle(entry.target).opacity !== '1') {
+            entry.target.style.opacity = '1';
+          }
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    elementsToAnimate.forEach(el => observer.observe(el));
+  }
+
   /* ── Boot ─────────────────────────────────────────────── */
   function boot() {
     /* star rows */
@@ -1396,6 +1750,8 @@ window.addEventListener('resize', () => {
     });
     /* scroll animate */
     initScrollAnimate();
+    /* pop-up animations */
+    initPopUpAnimations();
     /* initial paint */
     updateProgress();
   }
