@@ -898,13 +898,22 @@ function buildPopup(r) {
     
   let fotoHtml = '';
   if (r.fotoPath) {
-    const fotoUrl = r.fotoPath.startsWith('http') ? r.fotoPath : `/storage/${r.fotoPath}`;
-    fotoHtml = `<div style="margin-top:8px; text-align:center;">
+    let fotoUrl;
+    const fp = r.fotoPath;
+    if (fp.startsWith('http://') || fp.startsWith('https://')) {
+      fotoUrl = fp;
+    } else if (fp.startsWith('/storage/') || fp.startsWith('storage/')) {
+      fotoUrl = '/' + fp.replace(/^\//, '');
+    } else {
+      fotoUrl = '/storage/' + fp;
+    }
+    const safeUrl = fotoUrl.replace(/'/g, "\\'");
+    fotoHtml = `<div style="margin-top:8px; text-align:center;" class="popup-foto-wrap">
       <img src="${fotoUrl}"
         style="max-width:100%; max-height:140px; border-radius:4px; object-fit:cover; cursor:zoom-in;"
         alt="Foto Lokasi"
-        onclick="openLightbox('${fotoUrl}')"
-        onerror="this.style.display='none'"
+        onclick="openLightbox('${safeUrl}')"
+        onerror="this.closest('.popup-foto-wrap').style.display='none'"
         title="Klik untuk memperbesar"/>
       <div style="font-size:0.72rem; color:#999; margin-top:3px;">🔍 Klik foto untuk memperbesar</div>
     </div>`;
@@ -1076,14 +1085,36 @@ function toggleVis(type, cb) {
   if (type === 'heatmap')   visHeatmap   = cb.checked;
   if (type === 'point')     visPoint     = cb.checked;
   if (type === 'cluster')   visCluster   = cb.checked;
-  if (type === 'fixedpin')  visFixedPin  = cb.checked;
-  if (type === 'jurusan')   visJurusan   = cb.checked;
   document.getElementById('tog-' + type)?.classList.toggle('active', cb.checked);
-  if (type === 'fixedpin' || type === 'jurusan') {
-    renderFixedLocations(fixedLocationLayerMain);
+  renderLeafletMap();
+}
+
+function handlePinToggle(type, el) {
+  const isActive = el.dataset.active !== 'false'; // default true
+  const nowActive = !isActive;
+  el.dataset.active = nowActive;
+
+  // Visual: active = colored pill, inactive = grayed out
+  if (nowActive) {
+    el.style.background = 'rgba(242,132,130,.14)';
+    el.style.border = '1px solid rgba(242,132,130,.45)';
+    el.style.color = '#D56A6A';
+    el.style.opacity = '1';
+    el.querySelector('.fa-check-circle, .fa-circle').className = 'fas fa-check-circle';
   } else {
-    renderLeafletMap();
+    el.style.background = 'rgba(0,0,0,.04)';
+    el.style.border = '1px solid rgba(0,0,0,.12)';
+    el.style.color = '#999';
+    el.style.opacity = '0.7';
+    el.querySelector('.fa-check-circle, .fa-circle').className = 'fas fa-circle';
   }
+
+  if (type === 'fixedpin') {
+    visFixedPin = nowActive;
+  } else if (type === 'jurusan') {
+    visJurusan = nowActive;
+  }
+  renderFixedLocations(fixedLocationLayerMain);
 }
 
 function openLightbox(url) {
@@ -1096,7 +1127,7 @@ function openLightbox(url) {
 
 function closeLightbox() {
   const lb = document.getElementById('photoLightbox');
-  if (lb) lb.style.display = 'none';
+  if (lb) { lb.style.display = 'none'; document.getElementById('lightboxImg').src = ''; }
 }
 
 // ============================================================
