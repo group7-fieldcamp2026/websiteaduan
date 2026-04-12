@@ -16,6 +16,8 @@ let activeLayer = 'semua';
 let visHeatmap  = true;
 let visPoint    = false;
 let visCluster  = false;
+let visFixedPin = true;   // toggle pin QR
+let visJurusan  = true;   // toggle pin fakultas/jurusan
 
 // --- LEAFLET INSTANCES --------------------------------------
 let leafletMap   = null;
@@ -897,7 +899,15 @@ function buildPopup(r) {
   let fotoHtml = '';
   if (r.fotoPath) {
     const fotoUrl = r.fotoPath.startsWith('http') ? r.fotoPath : `/storage/${r.fotoPath}`;
-    fotoHtml = `<div style="margin-top:8px; text-align:center;"><img src="${fotoUrl}" style="max-width:100%; max-height:140px; border-radius:4px; object-fit:cover;" alt="Foto Lokasi" onerror="this.style.display='none'"></div>`;
+    fotoHtml = `<div style="margin-top:8px; text-align:center;">
+      <img src="${fotoUrl}"
+        style="max-width:100%; max-height:140px; border-radius:4px; object-fit:cover; cursor:zoom-in;"
+        alt="Foto Lokasi"
+        onclick="openLightbox('${fotoUrl}')"
+        onerror="this.style.display='none'"
+        title="Klik untuk memperbesar"/>
+      <div style="font-size:0.72rem; color:#999; margin-top:3px;">🔍 Klik foto untuk memperbesar</div>
+    </div>`;
   }
   
   return `<div style="font-family:'DM Sans',sans-serif;min-width:200px;font-size:.85rem">
@@ -943,36 +953,43 @@ function calcKelayakan(r) {
 function renderFixedLocations(layer) {
   if (!layer) return;
   layer.clearLayers();
-  const opts = Array.from(document.querySelectorAll('#lokasiInsiden option[data-lat][data-lng]'));
-  const seen = new Set();
-  opts.forEach(opt => {
-    const lat = opt.dataset.lat;
-    const lng = opt.dataset.lng;
-    if (!lat || !lng) return;
-    const key = `${lat},${lng},${opt.textContent}`;
-    if (seen.has(key)) return;
-    seen.add(key);
-    const faculty = getFacultyFromOption(opt);
-    const color   = getFacultyColor(faculty);
-    L.marker([parseFloat(lat), parseFloat(lng)], { icon: createFacultyIcon(color) })
-      .bindPopup(`<strong>${esc(opt.textContent)}</strong><br/><span>${esc(faculty)}</span>`)
-      .addTo(layer);
-  });
+  
+  // Pin Jurusan/Fakultas
+  if (visJurusan) {
+    const opts = Array.from(document.querySelectorAll('#lokasiInsiden option[data-lat][data-lng]'));
+    const seen = new Set();
+    opts.forEach(opt => {
+      const lat = opt.dataset.lat;
+      const lng = opt.dataset.lng;
+      if (!lat || !lng) return;
+      const key = `${lat},${lng},${opt.textContent}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      const faculty = getFacultyFromOption(opt);
+      const color   = getFacultyColor(faculty);
+      L.marker([parseFloat(lat), parseFloat(lng)], { icon: createFacultyIcon(color) })
+        .bindPopup(`<strong>${esc(opt.textContent)}</strong><br/><span>${esc(faculty)}</span>`)
+        .addTo(layer);
+    });
+  }
 
-  LOCATIONS.forEach(loc => {
-    const lat = parseFloat(loc.lat);
-    const lng = parseFloat(loc.lng);
-    if (isNaN(lat) || isNaN(lng)) return;
-    const status = loc.status === 'terpasang' ? 'Terpasang' : 'Rencana';
-    const markerColor = loc.status === 'terpasang' ? '#10B981' : '#F59E0B';
-    L.circleMarker([lat, lng], {
-      radius: 7,
-      color: markerColor,
-      fillColor: markerColor,
-      fillOpacity: 0.85,
-      weight: 2
-    }).bindPopup(`<strong>${esc(loc.name || 'Titik Pengaduan')}</strong><br/><span>${status}</span>`).addTo(layer);
-  });
+  // Pin Lokasi QR Aduan
+  if (visFixedPin) {
+    LOCATIONS.forEach(loc => {
+      const lat = parseFloat(loc.lat);
+      const lng = parseFloat(loc.lng);
+      if (isNaN(lat) || isNaN(lng)) return;
+      const status = loc.status === 'terpasang' ? 'Terpasang' : 'Rencana';
+      const markerColor = loc.status === 'terpasang' ? '#10B981' : '#F59E0B';
+      L.circleMarker([lat, lng], {
+        radius: 7,
+        color: markerColor,
+        fillColor: markerColor,
+        fillOpacity: 0.85,
+        weight: 2
+      }).bindPopup(`<strong>${esc(loc.name || 'Titik Pengaduan')}</strong><br/><span>${status}</span>`).addTo(layer);
+    });
+  }
 }
 
 function switchPetaTab(tab) {
@@ -1056,11 +1073,30 @@ function switchLayer(radio) {
 }
 
 function toggleVis(type, cb) {
-  if (type === 'heatmap') visHeatmap = cb.checked;
-  if (type === 'point')   visPoint   = cb.checked;
-  if (type === 'cluster') visCluster = cb.checked;
+  if (type === 'heatmap')   visHeatmap   = cb.checked;
+  if (type === 'point')     visPoint     = cb.checked;
+  if (type === 'cluster')   visCluster   = cb.checked;
+  if (type === 'fixedpin')  visFixedPin  = cb.checked;
+  if (type === 'jurusan')   visJurusan   = cb.checked;
   document.getElementById('tog-' + type)?.classList.toggle('active', cb.checked);
-  renderLeafletMap();
+  if (type === 'fixedpin' || type === 'jurusan') {
+    renderFixedLocations(fixedLocationLayerMain);
+  } else {
+    renderLeafletMap();
+  }
+}
+
+function openLightbox(url) {
+  const lb = document.getElementById('photoLightbox');
+  const img = document.getElementById('lightboxImg');
+  if (!lb || !img) return;
+  img.src = url;
+  lb.style.display = 'flex';
+}
+
+function closeLightbox() {
+  const lb = document.getElementById('photoLightbox');
+  if (lb) lb.style.display = 'none';
 }
 
 // ============================================================
@@ -1323,7 +1359,8 @@ function loadDemoData() {
         skorRawan: Math.floor(Math.random() * 5) + 1,
         skorNyaman: Math.floor(Math.random() * 3) + 1,
         createdAt: new Date(Date.now() - Math.random()*10000000000).toISOString(),
-        lokasiDeskripsi: 'Ini adalah data demo tersebar secara acak.'
+        lokasiDeskripsi: 'Ini adalah data demo tersebar secara acak.',
+        fotoPath: Math.random() > 0.5 ? 'https://picsum.photos/seed/' + Math.floor(Math.random()*1000) + '/400/300' : null
     });
   }
 
@@ -1341,6 +1378,7 @@ function loadDemoData() {
     skorNyaman: d.skorNyaman,
     lokasi: d.lokasi,
     lokasiDeskripsi: d.lokasiDeskripsi,
+    fotoPath: d.fotoPath,
     lat: d.lat,
     lng: d.lng,
     fakultas: getFacultyFromLocationName(d.lokasi), isDemo: true,
