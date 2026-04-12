@@ -106,6 +106,7 @@ const TEAM = [
 document.addEventListener('DOMContentLoaded', () => {
   initNav();
   initForm();
+  initPinToggles();
   buildLocationFacultyMap();
   fetchReports();       // ambil data dari API
   fetchStats();         // ambil statistik dari API
@@ -153,6 +154,7 @@ async function fetchReports() {
       fungsiRuang:      r.fungsi_ruang,
       lokasi:           r.lokasi_kejadian,
       lokasiDeskripsi:  r.lokasi_deskripsi,
+      kronologi:        r.kronologi,
       lat:              r.latitude ? parseFloat(r.latitude) : null,
       lng:              r.longitude ? parseFloat(r.longitude) : null,
         fotoPath:         r.foto_path,
@@ -208,12 +210,7 @@ async function fetchLocations() {
   }
   const active = document.querySelector('.loc-filter-btn.active');
   renderLocationCards(active?.dataset.filter || 'all');
-  if (fixedLocationLayerMain && leafletMap) {
-    renderFixedLocations(fixedLocationLayerMain);
-  }
-  if (fixedLocationLayerPicker && pickerMap) {
-    renderFixedLocations(fixedLocationLayerPicker);
-  }
+  renderAllFixedLocations();
 }
 
 // ============================================================
@@ -903,13 +900,19 @@ function buildPopup(r) {
     const fotoUrl = getPhotoUrl(r.fotoPath);
     const safeUrl = fotoUrl.replace(/'/g, "\\'");
     fotoHtml = `<div style="margin-top:8px; text-align:center;" class="popup-foto-wrap">
+      <div style="font-size:0.74rem; color:#666; margin-bottom:4px;">Foto dari pengadu</div>
       <img src="${fotoUrl}"
         style="max-width:100%; max-height:140px; border-radius:4px; object-fit:cover; cursor:zoom-in;"
         alt="Foto Lokasi"
         onclick="openLightbox('${safeUrl}')"
-        onerror="this.closest('.popup-foto-wrap').style.display='none'"
+        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
         title="Klik untuk memperbesar"/>
-      <div style="font-size:0.72rem; color:#999; margin-top:3px;">🔍 Klik foto untuk memperbesar</div>
+      <div style="display:none; font-size:0.74rem; margin-top:4px;">
+        <a href="${fotoUrl}" target="_blank" rel="noopener" style="color:#D56A6A; text-decoration:underline;">
+          Buka foto di tab baru
+        </a>
+      </div>
+      <div style="font-size:0.72rem; color:#999; margin-top:3px;">Klik foto untuk memperbesar</div>
     </div>`;
   }
   
@@ -992,6 +995,15 @@ function renderFixedLocations(layer) {
         weight: 2
       }).bindPopup(`<strong>${esc(loc.name || 'Titik Pengaduan')}</strong><br/><span>${status}</span>`).addTo(layer);
     });
+  }
+}
+
+function renderAllFixedLocations() {
+  if (fixedLocationLayerMain) {
+    renderFixedLocations(fixedLocationLayerMain);
+  }
+  if (fixedLocationLayerPicker) {
+    renderFixedLocations(fixedLocationLayerPicker);
   }
 }
 
@@ -1083,36 +1095,54 @@ function toggleVis(type, cb) {
   renderLeafletMap();
 }
 
-function handlePinToggle(type, el) {
-  // Baca state saat ini: jika data-active belum diset atau 'true', maka aktif
-  const currentlyActive = el.dataset.active !== 'false';
-  const nowActive = !currentlyActive;
-  el.dataset.active = nowActive ? 'true' : 'false';
+function applyPinToggleVisual(el, isActive) {
+  if (!el) return;
+  el.dataset.active = isActive ? 'true' : 'false';
+  el.setAttribute('aria-pressed', isActive ? 'true' : 'false');
 
-  // Update ikon: gunakan i:first-child agar lebih andal
   const icon = el.querySelector('i');
   if (icon) {
-    icon.className = nowActive ? 'fas fa-check-circle' : 'fas fa-times-circle';
+    icon.className = isActive ? 'fas fa-check-circle' : 'fas fa-times-circle';
     icon.style.fontSize = '0.85rem';
   }
 
-  // Update gaya visual
-  if (nowActive) {
+  if (isActive) {
     el.style.background = 'rgba(242,132,130,.14)';
     el.style.border = '1px solid rgba(242,132,130,.45)';
     el.style.color = '#D56A6A';
     el.style.opacity = '1';
-  } else {
-    el.style.background = 'rgba(0,0,0,.05)';
-    el.style.border = '1px solid rgba(0,0,0,.15)';
-    el.style.color = '#aaa';
-    el.style.opacity = '0.65';
+    return;
   }
 
-  if (type === 'fixedpin') visFixedPin = nowActive;
-  else if (type === 'jurusan') visJurusan = nowActive;
+  el.style.background = 'rgba(0,0,0,.05)';
+  el.style.border = '1px solid rgba(0,0,0,.15)';
+  el.style.color = '#aaa';
+  el.style.opacity = '0.65';
+}
 
-  renderFixedLocations(fixedLocationLayerMain);
+function setPinVisibility(type, isActive, opts = {}) {
+  const render = opts.render !== false;
+
+  if (type === 'fixedpin') visFixedPin = isActive;
+  if (type === 'jurusan') visJurusan = isActive;
+
+  const id = type === 'fixedpin' ? 'tog-fixedpin' : 'tog-jurusan';
+  applyPinToggleVisual(document.getElementById(id), isActive);
+
+  if (!render) return;
+  if (fixedLocationLayerPicker) {
+    renderFixedLocations(fixedLocationLayerPicker);
+  }
+  if (leafletMap) {
+    renderLeafletMap();
+  } else if (fixedLocationLayerMain) {
+    renderFixedLocations(fixedLocationLayerMain);
+  }
+}
+
+function handlePinToggle(type, el) {
+  const currentlyActive = el.dataset.active !== 'false';
+  setPinVisibility(type, !currentlyActive, { render: true });
 }
 
 function openLightbox(url) {
@@ -1132,7 +1162,10 @@ function closeLightbox() {
 function getPhotoUrl(path) {
   if (!path) return '';
   if (/^https?:\/\//i.test(path)) return path;
-  const clean = path.replace(/^\/?storage\//, '').replace(/^\/+/, '');
+  const clean = String(path)
+    .replace(/\\/g, '/')
+    .replace(/^\/?storage\//, '')
+    .replace(/^\/+/, '');
   const base = (window.location.origin && window.location.origin !== 'null')
     ? window.location.origin
     : '';
@@ -1141,16 +1174,35 @@ function getPhotoUrl(path) {
 
 // Init pin toggle buttons via addEventListener (more robust than inline onclick)
 function initPinToggles() {
-  ['tog-fixedpin', 'tog-jurusan'].forEach(id => {
+  const defs = [
+    { id: 'tog-fixedpin', type: 'fixedpin' },
+    { id: 'tog-jurusan', type: 'jurusan' },
+  ];
+
+  defs.forEach(({ id, type }) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.style.cursor = 'pointer';
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    if (el.dataset.bound === '1') return;
+    el.dataset.bound = '1';
+
     el.addEventListener('click', function(e) {
       e.stopPropagation();
-      const type = id === 'tog-fixedpin' ? 'fixedpin' : 'jurusan';
+      handlePinToggle(type, this);
+    });
+
+    el.addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      e.stopPropagation();
       handlePinToggle(type, this);
     });
   });
+
+  setPinVisibility('fixedpin', visFixedPin, { render: false });
+  setPinVisibility('jurusan', visJurusan, { render: false });
 }
 
 // ============================================================

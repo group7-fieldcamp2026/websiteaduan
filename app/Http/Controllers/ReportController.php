@@ -310,7 +310,7 @@ class ReportController extends Controller
             'pencahayaan', 'kepadatan', 'cctv', 'petugas_keamanan',
             'vegetasi', 'waktu_rawan', 'hari_rawan', 'skor_nyaman', 'skor_rawan',
             'alasan_tidak_nyaman', 'pernah_hindari', 'orang_lain', 'situasi_mencurigakan',
-            'fungsi_ruang', 'lokasi_kejadian', 'lokasi_deskripsi', 'latitude', 'longitude',
+            'fungsi_ruang', 'kronologi', 'lokasi_kejadian', 'lokasi_deskripsi', 'latitude', 'longitude',
             'foto_path', 'status', 'created_at'
         )->whereNotNull('latitude')->whereNotNull('longitude')->get();
 

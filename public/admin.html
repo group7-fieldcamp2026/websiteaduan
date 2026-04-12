@@ -1661,7 +1661,10 @@ let reportPhotoObjectUrl = null;
 function getPhotoUrl(path) {
   if (!path) return '';
   if (/^https?:\/\//i.test(path)) return path;
-  const clean = path.replace(/^\/?storage\//, '').replace(/^\/+/, '');
+  const clean = String(path)
+    .replace(/\\/g, '/')
+    .replace(/^\/?storage\//, '')
+    .replace(/^\/+/, '');
   const base = (window.location.origin && window.location.origin !== 'null')
     ? window.location.origin
     : API_BASE.replace(/\/api$/, '');
