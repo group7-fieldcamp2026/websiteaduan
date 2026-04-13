@@ -1262,10 +1262,11 @@ function deg2rad(deg) {
 
 function countReportsInRadius(lat, lng) {
   if (!reports || reports.length === 0) return 0;
+  console.log('Calculating for:', lat, lng, 'total reports:', reports.length);
   let count = 0;
   reports.forEach(r => {
-    if (r.latitude && r.longitude) {
-      const dist = getDistanceFromLatLonInMeters(lat, lng, r.latitude, r.longitude);
+    if (r.lat && r.lng) {
+      const dist = getDistanceFromLatLonInMeters(lat, lng, r.lat, r.lng);
       if (dist <= RADIUS_METERS) count++;
     }
   });
@@ -2135,8 +2136,28 @@ function openEditLoc(id) {
   
   // Hitung laporan dalam radius jika ada koordinat
   if (l.lat && l.lng) {
-    const count = countReportsInRadius(l.lat, l.lng);
-    document.getElementById('lCountDisplay').textContent = count;
+    // Fetch reports if not loaded
+    const loadAndCount = async () => {
+      if (reports.length === 0) {
+        try {
+          const res = await fetch(ADMIN_REPORTS_ENDPOINT);
+          if (res.ok) {
+            const data = await res.json();
+            reports = data.map(r => ({
+              id: r.id,
+              lat: r.latitude ? parseFloat(r.latitude) : null,
+              lng: r.longitude ? parseFloat(r.longitude) : null
+            }));
+          }
+        } catch(e) {
+          console.error('Failed to load reports:', e);
+        }
+      }
+      const count = countReportsInRadius(l.lat, l.lng);
+      document.getElementById('lCountDisplay').textContent = count;
+    };
+    loadAndCount();
+    
     document.getElementById('selectedLocationCoords').textContent = `${l.lat}, ${l.lng}`;
     document.getElementById('locationPreview').style.display = 'block';
   } else {
@@ -2174,6 +2195,23 @@ async function saveLoc() {
   const gmapsUrl = document.getElementById('lGmaps').value.trim();
   const lat = parseFloat(document.getElementById('lLat').value) || null;
   const lng = parseFloat(document.getElementById('lLng').value) || null;
+  
+  // Pastikan laporan sudah dimuat
+  if (reports.length === 0) {
+    try {
+      const res = await fetch(ADMIN_REPORTS_ENDPOINT);
+      if (res.ok) {
+        const data = await res.json();
+        reports = data.map(r => ({
+          id: r.id,
+          lat: r.latitude ? parseFloat(r.latitude) : null,
+          lng: r.longitude ? parseFloat(r.longitude) : null
+        }));
+      }
+    } catch (e) {
+      console.error('Failed to fetch reports:', e);
+    }
+  }
   
   // Hitung otomatis jumlah laporan dalam radius 500m
   const reportCount = countReportsInRadius(lat, lng);
@@ -2669,6 +2707,13 @@ function onLocationSelected(latlng) {
   
   // Auto-fill GMaps URL (bisa diedit manual потом)
   document.getElementById('lGmaps').value = `https://maps.google.com/maps?q=${latlng.lat.toFixed(6)},${latlng.lng.toFixed(6)}`;
+  
+  // Hitung dan tampilkan jumlah laporan dalam radius
+  if (reports.length > 0) {
+    const count = countReportsInRadius(latlng.lat, latlng.lng);
+    document.getElementById('lCountDisplay').textContent = count;
+  }
+  
   showToast('✅ Lokasi dipilih - URL otomatis terisi', 'success');
 }
 
