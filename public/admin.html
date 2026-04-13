@@ -1192,9 +1192,11 @@
         </div>
         <input type="hidden" id="lLat" value=""/>
         <input type="hidden" id="lLng" value=""/>
+        <input type="hidden" id="lCount" value="0"/>
         <div class="detail-item">
-          <label>Jumlah Laporan Terkait</label>
-          <input type="number" id="lCount" placeholder="0" min="0"/>
+          <label>Laporan dalam Radius 500m</label>
+          <span id="lCountDisplay" style="font-size:1rem;font-weight:600;color:var(--primary)">-</span>
+          <span style="font-size:.7rem;color:var(--text-muted);display:block">Otomatis dihitung dari laporan di sekitar titik ini</span>
         </div>
       </div>
     </div>
@@ -1237,9 +1239,38 @@ let reports = [];
 let filteredReports = [];
 let currentPage = 1;
 const PER_PAGE = 10;
+const RADIUS_METERS = 500;
 let editingId = null;
 let editingLocId = null;
 let adminMap = null;
+
+// Helper: Calculate distance between two points in meters (Haversine)
+function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371000; // Radius of earth in meters
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180);
+}
+
+function countReportsInRadius(lat, lng) {
+  if (!reports || reports.length === 0) return 0;
+  let count = 0;
+  reports.forEach(r => {
+    if (r.latitude && r.longitude) {
+      const dist = getDistanceFromLatLonInMeters(lat, lng, r.latitude, r.longitude);
+      if (dist <= RADIUS_METERS) count++;
+    }
+  });
+  return count;
+}
 let adminReportLayer = null;
 let adminLocLayer = null;
 let confirmCallback = null;
@@ -2074,6 +2105,7 @@ function openAddLoc() {
   const iconVal = ensureLocationIconOption('location-dot');
   document.getElementById('lIcon').value   = iconVal;
   document.getElementById('lCount').value  = '0';
+  document.getElementById('lCountDisplay').textContent = '0';
   document.getElementById('locationPreview').style.display = 'none';
   resetPhoto();
   updateIconPreview(iconVal);
@@ -2101,11 +2133,14 @@ function openEditLoc(id) {
   document.getElementById('lGmaps').value  = l.gmaps || '';
   document.getElementById('lCount').value  = l.count || 0;
   
-  // Tampilkan preview lokasi jika ada koordinat
+  // Hitung laporan dalam radius jika ada koordinat
   if (l.lat && l.lng) {
+    const count = countReportsInRadius(l.lat, l.lng);
+    document.getElementById('lCountDisplay').textContent = count;
     document.getElementById('selectedLocationCoords').textContent = `${l.lat}, ${l.lng}`;
     document.getElementById('locationPreview').style.display = 'block';
   } else {
+    document.getElementById('lCountDisplay').textContent = '0';
     document.getElementById('locationPreview').style.display = 'none';
   }
   
@@ -2140,6 +2175,9 @@ async function saveLoc() {
   const lat = parseFloat(document.getElementById('lLat').value) || null;
   const lng = parseFloat(document.getElementById('lLng').value) || null;
   
+  // Hitung otomatis jumlah laporan dalam radius 500m
+  const reportCount = countReportsInRadius(lat, lng);
+  
   const data = {
     name:   document.getElementById('lName').value.trim(),
     desc:   document.getElementById('lDesc').value.trim(),
@@ -2148,12 +2186,12 @@ async function saveLoc() {
     status: document.getElementById('lStatus').value,
     icon:   'fa-' + normalizeIconValue(document.getElementById('lIcon').value),
     gmaps:  gmapsUrl,
-    count:  parseInt(document.getElementById('lCount').value)||0,
+    count:  reportCount,
     photo:  currentPhotoDataUrl || null,
   };
   
   if (!data.name) { showToast('⚠ Nama lokasi wajib diisi', 'error'); return; }
-  if (lat === null || lng === null) { showToast('⚠ Silakan pilih lokasi di peta atau gunakan "Lokasi Saya"', 'error'); return; }
+  if (lat === null || lng === null) { showToast('⚠ Silakan pilih lokasi di peta', 'error'); return; }
   // Jika foto tidak diubah saat edit, pertahankan foto lama
   if (editingLocId && !currentPhotoDataUrl) {
     const existing = LOCATIONS.find(x=>x.id===editingLocId);
