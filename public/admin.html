@@ -1168,15 +1168,29 @@
           <span style="font-size:.7rem;color:var(--text-muted);margin-top:.3rem;display:block">Pilih ikon yang paling sesuai dengan jenis lokasi.</span>
         </div>
         <div class="detail-item full">
-          <label>Google Maps URL</label>
-          <div style="display:flex;gap:.5rem;align-items:flex-start">
-            <input type="text" id="lGmaps" placeholder="https://maps.google.com/?q=-7.2756,112.7951" oninput="autoFillCoordsFromGmaps()" style="flex:1"/>
-            <button type="button" class="btn btn-outline" style="padding:.5rem .8rem;font-size:.75rem;white-space:nowrap" onclick="fetchGmapsCoords()">
-              <i class="fas fa-location-arrow"></i> Deteksi
+          <label>Lokasi (Pilih di Peta)</label>
+          <div style="display:flex;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap">
+            <button type="button" class="btn btn-outline" style="font-size:.75rem;padding:.4rem .8rem" onclick="openLocationPicker()">
+              <i class="fas fa-map-pin"></i> Pilih di Peta
+            </button>
+            <button type="button" class="btn btn-outline" style="font-size:.75rem;padding:.4rem .8rem" onclick="getCurrentLocation()">
+              <i class="fas fa-crosshairs"></i> Gunakan Lokasi Saya
             </button>
           </div>
-          <span style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;display:block">➡️ Cara mendapatkan URL yang didukung: Buka Google Maps → Klik lokasi → Klik "Share" → Pilih "Copy link". Gunakan link tersebut (menggunakan format ?q=... atau @lat,lng).</span>
+          <div id="locationPreview" style="display:none;padding:.6rem;background:var(--bg4);border-radius:var(--radius-sm);margin-bottom:.5rem">
+            <span style="font-size:.75rem;color:var(--text-muted)">Lokasi dipilih:</span><br>
+            <span id="selectedLocationCoords" style="font-size:.82rem;font-weight:600;color:var(--text)"></span>
+          </div>
         </div>
+        <div class="detail-item full">
+          <label>Google Maps URL (Opsional)</label>
+          <div style="display:flex;gap:.5rem;align-items:flex-start">
+            <input type="text" id="lGmaps" placeholder="https://maps.app.goo.gl/..." style="flex:1"/>
+          </div>
+          <span style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;display:block">Opsional - bisa diisi dengan link Google Maps untuk referensi</span>
+        </div>
+        <input type="hidden" id="lLat" value=""/>
+        <input type="hidden" id="lLng" value=""/>
         <div class="detail-item">
           <label>Jumlah Laporan Terkait</label>
           <input type="number" id="lCount" placeholder="0" min="0"/>
@@ -1944,84 +1958,69 @@ async function fetchGmapsCoords() {
   
   showToast('⏳ Mendeteksi koordinat...', 'success');
   
-  // Try client-side extraction first (works for URLs with coordinates embedded)
-  const directCoords = parseGmapsUrl(gmapsUrl);
-  if (directCoords) {
-    document.getElementById('lLat').value = directCoords.lat;
-    document.getElementById('lLng').value = directCoords.lng;
-    showToast(`✅ Koordinat terdeteksi: ${directCoords.lat}, ${directCoords.lng}`, 'success');
-    return;
-  }
-  
-  // Try via server endpoint
+  // Method 1: Langsung coba backend PHP
   try {
     const response = await fetch(`${API_BASE}/gmaps/resolve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: gmapsUrl })
     });
     
     if (response.ok) {
       const data = await response.json();
       if (data.lat && data.lng) {
-        document.getElementById('lLat').value = data.lat;
-        document.getElementById('lLng').value = data.lng;
-        showToast(`✅ Koordinat terdeteksi: ${data.lat}, ${data.lng}`, 'success');
+        showToast(`✅ Koordinat: ${data.lat}, ${data.lng}`, 'success');
         return;
       }
     }
   } catch (e) {
-    console.log('Server endpoint failed, trying alternative');
+    console.log('Backend failed:', e);
   }
   
-  // Try opening in new tab and getting coordinates from URL
-  showToast('⚠ Mencoba metode alternatif...', 'success');
-  await tryAlternativeGmapsResolve(gmapsUrl);
-}
-
-async function tryAlternativeGmapsResolve(url) {
-  showToast('⏳ Mencari koordinat...', 'success');
+  // Method 2: Coba layanan unshorten lain
+  const services = [
+    'https://ulvis.net/api.php?url=',
+    'https://unshorten.me/s/',
+  ];
   
-  // Try backend API first (this is the most reliable method)
+  for (const service of services) {
+    try {
+      const resp = await fetch(service + encodeURIComponent(gmapsUrl));
+      if (resp.ok) {
+        let text = await resp.text();
+        // Cari koordinat di response
+        const match = text.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+        if (match) {
+          showToast(`✅ Koordinat: ${match[1]}, ${match[2]}`, 'success');
+          return;
+        }
+        // Coba parse JSON jika ada
+        try {
+          const json = JSON.parse(text);
+          if (json.long_url || json.original) {
+            const url = json.long_url || json.original;
+            const coordMatch = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/) || url.match(/q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+            if (coordMatch) {
+              showToast(`✅ Koordinat: ${coordMatch[1]}, ${coordMatch[2]}`, 'success');
+              return;
+            }
+          }
+        } catch(e) {}
+      }
+    } catch (e) {
+      console.log('Service failed:', service, e);
+    }
+  }
+  
+  // Method 3: Coba Google Maps direct redirect via no-cors (akan gagal tapi bisa dapat info)
   try {
-    const response = await fetch(`${API_BASE}/gmaps/resolve`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ url: url })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      if (data.lat && data.lng) {
-        document.getElementById('lLat').value = data.lat;
-        document.getElementById('lLng').value = data.lng;
-        showToast(`✅ Koordinat terdeteksi: ${data.lat}, ${data.lng}`, 'success');
-        return;
-      }
-      if (data.debug && data.debug.final_url) {
-        console.log('Final URL was:', data.debug.final_url);
-      }
-    } else {
-      console.log('Backend API returned:', response.status);
-    }
-  } catch (e) {
-    console.log('Backend API failed:', e);
-  }
+    // Ini adalah workaround - kita coba fetch yang akan redirect
+    // Karena mode 'no-cors' kita tidak bisa dapat response, tapi kita bisa trigger redirect
+    const img = new Image();
+    img.src = gmapsUrl;
+  } catch (e) {}
   
-  // Try Google Maps API (requires API key but works)
-  // Note: This won't work without a valid API key
-  
-  // Fallback: parse any coordinates from URL if it's actually a long URL
-  const directCoords = parseGmapsUrl(url);
-  if (directCoords) {
-    document.getElementById('lLat').value = directCoords.lat;
-    document.getElementById('lLng').value = directCoords.lng;
-    showToast(`✅ Koordinat terdeteksi: ${directCoords.lat}, ${directCoords.lng}`, 'success');
-    return;
-  }
-  
-  // All methods failed - suggest manual input
-  showToast('⚠ Link pendek tidak dapat dideteksi otomatis. Silakan klik lokasi di peta atau gunakan URL panjang dari Google Maps → Share → Copy link.', 'error');
+  showToast('⚠ Tidak dapat mendeteksi. Pastikan URL valid atau coba cara lain.', 'error');
 }
 
 async function expandGoogleUrl(shortUrl) {
@@ -2069,11 +2068,12 @@ function renderLocGrid() {
 function openAddLoc() {
   editingLocId = null;
   document.getElementById('locModalTitle').textContent = 'Tambah';
-  ['lName','lDesc','lGmaps'].forEach(id => document.getElementById(id).value='');
+  ['lName','lDesc','lGmaps','lLat','lLng'].forEach(id => document.getElementById(id).value='');
   document.getElementById('lStatus').value = 'terpasang';
   const iconVal = ensureLocationIconOption('location-dot');
   document.getElementById('lIcon').value   = iconVal;
   document.getElementById('lCount').value  = '0';
+  document.getElementById('locationPreview').style.display = 'none';
   resetPhoto();
   updateIconPreview(iconVal);
   openModal('locModal');
@@ -2086,11 +2086,22 @@ function openEditLoc(id) {
   document.getElementById('locModalTitle').textContent = 'Edit';
   document.getElementById('lName').value   = l.name;
   document.getElementById('lDesc').value   = l.desc;
+  document.getElementById('lLat').value    = l.lat || '';
+  document.getElementById('lLng').value    = l.lng || '';
   document.getElementById('lStatus').value = l.status;
   const iconVal = ensureLocationIconOption(l.icon || 'location-dot');
   document.getElementById('lIcon').value   = iconVal;
   document.getElementById('lGmaps').value  = l.gmaps || '';
   document.getElementById('lCount').value  = l.count || 0;
+  
+  // Tampilkan preview lokasi jika ada koordinat
+  if (l.lat && l.lng) {
+    document.getElementById('selectedLocationCoords').textContent = `${l.lat}, ${l.lng}`;
+    document.getElementById('locationPreview').style.display = 'block';
+  } else {
+    document.getElementById('locationPreview').style.display = 'none';
+  }
+  
   // Tampilkan foto jika ada
   if (l.photo) {
     document.getElementById('photoPreviewImg').src = l.photo;
@@ -2107,36 +2118,8 @@ function openEditLoc(id) {
 
 async function saveLoc() {
   const gmapsUrl = document.getElementById('lGmaps').value.trim();
-  let lat = null;
-  let lng = null;
-  
-  // Ambil koordinat dari URL GMaps
-  if (gmapsUrl) {
-    // Coba parsing lokal dulu (untuk URL dengan format ?q=... atau @lat,lng)
-    const coords = parseGmapsUrl(gmapsUrl);
-    if (coords) {
-      lat = coords.lat;
-      lng = coords.lng;
-    } else {
-      // Coba via API endpoint (backend)
-      try {
-        const response = await fetch(`${API_BASE}/gmaps/resolve`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ url: gmapsUrl })
-        });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.lat && data.lng) {
-            lat = data.lat;
-            lng = data.lng;
-          }
-        }
-      } catch (e) {
-        console.log('Gmaps resolve failed:', e);
-      }
-    }
-  }
+  const lat = parseFloat(document.getElementById('lLat').value) || null;
+  const lng = parseFloat(document.getElementById('lLng').value) || null;
   
   const data = {
     name:   document.getElementById('lName').value.trim(),
@@ -2149,12 +2132,9 @@ async function saveLoc() {
     count:  parseInt(document.getElementById('lCount').value)||0,
     photo:  currentPhotoDataUrl || null,
   };
+  
   if (!data.name) { showToast('⚠ Nama lokasi wajib diisi', 'error'); return; }
-  if (!data.gmaps) { showToast('⚠ URL Google Maps wajib diisi', 'error'); return; }
-  if (data.lat === null || data.lng === null) {
-    showToast('⚠ Tidak dapat mengambil koordinat dari URL. Pastikan URL valid atau coba URL panjang dari Google Maps.', 'error');
-    return;
-  }
+  if (lat === null || lng === null) { showToast('⚠ Silakan pilih lokasi di peta atau gunakan "Lokasi Saya"', 'error'); return; }
   // Jika foto tidak diubah saat edit, pertahankan foto lama
   if (editingLocId && !currentPhotoDataUrl) {
     const existing = LOCATIONS.find(x=>x.id===editingLocId);
@@ -2524,8 +2504,20 @@ function renderAdminMap() {
 
   // Plot titik pengaduan
   LOCATIONS.forEach(l => {
-    if (!l.lat || !l.lng) return;
-    L.circleMarker([l.lat, l.lng], {
+    let lat = l.lat;
+    let lng = l.lng;
+    
+    // Jika tidak ada koordinat, coba parsing dari URL GMaps
+    if ((!lat || !lng) && l.gmaps) {
+      const coords = parseGmapsUrl(l.gmaps);
+      if (coords) {
+        lat = coords.lat;
+        lng = coords.lng;
+      }
+    }
+    
+    if (!lat || !lng) return;
+    L.circleMarker([lat, lng], {
       radius: 9, color: '#fff', fillColor: '#3B82F6', fillOpacity: 0.9, weight: 2
     }).addTo(adminLocLayer).bindPopup(`
       <div style="font-family:'DM Sans',sans-serif;min-width:180px;font-size:0.8rem;text-align:center">
@@ -2586,6 +2578,122 @@ function showToast(msg, type='success') {
   t.textContent = msg;
   t.className = `show ${type}`;
   setTimeout(() => t.className = '', 3000);
+}
+
+let locationPickerMap = null;
+let locationPickerMarker = null;
+
+function openLocationPicker() {
+  const modal = document.getElementById('locModal');
+  modal.classList.remove('open');
+  
+  // Create picker modal if not exists
+  let pickerModal = document.getElementById('locationPickerModal');
+  if (!pickerModal) {
+    pickerModal = document.createElement('div');
+    pickerModal.id = 'locationPickerModal';
+    pickerModal.className = 'modal-overlay open';
+    pickerModal.innerHTML = `
+      <div class="modal" style="max-width:700px">
+        <div class="modal-header">
+          <span class="modal-title"><i class="fas fa-map-pin"></i> Pilih Lokasi</span>
+          <button class="modal-close" onclick="closeLocationPicker()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" style="padding:0">
+          <div id="pickerMap" style="height:400px;width:100%"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closeLocationPicker()">Batal</button>
+          <button class="btn btn-primary" onclick="confirmLocationPicker()"><i class="fas fa-check"></i> Gunakan Lokasi Ini</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(pickerModal);
+    
+    pickerModal.addEventListener('click', e => {
+      if (e.target.id === 'locationPickerModal') closeLocationPicker();
+    });
+  }
+  
+  // Initialize map
+  setTimeout(() => {
+    if (locationPickerMap) {
+      locationPickerMap.remove();
+      locationPickerMap = null;
+    }
+    
+    locationPickerMap = L.map('pickerMap').setView([-7.2755, 112.796], 15);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(locationPickerMap);
+    
+    // Click to place marker
+    locationPickerMap.on('click', function(e) {
+      if (locationPickerMarker) {
+        locationPickerMap.removeLayer(locationPickerMarker);
+      }
+      locationPickerMarker = L.marker(e.latlng).addTo(locationPickerMap);
+    });
+    
+    // Try to get current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        locationPickerMap.setView([pos.coords.latitude, pos.coords.longitude], 16);
+      }, err => {
+        console.log('Geolocation error:', err);
+      });
+    }
+  }, 100);
+}
+
+function closeLocationPicker() {
+  const pickerModal = document.getElementById('locationPickerModal');
+  if (pickerModal) {
+    pickerModal.classList.remove('open');
+  }
+  const locModal = document.getElementById('locModal');
+  locModal.classList.add('open');
+}
+
+function confirmLocationPicker() {
+  if (!locationPickerMarker) {
+    showToast('⚠ Klik pada peta untuk memilih lokasi', 'error');
+    return;
+  }
+  
+  const latlng = locationPickerMarker.getLatLng();
+  document.getElementById('lLat').value = latlng.lat;
+  document.getElementById('lLng').value = latlng.lng;
+  document.getElementById('selectedLocationCoords').textContent = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+  document.getElementById('locationPreview').style.display = 'block';
+  
+  closeLocationPicker();
+  showToast('✅ Lokasi dipilih', 'success');
+}
+
+function getCurrentLocation() {
+  if (!navigator.geolocation) {
+    showToast('⚠ Browser tidak mendukung geolocation', 'error');
+    return;
+  }
+  
+  showToast('⏳ Mendapatkan lokasi...', 'success');
+  
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      document.getElementById('lLat').value = pos.coords.latitude;
+      document.getElementById('lLng').value = pos.coords.longitude;
+      document.getElementById('selectedLocationCoords').textContent = 
+        `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+      document.getElementById('locationPreview').style.display = 'block';
+      showToast('✅ Lokasi Anda terdeteksi', 'success');
+    },
+    err => {
+      showToast('⚠ Tidak dapat mendapatkan lokasi. Pastikan GPS aktif dan izinkan akses lokasi.', 'error');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
 }
 
 // Close modal on overlay click

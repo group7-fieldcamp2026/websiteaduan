@@ -994,9 +994,23 @@ function renderFixedLocations(layer) {
   // Pin Lokasi QR Aduan
   if (visFixedPin) {
     LOCATIONS.forEach(loc => {
-      const lat = parseFloat(loc.lat);
-      const lng = parseFloat(loc.lng);
-      if (isNaN(lat) || isNaN(lng)) return;
+      let lat = parseFloat(loc.lat);
+      let lng = parseFloat(loc.lng);
+      
+      // Jika tidak ada koordinat, coba parsing dari URL GMaps
+      if ((isNaN(lat) || isNaN(lng)) && loc.gmaps) {
+        const coords = parseGmapsUrlFromString(loc.gmaps);
+        if (coords) {
+          lat = coords.lat;
+          lng = coords.lng;
+        }
+      }
+      
+      if (isNaN(lat) || isNaN(lng)) {
+        console.log('Skipping location (no coords):', loc.name);
+        return;
+      }
+      
       const status = loc.status === 'terpasang' ? 'Terpasang' : 'Rencana';
       const markerColor = loc.status === 'terpasang' ? '#10B981' : '#F59E0B';
       L.circleMarker([lat, lng], {
@@ -1008,6 +1022,31 @@ function renderFixedLocations(layer) {
       }).bindPopup(`<strong>${esc(loc.name || 'Titik Pengaduan')}</strong><br/><span>${status}</span>`).addTo(layer);
     });
   }
+}
+
+// Helper function to parse GMaps URL (same logic as admin.html)
+function parseGmapsUrlFromString(url) {
+  if (!url) return null;
+  try {
+    const urlObj = new URL(url.trim());
+    const params = new URLSearchParams(urlObj.search);
+    const q = params.get('q');
+    if (q) {
+      const parts = q.split(',');
+      if (parts.length >= 2) {
+        const lat = parseFloat(parts[0].trim());
+        const lng = parseFloat(parts[1].trim());
+        if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+      }
+    }
+    if (urlObj.pathname.includes('@')) {
+      const match = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+      if (match) {
+        return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+      }
+    }
+  } catch (e) {}
+  return null;
 }
 
 function renderAllFixedLocations() {
