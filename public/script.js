@@ -51,7 +51,7 @@ const BASEMAPS = {
 
 const ITS  = [-7.2756, 112.7951];
 const ZOOM = 15;
-const QR_URL = 'https://its.id/m/ITSafe_Kelompok7FieldCamp2026';
+const QR_URL = 'https://itsafe.geowebgis.id/';
 
 const FACULTY_COLORS = {
   'FSAD':   '#4E79A7', // blue
@@ -438,10 +438,12 @@ function getFacultyFromLocationName(name) {
 function createFacultyIcon(color) {
   return L.divIcon({
     className: 'faculty-pin-wrap',
-    html: `<div class="faculty-pin" style="--pin-color:${color}"></div>`,
+    html: `<div class="faculty-pin" style="--pin-color:${color}">
+             <i class="fas fa-building-columns"></i>
+           </div>`,
     iconSize: [24, 24],
-    iconAnchor: [12, 24],
-    popupAnchor: [0, -24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
   });
 }
 
@@ -449,9 +451,9 @@ function createCaseIcon(color) {
   return L.divIcon({
     className: 'case-dot-wrap',
     html: `<div class="case-dot" style="--case-color:${color}"></div>`,
-    iconSize: [18, 18],
-    iconAnchor: [9, 9],
-    popupAnchor: [0, -9],
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -10],
   });
 }
 

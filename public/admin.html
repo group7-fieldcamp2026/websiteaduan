@@ -73,18 +73,33 @@
       width: 100%; max-width: 400px;
       box-shadow: var(--shadow), var(--shadow-glow);
     }
-    .login-logo {
-      display: flex; align-items: center; gap: .75rem;
-      margin-bottom: 2rem;
-    }
-    .login-logo .brand-icon {
-      width: 44px; height: 44px; border-radius: 12px;
+    .brand-icon {
+      position: relative;
       background: linear-gradient(135deg, var(--primary-dk), var(--primary));
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem; color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 8px 16px rgba(var(--primary-rgb), 0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+      animation: adminBrandBlob 10s ease-in-out infinite;
+      transition: all 0.4s ease;
     }
-    .login-logo .brand-name { font-size: 1.2rem; font-weight: 700; }
-    .login-logo .brand-sub  { font-size: .65rem; color: var(--text-muted); }
+    @keyframes adminBrandBlob {
+      0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+      50% { border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; }
+    }
+    .brand-icon i { color: #fff; }
+    .brand-icon img { width: 100%; height: 100%; object-fit: contain; padding: 6px; filter: brightness(0) invert(1); }
+
+    .login-logo {
+      display: flex; align-items: center; gap: .85rem;
+      margin-bottom: 2.25rem; justify-content: center;
+    }
+    .login-logo .brand-icon {
+      width: 54px; height: 54px;
+    }
+    .login-logo .brand-name { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: var(--text); }
+    .login-logo .brand-sub  { font-size: .68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
     .login-title { font-family: var(--font-display); font-size: 1.6rem; margin-bottom: .4rem; }
     .login-sub { color: var(--text-soft); font-size: .85rem; margin-bottom: 1.75rem; }
 
@@ -129,17 +144,12 @@
       overflow-y: auto;
     }
     .sidebar-brand {
-      display: flex; align-items: center; gap: .75rem;
-      padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: .85rem;
+      padding: 1.5rem; border-bottom: 1px solid var(--border);
     }
-    .sidebar-brand .brand-icon {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--primary-dk), var(--primary));
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 1rem;
-    }
-    .sidebar-brand .brand-name { font-size: 1rem; font-weight: 700; }
-    .sidebar-brand .brand-sub  { font-size: .6rem; color: var(--text-muted); }
+    .sidebar-brand .brand-icon { width: 38px; height: 38px; }
+    .sidebar-brand .brand-name { font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; }
+    .sidebar-brand .brand-sub  { font-size: .6rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
 
     .sidebar-section { padding: 1rem 1rem .25rem; font-size: .65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; }
 
@@ -558,10 +568,13 @@
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">
-      <div class="brand-icon"><i class="fas fa-shield-halved"></i></div>
-      <div>
+      <div class="brand-icon">
+        <img src="assets/logo-its-1.png" alt="Logo ITS" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
+      </div>
+      <div class="brand-text">
         <span class="brand-name">ITSafe</span>
-        <span class="brand-sub" style="display:block">Admin Panel</span>
+        <span class="brand-sub">Admin Panel</span>
       </div>
     </div>
     <h2 class="login-title">Selamat Datang</h2>
@@ -585,10 +598,13 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-icon"><i class="fas fa-shield-halved"></i></div>
-      <div>
+      <div class="brand-icon">
+        <img src="assets/logo-its-1.png" alt="Logo ITS" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
+      </div>
+      <div class="brand-text">
         <span class="brand-name">ITSafe</span>
-        <span class="brand-sub" style="display:block">Admin Panel</span>
+        <span class="brand-sub">Admin Panel</span>
       </div>
     </div>
 
