@@ -1988,28 +1988,48 @@ async function fetchGmapsCoords() {
 }
 
 async function tryAlternativeGmapsResolve(url) {
+  showToast('⏳ Mencari koordinat...', 'success');
+  
+  // Try backend API first (this is the most reliable method)
   try {
-    // Method: Try to use a third-party expand API
-    // This uses Google's link expansion
-    const testUrl = 'https://www.google.com/maps/search/?api=1&query=placeholder';
+    const response = await fetch(`${API_BASE}/gmaps/resolve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ url: url })
+    });
     
-    // For now, let's try to open in new window for user to copy coordinates
-    // Or use a different approach - try to expand via CORS proxy
-    const expanded = await expandGoogleUrl(url);
-    if (expanded) {
-      const coords = parseGmapsUrl(expanded);
-      if (coords) {
-        document.getElementById('lLat').value = coords.lat;
-        document.getElementById('lLng').value = coords.lng;
-        showToast(`✅ Koordinat terdeteksi: ${coords.lat}, ${coords.lng}`, 'success');
+    if (response.ok) {
+      const data = await response.json();
+      if (data.lat && data.lng) {
+        document.getElementById('lLat').value = data.lat;
+        document.getElementById('lLng').value = data.lng;
+        showToast(`✅ Koordinat terdeteksi: ${data.lat}, ${data.lng}`, 'success');
         return;
       }
+      if (data.debug && data.debug.final_url) {
+        console.log('Final URL was:', data.debug.final_url);
+      }
+    } else {
+      console.log('Backend API returned:', response.status);
     }
   } catch (e) {
-    console.log('Alternative method failed:', e);
+    console.log('Backend API failed:', e);
   }
   
-  showToast('⚠ Tidak dapat otomatis. Gunakan URL panjang atau isi manual.', 'error');
+  // Try Google Maps API (requires API key but works)
+  // Note: This won't work without a valid API key
+  
+  // Fallback: parse any coordinates from URL if it's actually a long URL
+  const directCoords = parseGmapsUrl(url);
+  if (directCoords) {
+    document.getElementById('lLat').value = directCoords.lat;
+    document.getElementById('lLng').value = directCoords.lng;
+    showToast(`✅ Koordinat terdeteksi: ${directCoords.lat}, ${directCoords.lng}`, 'success');
+    return;
+  }
+  
+  // All methods failed - suggest manual input
+  showToast('⚠ Link pendek tidak dapat dideteksi otomatis. Silakan klik lokasi di peta atau gunakan URL panjang dari Google Maps → Share → Copy link.', 'error');
 }
 
 async function expandGoogleUrl(shortUrl) {
