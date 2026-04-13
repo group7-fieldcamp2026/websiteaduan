@@ -1153,14 +1153,27 @@
           </select>
         </div>
         <div class="detail-item">
-          <label>Icon (Font Awesome class)</label>
+          <label>Ikon Lokasi</label>
           <div style="display:flex;gap:.5rem;align-items:center">
-            <input type="text" id="lIcon" placeholder="location-dot" oninput="updateIconPreview(this.value)" style="flex:1"/>
+            <select id="lIcon" onchange="updateIconPreview(this.value)" style="flex:1">
+              <option value="location-dot">Lokasi umum</option>
+              <option value="book-open">Perpustakaan</option>
+              <option value="building-columns">Gedung akademik</option>
+              <option value="utensils">Kantin / food court</option>
+              <option value="house-user">Asrama / hunian</option>
+              <option value="flask">Laboratorium</option>
+              <option value="person-running">Olahraga / GOR</option>
+              <option value="microchip">Robotika / teknologi</option>
+              <option value="mosque">Masjid</option>
+              <option value="landmark">Rektorat / kantor</option>
+              <option value="laptop">Ruang belajar / co-working</option>
+              <option value="square-parking">Area parkir</option>
+            </select>
             <div id="iconPreview" style="width:36px;height:36px;border-radius:8px;background:rgba(var(--primary-rgb),.12);display:flex;align-items:center;justify-content:center;color:var(--primary-dk);flex-shrink:0">
               <i class="fas fa-location-dot"></i>
             </div>
           </div>
-          <span style="font-size:.7rem;color:var(--text-muted);margin-top:.3rem;display:block">Contoh: book-open, utensils, mosque</span>
+          <span style="font-size:.7rem;color:var(--text-muted);margin-top:.3rem;display:block">Pilih ikon yang paling sesuai dengan jenis lokasi.</span>
         </div>
         <div class="detail-item full">
           <label>Google Maps URL</label>
@@ -1276,6 +1289,9 @@ function doLogout() {
 
 // ─── INIT ────────────────────────────────────────────────────
 function initAdmin() {
+  ensureLocationIconOption('location-dot');
+  document.getElementById('lIcon').value = 'location-dot';
+  updateIconPreview('location-dot');
   fetchReports();
   fetchLocations();
   startAutoRefresh();
@@ -1849,9 +1865,35 @@ function resetPhoto() {
   document.getElementById('photoName').textContent = '';
 }
 
+function normalizeIconValue(value) {
+  return String(value || 'location-dot').replace(/^fa-/, '').trim() || 'location-dot';
+}
+
+function ensureLocationIconOption(value) {
+  const select = document.getElementById('lIcon');
+  const normalizedValue = normalizeIconValue(value);
+  if (!select) return normalizedValue;
+
+  const hasOption = Array.from(select.options).some(option => option.value === normalizedValue);
+  if (!hasOption) {
+    const option = document.createElement('option');
+    option.value = normalizedValue;
+    option.textContent = `Ikon tersimpan (${normalizedValue})`;
+    select.appendChild(option);
+  }
+
+  return normalizedValue;
+}
+
 function updateIconPreview(val) {
-  const cls = 'fa-' + val.replace(/^fa-/,'');
-  document.getElementById('iconPreview').innerHTML = `<i class="fas ${cls}"></i>`;
+  const cls = 'fa-' + normalizeIconValue(val);
+  const preview = document.getElementById('iconPreview');
+  if (!preview) return;
+
+  preview.innerHTML = '';
+  const icon = document.createElement('i');
+  icon.className = `fas ${cls}`;
+  preview.appendChild(icon);
 }
 
 // ─── TITIK PENGADUAN ─────────────────────────────────────────
@@ -1883,10 +1925,11 @@ function openAddLoc() {
   document.getElementById('locModalTitle').textContent = 'Tambah';
   ['lName','lDesc','lLat','lLng','lGmaps'].forEach(id => document.getElementById(id).value='');
   document.getElementById('lStatus').value = 'terpasang';
-  document.getElementById('lIcon').value   = 'location-dot';
+  const iconVal = ensureLocationIconOption('location-dot');
+  document.getElementById('lIcon').value   = iconVal;
   document.getElementById('lCount').value  = '0';
   resetPhoto();
-  updateIconPreview('location-dot');
+  updateIconPreview(iconVal);
   openModal('locModal');
 }
 
@@ -1900,7 +1943,7 @@ function openEditLoc(id) {
   document.getElementById('lLat').value    = l.lat;
   document.getElementById('lLng').value    = l.lng;
   document.getElementById('lStatus').value = l.status;
-  const iconVal = (l.icon||'location-dot').replace(/^fa-/,'');
+  const iconVal = ensureLocationIconOption(l.icon || 'location-dot');
   document.getElementById('lIcon').value   = iconVal;
   document.getElementById('lGmaps').value  = l.gmaps || '';
   document.getElementById('lCount').value  = l.count || 0;
@@ -1925,7 +1968,7 @@ async function saveLoc() {
     lat:    parseFloat(document.getElementById('lLat').value),
     lng:    parseFloat(document.getElementById('lLng').value),
     status: document.getElementById('lStatus').value,
-    icon:   'fa-' + document.getElementById('lIcon').value.replace(/^fa-/,''),
+    icon:   'fa-' + normalizeIconValue(document.getElementById('lIcon').value),
     gmaps:  document.getElementById('lGmaps').value.trim(),
     count:  parseInt(document.getElementById('lCount').value)||0,
     photo:  currentPhotoDataUrl || null,
