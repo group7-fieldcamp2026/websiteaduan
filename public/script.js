@@ -65,11 +65,11 @@ const FACULTY_COLORS = {
 };
 
 const RISK_COLORS = {
-  1: '#84A59D',
-  2: '#A7C4BC',
-  3: '#F6BD60',
-  4: '#F28482',
-  5: '#D56A6A',
+  1: '#10B981', // Hijau (Rawan Rendah)
+  2: '#10B981', // Hijau (Rawan Rendah)
+  3: '#F59E0B', // Kuning (Rawan Sedang)
+  4: '#EF4444', // Merah (Rawan Tinggi)
+  5: '#EF4444', // Merah (Rawan Tinggi)
 };
 
 let locationFacultyMap = {};
@@ -441,19 +441,21 @@ function createFacultyIcon(color) {
     html: `<div class="faculty-pin" style="--pin-color:${color}">
              <i class="fas fa-building-columns"></i>
            </div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12],
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16],
   });
 }
 
 function createCaseIcon(color) {
   return L.divIcon({
     className: 'case-dot-wrap',
-    html: `<div class="case-dot" style="--case-color:${color}"></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-    popupAnchor: [0, -10],
+    html: `<div class="case-dot" style="--case-color:${color}">
+             <i class="fas fa-exclamation"></i>
+           </div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+    popupAnchor: [0, -11],
   });
 }
 
@@ -482,9 +484,11 @@ function setPin(lat, lng, opts = {}) {
   if (pickerMarker) pickerMarker.remove();
   pickerMarker = L.marker([lat, lng], {
     icon: L.divIcon({
-      className: '',
-      html: `<div style="width:16px;height:16px;background:#F28482;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)"></div>`,
-      iconAnchor: [8, 8]
+      className: 'case-dot-wrap',
+      html: `<div class="case-dot" style="--case-color:#F28482">
+               <i class="fas fa-location-crosshairs"></i>
+             </div>`,
+      iconAnchor: [10, 10]
     })
   }).addTo(pickerMap);
   pickerMap.setView([lat, lng], Math.max(pickerMap.getZoom(), 16));
@@ -566,8 +570,8 @@ function renderLeafletMap() {
     pointLayer = L.layerGroup();
     data.forEach(r => {
       const color = getRiskColor(r.skorRawan);
-      L.circleMarker([r.lat, r.lng], {
-        radius: 9, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: .9
+      L.marker([r.lat, r.lng], {
+        icon: createCaseIcon(color)
       }).bindPopup(buildPopup(r)).addTo(pointLayer);
     });
     leafletMap.addLayer(pointLayer);
@@ -622,9 +626,9 @@ function renderLeafletMap() {
         popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
       }
 
-      L.circleMarker([r.lat, r.lng], {
-        radius: 9, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: .9
-      }).bindPopup(popupHtml).addTo(pointLayer);
+      L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
+        .bindPopup(popupHtml)
+        .addTo(pointLayer);
      });
   }
 }
@@ -963,21 +967,28 @@ function renderFixedLocations(layer) {
   
   // Pin Jurusan/Fakultas
   if (visJurusan) {
-    const opts = Array.from(document.querySelectorAll('#lokasiInsiden option[data-lat][data-lng]'));
-    const seen = new Set();
-    opts.forEach(opt => {
-      const lat = opt.dataset.lat;
-      const lng = opt.dataset.lng;
-      if (!lat || !lng) return;
-      const key = `${lat},${lng},${opt.textContent}`;
-      if (seen.has(key)) return;
-      seen.add(key);
-      const faculty = getFacultyFromOption(opt);
-      const color   = getFacultyColor(faculty);
-      L.marker([parseFloat(lat), parseFloat(lng)], { icon: createFacultyIcon(color) })
-        .bindPopup(`<strong>${esc(opt.textContent)}</strong><br/><span>${esc(faculty)}</span>`)
-        .addTo(layer);
-    });
+    const sel = document.getElementById('lokasiInsiden');
+    if (sel) {
+      const opts = Array.from(sel.querySelectorAll('option[data-lat][data-lng]'));
+      const seen = new Set();
+      opts.forEach(opt => {
+        const lat = opt.getAttribute('data-lat');
+        const lng = opt.getAttribute('data-lng');
+        if (!lat || !lng) return;
+        
+        const locName = (opt.textContent || '').trim();
+        const key = `${lat},${lng},${locName}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        
+        const faculty = getFacultyFromOption(opt);
+        const color   = getFacultyColor(faculty);
+        
+        L.marker([parseFloat(lat), parseFloat(lng)], { icon: createFacultyIcon(color) })
+          .bindPopup(`<strong>${esc(locName)}</strong><br/><span>${esc(faculty)}</span>`)
+          .addTo(layer);
+      });
+    }
   }
 
   // Pin Lokasi QR Aduan
@@ -1266,14 +1277,26 @@ function updateHeatmapAnalysis(data, filterWaktu, filterBulan) {
   });
   const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3);
   if (!sorted.length) { el.textContent = 'Belum ada lokasi untuk analisis heatmap.'; return; }
-  const names  = sorted.map(([n, c]) => `${n} (${c})`);
+  
+  // Menghilangkan angka jumlah laporan (c) sesuai permintaan USER
+  const names  = sorted.map(([n, c]) => n);
+  
   const period = [];
   if (filterWaktu) period.push(filterWaktu.toLowerCase());
   if (filterBulan) period.push(`bulan ${getMonthName(filterBulan)}`);
   const suffix = period.length ? ` (filter ${period.join(', ')})` : '';
+  
   const scores = data.map(r => r.skorRawan).filter(v => typeof v === 'number' && !isNaN(v));
-  const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : null;
-  const avgText = avg ? ` Rata-rata skor kerawanan: ${avg}.` : '';
+  const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+  
+  let avgLabel = '';
+  if (avg !== null) {
+    if (avg >= 3.6) avgLabel = 'Tinggi';
+    else if (avg >= 2.1) avgLabel = 'Sedang';
+    else avgLabel = 'Rendah';
+  }
+  
+  const avgText = avgLabel ? ` Tingkat kerawanan rata-rata: ${avgLabel}.` : '';
   el.textContent = `Hotspot tertinggi${suffix}: ${names.join(', ')}.${avgText}`;
 }
 
