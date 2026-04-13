@@ -1026,6 +1026,7 @@
             <option value="pending">⏳ Pending</option>
             <option value="in_review">📝 Dalam Tinjauan</option>
             <option value="resolved">✅ Terverifikasi</option>
+            <option value="rejected">❌ Tidak Valid / Hapus</option>
           </select>
         </div>
 
@@ -2111,32 +2112,35 @@ async function loadAdminGISLayers() {
       if (bounds.isValid()) adminMap.fitBounds(bounds, { padding: [20, 20] });
     }
     
-    // Jurusan Pins
-    let bufJurusan = await fetch('assets/jurusan_its.zip').then(r => r.ok ? r.arrayBuffer() : null);
-    if (!bufJurusan && typeof JURUSAN_ZIP_B64 !== 'undefined') {
-      bufJurusan = Uint8Array.from(atob(JURUSAN_ZIP_B64), c => c.charCodeAt(0)).buffer;
-    }
-    if (bufJurusan) {
-      let gjJurusan = await shp(bufJurusan);
-      gjJurusan = reproject(gjJurusan.type ? gjJurusan : gjJurusan[Object.keys(gjJurusan)[0]]);
-      
-      adminJurusanLayer = L.layerGroup();
-      if (visAdminJurusanLayer) adminJurusanLayer.addTo(adminMap);
+    // Jurusan Pins (Parsed from injected HTML select DOM)
+    adminJurusanLayer = L.layerGroup();
+    if (visAdminJurusanLayer) adminJurusanLayer.addTo(adminMap);
 
-      L.geoJSON(gjJurusan, {
-        pointToLayer: (feat, latlng) => {
-          const props = feat.properties || {};
-          const name = props.Name || props.NAME || 'Gedung Jurusan';
-          const icon = L.divIcon({
-            html: '<div style="background:#4B5563;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.4);border:2px solid #fff;"><i class="fas fa-building-columns" style="font-size:0.7rem;"></i></div>',
-            className: '',
-            iconSize: [24,24],
-            iconAnchor: [12,12]
-          });
-          return L.marker(latlng, { icon }).bindPopup(`<b style="color:#1F2937">${name}</b><br><span style="font-size:0.8rem;color:#6B7280">Fakultas / Departemen</span>`);
-        }
-      }).addTo(adminJurusanLayer);
-    }
+    const opts = Array.from(document.querySelectorAll('#lokasiInsidenAdminHidden option[data-lat][data-lng]'));
+    const seen = new Set();
+    opts.forEach(opt => {
+      const lat = opt.dataset.lat;
+      const lng = opt.dataset.lng;
+      if (!lat || !lng) return;
+      const key = `${lat},${lng},${opt.textContent}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      const faculty = opt.closest('optgroup') ? opt.closest('optgroup').label : 'Gedung Jurusan';
+      const name = opt.textContent;
+
+      const icon = L.divIcon({
+        html: '<div style="background:#4B5563;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.4);border:2px solid #fff;"><i class="fas fa-building-columns" style="font-size:0.7rem;"></i></div>',
+        className: '',
+        iconSize: [24,24],
+        iconAnchor: [12,12]
+      });
+
+      L.marker([parseFloat(lat), parseFloat(lng)], { icon })
+       .bindPopup(`<b style="color:#1F2937">${name}</b><br><span style="font-size:0.8rem;color:#6B7280">${faculty}</span>`)
+       .addTo(adminJurusanLayer);
+    });
+
   } catch(e) {
     console.error('Failed loading admin GIS layers:', e);
   }
@@ -2305,6 +2309,67 @@ document.addEventListener('visibilitychange', () => {
   startAutoRefresh();
 });
 </script>
+<div style="display:none">
+  <select id="lokasiInsidenAdminHidden">
+    <optgroup label="FSAD">
+      <option data-lat="-7.284466" data-lng="112.794847">Fisika</option>
+      <option data-lat="-7.285240" data-lng="112.794721">Matematika</option>
+      <option data-lat="-7.285421" data-lng="112.794128">Statistika</option>
+      <option data-lat="-7.284114" data-lng="112.795276">Kimia</option>
+      <option data-lat="-7.285847" data-lng="112.793935">Biologi</option>
+      <option data-lat="-7.285014" data-lng="112.794021">Aktuaria</option>
+    </optgroup>
+    <optgroup label="FTIRS">
+      <option data-lat="-7.284365" data-lng="112.796119">Teknik Mesin</option>
+      <option data-lat="-7.283027" data-lng="112.796711">Teknik Kimia</option>
+      <option data-lat="-7.284450" data-lng="112.795633">Teknik Fisika</option>
+      <option data-lat="-7.283774" data-lng="112.797446">Teknik Sistem dan Industri</option>
+      <option data-lat="-7.285126" data-lng="112.797819">Teknik Material dan Metalurgi</option>
+    </optgroup>
+    <optgroup label="FTSPK">
+      <option data-lat="-7.280507" data-lng="112.793603">Teknik Sipil</option>
+      <option data-lat="-7.279736" data-lng="112.792699">Teknik Lingkungan</option>
+      <option data-lat="-7.280880" data-lng="112.794195">Arsitektur</option>
+      <option data-lat="-7.280012" data-lng="112.794984">Teknik Geomatika</option>
+      <option data-lat="-7.279938" data-lng="112.795563">Teknik Geofisika</option>
+      <option data-lat="-7.279709" data-lng="112.794120">Perencanaan Wilayah Kota</option>
+    </optgroup>
+    <optgroup label="FTK">
+      <option data-lat="-7.282119" data-lng="112.796687">Teknik Perkapalan</option>
+      <option data-lat="-7.282119" data-lng="112.796687">Teknik Sistem Perkapalan</option>
+      <option data-lat="-7.281752" data-lng="112.796993">Teknik Kelautan</option>
+      <option data-lat="-7.281638" data-lng="112.795459">Teknik Lepas Pantai</option>
+      <option data-lat="-7.282290" data-lng="112.798420">Teknik Transportasi Laut</option>
+    </optgroup>
+    <optgroup label="FDKBD">
+      <option data-lat="-7.278905" data-lng="112.796706">Desain Produk Industri</option>
+      <option data-lat="-7.279539" data-lng="112.795826">Desain Interior</option>
+      <option data-lat="-7.278512" data-lng="112.797020">Desain Komunikasi Visual (DKV)</option>
+      <option data-lat="-7.277780" data-lng="112.792683">Manajemen Bisnis</option>
+      <option data-lat="-7.282449" data-lng="112.795392">Studi Pembangunan</option>
+    </optgroup>
+    <optgroup label="FTEIC">
+      <option data-lat="-7.284942" data-lng="112.796105">Teknik Elektro</option>
+      <option data-lat="-7.279573" data-lng="112.797524">Teknik Informatika</option>
+      <option data-lat="-7.280433" data-lng="112.796929">Sistem Informasi</option>
+      <option data-lat="-7.284493" data-lng="112.796698">Teknik Komputer</option>
+      <option data-lat="-7.284016" data-lng="112.796601">Teknik Biomedik</option>
+      <option data-lat="-7.285389" data-lng="112.795211">Teknologi Informasi</option>
+    </optgroup>
+    <optgroup label="FV">
+      <option data-lat="-7.278820" data-lng="112.792602">Teknik Elektro Otomasi</option>
+      <option data-lat="-7.278799" data-lng="112.792444">Teknik Kimia Industri</option>
+      <option data-lat="-7.278152" data-lng="112.792677">Statistika Bisnis</option>
+      <option data-lat="-7.278560" data-lng="112.791835">Mesin Industri</option>
+      <option data-lat="-7.278301" data-lng="112.792232">Teknik Instrumentasi</option>
+    </optgroup>
+    <optgroup label="FKK">
+      <option data-lat="-7.280388" data-lng="112.795266">Teknologi Kedokteran</option>
+      <option data-lat="-7.280388" data-lng="112.795266">Kedokteran</option>
+      <option data-lat="-7.280388" data-lng="112.795266">Pendidikan Profesi Dokter</option>
+    </optgroup>
+  </select>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.min.js"></script>
