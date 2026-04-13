@@ -1168,14 +1168,17 @@
           <span style="font-size:.7rem;color:var(--text-muted);margin-top:.3rem;display:block">Pilih ikon yang paling sesuai dengan jenis lokasi.</span>
         </div>
         <div class="detail-item full">
-          <label>Lokasi (Pilih di Peta)</label>
+          <label>Peta - Pilih Lokasi</label>
           <div style="display:flex;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap">
-            <button type="button" class="btn btn-outline" style="font-size:.75rem;padding:.4rem .8rem" onclick="openLocationPicker()">
-              <i class="fas fa-map-pin"></i> Pilih di Peta
+            <button type="button" class="btn btn-outline" style="font-size:.75rem;padding:.4rem .8rem" onclick="goToMyLocation()">
+              <i class="fas fa-crosshairs"></i> Ke Lokasi Saya
             </button>
-            <button type="button" class="btn btn-outline" style="font-size:.75rem;padding:.4rem .8rem" onclick="getCurrentLocation()">
-              <i class="fas fa-crosshairs"></i> Gunakan Lokasi Saya
+            <button type="button" class="btn btn-outline" style="font-size:.75rem;padding:.4rem .8rem" onclick="clearMapSelection()">
+              <i class="fas fa-times"></i> Hapus Pilihan
             </button>
+          </div>
+          <div id="pickerMapContainer" style="height:300px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);margin-bottom:.5rem">
+            <div id="pickerMap" style="height:100%;width:100%"></div>
           </div>
           <div id="locationPreview" style="display:none;padding:.6rem;background:var(--bg4);border-radius:var(--radius-sm);margin-bottom:.5rem">
             <span style="font-size:.75rem;color:var(--text-muted)">Lokasi dipilih:</span><br>
@@ -1184,10 +1187,8 @@
         </div>
         <div class="detail-item full">
           <label>Google Maps URL (Opsional)</label>
-          <div style="display:flex;gap:.5rem;align-items:flex-start">
-            <input type="text" id="lGmaps" placeholder="https://maps.app.goo.gl/..." style="flex:1"/>
-          </div>
-          <span style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;display:block">Opsional - bisa diisi dengan link Google Maps untuk referensi</span>
+          <input type="text" id="lGmaps" placeholder="https://maps.app.goo.gl/..." style="width:100%"/>
+          <span style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;display:block">Bisa diisi manual dengan link Google Maps (opsional)</span>
         </div>
         <input type="hidden" id="lLat" value=""/>
         <input type="hidden" id="lLng" value=""/>
@@ -2077,6 +2078,12 @@ function openAddLoc() {
   resetPhoto();
   updateIconPreview(iconVal);
   openModal('locModal');
+  
+  // Initialize picker map
+  setTimeout(() => {
+    initLocationPicker();
+    locationPickerMap.invalidateSize();
+  }, 100);
 }
 
 function openEditLoc(id) {
@@ -2114,6 +2121,18 @@ function openEditLoc(id) {
   }
   updateIconPreview(iconVal);
   openModal('locModal');
+  
+  // Initialize picker map
+  setTimeout(() => {
+    initLocationPicker();
+    locationPickerMap.invalidateSize();
+    // Show existing marker if editing
+    if (l.lat && l.lng) {
+      if (locationPickerMarker) locationPickerMap.removeLayer(locationPickerMarker);
+      locationPickerMarker = L.marker([l.lat, l.lng], { draggable: false }).addTo(locationPickerMap);
+      locationPickerMap.setView([l.lat, l.lng], 17);
+    }
+  }, 100);
 }
 
 async function saveLoc() {
@@ -2583,127 +2602,71 @@ function showToast(msg, type='success') {
 let locationPickerMap = null;
 let locationPickerMarker = null;
 
-function openLocationPicker() {
-  const modal = document.getElementById('locModal');
-  if (modal) modal.classList.remove('open');
+function initLocationPicker() {
+  if (locationPickerMap) return;
   
-  let pickerModal = document.getElementById('locationPickerModal');
-  if (!pickerModal) {
-    pickerModal = document.createElement('div');
-    pickerModal.id = 'locationPickerModal';
-    pickerModal.className = 'modal-overlay';
-    pickerModal.innerHTML = `
-      <div class="modal" style="max-width:700px">
-        <div class="modal-header">
-          <span class="modal-title"><i class="fas fa-map-pin"></i> Pilih Lokasi</span>
-          <button class="modal-close" onclick="closeLocationPicker()"><i class="fas fa-xmark"></i></button>
-        </div>
-        <div class="modal-body" style="padding:0">
-          <div id="pickerMap" style="height:400px;width:100%"></div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" onclick="closeLocationPicker()">Batal</button>
-          <button class="btn btn-primary" onclick="confirmLocationPicker()"><i class="fas fa-check"></i> Gunakan Lokasi Ini</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(pickerModal);
-  }
+  locationPickerMap = L.map('pickerMap', { 
+    center: [-7.2755, 112.796], 
+    zoom: 15 
+  });
   
-  pickerModal.classList.add('open');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(locationPickerMap);
   
-  setTimeout(() => {
-    if (locationPickerMap) {
-      locationPickerMap.remove();
-      locationPickerMap = null;
+  locationPickerMap.on('click', function(e) {
+    if (locationPickerMarker) {
+      locationPickerMap.removeLayer(locationPickerMarker);
     }
-    locationPickerMarker = null;
-    
-    const mapContainer = document.getElementById('pickerMap');
-    if (!mapContainer) return;
-    
-    locationPickerMap = L.map('pickerMap', { 
-      center: [-7.2755, 112.796], 
-      zoom: 15 
-    });
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(locationPickerMap);
-    
-    locationPickerMap.on('click', function(e) {
-      if (locationPickerMarker) {
-        locationPickerMap.removeLayer(locationPickerMarker);
-      }
-      locationPickerMarker = L.marker(e.latlng, { draggable: false }).addTo(locationPickerMap);
-    });
-    
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        locationPickerMap.setView([pos.coords.latitude, pos.coords.longitude], 16);
-      }, err => {
-        console.log('Geolocation error:', err);
-      });
-    }
-  }, 150);
+    locationPickerMarker = L.marker(e.latlng, { draggable: false }).addTo(locationPickerMap);
+    onLocationSelected(e.latlng);
+  });
 }
 
-function closeLocationPicker() {
-  const pickerModal = document.getElementById('locationPickerModal');
-  if (pickerModal) {
-    pickerModal.classList.remove('open');
-  }
-  
-  setTimeout(() => {
-    if (locationPickerMap) {
-      locationPickerMap.remove();
-      locationPickerMap = null;
-    }
-    locationPickerMarker = null;
-    
-    const locModal = document.getElementById('locModal');
-    if (locModal) locModal.classList.add('open');
-  }, 100);
-}
-
-function confirmLocationPicker() {
-  if (!locationPickerMarker) {
-    showToast('⚠ Klik pada peta untuk memilih lokasi', 'error');
-    return;
-  }
-  
-  const latlng = locationPickerMarker.getLatLng();
+function onLocationSelected(latlng) {
   document.getElementById('lLat').value = latlng.lat;
   document.getElementById('lLng').value = latlng.lng;
   document.getElementById('selectedLocationCoords').textContent = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
   document.getElementById('locationPreview').style.display = 'block';
-  
-  closeLocationPicker();
   showToast('✅ Lokasi dipilih', 'success');
 }
 
-function getCurrentLocation() {
-  if (!navigator.geolocation) {
-    showToast('⚠ Browser tidak mendukung geolocation', 'error');
-    return;
+function goToMyLocation() {
+  if (!locationPickerMap) {
+    initLocationPicker();
   }
   
-  showToast('⏳ Mendapatkan lokasi...', 'success');
-  
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      document.getElementById('lLat').value = pos.coords.latitude;
-      document.getElementById('lLng').value = pos.coords.longitude;
-      document.getElementById('selectedLocationCoords').textContent = 
-        `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
-      document.getElementById('locationPreview').style.display = 'block';
-      showToast('✅ Lokasi Anda terdeteksi', 'success');
-    },
-    err => {
-      showToast('⚠ Tidak dapat mendapatkan lokasi. Pastikan GPS aktif dan izinkan akses lokasi.', 'error');
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
+  if (navigator.geolocation) {
+    showToast('⏳ Mendeteksi lokasi...', 'success');
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        locationPickerMap.setView([pos.coords.latitude, pos.coords.longitude], 17);
+        if (locationPickerMarker) {
+          locationPickerMap.removeLayer(locationPickerMarker);
+        }
+        locationPickerMarker = L.marker([pos.coords.latitude, pos.coords.longitude], { draggable: false }).addTo(locationPickerMap);
+        onLocationSelected({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      err => {
+        showToast('⚠ Tidak dapat mendapatkan lokasi. Pastikan GPS aktif.', 'error');
+      },
+      { enableHighAccuracy: true }
+    );
+  } else {
+    showToast('⚠ Browser tidak mendukung geolocation', 'error');
+  }
+}
+
+function clearMapSelection() {
+  if (locationPickerMarker && locationPickerMap) {
+    locationPickerMap.removeLayer(locationPickerMarker);
+    locationPickerMarker = null;
+  }
+  document.getElementById('lLat').value = '';
+  document.getElementById('lLng').value = '';
+  document.getElementById('lGmaps').value = '';
+  document.getElementById('locationPreview').style.display = 'none';
+  showToast('Pilihan lokasi dihapus', 'success');
 }
 
 // Close modal on overlay click
