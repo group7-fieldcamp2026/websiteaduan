@@ -718,6 +718,13 @@
               <th>Skor Rawan</th>
               <th>Pencahayaan</th>
               <th>Kepadatan</th>
+              <th>Skor Nyaman</th>
+              <th>Alasan Tidak Nyaman</th>
+              <th>Pernah Hindari</th>
+              <th>Tahu Org Lain</th>
+              <th>Situasi Mencuriga</th>
+              <th>Fungsi Ruang</th>
+              <th>Kronologi</th>
               <th>Foto</th>
               <th>Status</th>
               <th>Aksi</th>
@@ -1414,21 +1421,15 @@ function renderDashboard() {
   document.getElementById('dBulan').textContent    = bulan;
 
   // Chart skor kerawanan
-  const skorCount = { 1:0, 2:0, 3:0, 4:0, 5:0 };
-  reports.forEach(r => {
-    const s = parseInt(r.skorRawan, 10);
-    if (!isNaN(s) && skorCount[s] !== undefined) skorCount[s] += 1;
-  });
-  const skorSorted = Object.entries(skorCount).filter(([,c]) => c > 0);
-  const maxS = Math.max(...Object.values(skorCount), 1);
-  const sColors = { 1:'#84A59D', 2:'#A7C4BC', 3:'#F6BD60', 4:'#F28482', 5:'#D56A6A' };
-  document.getElementById('chartJenis').innerHTML = skorSorted.map(([s,c]) =>
-    `<div class="chart-bar-row">
-      <span class="chart-label">Skor ${s}</span>
-      <div class="chart-track"><div class="chart-fill" style="width:${(c/maxS*100).toFixed(0)}%;background:${sColors[s]||'#94A3B8'}"></div></div>
-      <span class="chart-count">${c}</span>
-    </div>`
-  ).join('') || '<p style="color:var(--text-muted);font-size:.82rem">Belum ada data</p>';
+  const sangatRawan = reports.filter(r => parseInt(r.skorRawan, 10) >= 4).length;
+  const rawan       = reports.filter(r => parseInt(r.skorRawan, 10) === 3).length;
+  const kurangRawan = reports.filter(r => parseInt(r.skorRawan, 10) <= 2 && !isNaN(parseInt(r.skorRawan, 10))).length;
+  
+  const maxS = Math.max(sangatRawan, rawan, kurangRawan, 1);
+  document.getElementById('chartJenis').innerHTML = `
+    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Sangat Rawan</span><div class="chart-track"><div class="chart-fill" style="width:${(sangatRawan/maxS*100).toFixed(0)}%;background:#D56A6A"></div></div><span class="chart-count">${sangatRawan}</span></div>
+    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Cukup Rawan</span><div class="chart-track"><div class="chart-fill" style="width:${(rawan/maxS*100).toFixed(0)}%;background:#F6BD60"></div></div><span class="chart-count">${rawan}</span></div>
+    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Rendah / Aman</span><div class="chart-track"><div class="chart-fill" style="width:${(kurangRawan/maxS*100).toFixed(0)}%;background:#84A59D"></div></div><span class="chart-count">${kurangRawan}</span></div>`;
 
   // Chart kelamin
   const lk = reports.filter(r=>r.kelamin==='Laki-laki').length;
@@ -1436,17 +1437,20 @@ function renderDashboard() {
   const tn = reports.filter(r=>r.kelamin==='Tidak ingin menyebutkan').length;
   const maxK = Math.max(lk, pr, tn, 1);
   document.getElementById('chartKelamin').innerHTML = `
-    <div class="chart-bar-row"><span class="chart-label">Laki-laki</span><div class="chart-track"><div class="chart-fill" style="width:${(lk/maxK*100).toFixed(0)}%;background:#84A59D"></div></div><span class="chart-count">${lk}</span></div>
-    <div class="chart-bar-row"><span class="chart-label">Perempuan</span><div class="chart-track"><div class="chart-fill" style="width:${(pr/maxK*100).toFixed(0)}%;background:#F28482"></div></div><span class="chart-count">${pr}</span></div>
-    <div class="chart-bar-row"><span class="chart-label">Tidak sebutkan</span><div class="chart-track"><div class="chart-fill" style="width:${(tn/maxK*100).toFixed(0)}%;background:#94A3B8"></div></div><span class="chart-count">${tn}</span></div>`;
+    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Laki-laki</span><div class="chart-track"><div class="chart-fill" style="width:${(lk/maxK*100).toFixed(0)}%;background:#84A59D"></div></div><span class="chart-count">${lk}</span></div>
+    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Perempuan</span><div class="chart-track"><div class="chart-fill" style="width:${(pr/maxK*100).toFixed(0)}%;background:#F28482"></div></div><span class="chart-count">${pr}</span></div>
+    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Tidak sebutkan</span><div class="chart-track"><div class="chart-fill" style="width:${(tn/maxK*100).toFixed(0)}%;background:#94A3B8"></div></div><span class="chart-count">${tn}</span></div>`;
 
   // Recent table
+  const sLabel = (s) => s >= 4 ? 'Sangat Rawan' : (s === 3 ? 'Cukup Rawan' : 'Rendah/Aman');
+  const sClass = (s) => s >= 4 ? 'fisik' : (s === 3 ? 'pending' : 'resolved');
+  
   const recent = [...reports].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,5);
   document.getElementById('recentTable').innerHTML = recent.map(r =>
     `<tr>
       <td style="color:var(--text-muted)">#${r.id}</td>
       <td>${formatDate(r.createdAt)}</td>
-      <td><span class="badge other">${r.skorRawan ?? '—'}</span></td>
+      <td><span class="badge ${sClass(parseInt(r.skorRawan, 10))}">${!isNaN(parseInt(r.skorRawan, 10)) ? sLabel(parseInt(r.skorRawan, 10)) : '—'}</span></td>
       <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.lokasi || '—'}</td>
       <td>${statusBadge(r.status)}</td>
     </tr>`
@@ -1494,7 +1498,14 @@ function renderTable() {
       <td style="font-size:.78rem">${r.skorRawan ?? '—'}</td>
       <td style="font-size:.78rem">${r.pencahayaan || '—'}</td>
       <td style="font-size:.78rem">${r.kepadatan || '—'}</td>
-      <td style="font-size:.78rem">${r.fotoPath ? `<a class="photo-link" href="${getPhotoUrl(r.fotoPath)}" target="_blank" rel="noopener"><i class="fas fa-image"></i> Lihat</a>` : '—'}</td>
+      <td style="font-size:.78rem">${r.skorNyaman ?? '—'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.alasanTidakNyaman||''}">${r.alasanTidakNyaman || '—'}</td>
+      <td style="font-size:.78rem">${r.pernahHindari || '—'}</td>
+      <td style="font-size:.78rem">${r.orangLain || '—'}</td>
+      <td style="font-size:.78rem">${r.situasiMencurigakan || '—'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.fungsiRuang||''}">${r.fungsiRuang || '—'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.kronologi||''}">${r.kronologi || '—'}</td>
+      <td style="font-size:.78rem">${r.fotoPath && !r.fotoPath.startsWith('HIDDEN_') ? `<a class="photo-link" href="${getPhotoUrl(r.fotoPath)}" target="_blank" rel="noopener"><i class="fas fa-image"></i> Lihat</a>` : (r.fotoPath?.startsWith('HIDDEN_') ? '<span style="color:#D56A6A;font-weight:600;"><i class="fas fa-eye-slash"></i> Sembunyi</span>' : '—')}</td>
       <td>${statusBadge(r.status)}</td>
       <td>
         <div class="action-btns">
@@ -1912,21 +1923,99 @@ function renderAdminMap() {
   adminReportLayer.clearLayers();
   adminLocLayer.clearLayers();
 
+  const isRawanTinggi = (score) => { const s = parseInt(score, 10); return !isNaN(s) && s >= 4; };
+  const isRawanSedang = (score) => { const s = parseInt(score, 10); return s === 3; };
+  const getRawanLabel = (s) => 
+    isRawanTinggi(s) ? `<div style="background:#fef2f2;color:#991b1b;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;display:inline-block"><i class="fas fa-triangle-exclamation"></i> Sangat Rawan</div>` : 
+    (isRawanSedang(s) ? `<div style="background:#fffbeb;color:#b45309;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;display:inline-block"><i class="fas fa-circle-exclamation"></i> Cukup Rawan</div>` : 
+    `<div style="background:#f0fdf4;color:#166534;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;display:inline-block"><i class="fas fa-shield"></i> Rendah / Aman</div>`);
+
   // Plot laporan
   reports.forEach(r => {
     if (!r.lat || !r.lng) return;
+
+    const fotoUrl = r.fotoPath ? getPhotoUrl(r.fotoPath) : null;
+    const isHidden = r.fotoPath && r.fotoPath.startsWith('HIDDEN_');
+    const fotoHtml = fotoUrl ? `
+      <div style="margin-top:8px;text-align:center;">
+        <img src="${fotoUrl}" style="max-width:100%;max-height:140px;border-radius:4px;object-fit:cover;${isHidden ? 'opacity:0.4; filter: grayscale(100%);' : ''}" onerror="this.style.display='none'"/>
+        <div style="margin-top:5px;display:flex;gap:5px;justify-content:center">
+          <button onclick="toggleFotoHide(${r.id}, '${isHidden ? 'unhide' : 'hide'}')" style="background:${isHidden ? '#10B981' : '#F59E0B'};color:white;border:none;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:0.75rem;width:100%">
+            ${isHidden ? '<i class="fas fa-eye"></i> Tampilkan Foto ke Publik' : '<i class="fas fa-eye-slash"></i> Sembunyikan Foto'}
+          </button>
+        </div>
+      </div>
+    ` : `<div style="font-size:0.7rem;color:#888;text-align:center;margin-top:5px;padding:10px;background:#f5f5f5;border-radius:4px">Tidak ada foto dilampirkan</div>`;
+
+    const bodyHtml = `
+      <div style="font-family:'DM Sans',sans-serif;min-width:220px;font-size:0.8rem">
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding-bottom:5px;margin-bottom:5px">
+          <strong style="color:#D56A6A; font-size: 0.9rem">#${r.id} - ${r.lokasi || 'Tidak diketahui'}</strong>
+        </div>
+        <div style="text-align:center;margin-bottom:8px;">${getRawanLabel(r.skorRawan)}</div>
+        <div style="margin-bottom:8px; display:grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+          <div><b style="color:#666">Pencahayaan:</b><br>${r.pencahayaan || '-'}</div>
+          <div><b style="color:#666">Kepadatan:</b><br>${r.kepadatan || '-'}</div>
+          <div style="grid-column: span 2"><b style="color:#666">Waktu Rawan:</b><br>${r.waktu || '-'} (${r.hariRawan || '-'})</div>
+        </div>
+        ${fotoHtml}
+        <div style="margin-top:10px;text-align:center;border-top:1px solid #eee;padding-top:10px;">
+          <button onclick="deleteReportMap(${r.id})" style="background:#EF4444;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:0.8rem;width:100%;font-weight:600">
+            <i class="fas fa-trash"></i> Hapus Titik Laporan Ini
+          </button>
+        </div>
+      </div>
+    `;
+
+    const markerColor = isRawanTinggi(r.skorRawan) ? '#D56A6A' : (isRawanSedang(r.skorRawan) ? '#F6BD60' : '#84A59D');
+    
     L.circleMarker([r.lat, r.lng], {
-      radius: 7, color: '#D56A6A', fillColor: '#F28482', fillOpacity: .7, weight: 2
-    }).addTo(adminReportLayer).bindPopup(`<b>#${r.id}</b><br>${r.lokasi || '—'}<br>Skor Rawan: ${r.skorRawan ?? '—'}`);
+      radius: 8, color: '#fff', fillColor: markerColor, fillOpacity: 0.9, weight: 2
+    }).addTo(adminReportLayer).bindPopup(bodyHtml);
   });
 
   // Plot titik pengaduan
   LOCATIONS.forEach(l => {
     if (!l.lat || !l.lng) return;
     L.circleMarker([l.lat, l.lng], {
-      radius: 9, color: '#F6BD60', fillColor: '#F6BD60', fillOpacity: .5, weight: 2
-    }).addTo(adminLocLayer).bindPopup(`<b>${l.name}</b><br>${l.status}`);
+      radius: 9, color: '#fff', fillColor: '#3B82F6', fillOpacity: 0.9, weight: 2
+    }).addTo(adminLocLayer).bindPopup(`
+      <div style="font-family:'DM Sans',sans-serif;min-width:180px;font-size:0.8rem;text-align:center">
+        <b style="color:#3B82F6;font-size:1rem">${l.name}</b><br>
+        <div style="margin-top:5px;padding:3px;background:#EFF6FF;border-radius:4px;color:#1E3A8A">Titik Lokasi Pengaduan</div>
+      </div>
+    `);
   });
+}
+
+function deleteReportMap(id) {
+  if(!confirm('Anda yakin ingin menghapus laporan #' + id + ' ini secara permanen dari peta ini?')) return;
+  fetch(`/api/reports/${id}`, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(res => {
+      if(res.success) {
+        showToast('Laporan berhasil dihapus', 'success');
+        if (adminMap) adminMap.closePopup();
+        fetchReports({ skipIfModal: true });
+      } else throw new Error('Gagal menghapus laporan');
+    })
+    .catch(e => showToast(e.message, 'error'));
+}
+
+async function toggleFotoHide(id, action) {
+  try {
+    const res = await fetch(`/api/reports/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ foto_path_action: action })
+    });
+    if (!res.ok) throw new Error('Gagal update foto');
+    showToast(`Foto berhasil di-${action === 'hide' ? 'sembunyikan' : 'tampilkan'}`, 'success');
+    if (adminMap) adminMap.closePopup();
+    fetchReports({ skipIfModal: true });
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────

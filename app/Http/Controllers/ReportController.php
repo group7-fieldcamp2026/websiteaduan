@@ -394,6 +394,15 @@ class ReportController extends Controller
         }
         unset($validated['foto_lokasi']);
 
+        if ($request->has('foto_path_action')) {
+            $action = $request->input('foto_path_action');
+            if ($action === 'hide' && $report->foto_path && !str_starts_with($report->foto_path, 'HIDDEN_')) {
+                $validated['foto_path'] = 'HIDDEN_' . $report->foto_path;
+            } elseif ($action === 'unhide' && $report->foto_path && str_starts_with($report->foto_path, 'HIDDEN_')) {
+                $validated['foto_path'] = str_replace('HIDDEN_', '', $report->foto_path);
+            }
+        }
+
         if (array_key_exists('status', $validated)) {
             if ($validated['status'] === 'verified') {
                 $validated['status'] = 'resolved';

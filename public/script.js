@@ -896,7 +896,7 @@ function buildPopup(r) {
     <span>Keterbukaan: ${getScoreHtml(r.vegetasi, 'vegetasi')}</span>`;
     
   let fotoHtml = '';
-  if (r.fotoPath) {
+  if (r.fotoPath && !r.fotoPath.startsWith('HIDDEN_')) {
     const fotoUrl = getPhotoUrl(r.fotoPath);
     const safeUrl = fotoUrl.replace(/'/g, "\\'");
     fotoHtml = `<div style="margin-top:8px; text-align:center;" class="popup-foto-wrap">
