@@ -1212,6 +1212,21 @@ main { padding-top: 62px; }
 .case-dot i { font-size: 0.75rem; font-weight: 800; }
 .case-dot:hover { transform: scale(1.2); z-index: 1000; }
 
+/* Responsive Markers for Mobile */
+@media (max-width: 640px) {
+  .faculty-pin {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  .faculty-pin i { font-size: 0.55rem !important; }
+  
+  .case-dot {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  .case-dot i { font-size: 0.6rem !important; }
+}
+
 .map-active-layer {
   position: absolute; top: 1rem; left: 1rem;
   background: rgba(var(--bg-rgb),.92); border: 1px solid var(--border-glow);
