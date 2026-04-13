@@ -1138,14 +1138,6 @@
         </div>
 
         <div class="detail-item">
-          <label>Latitude</label>
-          <input type="number" id="lLat" placeholder="-7.2756" step="0.0001"/>
-        </div>
-        <div class="detail-item">
-          <label>Longitude</label>
-          <input type="number" id="lLng" placeholder="112.7951" step="0.0001"/>
-        </div>
-        <div class="detail-item">
           <label>Status QR Code</label>
           <select id="lStatus">
             <option value="terpasang">Terpasang</option>
@@ -2077,7 +2069,7 @@ function renderLocGrid() {
 function openAddLoc() {
   editingLocId = null;
   document.getElementById('locModalTitle').textContent = 'Tambah';
-  ['lName','lDesc','lLat','lLng','lGmaps'].forEach(id => document.getElementById(id).value='');
+  ['lName','lDesc','lGmaps'].forEach(id => document.getElementById(id).value='');
   document.getElementById('lStatus').value = 'terpasang';
   const iconVal = ensureLocationIconOption('location-dot');
   document.getElementById('lIcon').value   = iconVal;
@@ -2094,8 +2086,6 @@ function openEditLoc(id) {
   document.getElementById('locModalTitle').textContent = 'Edit';
   document.getElementById('lName').value   = l.name;
   document.getElementById('lDesc').value   = l.desc;
-  document.getElementById('lLat').value    = l.lat;
-  document.getElementById('lLng').value    = l.lng;
   document.getElementById('lStatus').value = l.status;
   const iconVal = ensureLocationIconOption(l.icon || 'location-dot');
   document.getElementById('lIcon').value   = iconVal;
@@ -2117,18 +2107,18 @@ function openEditLoc(id) {
 
 async function saveLoc() {
   const gmapsUrl = document.getElementById('lGmaps').value.trim();
-  let lat = parseFloat(document.getElementById('lLat').value);
-  let lng = parseFloat(document.getElementById('lLng').value);
+  let lat = null;
+  let lng = null;
   
-  // Jika lat/lng kosong, coba ambil dari URL GMaps
-  if ((isNaN(lat) || isNaN(lng)) && gmapsUrl) {
+  // Ambil koordinat dari URL GMaps
+  if (gmapsUrl) {
     // Coba parsing lokal dulu (untuk URL dengan format ?q=... atau @lat,lng)
     const coords = parseGmapsUrl(gmapsUrl);
     if (coords) {
       lat = coords.lat;
       lng = coords.lng;
     } else {
-      // Coba via API endpoint
+      // Coba via API endpoint (backend)
       try {
         const response = await fetch(`${API_BASE}/gmaps/resolve`, {
           method: 'POST',
@@ -2140,9 +2130,6 @@ async function saveLoc() {
           if (data.lat && data.lng) {
             lat = data.lat;
             lng = data.lng;
-            // Update input fields
-            document.getElementById('lLat').value = lat;
-            document.getElementById('lLng').value = lng;
           }
         }
       } catch (e) {
@@ -2163,7 +2150,11 @@ async function saveLoc() {
     photo:  currentPhotoDataUrl || null,
   };
   if (!data.name) { showToast('⚠ Nama lokasi wajib diisi', 'error'); return; }
-  if (isNaN(data.lat) || isNaN(data.lng)) { showToast('⚠ Koordinat wajib diisi. Gunakan URL GMaps yang valid atau isi latitude/longitude manual.', 'error'); return; }
+  if (!data.gmaps) { showToast('⚠ URL Google Maps wajib diisi', 'error'); return; }
+  if (data.lat === null || data.lng === null) {
+    showToast('⚠ Tidak dapat mengambil koordinat dari URL. Pastikan URL valid atau coba URL panjang dari Google Maps.', 'error');
+    return;
+  }
   // Jika foto tidak diubah saat edit, pertahankan foto lama
   if (editingLocId && !currentPhotoDataUrl) {
     const existing = LOCATIONS.find(x=>x.id===editingLocId);
