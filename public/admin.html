@@ -1178,12 +1178,12 @@
         <div class="detail-item full">
           <label>Google Maps URL</label>
           <div style="display:flex;gap:.5rem;align-items:flex-start">
-            <input type="text" id="lGmaps" placeholder="https://maps.app.goo.gl/..." oninput="autoFillCoordsFromGmaps()" style="flex:1"/>
+            <input type="text" id="lGmaps" placeholder="https://maps.google.com/?q=-7.2756,112.7951" oninput="autoFillCoordsFromGmaps()" style="flex:1"/>
             <button type="button" class="btn btn-outline" style="padding:.5rem .8rem;font-size:.75rem;white-space:nowrap" onclick="fetchGmapsCoords()">
               <i class="fas fa-location-arrow"></i> Deteksi
             </button>
           </div>
-          <span style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;display:block">Masukkan link Google Maps (panjang) untuk deteksi otomatis. Klik "Deteksi" untuk URL pendek.</span>
+          <span style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;display:block">➡️ Cara mendapatkan URL yang didukung: Buka Google Maps → Klik lokasi → Klik "Share" → Pilih "Copy link". Gunakan link tersebut (menggunakan format ?q=... atau @lat,lng).</span>
         </div>
         <div class="detail-item">
           <label>Jumlah Laporan Terkait</label>
@@ -1952,6 +1952,16 @@ async function fetchGmapsCoords() {
   
   showToast('⏳ Mendeteksi koordinat...', 'success');
   
+  // Try client-side extraction first (works for URLs with coordinates embedded)
+  const directCoords = parseGmapsUrl(gmapsUrl);
+  if (directCoords) {
+    document.getElementById('lLat').value = directCoords.lat;
+    document.getElementById('lLng').value = directCoords.lng;
+    showToast(`✅ Koordinat terdeteksi: ${directCoords.lat}, ${directCoords.lng}`, 'success');
+    return;
+  }
+  
+  // Try via server endpoint
   try {
     const response = await fetch(`${API_BASE}/gmaps/resolve`, {
       method: 'POST',
@@ -1959,20 +1969,65 @@ async function fetchGmapsCoords() {
       body: JSON.stringify({ url: gmapsUrl })
     });
     
-    const data = await response.json();
-    
-    if (data.lat && data.lng) {
-      document.getElementById('lLat').value = data.lat;
-      document.getElementById('lLng').value = data.lng;
-      showToast(`✅ Koordinat terdeteksi: ${data.lat}, ${data.lng}`, 'success');
-    } else if (data.error) {
-      showToast('⚠ ' + data.error, 'error');
-    } else {
-      showToast('⚠ Tidak dapat mendeteksi koordinat dari URL ini', 'error');
+    if (response.ok) {
+      const data = await response.json();
+      if (data.lat && data.lng) {
+        document.getElementById('lLat').value = data.lat;
+        document.getElementById('lLng').value = data.lng;
+        showToast(`✅ Koordinat terdeteksi: ${data.lat}, ${data.lng}`, 'success');
+        return;
+      }
     }
   } catch (e) {
-    showToast('⚠ Gagal mengakses URL. Coba gunakan URL panjang Google Maps.', 'error');
+    console.log('Server endpoint failed, trying alternative');
   }
+  
+  // Try opening in new tab and getting coordinates from URL
+  showToast('⚠ Mencoba metode alternatif...', 'success');
+  await tryAlternativeGmapsResolve(gmapsUrl);
+}
+
+async function tryAlternativeGmapsResolve(url) {
+  try {
+    // Method: Try to use a third-party expand API
+    // This uses Google's link expansion
+    const testUrl = 'https://www.google.com/maps/search/?api=1&query=placeholder';
+    
+    // For now, let's try to open in new window for user to copy coordinates
+    // Or use a different approach - try to expand via CORS proxy
+    const expanded = await expandGoogleUrl(url);
+    if (expanded) {
+      const coords = parseGmapsUrl(expanded);
+      if (coords) {
+        document.getElementById('lLat').value = coords.lat;
+        document.getElementById('lLng').value = coords.lng;
+        showToast(`✅ Koordinat terdeteksi: ${coords.lat}, ${coords.lng}`, 'success');
+        return;
+      }
+    }
+  } catch (e) {
+    console.log('Alternative method failed:', e);
+  }
+  
+  showToast('⚠ Tidak dapat otomatis. Gunakan URL panjang atau isi manual.', 'error');
+}
+
+async function expandGoogleUrl(shortUrl) {
+  // Try using Google's utility to expand URL
+  // Using unshorten.me or similar service
+  try {
+    const response = await fetch('https://unshorten.me/s/' + encodeURIComponent(shortUrl));
+    if (response.ok) {
+      const text = await response.text();
+      return text;
+    }
+  } catch (e) {
+    console.log('unshorten failed:', e);
+  }
+  
+  // Fallback: try using Google Maps Directions API with the URL
+  // This is a workaround
+  return null;
 }
 
 // ─── TITIK PENGADUAN ─────────────────────────────────────────
@@ -2045,11 +2100,34 @@ async function saveLoc() {
   let lat = parseFloat(document.getElementById('lLat').value);
   let lng = parseFloat(document.getElementById('lLng').value);
   
+  // Jika lat/lng kosong, coba ambil dari URL GMaps
   if ((isNaN(lat) || isNaN(lng)) && gmapsUrl) {
+    // Coba parsing lokal dulu (untuk URL dengan format ?q=... atau @lat,lng)
     const coords = parseGmapsUrl(gmapsUrl);
     if (coords) {
       lat = coords.lat;
       lng = coords.lng;
+    } else {
+      // Coba via API endpoint
+      try {
+        const response = await fetch(`${API_BASE}/gmaps/resolve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ url: gmapsUrl })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.lat && data.lng) {
+            lat = data.lat;
+            lng = data.lng;
+            // Update input fields
+            document.getElementById('lLat').value = lat;
+            document.getElementById('lLng').value = lng;
+          }
+        }
+      } catch (e) {
+        console.log('Gmaps resolve failed:', e);
+      }
     }
   }
   
@@ -2065,7 +2143,7 @@ async function saveLoc() {
     photo:  currentPhotoDataUrl || null,
   };
   if (!data.name) { showToast('⚠ Nama lokasi wajib diisi', 'error'); return; }
-  if (isNaN(data.lat) || isNaN(data.lng)) { showToast('⚠ Koordinat latitude/longitude wajib diisi', 'error'); return; }
+  if (isNaN(data.lat) || isNaN(data.lng)) { showToast('⚠ Koordinat wajib diisi. Gunakan URL GMaps yang valid atau isi latitude/longitude manual.', 'error'); return; }
   // Jika foto tidak diubah saat edit, pertahankan foto lama
   if (editingLocId && !currentPhotoDataUrl) {
     const existing = LOCATIONS.find(x=>x.id===editingLocId);
