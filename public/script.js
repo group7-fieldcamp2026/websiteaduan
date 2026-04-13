@@ -878,7 +878,6 @@ function buildPopup(r) {
     <span style="font-size:0.75rem; color:#888;">Koordinat: ${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</span><hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/>`;
     
   let descHtml = r.lokasiDeskripsi ? `<i>"${esc(r.lokasiDeskripsi)}"</i><br/>` : '';
-  if (r.kronologi) descHtml += `<span style="color:#666; font-size:0.8rem">Ket Lain: ${esc(r.kronologi)}</span><br/>`;
 
   let bodyHtml = '';
   const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');

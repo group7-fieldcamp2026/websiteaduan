@@ -843,8 +843,8 @@
           <input type="text" id="dLokasi" placeholder="Nama area / departemen"/>
         </div>
         <div class="detail-item full">
-          <label>Deskripsi Lokasi *</label>
-          <textarea id="dLokasiDeskripsi" rows="3" placeholder="Ciri-ciri lokasi, titik patokan, kondisi sekitar..."></textarea>
+          <label>Deskripsi Lokasi dan Alasan Pelaporan *</label>
+          <textarea id="dLokasiDeskripsi" rows="3" placeholder="Ciri-ciri lokasi, titik patokan, kondisi sekitar, serta alasan pelapor merasa tidak aman..."></textarea>
         </div>
         <div class="detail-item full">
           <label>Foto Lokasi dari Responden</label>
@@ -1011,7 +1011,7 @@
         </div>
 
         <div class="detail-item full">
-          <label>Keterangan Tambahan</label>
+          <label>Keterangan Tambahan (Opsional)</label>
           <textarea id="dKronologi" rows="4" placeholder="Catatan tambahan tentang kondisi area..."></textarea>
         </div>
         <div class="detail-item full">
@@ -2129,8 +2129,20 @@ async function loadAdminGISLayers() {
       const faculty = opt.closest('optgroup') ? opt.closest('optgroup').label : 'Gedung Jurusan';
       const name = opt.textContent;
 
+      const FACULTY_COLORS = {
+        'FSAD':   '#4E79A7', // blue
+        'FTIRS':  '#F28E2B', // orange
+        'FTSPK':  '#76B7B2', // teal
+        'FDKBD':  '#59A14F', // green
+        'FV':     '#E15759', // red
+        'FKK':    '#B07AA1', // purple
+        'FTEIC':  '#20B2AA', // cyan
+        'FTK':    '#BAB0AC', // gray
+      };
+      const color = FACULTY_COLORS[faculty] || '#4B5563';
+
       const icon = L.divIcon({
-        html: '<div style="background:#4B5563;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.4);border:2px solid #fff;"><i class="fas fa-building-columns" style="font-size:0.7rem;"></i></div>',
+        html: `<div style="background:${color};color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.4);border:2px solid #fff;"><i class="fas fa-building-columns" style="font-size:0.7rem;"></i></div>`,
         className: '',
         iconSize: [24,24],
         iconAnchor: [12,12]
