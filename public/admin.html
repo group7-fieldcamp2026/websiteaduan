@@ -759,6 +759,25 @@
         <p>Visualisasi titik laporan dan lokasi pengaduan</p>
       </div>
       <div class="card" style="padding:1rem">
+        <div class="map-panel" style="margin-bottom: 1rem; border: none; box-shadow: none; background: transparent; padding: 0;">
+          <div class="map-panel-section" style="background: var(--bg2); padding: 1rem; border-radius: var(--radius-sm);">
+            <div class="panel-title" style="font-size: .85rem; font-weight: 700; color: var(--text-muted); margin-bottom: .75rem; letter-spacing: 1px;"><i class="fas fa-globe"></i> BASEMAP</div>
+            <div class="basemap-row" style="display: flex; flex-wrap: wrap; gap: .45rem;">
+              <button class="bm-btn active" data-bm="osm" onclick="switchAdminBasemap(this)" style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .85rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(242,132,130,.2); color:#D56A6A; font-weight:700; cursor:pointer;"><i class="fas fa-map"></i> OpenStreetMap</button>
+              <button class="bm-btn" data-bm="satellite" onclick="switchAdminBasemap(this)" style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .85rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:var(--bg2); color:var(--text); font-weight:600; cursor:pointer;"><i class="fas fa-satellite"></i> Satelit</button>
+              <button class="bm-btn" data-bm="dark" onclick="switchAdminBasemap(this)" style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .85rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:var(--bg2); color:var(--text); font-weight:600; cursor:pointer;"><i class="fas fa-moon"></i> Dark</button>
+              <button class="bm-btn" data-bm="topo" onclick="switchAdminBasemap(this)" style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .85rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:var(--bg2); color:var(--text); font-weight:600; cursor:pointer;"><i class="fas fa-mountain"></i> Topografi</button>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:0.4rem; margin-top:1rem;">
+              <div id="tog-admin-fixedpin" data-active="true" onclick="toggleAdminPin('fixedpin', this)"
+                style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; padding:0.4rem 0.8rem; border-radius:6px; font-size:0.85rem; font-weight:600; transition:all .2s; background:rgba(242,132,130,.14); border:1px solid rgba(242,132,130,.45); color:#D56A6A; user-select:none;">
+                <i class="fas fa-check-circle pin-icon"></i>
+                <i class="fas fa-location-dot"></i> Pin Lokasi Tetap (Aduan QR)
+              </div>
+            </div>
+          </div>
+        </div>
         <div id="adminMap"></div>
       </div>
     </div>
@@ -1907,16 +1926,68 @@ function deleteLoc(id) {
 }
 
 // ─── ADMIN MAP ───────────────────────────────────────────────
+let adminBaseTile;
+const ADMIN_BASEMAPS = {
+  osm: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: '&copy; OpenStreetMap' },
+  satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles &copy; Esri' },
+  dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: '&copy; CartoDB' },
+  topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: '&copy; OpenTopoMap' }
+};
+
 function initAdminMap() {
   if (adminMap) return;
   adminMap = L.map('adminMap').setView([-7.2756, 112.7951], 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap'
+  
+  adminBaseTile = L.tileLayer(ADMIN_BASEMAPS.osm.url, {
+    attribution: ADMIN_BASEMAPS.osm.attr
   }).addTo(adminMap);
 
   adminReportLayer = L.layerGroup().addTo(adminMap);
   adminLocLayer = L.layerGroup().addTo(adminMap);
   renderAdminMap();
+}
+
+function switchAdminBasemap(btn) {
+  const bm = btn.dataset.bm;
+  btn.closest('.basemap-row').querySelectorAll('.bm-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  if (!adminMap) return;
+  adminMap.eachLayer(l => { if (l === adminBaseTile) adminMap.removeLayer(l); });
+  const cfg = ADMIN_BASEMAPS[bm];
+  adminBaseTile = L.tileLayer(cfg.url, { attribution: cfg.attr }).addTo(adminMap);
+  adminBaseTile.bringToBack();
+}
+
+let visAdminLocLayer = true;
+
+function toggleAdminPin(type, el) {
+  const isActive = el.dataset.active === 'true';
+  const nextState = !isActive;
+  el.dataset.active = nextState ? 'true' : 'false';
+  
+  if (nextState) {
+    el.style.background = 'rgba(242,132,130,.14)';
+    el.style.color = '#D56A6A';
+    el.style.borderColor = 'rgba(242,132,130,.45)';
+    el.querySelector('.pin-icon').className = 'fas fa-check-circle pin-icon';
+  } else {
+    el.style.background = 'transparent';
+    el.style.color = 'var(--text-muted)';
+    el.style.borderColor = 'var(--border)';
+    el.querySelector('.pin-icon').className = 'fas fa-circle pin-icon';
+  }
+
+  if (type === 'fixedpin') {
+    visAdminLocLayer = nextState;
+    if (adminMap && adminLocLayer) {
+      if (visAdminLocLayer) {
+        if (!adminMap.hasLayer(adminLocLayer)) adminMap.addLayer(adminLocLayer);
+      } else {
+        if (adminMap.hasLayer(adminLocLayer)) adminMap.removeLayer(adminLocLayer);
+      }
+    }
+  }
 }
 
 function renderAdminMap() {
