@@ -1177,7 +1177,13 @@
         </div>
         <div class="detail-item full">
           <label>Google Maps URL</label>
-          <input type="text" id="lGmaps" placeholder="https://maps.google.com/?q=..."/>
+          <div style="display:flex;gap:.5rem;align-items:flex-start">
+            <input type="text" id="lGmaps" placeholder="https://maps.app.goo.gl/..." oninput="autoFillCoordsFromGmaps()" style="flex:1"/>
+            <button type="button" class="btn btn-outline" style="padding:.5rem .8rem;font-size:.75rem;white-space:nowrap" onclick="fetchGmapsCoords()">
+              <i class="fas fa-location-arrow"></i> Deteksi
+            </button>
+          </div>
+          <span style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;display:block">Masukkan link Google Maps (panjang) untuk deteksi otomatis. Klik "Deteksi" untuk URL pendek.</span>
         </div>
         <div class="detail-item">
           <label>Jumlah Laporan Terkait</label>
@@ -1896,6 +1902,73 @@ function updateIconPreview(val) {
   preview.appendChild(icon);
 }
 
+function parseGmapsUrl(url) {
+  if (!url) return null;
+  try {
+    url = url.trim();
+    const urlObj = new URL(url);
+    const params = new URLSearchParams(urlObj.search);
+    const q = params.get('q');
+    if (q) {
+      const parts = q.split(',');
+      if (parts.length >= 2) {
+        const lat = parseFloat(parts[0].trim());
+        const lng = parseFloat(parts[1].trim());
+        if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
+      }
+    }
+    if (urlObj.pathname.includes('@')) {
+      const match = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+      if (match) {
+        return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+      }
+    }
+    const path = urlObj.pathname;
+    if (path.includes('/place/')) {
+      const match = path.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+      if (match) {
+        return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+function autoFillCoordsFromGmaps() {
+  const gmapsUrl = document.getElementById('lGmaps').value;
+  const coords = parseGmapsUrl(gmapsUrl);
+  if (coords) {
+    document.getElementById('lLat').value = coords.lat;
+    document.getElementById('lLng').value = coords.lng;
+  }
+}
+
+async function fetchGmapsCoords() {
+  const gmapsUrl = document.getElementById('lGmaps').value.trim();
+  if (!gmapsUrl) {
+    showToast('⚠ Masukkan URL Google Maps terlebih dahulu', 'error');
+    return;
+  }
+  
+  showToast('⏳ Mendeteksi koordinat...', 'success');
+  
+  try {
+    const response = await fetch(gmapsUrl, { method: 'GET', redirect: 'follow' });
+    const finalUrl = response.url;
+    
+    const coords = parseGmapsUrl(finalUrl);
+    if (coords) {
+      document.getElementById('lLat').value = coords.lat;
+      document.getElementById('lLng').value = coords.lng;
+      showToast(`✅ Koordinat terdeteksi: ${coords.lat}, ${coords.lng}`, 'success');
+    } else {
+      showToast('⚠ Tidak dapat mendeteksi koordinat dari URL ini', 'error');
+    }
+  } catch (e) {
+    showToast('⚠ Gagal mengakses URL. Coba gunakan URL panjang Google Maps.', 'error');
+  }
+}
+
 // ─── TITIK PENGADUAN ─────────────────────────────────────────
 function renderLocGrid() {
   document.getElementById('locGrid').innerHTML = LOCATIONS.map(l =>
@@ -1962,18 +2035,31 @@ function openEditLoc(id) {
 }
 
 async function saveLoc() {
+  const gmapsUrl = document.getElementById('lGmaps').value.trim();
+  let lat = parseFloat(document.getElementById('lLat').value);
+  let lng = parseFloat(document.getElementById('lLng').value);
+  
+  if ((isNaN(lat) || isNaN(lng)) && gmapsUrl) {
+    const coords = parseGmapsUrl(gmapsUrl);
+    if (coords) {
+      lat = coords.lat;
+      lng = coords.lng;
+    }
+  }
+  
   const data = {
     name:   document.getElementById('lName').value.trim(),
     desc:   document.getElementById('lDesc').value.trim(),
-    lat:    parseFloat(document.getElementById('lLat').value),
-    lng:    parseFloat(document.getElementById('lLng').value),
+    lat:    lat,
+    lng:    lng,
     status: document.getElementById('lStatus').value,
     icon:   'fa-' + normalizeIconValue(document.getElementById('lIcon').value),
-    gmaps:  document.getElementById('lGmaps').value.trim(),
+    gmaps:  gmapsUrl,
     count:  parseInt(document.getElementById('lCount').value)||0,
     photo:  currentPhotoDataUrl || null,
   };
   if (!data.name) { showToast('⚠ Nama lokasi wajib diisi', 'error'); return; }
+  if (isNaN(data.lat) || isNaN(data.lng)) { showToast('⚠ Koordinat latitude/longitude wajib diisi', 'error'); return; }
   // Jika foto tidak diubah saat edit, pertahankan foto lama
   if (editingLocId && !currentPhotoDataUrl) {
     const existing = LOCATIONS.find(x=>x.id===editingLocId);
