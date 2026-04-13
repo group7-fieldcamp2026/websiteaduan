@@ -2585,14 +2585,13 @@ let locationPickerMarker = null;
 
 function openLocationPicker() {
   const modal = document.getElementById('locModal');
-  modal.classList.remove('open');
+  if (modal) modal.classList.remove('open');
   
-  // Create picker modal if not exists
   let pickerModal = document.getElementById('locationPickerModal');
   if (!pickerModal) {
     pickerModal = document.createElement('div');
     pickerModal.id = 'locationPickerModal';
-    pickerModal.className = 'modal-overlay open';
+    pickerModal.className = 'modal-overlay';
     pickerModal.innerHTML = `
       <div class="modal" style="max-width:700px">
         <div class="modal-header">
@@ -2609,34 +2608,36 @@ function openLocationPicker() {
       </div>
     `;
     document.body.appendChild(pickerModal);
-    
-    pickerModal.addEventListener('click', e => {
-      if (e.target.id === 'locationPickerModal') closeLocationPicker();
-    });
   }
   
-  // Initialize map
+  pickerModal.classList.add('open');
+  
   setTimeout(() => {
     if (locationPickerMap) {
       locationPickerMap.remove();
       locationPickerMap = null;
     }
+    locationPickerMarker = null;
     
-    locationPickerMap = L.map('pickerMap').setView([-7.2755, 112.796], 15);
+    const mapContainer = document.getElementById('pickerMap');
+    if (!mapContainer) return;
+    
+    locationPickerMap = L.map('pickerMap', { 
+      center: [-7.2755, 112.796], 
+      zoom: 15 
+    });
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(locationPickerMap);
     
-    // Click to place marker
     locationPickerMap.on('click', function(e) {
       if (locationPickerMarker) {
         locationPickerMap.removeLayer(locationPickerMarker);
       }
-      locationPickerMarker = L.marker(e.latlng).addTo(locationPickerMap);
+      locationPickerMarker = L.marker(e.latlng, { draggable: false }).addTo(locationPickerMap);
     });
     
-    // Try to get current location
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
         locationPickerMap.setView([pos.coords.latitude, pos.coords.longitude], 16);
@@ -2644,7 +2645,7 @@ function openLocationPicker() {
         console.log('Geolocation error:', err);
       });
     }
-  }, 100);
+  }, 150);
 }
 
 function closeLocationPicker() {
@@ -2652,8 +2653,17 @@ function closeLocationPicker() {
   if (pickerModal) {
     pickerModal.classList.remove('open');
   }
-  const locModal = document.getElementById('locModal');
-  locModal.classList.add('open');
+  
+  setTimeout(() => {
+    if (locationPickerMap) {
+      locationPickerMap.remove();
+      locationPickerMap = null;
+    }
+    locationPickerMarker = null;
+    
+    const locModal = document.getElementById('locModal');
+    if (locModal) locModal.classList.add('open');
+  }, 100);
 }
 
 function confirmLocationPicker() {
