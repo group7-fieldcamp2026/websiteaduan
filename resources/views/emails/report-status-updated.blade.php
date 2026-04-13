@@ -34,7 +34,13 @@
                 $statusClass = 'status-pending';
                 if ($report->status == 'Dalam Tinjauan') $statusClass = 'status-tinjauan';
                 if ($report->status == 'Terverifikasi') $statusClass = 'status-terverifikasi';
-                if ($report->status == 'Ditolak') $statusClass = 'status-ditolak';
+                if ($report->status == 'Ditolak/Tidak Valid') $statusClass = 'status-ditolak';
+
+                $skorValue = intval($report->skor_rawan);
+                $kategoriRawan = 'Menunggu Evaluasi';
+                if ($skorValue >= 4) $kategoriRawan = 'Sangat Rawan (Tinggi)';
+                elseif ($skorValue == 3) $kategoriRawan = 'Cukup Rawan (Sedang)';
+                elseif ($skorValue > 0) $kategoriRawan = 'Rendah / Aman';
             @endphp
             
             <div>Status Laporan Anda saat ini:</div>
@@ -53,7 +59,7 @@
                 </tr>
                 <tr>
                     <th>Kategori Kerawanan</th>
-                    <td>Skor: {{ $report->skor_rawan }}</td>
+                    <td>{{ $kategoriRawan }}</td>
                 </tr>
                 <tr>
                     <th>Diperbarui Pada</th>
