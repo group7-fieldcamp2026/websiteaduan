@@ -1953,14 +1953,20 @@ async function fetchGmapsCoords() {
   showToast('⏳ Mendeteksi koordinat...', 'success');
   
   try {
-    const response = await fetch(gmapsUrl, { method: 'GET', redirect: 'follow' });
-    const finalUrl = response.url;
+    const response = await fetch(`${API_BASE}/gmaps/resolve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ url: gmapsUrl })
+    });
     
-    const coords = parseGmapsUrl(finalUrl);
-    if (coords) {
-      document.getElementById('lLat').value = coords.lat;
-      document.getElementById('lLng').value = coords.lng;
-      showToast(`✅ Koordinat terdeteksi: ${coords.lat}, ${coords.lng}`, 'success');
+    const data = await response.json();
+    
+    if (data.lat && data.lng) {
+      document.getElementById('lLat').value = data.lat;
+      document.getElementById('lLng').value = data.lng;
+      showToast(`✅ Koordinat terdeteksi: ${data.lat}, ${data.lng}`, 'success');
+    } else if (data.error) {
+      showToast('⚠ ' + data.error, 'error');
     } else {
       showToast('⚠ Tidak dapat mendeteksi koordinat dari URL ini', 'error');
     }
