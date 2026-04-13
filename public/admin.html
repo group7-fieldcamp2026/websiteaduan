@@ -549,6 +549,8 @@
       .search-box input { width: 100%; }
     }
   </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
 </head>
 <body>
 
@@ -775,6 +777,18 @@
                 <i class="fas fa-check-circle pin-icon"></i>
                 <i class="fas fa-location-dot"></i> Pin Lokasi Tetap (Aduan QR)
               </div>
+              <div id="tog-admin-jurusan" data-active="true" onclick="toggleAdminPin('jurusan', this)"
+                style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; padding:0.4rem 0.8rem; border-radius:6px; font-size:0.85rem; font-weight:600; transition:all .2s; background:rgba(242,132,130,.14); border:1px solid rgba(242,132,130,.45); color:#D56A6A; user-select:none;">
+                <i class="fas fa-check-circle pin-icon-jurusan"></i>
+                <i class="fas fa-building-columns"></i> Pin Penanda Jurusan/Fakultas
+              </div>
+            </div>
+
+            <div class="panel-title" style="font-size: .85rem; font-weight: 700; color: var(--text-muted); margin-bottom: .75rem; letter-spacing: 1px; margin-top: 1.5rem;"><i class="fas fa-layer-group"></i> TAMPILAN LAYER</div>
+            <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+              <button id="tog-admin-heatmap" class="bm-btn" onclick="toggleAdminLayerVis('heatmap')" style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .8rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:transparent; color:var(--text); font-weight:600; cursor:pointer;"><i class="fas fa-fire" style="color:#EF4444"></i> Heatmap</button>
+              <button id="tog-admin-point" class="bm-btn active" onclick="toggleAdminLayerVis('point')" style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .8rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(242,132,130,.2); color:#D56A6A; font-weight:700; cursor:pointer;"><i class="fas fa-dot-circle"></i> Titik</button>
+              <button id="tog-admin-cluster" class="bm-btn" onclick="toggleAdminLayerVis('cluster')" style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .8rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:transparent; color:var(--text); font-weight:600; cursor:pointer;"><i class="fas fa-share-nodes"></i> Cluster</button>
             </div>
           </div>
         </div>
@@ -1934,6 +1948,9 @@ const ADMIN_BASEMAPS = {
   topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: '&copy; OpenTopoMap' }
 };
 
+let adminBoundaryLayer = null;
+let adminJurusanLayer = null;
+
 function initAdminMap() {
   if (adminMap) return;
   adminMap = L.map('adminMap').setView([-7.2756, 112.7951], 15);
@@ -1943,8 +1960,16 @@ function initAdminMap() {
   }).addTo(adminMap);
 
   adminReportLayer = L.layerGroup().addTo(adminMap);
+  adminHeatLayer = L.heatLayer([], { radius: 25, blur: 20, maxZoom: 17 });
+  adminClusterLayer = L.markerClusterGroup({
+    spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true
+  });
+
   adminLocLayer = L.layerGroup().addTo(adminMap);
   renderAdminMap();
+  
+  // Load GIS layers
+  setTimeout(() => loadAdminGISLayers(), 500);
 }
 
 function switchAdminBasemap(btn) {
@@ -1960,6 +1985,39 @@ function switchAdminBasemap(btn) {
 }
 
 let visAdminLocLayer = true;
+let visAdminJurusanLayer = true;
+
+let visAdminHeatmap = false;
+let visAdminPoint = true;
+let visAdminCluster = false;
+
+function toggleAdminLayerVis(type) {
+  visAdminHeatmap = (type === 'heatmap');
+  visAdminPoint = (type === 'point');
+  visAdminCluster = (type === 'cluster');
+
+  const updateBtn = (id, active) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (active) {
+      el.classList.add('active');
+      el.style.background = 'rgba(242,132,130,.2)';
+      el.style.color = '#D56A6A';
+      el.style.fontWeight = '700';
+    } else {
+      el.classList.remove('active');
+      el.style.background = 'transparent';
+      el.style.color = 'var(--text)';
+      el.style.fontWeight = '600';
+    }
+  };
+
+  updateBtn('tog-admin-heatmap', visAdminHeatmap);
+  updateBtn('tog-admin-point', visAdminPoint);
+  updateBtn('tog-admin-cluster', visAdminCluster);
+
+  renderAdminMap();
+}
 
 function toggleAdminPin(type, el) {
   const isActive = el.dataset.active === 'true';
@@ -1970,12 +2028,12 @@ function toggleAdminPin(type, el) {
     el.style.background = 'rgba(242,132,130,.14)';
     el.style.color = '#D56A6A';
     el.style.borderColor = 'rgba(242,132,130,.45)';
-    el.querySelector('.pin-icon').className = 'fas fa-check-circle pin-icon';
+    el.querySelector('.fas.fa-circle').className = 'fas fa-check-circle ' + (type === 'jurusan' ? 'pin-icon-jurusan' : 'pin-icon');
   } else {
     el.style.background = 'transparent';
     el.style.color = 'var(--text-muted)';
     el.style.borderColor = 'var(--border)';
-    el.querySelector('.pin-icon').className = 'fas fa-circle pin-icon';
+    el.querySelector('.fas.fa-check-circle').className = 'fas fa-circle ' + (type === 'jurusan' ? 'pin-icon-jurusan' : 'pin-icon');
   }
 
   if (type === 'fixedpin') {
@@ -1987,13 +2045,109 @@ function toggleAdminPin(type, el) {
         if (adminMap.hasLayer(adminLocLayer)) adminMap.removeLayer(adminLocLayer);
       }
     }
+  } else if (type === 'jurusan') {
+    visAdminJurusanLayer = nextState;
+    if (adminMap && adminJurusanLayer) {
+      if (visAdminJurusanLayer) {
+        if (!adminMap.hasLayer(adminJurusanLayer)) adminMap.addLayer(adminJurusanLayer);
+      } else {
+        if (adminMap.hasLayer(adminJurusanLayer)) adminMap.removeLayer(adminJurusanLayer);
+      }
+    }
+  }
+}
+
+// ─── GIS SHAPEFILE LOADING ──────────────────────────────────
+async function loadAdminGISLayers() {
+  if (typeof shp === 'undefined') return;
+
+  // Reproject utility from UTM49S to WGS84
+  const defs = () => {
+    if (typeof proj4 === 'undefined') return;
+    if (!proj4.defs('EPSG:32749')) proj4.defs('EPSG:32749', '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs');
+    if (!proj4.defs('EPSG:4326')) proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
+  };
+
+  const reproject = (gj) => {
+    if (!gj || !gj.features || typeof proj4 === 'undefined') return gj;
+    defs();
+    const from = proj4('EPSG:32749');
+    const to = proj4('EPSG:4326');
+
+    gj.features.forEach(f => {
+      if (!f.geometry || !f.geometry.coordinates) return;
+      const tform = (coords) => {
+        if (typeof coords[0] === 'number') {
+          const out = proj4(from, to, coords);
+          return [out[0], out[1]];
+        }
+        return coords.map(tform);
+      };
+      
+      // Basic heuristic to check if it's already in WGS84
+      let first = f.geometry.coordinates;
+      while (first && typeof first[0] !== 'number') first = first[0];
+      if (first && (Math.abs(first[0]) > 180 || Math.abs(first[1]) > 90)) {
+        f.geometry.coordinates = tform(f.geometry.coordinates);
+      }
+    });
+    return gj;
+  };
+
+  try {
+    // Boundary ITS
+    let bufBoundary = await fetch('assets/its_boundary.zip').then(r => r.ok ? r.arrayBuffer() : null);
+    if (!bufBoundary && typeof BOUNDARY_ZIP_B64 !== 'undefined') {
+      bufBoundary = Uint8Array.from(atob(BOUNDARY_ZIP_B64), c => c.charCodeAt(0)).buffer;
+    }
+    if (bufBoundary) {
+      let gjBoundary = await shp(bufBoundary);
+      gjBoundary = reproject(gjBoundary.type ? gjBoundary : gjBoundary[Object.keys(gjBoundary)[0]]);
+      adminBoundaryLayer = L.geoJSON(gjBoundary, {
+        style: { color:'#EF4444', weight:3, fill:true, fillOpacity:0.08, dashArray:'6 4' }
+      }).addTo(adminMap);
+      
+      const bounds = adminBoundaryLayer.getBounds();
+      if (bounds.isValid()) adminMap.fitBounds(bounds, { padding: [20, 20] });
+    }
+    
+    // Jurusan Pins
+    let bufJurusan = await fetch('assets/jurusan_its.zip').then(r => r.ok ? r.arrayBuffer() : null);
+    if (!bufJurusan && typeof JURUSAN_ZIP_B64 !== 'undefined') {
+      bufJurusan = Uint8Array.from(atob(JURUSAN_ZIP_B64), c => c.charCodeAt(0)).buffer;
+    }
+    if (bufJurusan) {
+      let gjJurusan = await shp(bufJurusan);
+      gjJurusan = reproject(gjJurusan.type ? gjJurusan : gjJurusan[Object.keys(gjJurusan)[0]]);
+      
+      adminJurusanLayer = L.layerGroup();
+      if (visAdminJurusanLayer) adminJurusanLayer.addTo(adminMap);
+
+      L.geoJSON(gjJurusan, {
+        pointToLayer: (feat, latlng) => {
+          const props = feat.properties || {};
+          const name = props.Name || props.NAME || 'Gedung Jurusan';
+          const icon = L.divIcon({
+            html: '<div style="background:#4B5563;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.4);border:2px solid #fff;"><i class="fas fa-building-columns" style="font-size:0.7rem;"></i></div>',
+            className: '',
+            iconSize: [24,24],
+            iconAnchor: [12,12]
+          });
+          return L.marker(latlng, { icon }).bindPopup(`<b style="color:#1F2937">${name}</b><br><span style="font-size:0.8rem;color:#6B7280">Fakultas / Departemen</span>`);
+        }
+      }).addTo(adminJurusanLayer);
+    }
+  } catch(e) {
+    console.error('Failed loading admin GIS layers:', e);
   }
 }
 
 function renderAdminMap() {
-  if (!adminMap || !adminReportLayer || !adminLocLayer) return;
-  adminReportLayer.clearLayers();
-  adminLocLayer.clearLayers();
+  if (!adminMap) return;
+  if (adminReportLayer) { adminReportLayer.clearLayers(); adminMap.removeLayer(adminReportLayer); }
+  if (adminHeatLayer) { adminHeatLayer.setLatLngs([]); adminMap.removeLayer(adminHeatLayer); }
+  if (adminClusterLayer) { adminClusterLayer.clearLayers(); adminMap.removeLayer(adminClusterLayer); }
+  if (adminLocLayer) { adminLocLayer.clearLayers(); }
 
   const isRawanTinggi = (score) => { const s = parseInt(score, 10); return !isNaN(s) && s >= 4; };
   const isRawanSedang = (score) => { const s = parseInt(score, 10); return s === 3; };
@@ -2002,9 +2156,19 @@ function renderAdminMap() {
     (isRawanSedang(s) ? `<div style="background:#fffbeb;color:#b45309;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;display:inline-block"><i class="fas fa-circle-exclamation"></i> Cukup Rawan</div>` : 
     `<div style="background:#f0fdf4;color:#166534;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;display:inline-block"><i class="fas fa-shield"></i> Rendah / Aman</div>`);
 
+  const heatData = [];
+
   // Plot laporan
   reports.forEach(r => {
     if (!r.lat || !r.lng) return;
+
+    if (visAdminHeatmap) {
+      let intensity = 0.5;
+      if (isRawanTinggi(r.skorRawan)) intensity = 1.0;
+      else if (isRawanSedang(r.skorRawan)) intensity = 0.7;
+      heatData.push([r.lat, r.lng, intensity]);
+      return; 
+    }
 
     const fotoUrl = r.fotoPath ? getPhotoUrl(r.fotoPath) : null;
     const isHidden = r.fotoPath && r.fotoPath.startsWith('HIDDEN_');
@@ -2013,7 +2177,7 @@ function renderAdminMap() {
         <img src="${fotoUrl}" style="max-width:100%;max-height:140px;border-radius:4px;object-fit:cover;${isHidden ? 'opacity:0.4; filter: grayscale(100%);' : ''}" onerror="this.style.display='none'"/>
         <div style="margin-top:5px;display:flex;gap:5px;justify-content:center">
           <button onclick="toggleFotoHide(${r.id}, '${isHidden ? 'unhide' : 'hide'}')" style="background:${isHidden ? '#10B981' : '#F59E0B'};color:white;border:none;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:0.75rem;width:100%">
-            ${isHidden ? '<i class="fas fa-eye"></i> Tampilkan Foto ke Publik' : '<i class="fas fa-eye-slash"></i> Sembunyikan Foto'}
+            ${isHidden ? '<i class="fas fa-eye"></i> Tampilkan Foto' : '<i class="fas fa-eye-slash"></i> Sembunyikan Foto'}
           </button>
         </div>
       </div>
@@ -2041,10 +2205,25 @@ function renderAdminMap() {
 
     const markerColor = isRawanTinggi(r.skorRawan) ? '#D56A6A' : (isRawanSedang(r.skorRawan) ? '#F6BD60' : '#84A59D');
     
-    L.circleMarker([r.lat, r.lng], {
+    const marker = L.circleMarker([r.lat, r.lng], {
       radius: 8, color: '#fff', fillColor: markerColor, fillOpacity: 0.9, weight: 2
-    }).addTo(adminReportLayer).bindPopup(bodyHtml);
+    }).bindPopup(bodyHtml);
+
+    if (visAdminPoint) {
+      marker.addTo(adminReportLayer);
+    } else if (visAdminCluster && adminClusterLayer) {
+      adminClusterLayer.addLayer(marker);
+    }
   });
+
+  if (visAdminHeatmap && adminHeatLayer) {
+    adminHeatLayer.setLatLngs(heatData);
+    adminMap.addLayer(adminHeatLayer);
+  } else if (visAdminPoint) {
+    adminMap.addLayer(adminReportLayer);
+  } else if (visAdminCluster && adminClusterLayer) {
+    adminMap.addLayer(adminClusterLayer);
+  }
 
   // Plot titik pengaduan
   LOCATIONS.forEach(l => {
@@ -2126,5 +2305,9 @@ document.addEventListener('visibilitychange', () => {
   startAutoRefresh();
 });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.min.js"></script>
+<script src="https://unpkg.com/shpjs@latest/dist/shp.min.js"></script>
 </body>
 </html>
