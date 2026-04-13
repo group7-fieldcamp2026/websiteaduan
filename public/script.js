@@ -441,9 +441,9 @@ function createFacultyIcon(color) {
     html: `<div class="faculty-pin" style="--pin-color:${color}">
              <i class="fas fa-building-columns"></i>
            </div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -16],
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
   });
 }
 

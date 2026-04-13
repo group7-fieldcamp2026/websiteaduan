@@ -1182,8 +1182,8 @@ main { padding-top: 62px; }
 
 .faculty-pin-wrap { background: transparent; border: none; }
 .faculty-pin {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   background: var(--pin-color);
   border-radius: 50%;
   border: 2px solid #fff;
@@ -1195,7 +1195,7 @@ main { padding-top: 62px; }
   transition: transform .25s cubic-bezier(.175, .885, .32, 1.275);
 }
 .faculty-pin:hover { transform: scale(1.2); z-index: 1000; }
-.faculty-pin i { font-size: 0.85rem; }
+.faculty-pin i { font-size: 0.7rem; }
 .case-dot {
   width: 22px;
   height: 22px;

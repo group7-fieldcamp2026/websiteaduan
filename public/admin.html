@@ -560,12 +560,12 @@
     }
     /* MAP PINS SINKRONISASI */
     .faculty-pin {
-      width: 28px; height: 28px;
+      width: 20px; height: 20px;
       background: var(--pin-color);
       border-radius: 50%; border: 2px solid #fff;
       box-shadow: 0 2px 6px rgba(0,0,0,.3);
       display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 0.75rem;
+      color: #fff; font-size: 0.65rem;
     }
     .case-dot {
       width: 22px; height: 22px;
@@ -2178,8 +2178,8 @@ async function loadAdminGISLayers() {
       const icon = L.divIcon({
         html: `<div class="faculty-pin" style="--pin-color:${color}"><i class="fas fa-building-columns"></i></div>`,
         className: 'faculty-pin-wrap',
-        iconSize: [28, 28],
-        iconAnchor: [14, 14]
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
       });
 
       L.marker([parseFloat(lat), parseFloat(lng)], { icon })
