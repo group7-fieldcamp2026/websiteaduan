@@ -1186,9 +1186,9 @@
           </div>
         </div>
         <div class="detail-item full">
-          <label>Google Maps URL (Opsional)</label>
-          <input type="text" id="lGmaps" placeholder="https://maps.app.goo.gl/..." style="width:100%"/>
-          <span style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;display:block">Bisa diisi manual dengan link Google Maps (opsional)</span>
+          <label>Google Maps URL (Opsional - otomatis terisi dari peta)</label>
+          <input type="text" id="lGmaps" placeholder="Otomatis terisi setelah pilih lokasi di peta" style="width:100%"/>
+          <span style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;display:block">Bisa diedit manual jika ingin menggunakan link pendek</span>
         </div>
         <input type="hidden" id="lLat" value=""/>
         <input type="hidden" id="lLng" value=""/>
@@ -2628,7 +2628,10 @@ function onLocationSelected(latlng) {
   document.getElementById('lLng').value = latlng.lng;
   document.getElementById('selectedLocationCoords').textContent = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
   document.getElementById('locationPreview').style.display = 'block';
-  showToast('✅ Lokasi dipilih', 'success');
+  
+  // Auto-fill GMaps URL (bisa diedit manual потом)
+  document.getElementById('lGmaps').value = `https://maps.google.com/maps?q=${latlng.lat.toFixed(6)},${latlng.lng.toFixed(6)}`;
+  showToast('✅ Lokasi dipilih - URL otomatis terisi', 'success');
 }
 
 function goToMyLocation() {
