@@ -350,14 +350,78 @@ main { padding-top: 62px; }
   0% { background-position: 0% center; }
   100% { background-position: 200% center; }
 }
-.hero-content p { color: var(--text-soft); font-size: .95rem; line-height: 1.7; margin-bottom: 1.75rem;
+.hero-desc-wrapper {
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--primary);
+  padding-left: 1.4rem;
   animation: heroHeadIn 1s cubic-bezier(.22,1,.36,1) .25s both;
 }
-.hero-note {
-  font-size: .85rem;
-  color: var(--text-muted);
-  margin-top: -1rem;
-  margin-bottom: 1.4rem;
+.hero-lead {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.45;
+  margin-bottom: 0.6rem;
+}
+.hero-sub {
+  font-size: 0.95rem;
+  color: var(--text-soft);
+  line-height: 1.65;
+}
+
+.collab-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.7rem 1.1rem;
+  background: rgba(var(--ink-rgb), 0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 1.8rem;
+  animation: heroHeadIn 1s cubic-bezier(.22,1,.36,1) .35s both;
+  transition: all 0.3s ease;
+}
+.collab-badge:hover {
+  background: rgba(var(--ink-rgb), 0.05);
+  border-color: rgba(var(--primary-rgb), 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--ink-rgb), 0.05);
+}
+.collab-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--primary-lt), var(--primary-dk));
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.25);
+  flex-shrink: 0;
+}
+.collab-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.35;
+}
+.collab-text span {
+  font-size: 0.78rem;
+  color: var(--text);
+  margin-bottom: 0.1rem;
+  font-weight: 700;
+}
+.collab-text strong {
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  background: linear-gradient(90deg, var(--primary-dk) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .hero-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
