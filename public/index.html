@@ -155,9 +155,9 @@
 
                 <div class="form-grid">
                   <div class="form-group full-width">
-                    <label>Email ITS <span class="req">*</span></label>
-                    <input type="email" id="emailIts" placeholder="nama@its.ac.id" required />
-                    <span class="form-hint">Identitasmu tidak akan dipublikasikan.</span>
+                    <label>Email <span class="req">*</span></label>
+                    <input type="email" id="emailIts" placeholder="nama@gmail.com" required />
+                    <span class="form-hint">Identitasmu tidak akan dipublikasikan. Namun, sangat disarankan menggunakan email dengan nama asli guna memperkuat validitas laporan.</span>
                   </div>
                   <div class="form-group">
                     <label>Peran di Kampus <span class="req">*</span></label>
@@ -170,12 +170,11 @@
                     </select>
                   </div>
                   <div class="form-group">
-                    <label>Jenis Kelamin</label>
-                    <select id="jenisKelamin">
-                      <option value="">-- Opsional --</option>
+                    <label>Jenis Kelamin <span class="req">*</span></label>
+                    <select id="jenisKelamin" required>
+                      <option value="">-- Pilih --</option>
                       <option>Laki-laki</option>
                       <option>Perempuan</option>
-                      <option>Tidak ingin menyebutkan</option>
                     </select>
                   </div>
                   <!-- LOKASI -->
