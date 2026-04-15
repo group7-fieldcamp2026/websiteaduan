@@ -2059,21 +2059,33 @@ main { padding-top: 62px; }
   box-shadow: 0 8px 28px rgba(0,0,0,.3) !important;
   max-width: 260px !important;
   width: auto !important;
+  transform: none !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
 }
 .leaflet-popup-content {
   margin: 10px 13px !important;
   max-width: 240px !important;
   font-size: 13px !important;
   line-height: 1.4 !important;
+  transform: none !important;
+  max-height: 280px !important;
+  overflow-y: auto !important;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-content {
+  transform-origin: center center !important;
 }
 
 @media (max-width: 480px) {
   .leaflet-popup-content-wrapper {
     max-width: 220px !important;
+    max-height: 280px !important;
   }
   .leaflet-popup-content {
     max-width: 200px !important;
     font-size: 12px !important;
+    max-height: 260px !important;
   }
 }
 

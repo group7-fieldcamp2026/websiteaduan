@@ -921,7 +921,7 @@ function buildPopup(r) {
     </div>`;
   }
   
-  return `<div style="font-family:'DM Sans',sans-serif;min-width:160px;max-width:220px;font-size:13px;line-height:1.4">
+  return `<div style="font-family:'DM Sans',sans-serif;min-width:160px;max-width:220px;font-size:13px;line-height:1.4;transform:none">
     ${headerHtml}
     ${descHtml}
     ${bodyHtml}
