@@ -805,50 +805,70 @@
       touch-action: pan-x pan-y pinch-zoom;
     }
 
-    /* Leaflet popup sizing for admin map */
+    /* Leaflet popup sizing for admin map - nice design */
     #adminMap .leaflet-popup-content-wrapper {
-      max-width: 260px !important;
-      width: auto !important;
+      border-radius: 12px !important;
+      box-shadow: 0 8px 28px rgba(0,0,0,.25) !important;
+      max-width: 220px !important;
+      width: 220px !important;
       transform: none !important;
-      max-height: 300px !important;
-      overflow-y: auto !important;
-      direction: rtl;
+      max-height: 220px !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+      background: #F5CAC3 !important;
+      border: 1px solid rgba(0,0,0,0.08);
     }
     #adminMap .leaflet-popup-content {
-      margin: 10px 13px !important;
-      max-width: 240px !important;
-      font-size: 13px !important;
-      line-height: 1.4 !important;
+      margin: 0 !important;
+      max-width: 190px !important;
+      font-size: 12px !important;
+      line-height: 1.45 !important;
       transform: none !important;
-      max-height: 280px !important;
+      max-height: 200px !important;
       overflow-y: auto !important;
-      direction: ltr !important;
+      padding: 12px 12px 12px 18px !important;
+      display: block !important;
     }
     #adminMap .leaflet-popup-content-wrapper,
     #adminMap .leaflet-popup-content {
       transform-origin: center center !important;
     }
 
-    /* Custom scrollbar for admin popup - left side */
-    #adminMap .leaflet-popup-content-wrapper {
+    /* Custom scrollbar for admin popup - left side, nice design */
+    #adminMap .leaflet-popup-content {
       scrollbar-width: thin;
-      scrollbar-color: #c1c1c1 #f1f1f1;
+      scrollbar-color: #D56A6A #ebd5cf;
     }
-    #adminMap .leaflet-popup-content-wrapper::-webkit-scrollbar {
-      width: 6px;
-      position: absolute;
-      left: 0;
+    #adminMap .leaflet-popup-content::-webkit-scrollbar {
+      width: 4px;
     }
-    #adminMap .leaflet-popup-content-wrapper::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 3px;
+    #adminMap .leaflet-popup-content::-webkit-scrollbar-track {
+      background: #ebd5cf;
+      border-radius: 2px;
+      margin: 8px 0;
     }
-    #adminMap .leaflet-popup-content-wrapper::-webkit-scrollbar-thumb {
-      background: #F28482;
-      border-radius: 3px;
+    #adminMap .leaflet-popup-content::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #D56A6A, #B85454);
+      border-radius: 4px;
+      min-height: 25px;
     }
-    #adminMap .leaflet-popup-content-wrapper::-webkit-scrollbar-thumb:hover {
-      background: #D56A6A;
+    #adminMap .leaflet-popup-content::-webkit-scrollbar-thumb:hover {
+      background: #B85454;
+    }
+    #adminMap .leaflet-popup-content::-webkit-scrollbar-corner {
+      background: #ebd5cf;
+    }
+
+    /* Popup close button */
+    #adminMap .leaflet-popup-close-button {
+      color: #666 !important;
+      font-size: 18px !important;
+      padding: 4px !important;
+      right: 4px !important;
+      top: 4px !important;
+    }
+    #adminMap .leaflet-popup-close-button:hover {
+      color: #D56A6A !important;
     }
 
     @media (max-width: 640px) {
