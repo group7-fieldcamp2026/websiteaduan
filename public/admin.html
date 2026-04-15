@@ -3566,21 +3566,52 @@
       </div>
     ` : `<div style="font-size:0.7rem;color:#888;text-align:center;margin-top:5px;padding:10px;background:#f5f5f5;border-radius:4px">Tidak ada foto dilampirkan</div>`;
 
+        const getScoreAdmin = (val, type) => {
+          const scores = {
+            pencahayaan: { 'Terang': '#10B981', 'Remang-remang': '#F59E0B', 'Gelap': '#EF4444' },
+            kepadatan: { 'Ramai': '#10B981', 'Cukup ramai': '#F59E0B', 'Sepi': '#EF4444', 'Sangat sepi': '#EF4444' },
+            cctv: { 'Ada dan terlihat jelas': '#10B981', 'Ada tapi tidak yakin aktif': '#F59E0B', 'Tidak ada': '#EF4444', 'Tidak tahu': '#9CA3AF' },
+            petugas: { 'Sering ada': '#10B981', 'Kadang ada': '#F59E0B', 'Jarang ada': '#EF4444', 'Tidak pernah ada': '#EF4444' },
+            vegetasi: { 'Terbuka, tidak terhalang': '#10B981', 'Ada semak/pohon yang menghalangi pandangan': '#F59E0B', 'Sudut tersembunyi / gang buntu': '#EF4444', 'Ruang tertutup': '#EF4444' }
+          };
+          const color = scores[type]?.[val] || '#6B7280';
+          return `<span style="color:${color};font-weight:600">${val || '-'}</span>`;
+        };
+
         const bodyHtml = `
-      <div style="font-family:'DM Sans',sans-serif;min-width:160px;max-width:220px;font-size:13px;line-height:1.4;transform:none">
-        <div style="display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding-bottom:5px;margin-bottom:5px">
-          <strong style="color:#D56A6A; font-size: 0.9rem">#${r.id} - ${r.lokasi || 'Tidak diketahui'}</strong>
+      <div style="font-family:'DM Sans',sans-serif;min-width:160px;max-width:220px;font-size:12px;line-height:1.4;transform:none">
+        <div style="border-bottom:1px solid #e5e5e5;padding-bottom:6px;margin-bottom:6px">
+          <strong style="color:#D56A6A;font-size:0.85rem">${r.lokasi || 'Tidak diketahui'}</strong>
+          <div style="font-size:0.7rem;color:#888;margin-top:2px">#${r.id} | ${r.peran || '-'}</div>
         </div>
+        
+        <div style="margin-bottom:6px">
+          <div style="font-size:0.7rem;color:#6B7280;margin-bottom:2px">Email Pelapor</div>
+          <div style="font-size:0.75rem;color:#374151;font-weight:500">${r.email || '-'}</div>
+        </div>
+
         <div style="text-align:center;margin-bottom:8px;">${getRawanLabel(r.skorRawan)}</div>
-        <div style="margin-bottom:8px; display:grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-          <div><b style="color:#666">Pencahayaan:</b><br>${r.pencahayaan || '-'}</div>
-          <div><b style="color:#666">Kepadatan:</b><br>${r.kepadatan || '-'}</div>
-          <div style="grid-column: span 2"><b style="color:#666">Waktu Rawan:</b><br>${r.waktu || '-'} (${r.hariRawan || '-'})</div>
+        
+        <div style="margin-bottom:6px">
+          <div style="font-size:0.7rem;color:#6B7280;margin-bottom:2px">Deskripsi Lokasi</div>
+          <div style="font-size:0.75rem;color:#374151;font-style:italic">"${r.lokasiDeskripsi || '-'}"</div>
         </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;font-size:0.75rem">
+          <div><span style="color:#6B7280">Pencahayaan:</span><br>${getScoreAdmin(r.pencahayaan, 'pencahayaan')}</div>
+          <div><span style="color:#6B7280">Kepadatan:</span><br>${getScoreAdmin(r.kepadatan, 'kepadatan')}</div>
+          <div><span style="color:#6B7280">CCTV:</span><br>${getScoreAdmin(r.cctv, 'cctv')}</div>
+          <div><span style="color:#6B7280">Petugas:</span><br>${getScoreAdmin(r.petugas, 'petugas')}</div>
+          <div style="grid-column:span 2"><span style="color:#6B7280">Keterbukaan:</span><br>${getScoreAdmin(r.vegetasi, 'vegetasi')}</div>
+          <div style="grid-column:span 2"><span style="color:#6B7280">Waktu Rawan:</span><br>${r.waktu || '-'} (${r.hariRawan || '-'})</div>
+        </div>
+
+        <div style="font-size:0.7rem;color:#6B7280;margin-bottom:4px">Koordinat: ${r.lat?.toFixed(5) || '-'}, ${r.lng?.toFixed(5) || '-'}</div>
+        
         ${fotoHtml}
-        <div style="margin-top:10px;text-align:center;border-top:1px solid #eee;padding-top:10px;">
-          <button onclick="deleteReportMap(${r.id})" style="background:#EF4444;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:0.8rem;width:100%;font-weight:600">
-            <i class="fas fa-trash"></i> Hapus Titik Laporan Ini
+        <div style="margin-top:10px;text-align:center;border-top:1px solid #e5e5e5;padding-top:8px;">
+          <button onclick="deleteReportMap(${r.id})" style="background:#EF4444;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:0.7rem;width:100%;font-weight:600">
+            <i class="fas fa-trash"></i> Hapus
           </button>
         </div>
       </div>
