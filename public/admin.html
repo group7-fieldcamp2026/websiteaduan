@@ -805,6 +805,24 @@
       touch-action: pan-x pan-y pinch-zoom;
     }
 
+    /* Leaflet popup sizing for admin map */
+    #adminMap .leaflet-popup-content-wrapper {
+      max-width: 260px !important;
+      width: auto !important;
+    }
+    #adminMap .leaflet-popup-content {
+      max-width: 240px !important;
+    }
+
+    @media (max-width: 640px) {
+      #adminMap .leaflet-popup-content-wrapper {
+        max-width: 220px !important;
+      }
+      #adminMap .leaflet-popup-content {
+        max-width: 200px !important;
+      }
+    }
+
     /* MODAL */
     .modal-overlay {
       position: fixed;
@@ -3489,7 +3507,7 @@
     ` : `<div style="font-size:0.7rem;color:#888;text-align:center;margin-top:5px;padding:10px;background:#f5f5f5;border-radius:4px">Tidak ada foto dilampirkan</div>`;
 
         const bodyHtml = `
-      <div style="font-family:'DM Sans',sans-serif;min-width:220px;font-size:0.8rem">
+      <div style="font-family:'DM Sans',sans-serif;min-width:160px;max-width:220px;font-size:0.8rem">
         <div style="display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding-bottom:5px;margin-bottom:5px">
           <strong style="color:#D56A6A; font-size: 0.9rem">#${r.id} - ${r.lokasi || 'Tidak diketahui'}</strong>
         </div>

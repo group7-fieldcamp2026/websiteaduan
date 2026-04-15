@@ -2057,9 +2057,26 @@ main { padding-top: 62px; }
 .leaflet-popup-content-wrapper {
   border-radius: 10px !important;
   box-shadow: 0 8px 28px rgba(0,0,0,.3) !important;
+  max-width: 260px !important;
+  width: auto !important;
 }
 .leaflet-popup-content {
   margin: 10px 13px !important;
+  max-width: 240px !important;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-content {
+  font-size: .82rem !important;
+}
+
+@media (max-width: 480px) {
+  .leaflet-popup-content-wrapper {
+    max-width: 220px !important;
+  }
+  .leaflet-popup-content {
+    max-width: 200px !important;
+    font-size: .78rem !important;
+  }
 }
 
 /* ── Toast (if not already in style.css) ────────────────── */
