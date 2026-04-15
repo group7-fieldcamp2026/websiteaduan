@@ -794,9 +794,15 @@
 
     /* MAP PAGE */
     #adminMap {
-      height: 500px;
+      height: 400px;
       border-radius: var(--radius);
       overflow: hidden;
+      touch-action: pan-x pan-y pinch-zoom;
+      max-height: 60vh;
+    }
+    
+    #adminMap .leaflet-container {
+      touch-action: pan-x pan-y pinch-zoom;
     }
 
     /* MODAL */
@@ -1357,7 +1363,8 @@
       }
 
       #adminMap {
-        height: 320px;
+        height: 280px;
+        max-height: 50vh;
       }
 
       .card-header {
@@ -2459,7 +2466,10 @@
       el.classList.add('active');
       const titles = { dashboard: 'Dashboard', laporan: 'Data Laporan', titik: 'Titik Pengaduan', peta: 'Peta Admin' };
       document.getElementById('topbarTitle').textContent = titles[id] || id;
-      if (id === 'peta') initAdminMap();
+      if (id === 'peta') {
+        initAdminMap();
+        setTimeout(() => { if (adminMap) adminMap.invalidateSize(); }, 150);
+      }
     }
 
     // ─── DASHBOARD ───────────────────────────────────────────────
@@ -3215,7 +3225,20 @@
 
     function initAdminMap() {
       if (adminMap) return;
-      adminMap = L.map('adminMap').setView([-7.2756, 112.7951], 15);
+      adminMap = L.map('adminMap', {
+        center: [-7.2756, 112.7951],
+        zoom: 15,
+        zoomControl: true,
+        attributionControl: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
+        boxZoom: true,
+        keyboard: true,
+        tap: true,
+        bounceAtZoomRequirements: false,
+        zoomSnap: 0.25,
+        zoomDelta: 0.5,
+      });
 
       adminBaseTile = L.tileLayer(ADMIN_BASEMAPS.osm.url, {
         attribution: ADMIN_BASEMAPS.osm.attr
@@ -3224,7 +3247,9 @@
       adminReportLayer = L.layerGroup().addTo(adminMap);
       adminHeatLayer = L.heatLayer([], { radius: 25, blur: 20, maxZoom: 17 });
       adminClusterLayer = L.markerClusterGroup({
-        spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true
+        spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true,
+        disableClusteringAtZoom: 18,
+        maxClusterRadius: 40
       });
 
       adminLocLayer = L.layerGroup().addTo(adminMap);
@@ -3232,6 +3257,9 @@
 
       // Load GIS layers
       setTimeout(() => loadAdminGISLayers(), 500);
+      
+      // Fix map size after modal opens
+      setTimeout(() => { if (adminMap) adminMap.invalidateSize(); }, 200);
     }
 
     function switchAdminBasemap(btn) {
