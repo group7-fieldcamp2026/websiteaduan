@@ -3617,7 +3617,13 @@
       </div>
     `;
 
-        const markerColor = isRawanTinggi(r.skorRawan) ? '#EF4444' : (isRawanSedang(r.skorRawan) ? '#F59E0B' : '#10B981');
+        // Determine marker color based on verification status
+        const statusColors = {
+          pending: '#F59E0B',    // Orange (Menunggu Verifikasi)
+          in_review: '#3B82F6', // Blue (Dalam Tinjauan)
+          resolved: '#10B981'   // Green (Terverifikasi)
+        };
+        const markerColor = statusColors[r.status] || '#6B7280';
 
         const caseIcon = L.divIcon({
           className: 'case-dot-wrap',

@@ -539,10 +539,121 @@ function renderLeafletMap() {
   const filterBulan = document.getElementById('filterBulan')?.value || '';
   const filterWaktu = document.getElementById('filterWaktu')?.value || '';
 
+  // Base data: reports with coordinates
   let data = reports.filter(r => r.lat && r.lng);
+
+  // PUBLIC MAP: hanya tampilkan laporan yang sudah terverifikasi (resolved)
+  data = data.filter(r => r.status === 'resolved');
+
   if (activeLayer !== 'semua') {
     data = data.filter(r => matchesLayer(r, activeLayer));
   }
+  if (filterWaktu) data = data.filter(r => r.waktu === filterWaktu);
+  if (filterBulan) {
+    data = data.filter(r => {
+      const d = parseReportDate(r);
+      return d && (d.getMonth() + 1) === parseInt(filterBulan);
+    });
+  }
+
+  // Update counts and analysis based on the currently displayed data
+  updateLayerCounts(data);
+  updateTopAreas(data);
+  updateHeatmapAnalysis(data, filterWaktu, filterBulan);
+
+  const overlay = document.getElementById('mapOverlay');
+  const hasFixed = fixedLocationLayerMain && fixedLocationLayerMain.getLayers().length > 0;
+  overlay.style.display = (data.length === 0 && !hasFixed) ? 'flex' : 'none';
+  if (!data.length) return;
+
+  if (visHeatmap && L.heatLayer) {
+    heatLayer = L.heatLayer(
+      data.map(r => [r.lat, r.lng, 1]),
+      { radius: 35, blur: 22, maxZoom: 18, gradient: { 0.1:'#84A59D', 0.4:'#F6BD60', 0.7:'#F5CAC3', 1.0:'#F28482' } }
+    ).addTo(leafletMap);
+  }
+
+  if (visPoint) {
+    pointLayer = L.layerGroup();
+    data.forEach(r => {
+      let color = getRiskColor(r.skorRawan);
+      let popupHtml = buildPopup(r);
+
+      // Peta 3 (Kelayakan) logic
+      const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
+      if (isPeta3) {
+        const kel = calcKelayakan(r);
+        if (kel.status === 'Layak') color = '#10B981';
+        else if (kel.status === 'Cukup Layak') color = '#F59E0B';
+        else color = '#EF4444';
+
+        let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
+        let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
+        popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
+      }
+
+      L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
+        .bindPopup(popupHtml)
+        .addTo(pointLayer);
+    });
+    leafletMap.addLayer(pointLayer);
+  }
+
+  if (visCluster && L.markerClusterGroup) {
+    clusterLayer = L.markerClusterGroup({ chunkedLoading: true });
+
+    // PETA 3 Logic: Kelayakan Fasilitas
+    const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
+
+    data.forEach(r => {
+      let color = getRiskColor(r.skorRawan);
+      let popupHtml = buildPopup(r);
+
+      if (isPeta3) {
+        const kel = calcKelayakan(r);
+        if (kel.status === 'Layak') color = '#10B981';
+        else if (kel.status === 'Cukup Layak') color = '#F59E0B';
+        else color = '#EF4444';
+
+        let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
+        let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
+        popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
+      }
+
+      L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
+        .bindPopup(popupHtml)
+        .addTo(clusterLayer);
+    });
+    leafletMap.addLayer(clusterLayer);
+  }
+
+  if (visPoint && !visCluster) {
+     // Apply Peta 3 Logic to points too if visCluster is false but visPoint is true
+     const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
+     if (!pointLayer) pointLayer = L.layerGroup().addTo(leafletMap);
+     pointLayer.clearLayers();
+
+     data.forEach(r => {
+       let color = getRiskColor(r.skorRawan);
+       let popupHtml = buildPopup(r);
+
+       if (isPeta3) {
+         const kel = calcKelayakan(r);
+         if (kel.status === 'Layak') color = '#10B981';
+         else if (kel.status === 'Cukup Layak') color = '#F59E0B';
+         else color = '#EF4444';
+
+         let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
+         let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
+         popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
+       }
+
+       L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
+         .bindPopup(popupHtml)
+         .addTo(pointLayer);
+      });
+   }
+}
   if (filterWaktu) data = data.filter(r => r.waktu === filterWaktu);
   if (filterBulan) {
     data = data.filter(r => {
@@ -1263,22 +1374,22 @@ function updateStats() {
   fetchStats();
 }
 
-function updateLayerCounts() {
+function updateLayerCounts(data = reports) {
   const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
-  set('cnt-semua',  reports.length);
-  set('cnt-semua-2',  reports.length);
-  set('cnt-semua-3',  reports.length);
-  set('cnt-tinggi', reports.filter(r => isRawanTinggi(r.skorRawan)).length);
-  set('cnt-sedang', reports.filter(r => isRawanSedang(r.skorRawan)).length);
-  set('cnt-rendah', reports.filter(r => isRawanRendah(r.skorRawan)).length);
-  set('cnt-gelap',  reports.filter(r => r.pencahayaan === 'Gelap').length);
-  set('cnt-sepi',   reports.filter(r => isSepi(r.kepadatan)).length);
-  set('cnt-nocctv', reports.filter(r => r.cctv === 'Tidak ada').length);
-  set('cnt-minim',  reports.filter(r => isMinimPetugas(r.petugas)).length);
+  set('cnt-semua',  data.length);
+  set('cnt-semua-2',  data.length);
+  set('cnt-semua-3',  data.length);
+  set('cnt-tinggi', data.filter(r => isRawanTinggi(r.skorRawan)).length);
+  set('cnt-sedang', data.filter(r => isRawanSedang(r.skorRawan)).length);
+  set('cnt-rendah', data.filter(r => isRawanRendah(r.skorRawan)).length);
+  set('cnt-gelap',  data.filter(r => r.pencahayaan === 'Gelap').length);
+  set('cnt-sepi',   data.filter(r => isSepi(r.kepadatan)).length);
+  set('cnt-nocctv', data.filter(r => r.cctv === 'Tidak ada').length);
+  set('cnt-minim',  data.filter(r => isMinimPetugas(r.petugas)).length);
   
-  set('cnt-layak', reports.filter(r => calcKelayakan(r).status === 'Layak').length);
-  set('cnt-cukup-layak', reports.filter(r => calcKelayakan(r).status === 'Cukup Layak').length);
-  set('cnt-kurang-layak', reports.filter(r => calcKelayakan(r).status === 'Kurang Layak').length);
+  set('cnt-layak', data.filter(r => calcKelayakan(r).status === 'Layak').length);
+  set('cnt-cukup-layak', data.filter(r => calcKelayakan(r).status === 'Cukup Layak').length);
+  set('cnt-kurang-layak', data.filter(r => calcKelayakan(r).status === 'Kurang Layak').length);
 }
 
 function updateTopAreas(data) {

@@ -360,6 +360,9 @@ class ReportController extends Controller
             return response()->json(['success' => false, 'message' => 'Laporan tidak ditemukan.'], 404);
         }
 
+        // Dapatkan status yang diminta sebelum validasi/conversion
+        $requestedStatus = $request->input('status');
+
         $validated = $request->validate([
             'email_its'            => 'nullable|email',
             'peran_kampus'         => 'nullable|in:Mahasiswa,Dosen,Tenaga Kependidikan,Lainnya (non-ITS)',
@@ -388,6 +391,27 @@ class ReportController extends Controller
             'status'               => 'nullable|in:pending,in_review,resolved,verified,rejected',
         ]);
 
+        // Handle penolakan (data tidak valid) — kirim email & hapus
+        if ($requestedStatus === 'rejected') {
+            $readableStatus = 'Ditolak/Tidak Valid';
+            $mailReport = clone $report;
+            $mailReport->status = $readableStatus;
+            try {
+                if ($report->email_its) {
+                    \Illuminate\Support\Facades\Mail::to($report->email_its)->send(new \App\Mail\ReportStatusUpdated($mailReport));
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send rejection email: ' . $e->getMessage());
+            }
+            $report->delete();
+            return response()->json(['success' => true, 'message' => 'Laporan ditolak dan dihapus.']);
+        }
+
+        // Konversi 'verified' -> 'resolved' untuk kompatibilitas DB
+        if (isset($validated['status']) && $validated['status'] === 'verified') {
+            $validated['status'] = 'resolved';
+        }
+
         if ($request->hasFile('foto_lokasi')) {
             $path = $request->file('foto_lokasi')->store('report-photos', 'public');
             $validated['foto_path'] = $path;
@@ -403,30 +427,18 @@ class ReportController extends Controller
             }
         }
 
-        if (array_key_exists('status', $validated)) {
-            if ($validated['status'] === 'verified') {
-                $validated['status'] = 'resolved';
-            } elseif ($validated['status'] === 'rejected') {
-                $validated['status'] = 'in_review';
-            }
-        }
-
         $oldStatus = $report->getOriginal('status');
         $report->fill($validated);
         $report->save();
 
         if (array_key_exists('status', $validated) && $validated['status'] !== $oldStatus) {
-            // Format status name for email readability
             $statusMapping = [
                 'pending' => 'Pending',
                 'in_review' => 'Dalam Tinjauan',
                 'resolved' => 'Terverifikasi',
-                'verified' => 'Terverifikasi',
-                'rejected' => 'Ditolak/Tidak Valid'
             ];
             $readableStatus = $statusMapping[$validated['status']] ?? $validated['status'];
-            
-            // Create a temporary clone to pass the readable status to the Mailable
+
             $mailReport = clone $report;
             $mailReport->status = $readableStatus;
 
@@ -435,14 +447,7 @@ class ReportController extends Controller
                     \Illuminate\Support\Facades\Mail::to($report->email_its)->send(new \App\Mail\ReportStatusUpdated($mailReport));
                 }
             } catch (\Exception $e) {
-                // Log failed email, but still return success for the update
-                \Illuminate\Support\Facades\Log::error('Failed to send status update email: ' . $e->getMessage());
-            }
-
-            // Perform hard-delete if the report is marked as rejected
-            if ($validated['status'] === 'rejected') {
-                $report->delete();
-                return response()->json(['success' => true, 'message' => 'Laporan ditolak dan dihapus.']);
+                Log::error('Failed to send status update email: ' . $e->getMessage());
             }
         }
 
