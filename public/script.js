@@ -927,8 +927,12 @@ function buildPopup(r) {
 
   bodyHtml += `<div class="popup-meta-grid">
     <div class="popup-meta-row">
-      <span class="popup-meta-label">Waktu</span>
-      <span class="popup-meta-value" style="color:#64748b">${r.waktu || '—'} ${r.hariRawan ? '(' + r.hariRawan + ')' : ''}</span>
+      <span class="popup-meta-label">Waktu Rawan</span>
+      <span class="popup-meta-value" style="color:#64748b">${r.waktu || '—'}</span>
+    </div>
+    <div class="popup-meta-row">
+      <span class="popup-meta-label">Hari Rawan</span>
+      <span class="popup-meta-value" style="color:#64748b">${r.hariRawan || '—'}</span>
     </div>
     <div class="popup-meta-row">
       <span class="popup-meta-label">Cahaya</span>
@@ -947,7 +951,7 @@ function buildPopup(r) {
       ${getScoreHtml(r.petugas, 'petugas')}
     </div>
     <div class="popup-meta-row">
-      <span class="popup-meta-label">Vegetasi</span>
+      <span class="popup-meta-label">Keterbukaan</span>
       ${getScoreHtml(r.vegetasi, 'vegetasi')}
     </div>
   </div></div>`;
@@ -1196,6 +1200,9 @@ function toggleVis(type, cb) {
   if (type === 'heatmap') visHeatmap = cb.checked;
   if (type === 'point') visPoint = cb.checked;
   if (type === 'cluster') visCluster = cb.checked;
+  if (type === 'jurusan') visJurusan = cb.checked;
+  if (type === 'fixedpin') visFixedPin = cb.checked;
+
   document.getElementById('tog-' + type)?.classList.toggle('active', cb.checked);
   renderLeafletMap();
 }

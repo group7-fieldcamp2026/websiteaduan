@@ -1216,37 +1216,59 @@ main {
 
 /* Segmented pill buttons for yes/no */
 .pill-group {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: .6rem;
-  margin-top: .4rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-top: .6rem;
 }
 
 .pill-btn {
-  flex: 1 1 120px;
-  padding: .5rem .65rem;
-  border-radius: 8px;
-  background: rgba(var(--bg-rgb), 1);
-  border: 1.5px solid rgba(var(--ink-rgb), .1);
+  width: 100%;
+  padding: .75rem 1rem;
+  border-radius: 12px;
+  background: #fff;
+  border: 1.5px solid rgba(var(--ink-rgb), .08);
   color: var(--text-muted);
-  font-size: .8rem;
-  font-weight: 600;
+  font-size: .88rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all .2s;
+  transition: all .2s ease;
+  text-align: left;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
   font-family: var(--font-body);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pill-btn::after {
+  content: '\f105';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  opacity: .3;
+  transition: transform .2s;
 }
 
 .pill-btn:hover {
   border-color: rgba(var(--primary-rgb), .3);
-  color: var(--text);
+  color: var(--primary-dk);
+  background: rgba(var(--primary-rgb), .02);
+  transform: translateX(4px);
 }
 
-.pill-btn.selected {
-  background: rgba(var(--primary-rgb), .12);
+.pill-btn.active {
+  background: var(--primary);
   border-color: var(--primary);
-  color: var(--primary-dk);
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), .25);
 }
+
+.pill-btn.active::after {
+  content: '\f058';
+  opacity: 1;
+}
+
+/* Removed old selected class */
 
 /* Subsection inside right column */
 .form-subsection {
@@ -4552,20 +4574,20 @@ main {
 }
 
 [data-theme="dark"] .pill-btn {
-  background: rgba(200, 210, 255, .04);
-  border-color: rgba(200, 210, 255, .1);
-  color: var(--text-muted);
+  background: rgba(255, 255, 255, .05);
+  border-color: rgba(255, 255, 255, .1);
+  color: rgba(200, 210, 255, .6);
 }
 
 [data-theme="dark"] .pill-btn:hover {
-  border-color: rgba(212, 135, 154, .25);
-  color: var(--text);
+  background: rgba(255, 255, 255, .08);
+  border-color: rgba(212, 135, 154, .3);
 }
 
-[data-theme="dark"] .pill-btn.selected {
-  background: rgba(212, 135, 154, .1);
+[data-theme="dark"] .pill-btn.active {
+  background: var(--primary);
   border-color: var(--primary);
-  color: var(--primary-dk);
+  color: #fff !important;
 }
 
 /* Progress bar */
