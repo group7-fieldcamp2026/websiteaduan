@@ -17,7 +17,9 @@
 <body>
   <canvas id="globalBgCanvas"></canvas>
   <!-- Mobile menu overlay for nav -->
-  <div id="mobileNavOverlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(24,28,42,.7);backdrop-filter:blur(2px)"></div>
+  <div id="mobileNavOverlay"
+    style="display:none;position:fixed;inset:0;z-index:999;background:rgba(24,28,42,.7);backdrop-filter:blur(2px)">
+  </div>
 
   <!-- NAVBAR -->
   <nav class="navbar" id="navbar">
@@ -36,10 +38,14 @@
       <span></span><span></span><span></span>
     </button>
     <ul class="nav-links" id="navLinks">
-      <li><a href="#home" class="nav-link active" data-page="home"><i class="fas fa-house"></i><span>Home</span></a></li>
-      <li><a href="#peta" class="nav-link" data-page="peta"><i class="fas fa-map-location-dot"></i><span>Peta Persebaran</span></a></li>
-      <li><a href="#titikpengaduan" class="nav-link" data-page="titikpengaduan"><i class="fas fa-location-crosshairs"></i><span>Titik Pengaduan</span></a></li>
-      <li><a href="#tentang" class="nav-link" data-page="tentang"><i class="fas fa-circle-info"></i><span>Tentang</span></a></li>
+      <li><a href="#home" class="nav-link active" data-page="home"><i class="fas fa-house"></i><span>Home</span></a>
+      </li>
+      <li><a href="#peta" class="nav-link" data-page="peta"><i class="fas fa-map-location-dot"></i><span>Peta
+            Persebaran</span></a></li>
+      <li><a href="#titikpengaduan" class="nav-link" data-page="titikpengaduan"><i
+            class="fas fa-location-crosshairs"></i><span>Titik Pengaduan</span></a></li>
+      <li><a href="#tentang" class="nav-link" data-page="tentang"><i
+            class="fas fa-circle-info"></i><span>Tentang</span></a></li>
       <li><a href="/admin" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
     </ul>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Mode Gelap/Terang">
@@ -63,8 +69,10 @@
           <div class="hero-badge"><i class="fas fa-lock"></i> Anonim &amp; Aman</div>
           <h1>Amati. Laporkan.<br><span class="gradient-text">Buat Kampus Lebih Aman!</span></h1>
           <div class="hero-desc-wrapper">
-            <p class="hero-lead">Platform pelaporan dan pemetaan area berpotensi rawan tindak asusila di lingkungan ITS.</p>
-            <p class="hero-sub">Laporanmu tentang kondisi area yang gelap, sepi, minim pengawasan dapat membantu kampus mengambil tindakan nyata untuk menjaga keamanan semua warga ITS.</p>
+            <p class="hero-lead">Platform pelaporan dan pemetaan area berpotensi rawan tindak asusila di lingkungan ITS.
+            </p>
+            <p class="hero-sub">Laporanmu tentang kondisi area yang gelap, sepi, minim pengawasan dapat membantu kampus
+              mengambil tindakan nyata untuk menjaga keamanan semua warga ITS.</p>
           </div>
           <div class="collab-badge">
             <div class="collab-icon"><i class="fas fa-handshake"></i></div>
@@ -159,7 +167,8 @@
                   <div class="form-group full-width">
                     <label>Email <span class="req">*</span></label>
                     <input type="email" id="emailIts" placeholder="nama@gmail.com" required />
-                    <span class="form-hint">Identitasmu tidak akan dipublikasikan. Namun, sangat disarankan menggunakan email dengan nama asli guna memperkuat validitas laporan.</span>
+                    <span class="form-hint">Identitasmu tidak akan dipublikasikan. Namun, sangat disarankan menggunakan
+                      email dengan nama asli guna memperkuat validitas laporan.</span>
                   </div>
                   <div class="form-group">
                     <label>Peran di Kampus <span class="req">*</span></label>
@@ -279,7 +288,8 @@
                   <div class="form-group full-width">
                     <label>Foto Lokasi <span class="label-opt">opsional</span></label>
                     <input type="file" id="fotoLokasi" accept="image/*" />
-                    <span class="form-hint">Sangat disarankan untuk menyertakan foto karena sangat mendukung kevalidasian laporan. Format JPG/PNG/WEBP, maks 5 MB.</span>
+                    <span class="form-hint">Sangat disarankan untuk menyertakan foto karena sangat mendukung
+                      kevalidasian laporan. Format JPG/PNG/WEBP, maks 5 MB.</span>
                   </div>
                 </div><!-- /form-grid lokasi -->
 
@@ -396,44 +406,51 @@
                       <option value="3">3</option>
                     </select>
                   </div>
-                  <!-- Skor Rawan — bintang -->
+
+                  <!-- Skor Rawan — bintang merah -->
                   <div class="form-group full-width">
-                    <label>Tingkat Kerawanan Terhadap Tindak Asusila <span class="req">*</span></label>
+                    <label>Skala Kerawanan <span class="req">*</span></label>
                     <div class="star-rating-group" id="rawanStars">
                       <div class="star-row" data-target="skorRawan" data-type="danger">
                         <button type="button" class="star-btn" data-val="1" title="1 – Tidak Rawan">★</button>
-                        <button type="button" class="star-btn" data-val="2" title="2 – Sedikit Rawan">★</button>
-                        <button type="button" class="star-btn" data-val="3" title="3 – Cukup Rawan">★</button>
-                        <button type="button" class="star-btn" data-val="4" title="4 – Rawan">★</button>
-                        <button type="button" class="star-btn" data-val="5" title="5 – Sangat Rawan">★</button>
+                        <button type="button" class="star-btn" data-val="2" title="2 – Cukup Rawan">★</button>
+                        <button type="button" class="star-btn" data-val="3" title="3 – Sangat Rawan">★</button>
                       </div>
-                      <div class="star-hint" id="rawanHint">Pilih 1 bintang = Aman, 5 bintang = Sangat Rawan</div>
+                      <div class="star-hint" id="rawanHint">Pilih 1 bintang = Tidak Rawan, 3 bintang = Sangat Rawan
+                      </div>
                     </div>
                     <select id="skorRawan" required class="star-select">
                       <option value="">-- Pilih --</option>
                       <option value="1">1</option>
                       <option value="2">2</option>
                       <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
                     </select>
                   </div>
 
                   <div class="form-group full-width">
-                    <label>Alasan Area Terasa Tidak Nyaman / Rawan <span class="label-opt">opsional</span></label>
-                    <textarea id="alasanTidakNyaman" rows="2" placeholder="Contoh: Sepi saat malam, pencahayaan mati, banyak semak-semak..."></textarea>
+                    <label>Perasaan tidak nyaman muncul karena?</label>
+                    <select id="alasanTidakNyaman">
+                      <option value="">-- Pilih --</option>
+                      <option>Kondisi fisik area (gelap, sepi, dll)</option>
+                      <option>Pengalaman pribadi di area ini</option>
+                      <option>Cerita / pengalaman orang lain</option>
+                      <option>Intuisi / perasaan tidak aman</option>
+                      <option>Kombinasi dari beberapa hal di atas</option>
+                    </select>
                   </div>
 
                   <div class="form-group">
-                    <label>Pernah Menghindari Area Ini?</label>
+                    <label>Pernah menghindari area ini?</label>
                     <div class="pill-group">
-                      <button type="button" class="pill-btn" data-target="pernahHindari" data-val="Ya">Ya</button>
-                      <button type="button" class="pill-btn" data-target="pernahHindari" data-val="Tidak">Tidak</button>
+                      <button type="button" class="pill-btn" data-target="pernahHindari"
+                        data-val="Pernah">Pernah</button>
+                      <button type="button" class="pill-btn" data-target="pernahHindari"
+                        data-val="Tidak pernah">Tidak</button>
                     </div>
                     <select id="pernahHindari" class="star-select">
                       <option value="">-- Pilih --</option>
-                      <option>Ya</option>
-                      <option>Tidak</option>
+                      <option>Pernah</option>
+                      <option>Tidak pernah</option>
                     </select>
                   </div>
 
@@ -442,7 +459,8 @@
                     <div class="pill-group">
                       <button type="button" class="pill-btn" data-target="orangLain" data-val="Ya">Ya</button>
                       <button type="button" class="pill-btn" data-target="orangLain" data-val="Tidak">Tidak</button>
-                      <button type="button" class="pill-btn" data-target="orangLain" data-val="Tidak tahu">Tidak tahu</button>
+                      <button type="button" class="pill-btn" data-target="orangLain" data-val="Tidak tahu">Tidak
+                        tahu</button>
                     </div>
                     <select id="orangLain" class="star-select">
                       <option value="">-- Pilih --</option>
@@ -466,8 +484,6 @@
                       <option>Tidak pernah</option>
                     </select>
                   </div>
-
-
 
                   <div class="form-group full-width">
                     <label>Keterangan Tambahan <span class="label-opt">opsional</span></label>
@@ -1098,7 +1114,8 @@
             <div class="contact-item">
               <i class="fas fa-envelope"></i>
               <div><strong>Email Penelitian</strong><span><a
-                    href="https://mail.google.com/mail/?view=cm&fs=1&to=kelompok7fieldcamp2026@gmail.com" target="_blank" rel="noopener noreferrer">kelompok7fieldcamp2026@gmail.com</a></span></div>
+                    href="https://mail.google.com/mail/?view=cm&fs=1&to=kelompok7fieldcamp2026@gmail.com"
+                    target="_blank" rel="noopener noreferrer">kelompok7fieldcamp2026@gmail.com</a></span></div>
             </div>
             <div class="contact-item">
               <i class="fas fa-university"></i>
@@ -1490,8 +1507,36 @@
         });
       }
 
+      /* ─── Theme Toggle ─── */
+      function initThemeToggle() {
+        const btn = document.getElementById('themeToggle');
+        const icon = document.getElementById('themeIcon');
+        if (!btn || !icon) return;
+
+        // Load saved theme
+        const saved = localStorage.getItem('itsafe-theme');
+        if (saved === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          icon.className = 'fas fa-sun';
+        }
+
+        btn.addEventListener('click', function () {
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          if (isDark) {
+            document.documentElement.removeAttribute('data-theme');
+            icon.className = 'fas fa-moon';
+            localStorage.setItem('itsafe-theme', 'light');
+          } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            icon.className = 'fas fa-sun';
+            localStorage.setItem('itsafe-theme', 'dark');
+          }
+        });
+      }
+
       /* ─── Boot ─── */
       function boot() {
+        initThemeToggle();      // dark/light mode toggle
         initGlobalBubbles();   // floating bubble background (all pages)
         initParticles();        // hero particle network
         initReveal();           // scroll reveal
@@ -1512,67 +1557,6 @@
     })();
   </script>
 
-
-  </main>
-
-  <!-- LIBRARY JS: Pastikan urutan ini -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-  <script src="https://unpkg.com/shpjs@latest/dist/shp.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
-  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-  <script src="script.js?v=3.0"></script>
-
-
-  <script>
-    (function () {
-      function initThemeToggle() {
-        const btn = document.getElementById('themeToggle');
-        const icon = document.getElementById('themeIcon');
-        if (!btn || !icon) return;
-        
-        // Initial state
-        const saved = localStorage.getItem('itsafe-theme');
-        if (saved === 'dark') {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          if (icon) icon.className = 'fas fa-sun';
-        }
-
-        btn.addEventListener('click', function () {
-          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-          if (isDark) {
-            document.documentElement.removeAttribute('data-theme');
-            if (icon) icon.className = 'fas fa-moon';
-            localStorage.setItem('itsafe-theme', 'light');
-          } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            if (icon) icon.className = 'fas fa-sun';
-            localStorage.setItem('itsafe-theme', 'dark');
-          }
-          // Also call script.js function if available
-          if (typeof updateThemeIcon === 'function') updateThemeIcon();
-        });
-      }
-
-      function bootAll() {
-        if (typeof initGlobalBubbles === 'function') initGlobalBubbles();
-        if (typeof initParticles === 'function') initParticles();
-        if (typeof initReveal === 'function') initReveal();
-        if (typeof initStagger === 'function') initStagger();
-        if (typeof initStaggerDelay === 'function') initStaggerDelay();
-        if (typeof initMagnetic === 'function') initMagnetic();
-        if (typeof initBadgePulse === 'function') initBadgePulse();
-        if (typeof initAboutParticles === 'function') initAboutParticles();
-        if (typeof patchNavReveal === 'function') patchNavReveal();
-        if (typeof initNavSparkle === 'function') initNavSparkle();
-        initThemeToggle();
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bootAll);
-      } else {
-        bootAll();
-      }
-    })();
-  </script>
 </body>
+
 </html>

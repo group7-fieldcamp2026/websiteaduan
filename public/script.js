@@ -9,23 +9,23 @@ const API_BASE = `${window.location.origin}/api`;
 const REALTIME_INTERVAL = 15000;
 
 // --- STATE --------------------------------------------------
-let reports     = [];   // diisi dari API
+let reports = [];   // diisi dari API
 let realtimeTimer = null;
 let isRealtimeRefreshing = false;
 let activeLayer = 'semua';
-let visHeatmap  = true;
-let visPoint    = false;
-let visCluster  = false;
+let visHeatmap = true;
+let visPoint = false;
+let visCluster = false;
 let visFixedPin = true;   // toggle pin QR
-let visJurusan  = true;   // toggle pin fakultas/jurusan
+let visJurusan = true;   // toggle pin fakultas/jurusan
 
 // --- LEAFLET INSTANCES --------------------------------------
-let leafletMap   = null;
-let pickerMap    = null;
+let leafletMap = null;
+let pickerMap = null;
 let pickerMarker = null;
-let baseTile     = null;
-let heatLayer    = null;
-let pointLayer   = null;
+let baseTile = null;
+let heatLayer = null;
+let pointLayer = null;
 let clusterLayer = null;
 let fixedLocationLayerMain = null;
 let fixedLocationLayerPicker = null;
@@ -33,7 +33,7 @@ let boundaryLayerMain = null;
 let boundaryLayerPicker = null;
 let boundaryGeoJSON = null;
 let boundaryPolygons = null;
-let currentBm    = 'osm';
+let currentBm = 'osm';
 
 const BOUNDARY_SRC_CRS = 'EPSG:32749';
 const BOUNDARY_SRC_DEF = '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs';
@@ -43,25 +43,25 @@ const BOUNDARY_ZIP_B64 = 'UEsDBBQAAAAIAGJzbFwBUcDk+QQAAJwMAAAQAAAAQmF0YXNXaWxheW
 
 // --- BASEMAP CONFIGS ----------------------------------------
 const BASEMAPS = {
-  osm:       { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',                                                                attr: '© <a href="https://www.openstreetmap.org">OpenStreetMap</a>', opt: {} },
-  satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',                    attr: 'Tiles © Esri',                                                opt: {} },
-  dark:      { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',                                                    attr: '© <a href="https://carto.com">CARTO</a>',                    opt: { subdomains: 'abcd' } },
-  topo:      { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',                                                                 attr: '© <a href="https://opentopomap.org">OpenTopoMap</a>',       opt: {} },
+  osm: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: '© <a href="https://www.openstreetmap.org">OpenStreetMap</a>', opt: {} },
+  satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles © Esri', opt: {} },
+  dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: '© <a href="https://carto.com">CARTO</a>', opt: { subdomains: 'abcd' } },
+  topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: '© <a href="https://opentopomap.org">OpenTopoMap</a>', opt: {} },
 };
 
-const ITS  = [-7.2756, 112.7951];
+const ITS = [-7.2756, 112.7951];
 const ZOOM = 15;
 const QR_URL = 'https://itsafe.geowebgis.id/';
 
 const FACULTY_COLORS = {
-  'FSAD':   '#4E79A7', // blue
-  'FTIRS':  '#F28E2B', // orange
-  'FTSPK':  '#76B7B2', // teal
-  'FDKBD':  '#59A14F', // green
-  'FV':     '#E15759', // red
-  'FKK':    '#B07AA1', // purple
-  'FTEIC':  '#20B2AA', // cyan
-  'FTK':  '#BAB0AC', // gray
+  'FSAD': '#4E79A7', // blue
+  'FTIRS': '#F28E2B', // orange
+  'FTSPK': '#76B7B2', // teal
+  'FDKBD': '#59A14F', // green
+  'FV': '#E15759', // red
+  'FKK': '#B07AA1', // purple
+  'FTEIC': '#20B2AA', // cyan
+  'FTK': '#BAB0AC', // gray
 };
 
 const RISK_COLORS = {
@@ -76,34 +76,34 @@ let locationFacultyMap = {};
 
 // --- LOCATION DATA ------------------------------------------
 const DEFAULT_LOCATIONS = [
-  { id:1,  name:'Perpustakaan Pusat ITS',         desc:'Area parkir dan lobi utama perpustakaan, zona keluar-masuk yang minim pengawasan.',    status:'terpasang', count:3,  icon:'fa-book-open',        lat:-7.2748, lng:112.7944, gmaps:'https://maps.google.com/?q=-7.2748,112.7944' },
-  { id:2,  name:'Gedung Teknik Sipil (FTSP)',      desc:'Koridor lantai 2 dan area tangga belakang gedung.',                                    status:'terpasang', count:5,  icon:'fa-building-columns', lat:-7.2771, lng:112.7963, gmaps:'https://maps.google.com/?q=-7.2771,112.7963' },
-  { id:3,  name:'Kantin Pusat (Food Court)',       desc:'Area sekitar kantin pusat, terutama pada jam-jam sepi.',                               status:'terpasang', count:2,  icon:'fa-utensils',         lat:-7.2756, lng:112.7951, gmaps:'https://maps.google.com/?q=-7.2756,112.7951' },
-  { id:4,  name:'Asrama Mahasiswa Putra',          desc:'Koridor dan area parkir depan asrama putra ITS.',                                      status:'terpasang', count:4,  icon:'fa-house-user',       lat:-7.2735, lng:112.7938, gmaps:'https://maps.google.com/?q=-7.2735,112.7938' },
-  { id:5,  name:'Asrama Mahasiswa Putri',          desc:'Pintu masuk utama dan taman asrama putri.',                                            status:'terpasang', count:4,  icon:'fa-house-user',       lat:-7.2745, lng:112.7955, gmaps:'https://maps.google.com/?q=-7.2745,112.7955' },
-  { id:6,  name:'Laboratorium Kimia (FMIPA)',      desc:'Lorong penghubung antar laboratorium di gedung FMIPA.',                                status:'rencana',   count:1,  icon:'fa-flask',            lat:-7.2780, lng:112.7969, gmaps:'https://maps.google.com/?q=-7.2780,112.7969' },
-  { id:7,  name:'Lapangan Olahraga / GOR',         desc:'Area tribun dan ruang ganti GOR ITS.',                                                 status:'rencana',   count:0,  icon:'fa-person-running',   lat:-7.2790, lng:112.7920, gmaps:'https://maps.google.com/?q=-7.2790,112.7920' },
-  { id:8,  name:'Gedung Robotika (Teknik Elektro)',desc:'Basement dan area parkir motor gedung Teknik Elektro.',                                status:'rencana',   count:0,  icon:'fa-microchip',        lat:-7.2760, lng:112.7980, gmaps:'https://maps.google.com/?q=-7.2760,112.7980' },
-  { id:9,  name:'Masjid Manarul Ilmi ITS',         desc:'Area wudhu dan parkir belakang masjid.',                                               status:'terpasang', count:1,  icon:'fa-mosque',           lat:-7.2765, lng:112.7925, gmaps:'https://maps.google.com/?q=-7.2765,112.7925' },
-  { id:10, name:'Gedung Rektorat ITS',             desc:'Area lobby dan lorong menuju ruang tunggu layanan mahasiswa.',                         status:'rencana',   count:0,  icon:'fa-landmark',         lat:-7.2770, lng:112.7940, gmaps:'https://maps.google.com/?q=-7.2770,112.7940' },
-  { id:11, name:'Co-working Space / Ruang Bersama',desc:'Area kerja bersama yang buka hingga larut malam.',                                     status:'terpasang', count:2,  icon:'fa-laptop',           lat:-7.2753, lng:112.7985, gmaps:'https://maps.google.com/?q=-7.2753,112.7985' },
-  { id:12, name:'Area Parkir Timur',               desc:'Parkiran motor dan mobil bagian timur kampus, minim pencahayaan malam.',               status:'rencana',   count:0,  icon:'fa-square-parking',   lat:-7.2762, lng:112.7978, gmaps:'https://maps.google.com/?q=-7.2762,112.7978' },
+  { id: 1, name: 'Perpustakaan Pusat ITS', desc: 'Area parkir dan lobi utama perpustakaan, zona keluar-masuk yang minim pengawasan.', status: 'terpasang', count: 3, icon: 'fa-book-open', lat: -7.2748, lng: 112.7944, gmaps: 'https://maps.google.com/?q=-7.2748,112.7944' },
+  { id: 2, name: 'Gedung Teknik Sipil (FTSP)', desc: 'Koridor lantai 2 dan area tangga belakang gedung.', status: 'terpasang', count: 5, icon: 'fa-building-columns', lat: -7.2771, lng: 112.7963, gmaps: 'https://maps.google.com/?q=-7.2771,112.7963' },
+  { id: 3, name: 'Kantin Pusat (Food Court)', desc: 'Area sekitar kantin pusat, terutama pada jam-jam sepi.', status: 'terpasang', count: 2, icon: 'fa-utensils', lat: -7.2756, lng: 112.7951, gmaps: 'https://maps.google.com/?q=-7.2756,112.7951' },
+  { id: 4, name: 'Asrama Mahasiswa Putra', desc: 'Koridor dan area parkir depan asrama putra ITS.', status: 'terpasang', count: 4, icon: 'fa-house-user', lat: -7.2735, lng: 112.7938, gmaps: 'https://maps.google.com/?q=-7.2735,112.7938' },
+  { id: 5, name: 'Asrama Mahasiswa Putri', desc: 'Pintu masuk utama dan taman asrama putri.', status: 'terpasang', count: 4, icon: 'fa-house-user', lat: -7.2745, lng: 112.7955, gmaps: 'https://maps.google.com/?q=-7.2745,112.7955' },
+  { id: 6, name: 'Laboratorium Kimia (FMIPA)', desc: 'Lorong penghubung antar laboratorium di gedung FMIPA.', status: 'rencana', count: 1, icon: 'fa-flask', lat: -7.2780, lng: 112.7969, gmaps: 'https://maps.google.com/?q=-7.2780,112.7969' },
+  { id: 7, name: 'Lapangan Olahraga / GOR', desc: 'Area tribun dan ruang ganti GOR ITS.', status: 'rencana', count: 0, icon: 'fa-person-running', lat: -7.2790, lng: 112.7920, gmaps: 'https://maps.google.com/?q=-7.2790,112.7920' },
+  { id: 8, name: 'Gedung Robotika (Teknik Elektro)', desc: 'Basement dan area parkir motor gedung Teknik Elektro.', status: 'rencana', count: 0, icon: 'fa-microchip', lat: -7.2760, lng: 112.7980, gmaps: 'https://maps.google.com/?q=-7.2760,112.7980' },
+  { id: 9, name: 'Masjid Manarul Ilmi ITS', desc: 'Area wudhu dan parkir belakang masjid.', status: 'terpasang', count: 1, icon: 'fa-mosque', lat: -7.2765, lng: 112.7925, gmaps: 'https://maps.google.com/?q=-7.2765,112.7925' },
+  { id: 10, name: 'Gedung Rektorat ITS', desc: 'Area lobby dan lorong menuju ruang tunggu layanan mahasiswa.', status: 'rencana', count: 0, icon: 'fa-landmark', lat: -7.2770, lng: 112.7940, gmaps: 'https://maps.google.com/?q=-7.2770,112.7940' },
+  { id: 11, name: 'Co-working Space / Ruang Bersama', desc: 'Area kerja bersama yang buka hingga larut malam.', status: 'terpasang', count: 2, icon: 'fa-laptop', lat: -7.2753, lng: 112.7985, gmaps: 'https://maps.google.com/?q=-7.2753,112.7985' },
+  { id: 12, name: 'Area Parkir Timur', desc: 'Parkiran motor dan mobil bagian timur kampus, minim pencahayaan malam.', status: 'rencana', count: 0, icon: 'fa-square-parking', lat: -7.2762, lng: 112.7978, gmaps: 'https://maps.google.com/?q=-7.2762,112.7978' },
 ];
 let LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
 
 const TEAM = [
-  { name:'Wisnu Aditya Duane',      nrp:'5016221087', initial:'W', photo:'assets/Wisnu.png' },
-  { name:'Josephine Novellia A.',   nrp:'5016231044', initial:'J', photo:'assets/Josephine.png' },
-  { name:'Duta Satrio Wibowo',      nrp:'5016231047', initial:'D', photo:'assets/Duta.png' },
-  { name:'Muhammad Farid Farhan',   nrp:'5016231069', initial:'M', photo:'assets/Muhammad.png' },
-  { name:'Farrel Valentino Y.',     nrp:'5016231075', initial:'F', photo:'assets/Farrel.png' },
-  { name:'Ananda Adellia C. S.',    nrp:'5016231092', initial:'A', photo:'assets/Adellia.png' },
+  { name: 'Wisnu Aditya Duane', nrp: '5016221087', initial: 'W', photo: 'assets/Wisnu.png' },
+  { name: 'Josephine Novellia A.', nrp: '5016231044', initial: 'J', photo: 'assets/Josephine.png' },
+  { name: 'Duta Satrio Wibowo', nrp: '5016231047', initial: 'D', photo: 'assets/Duta.png' },
+  { name: 'Muhammad Farid Farhan', nrp: '5016231069', initial: 'M', photo: 'assets/Muhammad.png' },
+  { name: 'Farrel Valentino Y.', nrp: '5016231075', initial: 'F', photo: 'assets/Farrel.png' },
+  { name: 'Ananda Adellia C. S.', nrp: '5016231092', initial: 'A', photo: 'assets/Adellia.png' },
 ];
 
 // ============================================================
 // INIT
 // ============================================================
-document.addEventListener('DOMContentLoaded', () => {
+function itsafeInit() {
   initNav();
   initForm();
   initPinToggles();
@@ -115,7 +115,13 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTeam();
   generateQR();
   initPickerMap();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', itsafeInit);
+} else {
+  itsafeInit();
+}
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { stopRealtimeSync(); return; }
@@ -134,49 +140,49 @@ async function fetchReports() {
     const data = await res.json();
     // Sesuaikan field dari API ke format lokal
     reports = data.map(r => ({
-      id:               r.id,
-      createdAt:        r.created_at,
-      kelamin:          r.jenis_kelamin,
-      peran:            r.peran_kampus,
-      pencahayaan:      r.pencahayaan,
-      kepadatan:        r.kepadatan,
-      cctv:             r.cctv,
-      petugas:          r.petugas_keamanan,
-      vegetasi:         r.vegetasi,
-      waktu:            r.waktu_rawan,
-      hariRawan:        r.hari_rawan,
-      skorNyaman:       r.skor_nyaman ? parseInt(r.skor_nyaman, 10) : null,
-      skorRawan:        r.skor_rawan ? parseInt(r.skor_rawan, 10) : null,
-      alasanTidakNyaman:r.alasan_tidak_nyaman,
-      pernahHindari:    r.pernah_hindari,
-      orangLain:        r.orang_lain,
-      situasiMencurigakan:r.situasi_mencurigakan,
-      fungsiRuang:      r.fungsi_ruang,
-      lokasi:           r.lokasi_kejadian,
-      lokasiDeskripsi:  r.lokasi_deskripsi,
-      kronologi:        r.kronologi,
-      lat:              r.latitude ? parseFloat(r.latitude) : null,
-      lng:              r.longitude ? parseFloat(r.longitude) : null,
-        fotoPath:         r.foto_path,
-        status:           r.status,
-        fakultas:         getFacultyFromLocationName(r.lokasi_kejadian),
-      }));
-      updateLayerCounts();
-      if (leafletMap) renderLeafletMap();
-      renderLaporanChart();
-    } catch (e) {
-      console.error('Gagal ambil data laporan:', e);
-    }
+      id: r.id,
+      createdAt: r.created_at,
+      kelamin: r.jenis_kelamin,
+      peran: r.peran_kampus,
+      pencahayaan: r.pencahayaan,
+      kepadatan: r.kepadatan,
+      cctv: r.cctv,
+      petugas: r.petugas_keamanan,
+      vegetasi: r.vegetasi,
+      waktu: r.waktu_rawan,
+      hariRawan: r.hari_rawan,
+      skorNyaman: r.skor_nyaman ? parseInt(r.skor_nyaman, 10) : null,
+      skorRawan: r.skor_rawan ? parseInt(r.skor_rawan, 10) : null,
+      alasanTidakNyaman: r.alasan_tidak_nyaman,
+      pernahHindari: r.pernah_hindari,
+      orangLain: r.orang_lain,
+      situasiMencurigakan: r.situasi_mencurigakan,
+      fungsiRuang: r.fungsi_ruang,
+      lokasi: r.lokasi_kejadian,
+      lokasiDeskripsi: r.lokasi_deskripsi,
+      kronologi: r.kronologi,
+      lat: r.latitude ? parseFloat(r.latitude) : null,
+      lng: r.longitude ? parseFloat(r.longitude) : null,
+      fotoPath: r.foto_path,
+      status: r.status,
+      fakultas: getFacultyFromLocationName(r.lokasi_kejadian),
+    }));
+    updateLayerCounts();
+    if (leafletMap) renderLeafletMap();
+    renderLaporanChart();
+  } catch (e) {
+    console.error('Gagal ambil data laporan:', e);
   }
+}
 
 // Ambil statistik dari Laravel
 async function fetchStats() {
   try {
-    const res  = await fetch(`${API_BASE}/reports/stats`);
+    const res = await fetch(`${API_BASE}/reports/stats`);
     const data = await res.json();
-    document.getElementById('totalLaporan').textContent  = data.total       || 0;
-    document.getElementById('bulanIni').textContent      = data.bulan_ini   || 0;
-    document.getElementById('terverifikasi').textContent = data.terverifikasi|| 0;
+    document.getElementById('totalLaporan').textContent = data.total || 0;
+    document.getElementById('bulanIni').textContent = data.bulan_ini || 0;
+    document.getElementById('terverifikasi').textContent = data.terverifikasi || 0;
   } catch (e) {
     console.error('Gagal ambil statistik:', e);
   }
@@ -323,7 +329,7 @@ function navigateTo(page) {
 
 function scrollToForm() {
   navigateTo('home');
-  setTimeout(() => document.getElementById('formSection').scrollIntoView({ behavior:'smooth' }), 100);
+  setTimeout(() => document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' }), 100);
 }
 
 // ============================================================
@@ -356,13 +362,13 @@ async function handleSubmit(e) {
     if (!el.value.trim()) { el.style.borderColor = '#F28482'; valid = false; }
     else el.style.borderColor = '';
   });
-  if (!document.getElementById('consent').checked) { showToast('Harap setujui pernyataan persetujuan.','error'); return; }
-  if (!valid) { showToast('Harap lengkapi semua field wajib.','error'); return; }
+  if (!document.getElementById('consent').checked) { showToast('Harap setujui pernyataan persetujuan.', 'error'); return; }
+  if (!valid) { showToast('Harap lengkapi semua field wajib.', 'error'); return; }
 
   const lat = parseFloat(document.getElementById('lat').value);
   const lng = parseFloat(document.getElementById('lng').value);
   const lokasiSelect = document.getElementById('lokasiInsiden');
-  const lokasiVal    = lokasiSelect.value;
+  const lokasiVal = lokasiSelect.value;
   if (/Lainnya/i.test(lokasiVal) && (isNaN(lat) || isNaN(lng))) {
     showToast('Pin lokasi wajib diisi jika memilih Lainnya.', 'error');
     return;
@@ -373,28 +379,28 @@ async function handleSubmit(e) {
   const skorRawanVal = parseInt(document.getElementById('skorRawan').value, 10);
 
   const payload = {
-    email_its:            document.getElementById('emailIts').value.trim(),
-    peran_kampus:         document.getElementById('peranKampus').value,
-    jenis_kelamin:        kelaminVal || null,
-    lokasi_kejadian:      lokasiVal,
-    lokasi_deskripsi:     document.getElementById('lokasiDeskripsi').value.trim() || null,
-    latitude:             isNaN(lat) ? null : lat,
-    longitude:            isNaN(lng) ? null : lng,
-    pencahayaan:          document.getElementById('pencahayaan').value,
-    kepadatan:            document.getElementById('kepadatan').value,
-    cctv:                 document.getElementById('cctv').value,
-    petugas_keamanan:     document.getElementById('petugasKeamanan').value,
-    vegetasi:             document.getElementById('vegetasi').value || null,
-    waktu_rawan:          document.getElementById('waktuInsiden').value,
-    hari_rawan:           document.getElementById('hariRawan').value || null,
-    skor_nyaman:          isNaN(skorNyamanVal) ? null : skorNyamanVal,
-    alasan_tidak_nyaman:  document.getElementById('alasanTidakNyaman').value || null,
-    skor_rawan:           isNaN(skorRawanVal) ? null : skorRawanVal,
-    pernah_hindari:       document.getElementById('pernahHindari').value || null,
-    orang_lain:           document.getElementById('orangLain').value || null,
+    email_its: document.getElementById('emailIts').value.trim(),
+    peran_kampus: document.getElementById('peranKampus').value,
+    jenis_kelamin: kelaminVal || null,
+    lokasi_kejadian: lokasiVal,
+    lokasi_deskripsi: document.getElementById('lokasiDeskripsi').value.trim() || null,
+    latitude: isNaN(lat) ? null : lat,
+    longitude: isNaN(lng) ? null : lng,
+    pencahayaan: document.getElementById('pencahayaan').value,
+    kepadatan: document.getElementById('kepadatan').value,
+    cctv: document.getElementById('cctv').value,
+    petugas_keamanan: document.getElementById('petugasKeamanan').value,
+    vegetasi: document.getElementById('vegetasi').value || null,
+    waktu_rawan: document.getElementById('waktuInsiden').value,
+    hari_rawan: document.getElementById('hariRawan').value || null,
+    skor_nyaman: isNaN(skorNyamanVal) ? null : skorNyamanVal,
+    alasan_tidak_nyaman: document.getElementById('alasanTidakNyaman').value || null,
+    skor_rawan: isNaN(skorRawanVal) ? null : skorRawanVal,
+    pernah_hindari: document.getElementById('pernahHindari').value || null,
+    orang_lain: document.getElementById('orangLain').value || null,
     situasi_mencurigakan: document.getElementById('situasiMencurigakan').value || null,
-    kronologi:            document.getElementById('kronologi').value.trim() || null,
-    kontak_pelapor:       document.getElementById('kontakPelapor').value.trim() || null,
+    kronologi: document.getElementById('kronologi').value.trim() || null,
+    kontak_pelapor: document.getElementById('kontakPelapor').value.trim() || null,
   };
   const fotoInput = document.getElementById('fotoLokasi');
   const fotoFile = fotoInput && fotoInput.files && fotoInput.files[0] ? fotoInput.files[0] : null;
@@ -546,7 +552,7 @@ function getLocation() {
   document.getElementById('locStatus').textContent = 'Mendapatkan lokasi...';
   navigator.geolocation.getCurrentPosition(
     pos => setPin(pos.coords.latitude, pos.coords.longitude, { fromPreset: false }),
-    ()  => { showToast('Gagal mendapatkan lokasi.','error'); document.getElementById('locStatus').textContent = ''; }
+    () => { showToast('Gagal mendapatkan lokasi.', 'error'); document.getElementById('locStatus').textContent = ''; }
   );
 }
 
@@ -568,8 +574,8 @@ function renderLeafletMap() {
   if (!leafletMap) return;
   renderFixedLocations(fixedLocationLayerMain);
 
-  if (heatLayer)    { leafletMap.removeLayer(heatLayer);    heatLayer = null; }
-  if (pointLayer)   { leafletMap.removeLayer(pointLayer);   pointLayer = null; }
+  if (heatLayer) { leafletMap.removeLayer(heatLayer); heatLayer = null; }
+  if (pointLayer) { leafletMap.removeLayer(pointLayer); pointLayer = null; }
   if (clusterLayer) { leafletMap.removeLayer(clusterLayer); clusterLayer = null; }
 
   const filterBulan = document.getElementById('filterBulan')?.value || '';
@@ -605,7 +611,7 @@ function renderLeafletMap() {
   if (visHeatmap && L.heatLayer) {
     heatLayer = L.heatLayer(
       data.map(r => [r.lat, r.lng, 1]),
-      { radius: 35, blur: 22, maxZoom: 18, gradient: { 0.1:'#84A59D', 0.4:'#F6BD60', 0.7:'#F5CAC3', 1.0:'#F28482' } }
+      { radius: 35, blur: 22, maxZoom: 18, gradient: { 0.1: '#84A59D', 0.4: '#F6BD60', 0.7: '#F5CAC3', 1.0: '#F28482' } }
     ).addTo(leafletMap);
   }
 
@@ -664,110 +670,21 @@ function renderLeafletMap() {
   }
 
   if (visPoint && !visCluster) {
-     // Apply Peta 3 Logic to points too if visCluster is false but visPoint is true
-     const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
-     if (!pointLayer) pointLayer = L.layerGroup().addTo(leafletMap);
-     pointLayer.clearLayers();
-
-     data.forEach(r => {
-       let color = getRiskColor(r.skorRawan);
-       let popupHtml = buildPopup(r);
-
-       if (isPeta3) {
-         const kel = calcKelayakan(r);
-         if (kel.status === 'Layak') color = '#10B981';
-         else if (kel.status === 'Cukup Layak') color = '#F59E0B';
-         else color = '#EF4444';
-
-         let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
-         let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
-         popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
-       }
-
-       L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
-         .bindPopup(popupHtml)
-         .addTo(pointLayer);
-      });
-   }
-}
-  if (filterWaktu) data = data.filter(r => r.waktu === filterWaktu);
-  if (filterBulan) {
-    data = data.filter(r => {
-      const d = parseReportDate(r);
-      return d && (d.getMonth() + 1) === parseInt(filterBulan);
-    });
-  }
-
-  updateTopAreas(data);
-  updateHeatmapAnalysis(data, filterWaktu, filterBulan);
-
-  const overlay = document.getElementById('mapOverlay');
-  const hasFixed = fixedLocationLayerMain && fixedLocationLayerMain.getLayers().length > 0;
-  overlay.style.display = (data.length === 0 && !hasFixed) ? 'flex' : 'none';
-  if (!data.length) return;
-
-  if (visHeatmap && L.heatLayer) {
-    heatLayer = L.heatLayer(
-      data.map(r => [r.lat, r.lng, 1]),
-      { radius: 35, blur: 22, maxZoom: 18, gradient: { 0.1:'#84A59D', 0.4:'#F6BD60', 0.7:'#F5CAC3', 1.0:'#F28482' } }
-    ).addTo(leafletMap);
-  }
-
-  if (visPoint) {
-    pointLayer = L.layerGroup();
-    data.forEach(r => {
-      const color = getRiskColor(r.skorRawan);
-      L.marker([r.lat, r.lng], {
-        icon: createCaseIcon(color)
-      }).bindPopup(buildPopup(r)).addTo(pointLayer);
-    });
-    leafletMap.addLayer(pointLayer);
-  }
-
-  if (visCluster && L.markerClusterGroup) {
-    clusterLayer = L.markerClusterGroup({ chunkedLoading: true });
-    
-    // PETA 3 Logic: Kelayakan Fasilitas
+    // Apply Peta 3 Logic to points too if visCluster is false but visPoint is true
     const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
-    
+    if (!pointLayer) pointLayer = L.layerGroup().addTo(leafletMap);
+    pointLayer.clearLayers();
+
     data.forEach(r => {
       let color = getRiskColor(r.skorRawan);
       let popupHtml = buildPopup(r);
-      
-      if (isPeta3) {
-        const kel = calcKelayakan(r);
-        if (kel.status === 'Layak') color = '#10B981'; // Green
-        else if (kel.status === 'Cukup Layak') color = '#F59E0B'; // Orange
-        else color = '#EF4444'; // Red
-        
-        let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
-        let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
-        popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
-      }
-      
-      L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
-        .bindPopup(popupHtml)
-        .addTo(clusterLayer);
-    });
-    leafletMap.addLayer(clusterLayer);
-  }
-  
-  if (visPoint && !visCluster) {
-     // Apply Peta 3 Logic to points too if visCluster is false but visPoint is true
-     const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
-     if (!pointLayer) pointLayer = L.layerGroup().addTo(leafletMap);
-     pointLayer.clearLayers();
-     
-     data.forEach(r => {
-      let color = getRiskColor(r.skorRawan);
-      let popupHtml = buildPopup(r);
-      
+
       if (isPeta3) {
         const kel = calcKelayakan(r);
         if (kel.status === 'Layak') color = '#10B981';
         else if (kel.status === 'Cukup Layak') color = '#F59E0B';
-        else color = '#EF4444'; 
-        
+        else color = '#EF4444';
+
         let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
         let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
         popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
@@ -776,8 +693,97 @@ function renderLeafletMap() {
       L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
         .bindPopup(popupHtml)
         .addTo(pointLayer);
-     });
+    });
   }
+}
+if (filterWaktu) data = data.filter(r => r.waktu === filterWaktu);
+if (filterBulan) {
+  data = data.filter(r => {
+    const d = parseReportDate(r);
+    return d && (d.getMonth() + 1) === parseInt(filterBulan);
+  });
+}
+
+updateTopAreas(data);
+updateHeatmapAnalysis(data, filterWaktu, filterBulan);
+
+const overlay = document.getElementById('mapOverlay');
+const hasFixed = fixedLocationLayerMain && fixedLocationLayerMain.getLayers().length > 0;
+overlay.style.display = (data.length === 0 && !hasFixed) ? 'flex' : 'none';
+if (!data.length) return;
+
+if (visHeatmap && L.heatLayer) {
+  heatLayer = L.heatLayer(
+    data.map(r => [r.lat, r.lng, 1]),
+    { radius: 35, blur: 22, maxZoom: 18, gradient: { 0.1: '#84A59D', 0.4: '#F6BD60', 0.7: '#F5CAC3', 1.0: '#F28482' } }
+  ).addTo(leafletMap);
+}
+
+if (visPoint) {
+  pointLayer = L.layerGroup();
+  data.forEach(r => {
+    const color = getRiskColor(r.skorRawan);
+    L.marker([r.lat, r.lng], {
+      icon: createCaseIcon(color)
+    }).bindPopup(buildPopup(r)).addTo(pointLayer);
+  });
+  leafletMap.addLayer(pointLayer);
+}
+
+if (visCluster && L.markerClusterGroup) {
+  clusterLayer = L.markerClusterGroup({ chunkedLoading: true });
+
+  // PETA 3 Logic: Kelayakan Fasilitas
+  const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
+
+  data.forEach(r => {
+    let color = getRiskColor(r.skorRawan);
+    let popupHtml = buildPopup(r);
+
+    if (isPeta3) {
+      const kel = calcKelayakan(r);
+      if (kel.status === 'Layak') color = '#10B981'; // Green
+      else if (kel.status === 'Cukup Layak') color = '#F59E0B'; // Orange
+      else color = '#EF4444'; // Red
+
+      let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
+      let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
+      popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
+    }
+
+    L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
+      .bindPopup(popupHtml)
+      .addTo(clusterLayer);
+  });
+  leafletMap.addLayer(clusterLayer);
+}
+
+if (visPoint && !visCluster) {
+  // Apply Peta 3 Logic to points too if visCluster is false but visPoint is true
+  const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
+  if (!pointLayer) pointLayer = L.layerGroup().addTo(leafletMap);
+  pointLayer.clearLayers();
+
+  data.forEach(r => {
+    let color = getRiskColor(r.skorRawan);
+    let popupHtml = buildPopup(r);
+
+    if (isPeta3) {
+      const kel = calcKelayakan(r);
+      if (kel.status === 'Layak') color = '#10B981';
+      else if (kel.status === 'Cukup Layak') color = '#F59E0B';
+      else color = '#EF4444';
+
+      let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
+      let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
+      popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
+    }
+
+    L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
+      .bindPopup(popupHtml)
+      .addTo(pointLayer);
+  });
+}
 }
 
 async function loadBoundaryLayer(map, target) {
@@ -795,7 +801,7 @@ async function loadBoundaryLayer(map, target) {
     if (!isZipBuffer(buf)) {
       buf = base64ToArrayBuffer(BOUNDARY_ZIP_B64);
     }
-    const gj  = await shp(buf);
+    const gj = await shp(buf);
     let data = gj.type ? gj : gj[Object.keys(gj)[0]];
     if (!data || !data.features || !data.features.length) {
       console.warn('[boundary] empty geojson', gj);
@@ -807,7 +813,7 @@ async function loadBoundaryLayer(map, target) {
       boundaryPolygons = extractPolygonsFromGeoJSON(data);
     }
     const layer = L.geoJSON(data, {
-      style: { color:'#EF4444', weight:3, fill:true, fillOpacity:0.08, dashArray:'6 4' }
+      style: { color: '#EF4444', weight: 3, fill: true, fillOpacity: 0.08, dashArray: '6 4' }
     }).addTo(map);
     layer.bringToFront();
     const bounds = layer.getBounds?.();
@@ -817,7 +823,7 @@ async function loadBoundaryLayer(map, target) {
         map.__boundaryFitted = true;
       }
     }
-    if (target === 'main')   boundaryLayerMain   = layer;
+    if (target === 'main') boundaryLayerMain = layer;
     if (target === 'picker') boundaryLayerPicker = layer;
   } catch (e) {
     console.warn('[boundary] load failed', e);
@@ -996,7 +1002,7 @@ function getRawanLabel(val) {
 
 function getScoreHtml(val, type) {
   let color = '#F59E0B'; // kuning
-  
+
   if (type === 'pencahayaan') {
     if (val === 'Terang') { color = '#10B981'; } // hijau
     else if (val === 'Gelap') { color = '#EF4444'; } // merah
@@ -1014,10 +1020,10 @@ function getScoreHtml(val, type) {
     else if (val === 'Tidak pernah ada') { color = '#EF4444'; }
   }
   else if (type === 'vegetasi') {
-     if ((val || '').includes('Terbuka')) { color = '#10B981'; }
-     else if ((val || '').includes('Tertutup')) { color = '#EF4444'; }
+    if ((val || '').includes('Terbuka')) { color = '#10B981'; }
+    else if ((val || '').includes('Tertutup')) { color = '#EF4444'; }
   }
-  
+
   if (!val || val === '-') return '-';
   return `<span style="color:${color}; font-weight:bold">${val}</span>`;
 }
@@ -1029,7 +1035,7 @@ function buildPopup(r) {
   let headerHtml = `<strong style="color:#F28482">${esc(r.lokasi)}</strong><br/>
     <span style="color:#555">${esc(faculty)}</span><br/>
     <span style="font-size:0.75rem; color:#888;">Koordinat: ${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</span><hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/>`;
-    
+
   let descHtml = r.lokasiDeskripsi ? `<i>"${esc(r.lokasiDeskripsi)}"</i><br/>` : '';
 
   let bodyHtml = '';
@@ -1046,7 +1052,7 @@ function buildPopup(r) {
     <span>CCTV: ${getScoreHtml(r.cctv, 'cctv')}</span><br/>
     <span>Petugas: ${getScoreHtml(r.petugas, 'petugas')}</span><br/>
     <span>Keterbukaan: ${getScoreHtml(r.vegetasi, 'vegetasi')}</span>`;
-    
+
   let fotoHtml = '';
   if (r.fotoPath && !r.fotoPath.startsWith('HIDDEN_')) {
     const fotoUrl = getPhotoUrl(r.fotoPath);
@@ -1067,7 +1073,7 @@ function buildPopup(r) {
       <div style="font-size:0.72rem; color:#999; margin-top:3px;">Klik foto untuk memperbesar</div>
     </div>`;
   }
-  
+
   return `<div style="font-family:'DM Sans',sans-serif;min-width:160px;max-width:220px;font-size:13px;line-height:1.4;transform:none">
     ${headerHtml}
     ${descHtml}
@@ -1080,7 +1086,7 @@ function buildPopup(r) {
 function calcKelayakan(r) {
   let score = 0;
   let alasan = [];
-  
+
   if (r.pencahayaan === 'Terang') score += 3;
   else if (r.pencahayaan === 'Remang-remang') { score += 2; alasan.push('Pencahayaan kurang memadai'); }
   else { score += 1; alasan.push('Area sangat gelap'); }
@@ -1104,7 +1110,7 @@ function calcKelayakan(r) {
   let status = 'Layak';
   if (score < 10) status = 'Kurang Layak';
   else if (score <= 13) status = 'Cukup Layak';
-  
+
   return { score, status, alasan };
 }
 
@@ -1133,7 +1139,7 @@ function renderFixedLocations(layer) {
         seen.add(key);
 
         const faculty = getFacultyFromOption(opt);
-        const color   = getFacultyColor(faculty);
+        const color = getFacultyColor(faculty);
 
         L.marker([parseFloat(lat), parseFloat(lng)], { icon: createFacultyIcon(color) })
           .bindPopup(`<strong>${esc(locName)}</strong><br/><span>${esc(faculty)}</span>`)
@@ -1201,7 +1207,7 @@ function parseGmapsUrlFromString(url) {
         return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
       }
     }
-  } catch (e) {}
+  } catch (e) { }
   return null;
 }
 
@@ -1221,21 +1227,21 @@ function switchPetaTab(tab) {
 
   // Update judul & deskripsi panel
   const titles = {
-    sebaran:   { title: 'Peta 1 — Sebaran Titik Lokasi Rawan',  desc: 'Menampilkan sebaran titik lokasi area rawan berdasarkan jumlah laporan masuk dari warga kampus ITS.' },
-    heatmap:   { title: 'Peta 2 — Heatmap Kerawanan',           desc: 'Menampilkan konsentrasi area rawan berdasarkan skor kerawanan yang diberikan oleh pelapor.' },
-    fasilitas: { title: 'Peta 3 — Kelayakan Fasilitas',         desc: 'Menampilkan penilaian kondisi fisik area berdasarkan parameter pencahayaan, CCTV, kepadatan, petugas keamanan, dan vegetasi.' },
+    sebaran: { title: 'Peta 1 — Sebaran Titik Lokasi Rawan', desc: 'Menampilkan sebaran titik lokasi area rawan berdasarkan jumlah laporan masuk dari warga kampus ITS.' },
+    heatmap: { title: 'Peta 2 — Heatmap Kerawanan', desc: 'Menampilkan konsentrasi area rawan berdasarkan skor kerawanan yang diberikan oleh pelapor.' },
+    fasilitas: { title: 'Peta 3 — Kelayakan Fasilitas', desc: 'Menampilkan penilaian kondisi fisik area berdasarkan parameter pencahayaan, CCTV, kepadatan, petugas keamanan, dan vegetasi.' },
   };
 
   // Update tampilan layer sesuai tab
   if (tab === 'sebaran') {
     // Titik + Cluster aktif, heatmap off
     visHeatmap = false;
-    visPoint   = true;
+    visPoint = true;
     visCluster = false;
     document.querySelector('#tog-heatmap input').checked = false;
-    document.querySelector('#tog-point input').checked   = true;
+    document.querySelector('#tog-point input').checked = true;
     document.querySelector('#tog-cluster input').checked = false;
-    
+
     // Tampilkan tombol layer Peta 1
     document.querySelectorAll('.layer-card').forEach(l => l.style.display = 'none');
     document.querySelectorAll('.layer-p1').forEach(l => l.style.display = 'flex');
@@ -1244,12 +1250,12 @@ function switchPetaTab(tab) {
   } else if (tab === 'heatmap') {
     // Heatmap aktif, titik off
     visHeatmap = true;
-    visPoint   = false;
+    visPoint = false;
     visCluster = false;
     document.querySelector('#tog-heatmap input').checked = true;
-    document.querySelector('#tog-point input').checked   = false;
+    document.querySelector('#tog-point input').checked = false;
     document.querySelector('#tog-cluster input').checked = false;
-    
+
     // Tampilkan tombol layer Peta 2
     document.querySelectorAll('.layer-card').forEach(l => l.style.display = 'none');
     document.querySelectorAll('.layer-p2').forEach(l => l.style.display = 'flex');
@@ -1258,12 +1264,12 @@ function switchPetaTab(tab) {
   } else if (tab === 'fasilitas') {
     // Titik aktif dengan simbologi kondisi fisik
     visHeatmap = false;
-    visPoint   = true;
+    visPoint = true;
     visCluster = false;
     document.querySelector('#tog-heatmap input').checked = false;
-    document.querySelector('#tog-point input').checked   = true;
+    document.querySelector('#tog-point input').checked = true;
     document.querySelector('#tog-cluster input').checked = false;
-    
+
     // Tampilkan tombol layer Peta 3
     document.querySelectorAll('.layer-card').forEach(l => l.style.display = 'none');
     document.querySelectorAll('.layer-p3').forEach(l => l.style.display = 'flex');
@@ -1295,9 +1301,9 @@ function switchLayer(radio) {
 }
 
 function toggleVis(type, cb) {
-  if (type === 'heatmap')   visHeatmap   = cb.checked;
-  if (type === 'point')     visPoint     = cb.checked;
-  if (type === 'cluster')   visCluster   = cb.checked;
+  if (type === 'heatmap') visHeatmap = cb.checked;
+  if (type === 'point') visPoint = cb.checked;
+  if (type === 'cluster') visCluster = cb.checked;
   document.getElementById('tog-' + type)?.classList.toggle('active', cb.checked);
   renderLeafletMap();
 }
@@ -1395,12 +1401,12 @@ function initPinToggles() {
     if (el.dataset.bound === '1') return;
     el.dataset.bound = '1';
 
-    el.addEventListener('click', function(e) {
+    el.addEventListener('click', function (e) {
       e.stopPropagation();
       handlePinToggle(type, this);
     });
 
-    el.addEventListener('keydown', function(e) {
+    el.addEventListener('keydown', function (e) {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       e.preventDefault();
       e.stopPropagation();
@@ -1421,17 +1427,17 @@ function updateStats() {
 
 function updateLayerCounts(data = reports) {
   const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
-  set('cnt-semua',  data.length);
-  set('cnt-semua-2',  data.length);
-  set('cnt-semua-3',  data.length);
+  set('cnt-semua', data.length);
+  set('cnt-semua-2', data.length);
+  set('cnt-semua-3', data.length);
   set('cnt-tinggi', data.filter(r => isRawanTinggi(r.skorRawan)).length);
   set('cnt-sedang', data.filter(r => isRawanSedang(r.skorRawan)).length);
   set('cnt-rendah', data.filter(r => isRawanRendah(r.skorRawan)).length);
-  set('cnt-gelap',  data.filter(r => r.pencahayaan === 'Gelap').length);
-  set('cnt-sepi',   data.filter(r => isSepi(r.kepadatan)).length);
+  set('cnt-gelap', data.filter(r => r.pencahayaan === 'Gelap').length);
+  set('cnt-sepi', data.filter(r => isSepi(r.kepadatan)).length);
   set('cnt-nocctv', data.filter(r => r.cctv === 'Tidak ada').length);
-  set('cnt-minim',  data.filter(r => isMinimPetugas(r.petugas)).length);
-  
+  set('cnt-minim', data.filter(r => isMinimPetugas(r.petugas)).length);
+
   set('cnt-layak', data.filter(r => calcKelayakan(r).status === 'Layak').length);
   set('cnt-cukup-layak', data.filter(r => calcKelayakan(r).status === 'Cukup Layak').length);
   set('cnt-kurang-layak', data.filter(r => calcKelayakan(r).status === 'Kurang Layak').length);
@@ -1472,31 +1478,31 @@ function updateHeatmapAnalysis(data, filterWaktu, filterBulan) {
   });
   const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3);
   if (!sorted.length) { el.textContent = 'Belum ada lokasi untuk analisis heatmap.'; return; }
-  
+
   // Menghilangkan angka jumlah laporan (c) sesuai permintaan USER
-  const names  = sorted.map(([n, c]) => n);
-  
+  const names = sorted.map(([n, c]) => n);
+
   const period = [];
   if (filterWaktu) period.push(filterWaktu.toLowerCase());
   if (filterBulan) period.push(`bulan ${getMonthName(filterBulan)}`);
   const suffix = period.length ? ` (filter ${period.join(', ')})` : '';
-  
+
   const scores = data.map(r => r.skorRawan).filter(v => typeof v === 'number' && !isNaN(v));
   const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : null;
-  
+
   let avgLabel = '';
   if (avg !== null) {
     if (avg >= 3.6) avgLabel = 'Tinggi';
     else if (avg >= 2.1) avgLabel = 'Sedang';
     else avgLabel = 'Rendah';
   }
-  
+
   const avgText = avgLabel ? ` Tingkat kerawanan rata-rata: ${avgLabel}.` : '';
   el.textContent = `Hotspot tertinggi${suffix}: ${names.join(', ')}.${avgText}`;
 }
 
 function getMonthName(n) {
-  const names = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const names = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
   return names[parseInt(n, 10) - 1] || '';
 }
 
@@ -1512,7 +1518,7 @@ if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
 function renderLaporanChart() {
   const ctx = document.getElementById('laporanChart');
   if (!ctx) return;
-  
+
   const filterWaktu = document.getElementById('laporanChartFilter')?.value || '';
   let data = reports;
   if (filterWaktu) data = data.filter(r => r.waktu === filterWaktu);
@@ -1524,13 +1530,13 @@ function renderLaporanChart() {
     if (d) monthCounts[d.getMonth()]++;
   });
 
-  const monthLabels = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
 
   if (typeof Chart === 'undefined' || typeof ChartDataLabels === 'undefined') {
     setTimeout(renderLaporanChart, 500);
     return;
   }
-  
+
   Chart.register(ChartDataLabels);
 
   if (laporanChartInstance) {
@@ -1564,9 +1570,9 @@ function renderLaporanChart() {
         }
       },
       scales: {
-        y: { 
-          beginAtZero: true, 
-          ticks: { stepSize: 1 } 
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 }
         }
       }
     }
@@ -1617,10 +1623,10 @@ function dlFile(content, filename, type) {
 function exportMarkersCSV() {
   const pts = reports.filter(r => r.lat && r.lng);
   if (!pts.length) { showToast('Tidak ada data koordinat.', 'error'); return; }
-  
+
   // Headers
   let csv = "ID,Peran Kampus,Jenis Kelamin,Pencahayaan,Kepadatan,CCTV,Petugas Keamanan,Waktu Rawan,Skor Rawan,Skor Nyaman,Lokasi,Fakultas,Deskripsi,Status\n";
-  
+
   pts.forEach(r => {
     const row = [
       r.id,
@@ -1640,7 +1646,7 @@ function exportMarkersCSV() {
     ];
     csv += row.join(',') + '\n';
   });
-  
+
   dlFile(csv, 'itsafe_area_rawan.csv', 'text/csv;charset=utf-8;');
   showToast('CSV diunduh.', 'success');
 }
@@ -1661,31 +1667,31 @@ function loadDemoData() {
     let lat = -7.283 + (Math.random() * 0.01 - 0.005);
     let lng = 112.795 + (Math.random() * 0.008 - 0.004);
     let attempts = 0;
-    while(attempts < 100) {
+    while (attempts < 100) {
       lat = -7.283 + (Math.random() * 0.01 - 0.005);
       lng = 112.795 + (Math.random() * 0.008 - 0.004);
       if (typeof isPointInBoundary === 'function' && boundaryPolygons && boundaryPolygons.length) {
-         if (isPointInBoundary(lat, lng)) break;
+        if (isPointInBoundary(lat, lng)) break;
       } else {
-         break;
+        break;
       }
       attempts++;
     }
-    
+
     demo.push({
-        lat: lat,
-        lng: lng,
-        lokasi: lokOpts[Math.floor(Math.random() * lokOpts.length)],
-        waktu: waktuOpts[Math.floor(Math.random() * waktuOpts.length)],
-        pencahayaan: pencahayaanOpts[Math.floor(Math.random() * pencahayaanOpts.length)],
-        kepadatan: kepadatanOpts[Math.floor(Math.random() * kepadatanOpts.length)],
-        cctv: cctvOpts[Math.floor(Math.random() * cctvOpts.length)],
-        petugas: petugasOpts[Math.floor(Math.random() * petugasOpts.length)],
-        skorRawan: Math.floor(Math.random() * 5) + 1,
-        skorNyaman: Math.floor(Math.random() * 3) + 1,
-        createdAt: new Date(Date.now() - Math.random()*10000000000).toISOString(),
-        lokasiDeskripsi: 'Ini adalah data demo tersebar secara acak.',
-        fotoPath: Math.random() > 0.5 ? 'https://picsum.photos/seed/' + Math.floor(Math.random()*1000) + '/400/300' : null
+      lat: lat,
+      lng: lng,
+      lokasi: lokOpts[Math.floor(Math.random() * lokOpts.length)],
+      waktu: waktuOpts[Math.floor(Math.random() * waktuOpts.length)],
+      pencahayaan: pencahayaanOpts[Math.floor(Math.random() * pencahayaanOpts.length)],
+      kepadatan: kepadatanOpts[Math.floor(Math.random() * kepadatanOpts.length)],
+      cctv: cctvOpts[Math.floor(Math.random() * cctvOpts.length)],
+      petugas: petugasOpts[Math.floor(Math.random() * petugasOpts.length)],
+      skorRawan: Math.floor(Math.random() * 5) + 1,
+      skorNyaman: Math.floor(Math.random() * 3) + 1,
+      createdAt: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
+      lokasiDeskripsi: 'Ini adalah data demo tersebar secara acak.',
+      fotoPath: Math.random() > 0.5 ? 'https://picsum.photos/seed/' + Math.floor(Math.random() * 1000) + '/400/300' : null
     });
   }
 
@@ -1729,12 +1735,12 @@ function clearDemoData() {
 let qrInstance = null;
 function generateQR() {
   const cont = document.getElementById('qrCodeContainer');
-  const url  = QR_URL;
+  const url = QR_URL;
   if (!cont) return;
   cont.innerHTML = '';
   try {
-    qrInstance = new QRCode(cont, { text: url, width: 220, height: 220, colorDark:'#000', colorLight:'#fff', correctLevel: QRCode.CorrectLevel.H });
-  } catch(e) {
+    qrInstance = new QRCode(cont, { text: url, width: 220, height: 220, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.H });
+  } catch (e) {
     cont.innerHTML = `<div class="qr-placeholder-inner"><i class="fas fa-qrcode"></i><p>QR Code</p></div>`;
   }
   const d = document.getElementById('qrUrlDisplay');
@@ -1755,9 +1761,9 @@ function renderLocationCards(filter) {
   grid.innerHTML = list.map(loc => `
     <div class="location-card" data-status="${loc.status}">
       ${loc.photo
-        ? `<div class="location-img"><img src="${loc.photo}" alt="Foto ${esc(loc.name)}" onerror="this.parentElement.innerHTML='<div class=&quot;location-img-placeholder&quot;><i class=&quot;fas ${loc.icon || 'fa-location-dot'}&quot;></i><span>Foto lokasi</span></div>'"/></div>`
-        : `<div class="location-img-placeholder"><i class="fas ${loc.icon || 'fa-location-dot'}"></i><span>Foto lokasi</span></div>`
-      }
+      ? `<div class="location-img"><img src="${loc.photo}" alt="Foto ${esc(loc.name)}" onerror="this.parentElement.innerHTML='<div class=&quot;location-img-placeholder&quot;><i class=&quot;fas ${loc.icon || 'fa-location-dot'}&quot;></i><span>Foto lokasi</span></div>'"/></div>`
+      : `<div class="location-img-placeholder"><i class="fas ${loc.icon || 'fa-location-dot'}"></i><span>Foto lokasi</span></div>`
+    }
       <div class="location-body">
         <div class="location-name">${loc.name}</div>
         <div class="location-desc">${loc.desc}</div>
@@ -1900,7 +1906,7 @@ function parseTanggal(str) {
 }
 
 function esc(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function showToast(msg, type = 'success') {
@@ -1913,7 +1919,7 @@ function showToast(msg, type = 'success') {
 
 window.addEventListener('resize', () => {
   if (leafletMap) leafletMap.invalidateSize();
-  if (pickerMap)  pickerMap.invalidateSize();
+  if (pickerMap) pickerMap.invalidateSize();
 });
 
 /* ============================================================
@@ -1921,18 +1927,18 @@ window.addEventListener('resize', () => {
    Progress bar · Star ratings · Pill buttons · Fill highlight
 ============================================================ */
 
-(function() {
+(function () {
 
   /* ── Progress bar ─────────────────────────────────────── */
   const REQUIRED_IDS = [
-    'emailIts','peranKampus','lokasiInsiden','lokasiDeskripsi',
-    'pencahayaan','kepadatan','cctv','petugasKeamanan','waktuInsiden',
-    'skorNyaman','skorRawan','kronologi'
+    'emailIts', 'peranKampus', 'lokasiInsiden', 'lokasiDeskripsi',
+    'pencahayaan', 'kepadatan', 'cctv', 'petugasKeamanan', 'waktuInsiden',
+    'skorNyaman', 'skorRawan', 'kronologi'
   ];
   const OPTIONAL_IDS = [
-    'jenisKelamin','vegetasi','hariRawan','alasanTidakNyaman',
-    'pernahHindari','orangLain','situasiMencurigakan',
-    'kontakPelapor','fotoLokasi'
+    'jenisKelamin', 'vegetasi', 'hariRawan', 'alasanTidakNyaman',
+    'pernahHindari', 'orangLain', 'situasiMencurigakan',
+    'kontakPelapor', 'fotoLokasi'
   ];
   const ALL_IDS = [...REQUIRED_IDS, ...OPTIONAL_IDS];
 
@@ -1956,13 +1962,13 @@ window.addEventListener('resize', () => {
     const pct = calcProgress();
     const fill = document.getElementById('progressFill');
     const label = document.getElementById('progressPercent');
-    if (fill)  fill.style.width = pct + '%';
+    if (fill) fill.style.width = pct + '%';
     if (label) {
       let msg = pct === 0 ? '0% terisi' :
-                pct < 40  ? `${pct}% — Lanjutkan pengisian.` :
-                pct < 70  ? `${pct}% — Sudah mendekati setengah.` :
-                pct < 100 ? `${pct}% — Hampir selesai.` :
-                            `100% — Siap dikirim.`;
+        pct < 40 ? `${pct}% — Lanjutkan pengisian.` :
+          pct < 70 ? `${pct}% — Sudah mendekati setengah.` :
+            pct < 100 ? `${pct}% — Hampir selesai.` :
+              `100% — Siap dikirim.`;
       label.textContent = msg;
     }
     /* highlight filled inputs */
@@ -1980,15 +1986,15 @@ window.addEventListener('resize', () => {
   /* ── Star ratings ─────────────────────────────────────── */
   function initStarRating(rowEl) {
     const targetId = rowEl.dataset.target;
-    const type     = rowEl.dataset.type; // 'comfort' | 'danger'
-    const btns     = rowEl.querySelectorAll('.star-btn');
-    const select   = document.getElementById(targetId);
-    const hintEl   = rowEl.closest('.star-rating-group')
-                       .querySelector('.star-hint');
+    const type = rowEl.dataset.type; // 'comfort' | 'danger'
+    const btns = rowEl.querySelectorAll('.star-btn');
+    const select = document.getElementById(targetId);
+    const hintEl = rowEl.closest('.star-rating-group')
+      .querySelector('.star-hint');
 
     const labels = {
-      comfort: ['Sangat tidak nyaman','Tidak nyaman','Cukup nyaman','Nyaman','Sangat nyaman'],
-      danger:  ['Tidak rawan','Sedikit rawan','Cukup rawan','Rawan','Sangat rawan']
+      comfort: ['Sangat tidak nyaman', 'Tidak nyaman', 'Cukup nyaman', 'Nyaman', 'Sangat nyaman'],
+      danger: ['Tidak rawan', 'Sedikit rawan', 'Cukup rawan', 'Rawan', 'Sangat rawan']
     };
 
     function paint(val) {
@@ -2021,7 +2027,7 @@ window.addEventListener('resize', () => {
     btns.forEach(btn => {
       btn.addEventListener('click', () => {
         const targetId = btn.dataset.target;
-        const val      = btn.dataset.val;
+        const val = btn.dataset.val;
         /* deselect all in group */
         btns.forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
@@ -2066,7 +2072,7 @@ window.addEventListener('resize', () => {
     const elementsToAnimate = document.querySelectorAll(
       '.stat-card, .team-card, .location-card, .about-info-card, .hero-content h1, .hero-actions, .info-card'
     );
-    
+
     let delayCounter = 0;
     elementsToAnimate.forEach(el => {
       if (el.classList.contains('animate-pop')) return; // Skip if already has it
