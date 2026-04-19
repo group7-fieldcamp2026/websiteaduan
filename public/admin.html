@@ -800,7 +800,7 @@
       touch-action: pan-x pan-y pinch-zoom;
       max-height: 60vh;
     }
-    
+
     #adminMap .leaflet-container {
       touch-action: pan-x pan-y pinch-zoom;
     }
@@ -808,7 +808,7 @@
     /* Leaflet popup sizing for admin map - nice design */
     #adminMap .leaflet-popup-content-wrapper {
       border-radius: 12px !important;
-      box-shadow: 0 8px 28px rgba(0,0,0,.25) !important;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, .25) !important;
       max-width: 220px !important;
       width: 220px !important;
       transform: none !important;
@@ -816,8 +816,9 @@
       overflow: hidden !important;
       padding: 0 !important;
       background: #F5CAC3 !important;
-      border: 1px solid rgba(0,0,0,0.08);
+      border: 1px solid rgba(0, 0, 0, 0.08);
     }
+
     #adminMap .leaflet-popup-content {
       margin: 0 !important;
       max-width: 190px !important;
@@ -829,6 +830,7 @@
       padding: 12px 12px 12px 18px !important;
       display: block !important;
     }
+
     #adminMap .leaflet-popup-content-wrapper,
     #adminMap .leaflet-popup-content {
       transform-origin: center center !important;
@@ -839,22 +841,27 @@
       scrollbar-width: thin;
       scrollbar-color: #D56A6A #ebd5cf;
     }
+
     #adminMap .leaflet-popup-content::-webkit-scrollbar {
       width: 4px;
     }
+
     #adminMap .leaflet-popup-content::-webkit-scrollbar-track {
       background: #ebd5cf;
       border-radius: 2px;
       margin: 8px 0;
     }
+
     #adminMap .leaflet-popup-content::-webkit-scrollbar-thumb {
       background: linear-gradient(180deg, #D56A6A, #B85454);
       border-radius: 4px;
       min-height: 25px;
     }
+
     #adminMap .leaflet-popup-content::-webkit-scrollbar-thumb:hover {
       background: #B85454;
     }
+
     #adminMap .leaflet-popup-content::-webkit-scrollbar-corner {
       background: #ebd5cf;
     }
@@ -867,6 +874,7 @@
       right: 4px !important;
       top: 4px !important;
     }
+
     #adminMap .leaflet-popup-close-button:hover {
       color: #D56A6A !important;
     }
@@ -876,6 +884,7 @@
         max-width: 220px !important;
         max-height: 280px !important;
       }
+
       #adminMap .leaflet-popup-content {
         max-width: 200px !important;
         font-size: 12px !important;
@@ -3335,7 +3344,7 @@
 
       // Load GIS layers
       setTimeout(() => loadAdminGISLayers(), 500);
-      
+
       // Fix map size after modal opens
       setTimeout(() => { if (adminMap) adminMap.invalidateSize(); }, 200);
     }
@@ -3617,13 +3626,7 @@
       </div>
     `;
 
-        // Determine marker color based on verification status
-        const statusColors = {
-          pending: '#F59E0B',    // Orange (Menunggu Verifikasi)
-          in_review: '#3B82F6', // Blue (Dalam Tinjauan)
-          resolved: '#10B981'   // Green (Terverifikasi)
-        };
-        const markerColor = statusColors[r.status] || '#6B7280';
+        const markerColor = isRawanTinggi(r.skorRawan) ? '#EF4444' : (isRawanSedang(r.skorRawan) ? '#F59E0B' : '#10B981');
 
         const caseIcon = L.divIcon({
           className: 'case-dot-wrap',

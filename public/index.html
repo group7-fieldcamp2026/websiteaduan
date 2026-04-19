@@ -3,9 +3,9 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ITSafe x Satgas PPK ITS</title>
-  <link rel="stylesheet" href="style.css?v=3.0" />
+  <link rel="stylesheet" href="style.css?v=5.2" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Nunito:wght@300;400;500;600;700&display=swap"
@@ -16,10 +16,6 @@
 
 <body>
   <canvas id="globalBgCanvas"></canvas>
-  <!-- Mobile menu overlay for nav -->
-  <div id="mobileNavOverlay"
-    style="display:none;position:fixed;inset:0;z-index:999;background:rgba(24,28,42,.7);backdrop-filter:blur(2px)">
-  </div>
 
   <!-- NAVBAR -->
   <nav class="navbar" id="navbar">
@@ -53,11 +49,10 @@
     </button>
   </nav>
 
-
   <main>
+
     <!-- ===== PAGE: HOME ===== -->
     <section id="home" class="page active">
-
       <div class="hero">
         <div class="hero-bg-shapes">
           <canvas id="particleCanvas"></canvas>
@@ -484,6 +479,8 @@
                       <option>Tidak pernah</option>
                     </select>
                   </div>
+
+
 
                   <div class="form-group full-width">
                     <label>Keterangan Tambahan <span class="label-opt">opsional</span></label>
@@ -1164,7 +1161,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
-  <script src="script.js?v=4.0"></script>
+  <script src="script.js?v=5.2"></script>
 
   <!-- ===== ITSafe UI ANIMATIONS ===== -->
   <script>
@@ -1534,29 +1531,37 @@
         });
       }
 
-      /* ─── Boot ─── */
-      function boot() {
+      /* ─── Boot Wrapper ─── */
+      function masterBoot() {
+        // 1. Run the script.js logic first if not already done
+        if (typeof itsafeInit === 'function') itsafeInit();
+        
+        // 2. Run the premium UI effects
         initThemeToggle();      // dark/light mode toggle
-        initGlobalBubbles();   // floating bubble background (all pages)
+        initGlobalBubbles();    // floating bubble background
         initParticles();        // hero particle network
         initReveal();           // scroll reveal
         initStagger();          // CSS --i variables
-        initStaggerDelay();     // actual transition-delay on stagger children
-        initMagnetic();         // magnetic button effect
-        initBadgePulse();       // hero badge ring
-        initAboutParticles();   // tentang hero particles
-        patchNavReveal();       // re-trigger reveal on page navigation
-        initNavSparkle();       // sparkle on nav-link hover
+        initStaggerDelay();     // staggered transitions
+        initMagnetic();         // magnetic buttons
+        initBadgePulse();       // hero badge pulse
+        initAboutParticles();   // about page particles
+        patchNavReveal();       // patch navigateTo for reveal effects
+        initNavSparkle();       // sparkles!
+        
+        // 3. Run the script.js secondary UI boot
+        if (typeof itsafeBootUI === 'function') itsafeBootUI();
       }
 
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', boot);
+        document.addEventListener('DOMContentLoaded', masterBoot);
       } else {
-        boot();
+        masterBoot();
       }
     })();
   </script>
 
 </body>
+
 
 </html>
