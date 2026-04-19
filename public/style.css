@@ -4372,11 +4372,11 @@ main {
 }
 
 [data-theme="dark"] .star-btn.active {
-  color: var(--accent);
+  color: #f59e0b !important; /* Amber cerah */
 }
 
 [data-theme="dark"] .star-btn.active-red {
-  color: var(--primary-dk);
+  color: #ff8fa3 !important; /* Pink cerah */
 }
 
 [data-theme="dark"] .star-hint {
