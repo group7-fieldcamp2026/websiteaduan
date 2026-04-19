@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -47,16 +47,11 @@
     </button>
   </nav>
 
-    </main>
-    <!-- LIBRARY JS: Pastikan urutan ini -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-    <script src="https://unpkg.com/shpjs@latest/dist/shp.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
-    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-    <script src="script.js?v=3.0"></script>
 
-  </body>
-  </html>
+  <main>
+    <!-- ===== PAGE: HOME ===== -->
+    <section id="home" class="page active">
+
       <div class="hero">
         <div class="hero-bg-shapes">
           <canvas id="particleCanvas"></canvas>
@@ -401,60 +396,53 @@
                       <option value="3">3</option>
                     </select>
                   </div>
-
-                  <!-- ===== PAGE: HOME (sinkron referensi) ===== -->
-                  <section id="home" class="page active">
-                    <div class="hero">
-                      <div class="hero-bg-shapes">
-                        <canvas id="particleCanvas"></canvas>
-                        <div class="shape shape-1"></div>
-                        <div class="shape shape-2"></div>
-                        <div class="shape shape-3"></div>
+                  <!-- Skor Rawan — bintang -->
+                  <div class="form-group full-width">
+                    <label>Tingkat Kerawanan Terhadap Tindak Asusila <span class="req">*</span></label>
+                    <div class="star-rating-group" id="rawanStars">
+                      <div class="star-row" data-target="skorRawan" data-type="danger">
+                        <button type="button" class="star-btn" data-val="1" title="1 – Tidak Rawan">★</button>
+                        <button type="button" class="star-btn" data-val="2" title="2 – Sedikit Rawan">★</button>
+                        <button type="button" class="star-btn" data-val="3" title="3 – Cukup Rawan">★</button>
+                        <button type="button" class="star-btn" data-val="4" title="4 – Rawan">★</button>
+                        <button type="button" class="star-btn" data-val="5" title="5 – Sangat Rawan">★</button>
                       </div>
-                      <div class="hero-content">
-                        <div class="hero-badge"><i class="fas fa-lock"></i> Anonim &amp; Aman</div>
-                        <h1>Amati. Laporkan.<br><span class="gradient-text">Buat Kampus Lebih Aman!</span></h1>
-                        <div class="hero-desc-wrapper">
-                          <p class="hero-lead">Platform pelaporan dan pemetaan area berpotensi rawan tindak asusila di lingkungan ITS.</p>
-                          <p class="hero-sub">Laporanmu tentang kondisi area yang gelap, sepi, minim pengawasan dapat membantu kampus mengambil tindakan nyata untuk menjaga keamanan semua warga ITS.</p>
-                        </div>
-                        <div class="collab-badge">
-                          <div class="collab-icon"><i class="fas fa-handshake"></i></div>
-                          <div class="collab-text">
-                            <span>ITSafe (Kelompok 7 Field Camp 2026) berkolaborasi dengan</span>
-                            <strong>Satgas PPK ITS</strong>
-                          </div>
-                        </div>
-                        <div class="hero-actions">
-                          <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Buat Laporan</button>
-                          <button class="btn btn-outline" onclick="navigateTo('peta')"><i class="fas fa-map"></i> Lihat Peta</button>
-                          <a class="btn btn-admin-entry" href="/admin"><i class="fas fa-user-shield"></i> Masuk Admin</a>
-                        </div>
-                      </div>
-                      <div class="hero-stats">
-                        <div class="stat-card" style="--i:0">
-                          <div class="stat-icon"><i class="fas fa-file-lines"></i></div>
-                          <span class="stat-number" id="totalLaporan">0</span>
-                          <span class="stat-label">Total Laporan</span>
-                        </div>
-                        <div class="stat-card" style="--i:1">
-                          <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
-                          <span class="stat-number" id="bulanIni">0</span>
-                          <span class="stat-label">Bulan Ini</span>
-                        </div>
-                        <div class="stat-card" style="--i:2">
-                          <div class="stat-icon"><i class="fas fa-circle-check"></i></div>
-                          <span class="stat-number" id="terverifikasi">0</span>
-                          <span class="stat-label">Terverifikasi</span>
-                        </div>
-                      </div>
+                      <div class="star-hint" id="rawanHint">Pilih 1 bintang = Aman, 5 bintang = Sangat Rawan</div>
                     </div>
+                    <select id="skorRawan" required class="star-select">
+                      <option value="">-- Pilih --</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label>Alasan Area Terasa Tidak Nyaman / Rawan <span class="label-opt">opsional</span></label>
+                    <textarea id="alasanTidakNyaman" rows="2" placeholder="Contoh: Sepi saat malam, pencahayaan mati, banyak semak-semak..."></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Pernah Menghindari Area Ini?</label>
+                    <div class="pill-group">
+                      <button type="button" class="pill-btn" data-target="pernahHindari" data-val="Ya">Ya</button>
+                      <button type="button" class="pill-btn" data-target="pernahHindari" data-val="Tidak">Tidak</button>
+                    </div>
+                    <select id="pernahHindari" class="star-select">
+                      <option value="">-- Pilih --</option>
+                      <option>Ya</option>
+                      <option>Tidak</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
                     <label>Tahu orang lain yang tidak nyaman?</label>
                     <div class="pill-group">
                       <button type="button" class="pill-btn" data-target="orangLain" data-val="Ya">Ya</button>
                       <button type="button" class="pill-btn" data-target="orangLain" data-val="Tidak">Tidak</button>
-                      <button type="button" class="pill-btn" data-target="orangLain" data-val="Tidak tahu">Tidak
-                        tahu</button>
+                      <button type="button" class="pill-btn" data-target="orangLain" data-val="Tidak tahu">Tidak tahu</button>
                     </div>
                     <select id="orangLain" class="star-select">
                       <option value="">-- Pilih --</option>
@@ -1524,45 +1512,67 @@
     })();
   </script>
 
-</body>
+
+  </main>
+
+  <!-- LIBRARY JS: Pastikan urutan ini -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  <script src="https://unpkg.com/shpjs@latest/dist/shp.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <script src="script.js?v=3.0"></script>
 
 
-  <!-- Theme toggle and navbar script from referensi -->
   <script>
     (function () {
       function initThemeToggle() {
         const btn = document.getElementById('themeToggle');
         const icon = document.getElementById('themeIcon');
         if (!btn || !icon) return;
+        
+        // Initial state
         const saved = localStorage.getItem('itsafe-theme');
         if (saved === 'dark') {
           document.documentElement.setAttribute('data-theme', 'dark');
-          icon.className = 'fas fa-sun';
+          if (icon) icon.className = 'fas fa-sun';
         }
+
         btn.addEventListener('click', function () {
           const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
           if (isDark) {
             document.documentElement.removeAttribute('data-theme');
-            icon.className = 'fas fa-moon';
+            if (icon) icon.className = 'fas fa-moon';
             localStorage.setItem('itsafe-theme', 'light');
           } else {
             document.documentElement.setAttribute('data-theme', 'dark');
-            icon.className = 'fas fa-sun';
+            if (icon) icon.className = 'fas fa-sun';
             localStorage.setItem('itsafe-theme', 'dark');
           }
+          // Also call script.js function if available
+          if (typeof updateThemeIcon === 'function') updateThemeIcon();
         });
       }
-      function boot() {
+
+      function bootAll() {
+        if (typeof initGlobalBubbles === 'function') initGlobalBubbles();
+        if (typeof initParticles === 'function') initParticles();
+        if (typeof initReveal === 'function') initReveal();
+        if (typeof initStagger === 'function') initStagger();
+        if (typeof initStaggerDelay === 'function') initStaggerDelay();
+        if (typeof initMagnetic === 'function') initMagnetic();
+        if (typeof initBadgePulse === 'function') initBadgePulse();
+        if (typeof initAboutParticles === 'function') initAboutParticles();
+        if (typeof patchNavReveal === 'function') patchNavReveal();
+        if (typeof initNavSparkle === 'function') initNavSparkle();
         initThemeToggle();
       }
+
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', boot);
+        document.addEventListener('DOMContentLoaded', bootAll);
       } else {
-        boot();
+        bootAll();
       }
     })();
   </script>
-
 </body>
-
 </html>

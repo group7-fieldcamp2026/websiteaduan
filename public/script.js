@@ -330,9 +330,10 @@ function scrollToForm() {
 // FORM
 // ============================================================
 function initForm() {
-  document.getElementById('reportForm').addEventListener('submit', handleSubmit);
+  document.getElementById('reportForm')?.addEventListener('submit', handleSubmit);
   document.getElementById('lokasiInsiden')?.addEventListener('change', handleLocationPreset);
 }
+
 
 async function handleSubmit(e) {
   e.preventDefault();
