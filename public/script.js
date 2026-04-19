@@ -615,9 +615,11 @@ function renderLeafletMap() {
         else if (kel.status === 'Cukup Layak') color = '#F59E0B'; // Orange
         else color = '#EF4444'; // Red
 
-        let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
-        let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
-        popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
+        let badgeClass = kel.status === 'Layak' ? 'badge-safe' : (kel.status === 'Cukup Layak' ? 'badge-warning' : 'badge-danger');
+        let badgeIcon = kel.status === 'Layak' ? 'fa-check-circle' : (kel.status === 'Cukup Layak' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle');
+        let alasanHtml = kel.alasan.length ? `<div style="margin-top:6px;font-size:10.5px;color:#94a3b8;line-height:1.4">Penyebab: ${kel.alasan.join(', ')}</div>` : '';
+        let kelHtml = `<div style="padding:8px 16px 10px;border-top:1px solid rgba(0,0,0,.06)"><div class="popup-status-badge ${badgeClass}"><i class="fas ${badgeIcon}"></i> ${kel.status}</div>${alasanHtml}</div>`;
+        popupHtml = popupHtml.replace('</div>\n  </div>', kelHtml + '</div>\n  </div>');
       }
 
       L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
@@ -643,9 +645,11 @@ function renderLeafletMap() {
         else if (kel.status === 'Cukup Layak') color = '#F59E0B';
         else color = '#EF4444';
 
-        let labelColor = kel.status === 'Layak' ? '#10B981' : (kel.status === 'Cukup Layak' ? '#F59E0B' : '#EF4444');
-        let alasanHtml = kel.alasan.length ? `<br/><span style="color:#D56A6A; font-size: 0.8rem;">Penyebab Kurang Layak: <br>- ${kel.alasan.join('<br>- ')}</span>` : '';
-        popupHtml = popupHtml.replace('</div>', `<hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/><div style="text-align:center; padding: 5px 0; color:${labelColor}; font-size:1.1rem; font-weight:bold;">${kel.status.toUpperCase()}!</div>${alasanHtml}</div>`);
+        let badgeClass = kel.status === 'Layak' ? 'badge-safe' : (kel.status === 'Cukup Layak' ? 'badge-warning' : 'badge-danger');
+        let badgeIcon = kel.status === 'Layak' ? 'fa-check-circle' : (kel.status === 'Cukup Layak' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle');
+        let alasanHtml = kel.alasan.length ? `<div style="margin-top:6px;font-size:10.5px;color:#94a3b8;line-height:1.4">Penyebab: ${kel.alasan.join(', ')}</div>` : '';
+        let kelHtml = `<div style="padding:8px 16px 10px;border-top:1px solid rgba(0,0,0,.06)"><div class="popup-status-badge ${badgeClass}"><i class="fas ${badgeIcon}"></i> ${kel.status}</div>${alasanHtml}</div>`;
+        popupHtml = popupHtml.replace('</div>\n  </div>', kelHtml + '</div>\n  </div>');
       }
 
       L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
@@ -856,25 +860,25 @@ function mapGeoJSONCoords(gj, fn) {
 }
 
 function getNyamanLabel(val) {
-  if (val === 1) return '<div style="text-align:center; padding: 5px 0; color:#EF4444; font-size:1.1rem; font-weight:bold;">TIDAK NYAMAN!</div>';
-  if (val === 2) return '<div style="text-align:center; padding: 5px 0; color:#F59E0B; font-size:1.1rem; font-weight:bold;">KURANG NYAMAN!</div>';
-  if (val === 3) return '<div style="text-align:center; padding: 5px 0; color:#10B981; font-size:1.1rem; font-weight:bold;">NYAMAN!</div>';
+  if (val === 1) return '<div class="popup-status-badge badge-danger"><i class="fas fa-exclamation-circle"></i> Tidak Nyaman</div>';
+  if (val === 2) return '<div class="popup-status-badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Kurang Nyaman</div>';
+  if (val === 3) return '<div class="popup-status-badge badge-safe"><i class="fas fa-check-circle"></i> Nyaman</div>';
   return '';
 }
 
 function getRawanLabel(val) {
-  if (val >= 4 || val === 3) return '<span style="color:#EF4444; font-weight:bold;">RAWAN TINGGI !</span>';
-  if (val === 2) return '<span style="color:#F59E0B; font-weight:bold;">RAWAN SEDANG !</span>';
-  if (val <= 1) return '<span style="color:#10B981; font-weight:bold;">RAWAN RENDAH !</span>';
+  if (val >= 4 || val === 3) return '<div class="popup-status-badge badge-danger"><i class="fas fa-exclamation-circle"></i> Rawan Tinggi</div>';
+  if (val === 2) return '<div class="popup-status-badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Rawan Sedang</div>';
+  if (val <= 1) return '<div class="popup-status-badge badge-safe"><i class="fas fa-shield-halved"></i> Rawan Rendah</div>';
   return '-';
 }
 
 function getScoreHtml(val, type) {
-  let color = '#F59E0B'; // kuning
+  let color = '#F59E0B';
 
   if (type === 'pencahayaan') {
-    if (val === 'Terang') { color = '#10B981'; } // hijau
-    else if (val === 'Gelap') { color = '#EF4444'; } // merah
+    if (val === 'Terang') { color = '#10B981'; }
+    else if (val === 'Gelap') { color = '#EF4444'; }
   }
   else if (type === 'kepadatan') {
     if (val === 'Ramai') { color = '#10B981'; }
@@ -893,43 +897,70 @@ function getScoreHtml(val, type) {
     else if ((val || '').includes('Tertutup')) { color = '#EF4444'; }
   }
 
-  if (!val || val === '-') return '-';
-  return `<span style="color:${color}; font-weight:bold">${val}</span>`;
+  if (!val || val === '-') return '<span class="popup-meta-value" style="color:#94a3b8">—</span>';
+  return `<span class="popup-meta-value" style="color:${color}">${val}</span>`;
 }
 
 function buildPopup(r) {
   const faculty = r.fakultas || getFacultyFromLocationName(r.lokasi);
   const isPeta2 = document.getElementById('tab-heatmap') && document.getElementById('tab-heatmap').classList.contains('active');
 
-  let headerHtml = `<strong style="color:#F28482">${esc(r.lokasi)}</strong><br/>
-    <span style="color:#555">${esc(faculty)}</span><br/>
-    <span style="font-size:0.75rem; color:#888;">Koordinat: ${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</span><hr style="margin:.35rem 0;border:none;border-top:1px solid #eee"/>`;
+  // Header
+  let headerHtml = `<div class="popup-header">
+    <div class="popup-loc-name">${esc(r.lokasi)}</div>
+    <div class="popup-faculty">${esc(faculty)}</div>
+    <div class="popup-coords">${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</div>
+  </div>`;
 
-  let descHtml = r.lokasiDeskripsi ? `<i>"${esc(r.lokasiDeskripsi)}"</i><br/>` : '';
+  // Description quote
+  let descHtml = r.lokasiDeskripsi
+    ? `<div class="popup-desc">${esc(r.lokasiDeskripsi)}</div>`
+    : '';
 
-  let bodyHtml = '';
+  // Body
+  let bodyHtml = '<div class="popup-body">';
+
   const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
   if (isPeta2) {
-    bodyHtml += `<div style="text-align:center; padding: 5px 0;">${getRawanLabel(r.skorRawan)}</div>`;
+    bodyHtml += getRawanLabel(r.skorRawan);
   } else if (!isPeta3) {
     bodyHtml += getNyamanLabel(r.skorNyaman);
   }
 
-  bodyHtml += `<span>Waktu Rawan: ${r.waktu || '-'} (${r.hariRawan || '-'})</span><br/>
-    <span>Pencahayaan: ${getScoreHtml(r.pencahayaan, 'pencahayaan')}</span><br/>
-    <span>Kepadatan: ${getScoreHtml(r.kepadatan, 'kepadatan')}</span><br/>
-    <span>CCTV: ${getScoreHtml(r.cctv, 'cctv')}</span><br/>
-    <span>Petugas: ${getScoreHtml(r.petugas, 'petugas')}</span><br/>
-    <span>Keterbukaan: ${getScoreHtml(r.vegetasi, 'vegetasi')}</span>`;
+  bodyHtml += `<div class="popup-meta-grid">
+    <div class="popup-meta-row">
+      <span class="popup-meta-label">Waktu</span>
+      <span class="popup-meta-value" style="color:#64748b">${r.waktu || '—'} ${r.hariRawan ? '(' + r.hariRawan + ')' : ''}</span>
+    </div>
+    <div class="popup-meta-row">
+      <span class="popup-meta-label">Cahaya</span>
+      ${getScoreHtml(r.pencahayaan, 'pencahayaan')}
+    </div>
+    <div class="popup-meta-row">
+      <span class="popup-meta-label">Kepadatan</span>
+      ${getScoreHtml(r.kepadatan, 'kepadatan')}
+    </div>
+    <div class="popup-meta-row">
+      <span class="popup-meta-label">CCTV</span>
+      ${getScoreHtml(r.cctv, 'cctv')}
+    </div>
+    <div class="popup-meta-row">
+      <span class="popup-meta-label">Petugas</span>
+      ${getScoreHtml(r.petugas, 'petugas')}
+    </div>
+    <div class="popup-meta-row">
+      <span class="popup-meta-label">Vegetasi</span>
+      ${getScoreHtml(r.vegetasi, 'vegetasi')}
+    </div>
+  </div></div>`;
 
+  // Photo
   let fotoHtml = '';
   if (r.fotoPath && !r.fotoPath.startsWith('HIDDEN_')) {
     const fotoUrl = getPhotoUrl(r.fotoPath);
     const safeUrl = fotoUrl.replace(/'/g, "\\'");
-    fotoHtml = `<div style="margin-top:8px; text-align:center;" class="popup-foto-wrap">
-      <div style="font-size:0.74rem; color:#666; margin-bottom:4px;">Foto dari pengadu</div>
+    fotoHtml = `<div class="popup-foto">
       <img src="${fotoUrl}"
-        style="max-width:100%; max-height:140px; border-radius:4px; object-fit:cover; cursor:zoom-in;"
         alt="Foto Lokasi"
         onclick="openLightbox('${safeUrl}')"
         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
@@ -939,17 +970,18 @@ function buildPopup(r) {
           Buka foto di tab baru
         </a>
       </div>
-      <div style="font-size:0.72rem; color:#999; margin-top:3px;">Klik foto untuk memperbesar</div>
+      <div class="popup-foto-caption">Klik foto untuk memperbesar</div>
     </div>`;
   }
 
-  return `<div style="font-family:'DM Sans',sans-serif;min-width:160px;max-width:220px;font-size:13px;line-height:1.4;transform:none">
+  return `<div class="popup-card">
     ${headerHtml}
     ${descHtml}
     ${bodyHtml}
     ${fotoHtml}
   </div>`;
 }
+
 
 // Map 3 Logic (Kelayakan)
 function calcKelayakan(r) {
@@ -1007,7 +1039,7 @@ function renderFixedLocations(layer) {
         const color = getFacultyColor(faculty);
 
         L.marker([parseFloat(lat), parseFloat(lng)], { icon: createFacultyIcon(color) })
-          .bindPopup(`<strong>${esc(locName)}</strong><br/><span>${esc(faculty)}</span>`)
+          .bindPopup(`<div class="popup-card"><div class="popup-header"><div class="popup-loc-name">${esc(locName)}</div><div class="popup-faculty">${esc(faculty)}</div></div></div>`)
           .addTo(layer);
       });
     }
@@ -1035,13 +1067,15 @@ function renderFixedLocations(layer) {
 
       const status = loc.status === 'terpasang' ? 'Terpasang' : 'Rencana';
       const markerColor = loc.status === 'terpasang' ? '#10B981' : '#F59E0B';
+      const badgeCls = loc.status === 'terpasang' ? 'badge-safe' : 'badge-warning';
+      const badgeIcon = loc.status === 'terpasang' ? 'fa-circle-check' : 'fa-clock';
       L.circleMarker([lat, lng], {
         radius: 7,
         color: markerColor,
         fillColor: markerColor,
         fillOpacity: 0.85,
         weight: 2
-      }).bindPopup(`<strong>${esc(loc.name || 'Titik Pengaduan')}</strong><br/><span>${status}</span>`).addTo(layer);
+      }).bindPopup(`<div class="popup-card"><div class="popup-header"><div class="popup-loc-name">${esc(loc.name || 'Titik Pengaduan')}</div></div><div class="popup-body"><div class="popup-status-badge ${badgeCls}"><i class="fas ${badgeIcon}"></i> ${status}</div></div></div>`).addTo(layer);
     });
   }
 }
