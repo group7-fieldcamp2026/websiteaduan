@@ -16,8 +16,10 @@ let activeLayer = 'semua';
 let visHeatmap = true;
 let visPoint = false;
 let visCluster = false;
-let visFixedPin = true;   // toggle pin QR
-let visJurusan = true;   // toggle pin fakultas/jurusan
+let visFixedPinMain = true;
+let visJurusanMain = true;
+let visFixedPinForm = true;
+let visJurusanForm = true;
 
 // --- LEAFLET INSTANCES --------------------------------------
 let leafletMap = null;
@@ -490,6 +492,9 @@ function initPickerMap() {
   renderFixedLocations(fixedLocationLayerPicker);
   loadBoundaryLayer(pickerMap, 'picker');
   pickerMap.on('click', e => setPin(e.latlng.lat, e.latlng.lng, { fromPreset: false }));
+
+  // Force size refresh for grey map issue
+  setTimeout(() => { if(pickerMap) pickerMap.invalidateSize(); }, 500);
 }
 
 function setPin(lat, lng, opts = {}) {
@@ -932,7 +937,7 @@ function buildPopup(r) {
     </div>
     <div class="popup-meta-row">
       <span class="popup-meta-label">Hari Rawan</span>
-      <span class="popup-meta-value" style="color:#64748b">${r.hariRawan || '—'}</span>
+      <span class="popup-meta-value" style="color:#64748b">${r.hariRawan === 'Keduanya sama' ? 'Hari Kerja dan Libur' : (r.hariRawan || '—')}</span>
     </div>
     <div class="popup-meta-row">
       <span class="popup-meta-label">Cahaya</span>
@@ -1021,8 +1026,12 @@ function renderFixedLocations(layer) {
   if (!layer) return;
   layer.clearLayers();
 
+  const isPicker = (layer === fixedLocationLayerPicker);
+  const showJurusan = isPicker ? visJurusanForm : visJurusanMain;
+  const showFixed = isPicker ? visFixedPinForm : visFixedPinMain;
+
   // Pin Jurusan/Fakultas
-  if (visJurusan) {
+  if (showJurusan) {
     const sel = document.getElementById('lokasiInsiden');
     if (sel) {
       const opts = Array.from(sel.querySelectorAll('option[data-lat][data-lng]'));
@@ -1048,7 +1057,7 @@ function renderFixedLocations(layer) {
   }
 
   // Pin Lokasi QR Aduan
-  if (visFixedPin) {
+  if (showFixed) {
     LOCATIONS.forEach(loc => {
       let lat = parseFloat(loc.lat);
       let lng = parseFloat(loc.lng);
@@ -1200,21 +1209,25 @@ function toggleVis(type, cb) {
   if (type === 'heatmap') visHeatmap = cb.checked;
   if (type === 'point') visPoint = cb.checked;
   if (type === 'cluster') visCluster = cb.checked;
-  if (type === 'jurusan') visJurusan = cb.checked;
-  if (type === 'fixedpin') visFixedPin = cb.checked;
+  
+  // Independent visibility for main and form
+  if (type === 'jurusan') visJurusanMain = cb.checked;
+  if (type === 'fixedpin') visFixedPinMain = cb.checked;
+  if (type === 'jurusan-form') visJurusanForm = cb.checked;
+  if (type === 'fixedpin-form') visFixedPinForm = cb.checked;
 
-  // Sync with all similar toggles (labels)
-  document.querySelectorAll('#tog-' + type + ', #tog-' + type + '-main').forEach(el => {
+  const el = document.getElementById('tog-' + type);
+  if (el) {
     el.classList.toggle('active', cb.checked);
     const inp = el.querySelector('input');
     if (inp) inp.checked = cb.checked;
-  });
+  }
 
-  // Sync with form toggles (buttons)
-  const formEl = document.getElementById('tog-' + type + '-form');
-  if (formEl) applyPinToggleVisual(formEl, cb.checked);
-
-  renderLeafletMap();
+  if (type.includes('-form')) {
+    if (fixedLocationLayerPicker) renderFixedLocations(fixedLocationLayerPicker);
+  } else {
+    renderLeafletMap();
+  }
 }
 
 function applyPinToggleVisual(el, isActive) {
@@ -1247,16 +1260,16 @@ function setPinVisibility(type, isActive, opts = {}) {
   if (type === 'fixedpin') visFixedPin = isActive;
   if (type === 'jurusan') visJurusan = isActive;
 
-  // Sync back to label-style toggles
-  document.querySelectorAll('#tog-' + type + ', #tog-' + type + '-main').forEach(el => {
-    el.classList.toggle('active', isActive);
-    const inp = el.querySelector('input');
-    if (inp) inp.checked = isActive;
+  // Sync EVERY element that starts with id="tog-[type]"
+  document.querySelectorAll('[id^="tog-' + type + '"]').forEach(el => {
+    if (el.tagName === 'LABEL') {
+      el.classList.toggle('active', isActive);
+      const inp = el.querySelector('input');
+      if (inp) inp.checked = isActive;
+    } else {
+      applyPinToggleVisual(el, isActive);
+    }
   });
-
-  // Sync to button-style toggles
-  const formEl = document.getElementById('tog-' + type + '-form');
-  if (formEl) applyPinToggleVisual(formEl, isActive);
 
   if (!render) return;
   renderLeafletMap();

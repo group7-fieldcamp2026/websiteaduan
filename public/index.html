@@ -258,13 +258,15 @@
                     </div>
                   </div>
                   <div class="form-group full-width" style="margin-top: .5rem; margin-bottom: 0.5rem;">
-                    <div style="display: flex; gap: .6rem; flex-wrap: wrap;">
-                      <button type="button" class="btn btn-outline btn-xs btn-pin-toggle" id="tog-fixedpin-form" data-active="true" onclick="setPinVisibility('fixedpin', this.dataset.active === 'false')">
-                        <i class="fas fa-check-circle"></i> Pin Lokasi Tetap (Aduan QR)
-                      </button>
-                      <button type="button" class="btn btn-outline btn-xs btn-pin-toggle" id="tog-jurusan-form" data-active="true" onclick="setPinVisibility('jurusan', this.dataset.active === 'false')">
-                        <i class="fas fa-check-circle"></i> Pin Penanda Jurusan/Fakultas
-                      </button>
+                    <div class="vis-toggles">
+                      <label class="vis-toggle active" id="tog-fixedpin-form">
+                        <input type="checkbox" checked onchange="toggleVis('fixedpin-form', this)" />
+                        <i class="fas fa-qrcode"></i> Pin QR
+                      </label>
+                      <label class="vis-toggle active" id="tog-jurusan-form">
+                        <input type="checkbox" checked onchange="toggleVis('jurusan-form', this)" />
+                        <i class="fas fa-graduation-cap"></i> Jurusan
+                      </label>
                     </div>
                   </div>
                   <div class="form-group">
@@ -1177,7 +1179,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
-  <script src="script.js?v=8.4"></script>
+  <script src="script.js?v=8.8"></script>
 
   <!-- ===== ITSafe UI ANIMATIONS ===== -->
   <script>
@@ -1540,16 +1542,6 @@
         });
       }
 
-      function toggleVis(type, cb) {
-        if (type === 'heatmap') visHeatmap = cb.checked;
-        if (type === 'point') visPoint = cb.checked;
-        if (type === 'cluster') visCluster = cb.checked;
-        if (type === 'jurusan') visJurusan = cb.checked;
-        if (type === 'fixedpin') visFixedPin = cb.checked;
-
-        document.getElementById('tog-' + type)?.classList.toggle('active', cb.checked);
-        renderLeafletMap();
-      }
 
       /* ─── Theme Toggle ─── */
       function initThemeToggle() {
