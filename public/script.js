@@ -258,16 +258,20 @@ async function submitToAPI(payload) {
 // NAVIGATION
 // ============================================================
 function initNav() {
+  // Remove all previous event listeners to avoid duplicate binding
   document.querySelectorAll('.nav-link').forEach(link => {
+    link.onclick = null;
     link.addEventListener('click', e => {
       e.preventDefault();
-      navigateTo(link.dataset.page);
+      const page = link.getAttribute('data-page');
+      if (page) navigateTo(page);
       const navLinks = document.getElementById('navLinks');
       if (navLinks) navLinks.classList.remove('open');
     });
   });
   const hamburger = document.getElementById('hamburger');
   if (hamburger) {
+    hamburger.onclick = null;
     hamburger.addEventListener('click', () => {
       const navLinks = document.getElementById('navLinks');
       if (navLinks) navLinks.classList.toggle('open');
@@ -277,6 +281,31 @@ function initNav() {
     const navbar = document.getElementById('navbar');
     if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 20);
   });
+
+  // Theme toggle icon update
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    themeToggle.onclick = null;
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      updateThemeIcon();
+    });
+    updateThemeIcon();
+  }
+}
+
+function updateThemeIcon() {
+  const icon = document.getElementById('themeIcon');
+  if (!icon) return;
+  if (document.body.classList.contains('dark-mode')) {
+    icon.className = 'fas fa-sun';
+    icon.style.color = '#FFD700';
+    icon.title = 'Mode Terang';
+  } else {
+    icon.className = 'fas fa-moon';
+    icon.style.color = '#232a42';
+    icon.title = 'Mode Gelap';
+  }
 }
 
 function navigateTo(page) {
