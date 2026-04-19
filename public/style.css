@@ -339,11 +339,14 @@ body {
 .hamburger {
   display: none;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 12px;
+  margin: -12px;
+  z-index: 1100;
+  transition: .3s;
 }
 
 .hamburger span {
@@ -3576,14 +3579,15 @@ main {
     display: none;
     flex-direction: column;
     position: absolute;
-    top: 62px;
+    top: 72px; /* sesuaikan min-height navbar 72px */
     left: 0;
     right: 0;
     background: rgba(var(--bg-rgb), .98);
     border-bottom: 1px solid var(--border);
-    padding: 1rem;
+    padding: 1.5rem 1rem;
     gap: .2rem;
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(28px);
+    z-index: 1000;
   }
 
   .nav-links.open {
@@ -4367,8 +4371,16 @@ main {
   color: rgba(200, 210, 255, .15);
 }
 
+[data-theme="dark"] .star-btn.active {
+  color: var(--accent);
+}
+
+[data-theme="dark"] .star-btn.active-red {
+  color: var(--primary-dk);
+}
+
 [data-theme="dark"] .star-hint {
-  color: var(--text-muted);
+  color: var(--text-soft);
 }
 
 [data-theme="dark"] .pill-btn {

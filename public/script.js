@@ -104,6 +104,9 @@ const TEAM = [
 // INIT
 // ============================================================
 function itsafeInit() {
+  if (window._itsInitDone) return;
+  window._itsInitDone = true;
+  
   // Navigation & Form
   initNav();
   initForm();
@@ -274,6 +277,9 @@ async function submitToAPI(payload) {
 // NAVIGATION
 // ============================================================
 function initNav() {
+  if (window._itsNavInit) return;
+  window._itsNavInit = true;
+
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
