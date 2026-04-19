@@ -302,7 +302,7 @@ class ReportController extends Controller
         ], 201);
     }
 
-    // Ambil semua laporan (untuk peta)
+    // Ambil semua laporan (untuk peta publik) - hanya yang sudah terverifikasi
     public function index()
     {
         $reports = Report::select(
@@ -312,7 +312,10 @@ class ReportController extends Controller
             'alasan_tidak_nyaman', 'pernah_hindari', 'orang_lain', 'situasi_mencurigakan',
             'fungsi_ruang', 'kronologi', 'lokasi_kejadian', 'lokasi_deskripsi', 'latitude', 'longitude',
             'foto_path', 'status', 'created_at'
-        )->whereNotNull('latitude')->whereNotNull('longitude')->get();
+        )->whereNotNull('latitude')
+          ->whereNotNull('longitude')
+          ->where('status', 'resolved')
+          ->get();
 
         return response()->json($reports);
     }

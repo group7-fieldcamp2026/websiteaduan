@@ -556,7 +556,7 @@ function renderLeafletMap() {
     });
   }
 
-  // Update counts and analysis based on the currently displayed data
+  // Update counts based on filtered data
   updateLayerCounts(data);
   updateTopAreas(data);
   updateHeatmapAnalysis(data, filterWaktu, filterBulan);
@@ -1074,8 +1074,12 @@ function calcKelayakan(r) {
 
 function renderFixedLocations(layer) {
   if (!layer) return;
+
   layer.clearLayers();
-  
+
+  // Determine if we're rendering on the public map (main) or picker map
+  const isPublicMap = layer === fixedLocationLayerMain;
+
   // Pin Jurusan/Fakultas
   if (visJurusan) {
     const sel = document.getElementById('lokasiInsiden');
@@ -1086,15 +1090,15 @@ function renderFixedLocations(layer) {
         const lat = opt.getAttribute('data-lat');
         const lng = opt.getAttribute('data-lng');
         if (!lat || !lng) return;
-        
+
         const locName = (opt.textContent || '').trim();
         const key = `${lat},${lng},${locName}`;
         if (seen.has(key)) return;
         seen.add(key);
-        
+
         const faculty = getFacultyFromOption(opt);
         const color   = getFacultyColor(faculty);
-        
+
         L.marker([parseFloat(lat), parseFloat(lng)], { icon: createFacultyIcon(color) })
           .bindPopup(`<strong>${esc(locName)}</strong><br/><span>${esc(faculty)}</span>`)
           .addTo(layer);
@@ -1107,7 +1111,7 @@ function renderFixedLocations(layer) {
     LOCATIONS.forEach(loc => {
       let lat = parseFloat(loc.lat);
       let lng = parseFloat(loc.lng);
-      
+
       // Jika tidak ada koordinat, coba parsing dari URL GMaps
       if ((isNaN(lat) || isNaN(lng)) && loc.gmaps) {
         const coords = parseGmapsUrlFromString(loc.gmaps);
@@ -1116,12 +1120,17 @@ function renderFixedLocations(layer) {
           lng = coords.lng;
         }
       }
-      
+
       if (isNaN(lat) || isNaN(lng)) {
         console.log('Skipping location (no coords):', loc.name);
         return;
       }
-      
+
+      // On public map, only show locations that are 'terpasang' (verified/installed)
+      if (isPublicMap && loc.status !== 'terpasang') {
+        return;
+      }
+
       const status = loc.status === 'terpasang' ? 'Terpasang' : 'Rencana';
       const markerColor = loc.status === 'terpasang' ? '#10B981' : '#F59E0B';
       L.circleMarker([lat, lng], {
