@@ -1883,40 +1883,22 @@ window.addEventListener('resize', () => {
   }
 
   /* ── Star ratings ─────────────────────────────────────── */
-  function initStarRating(rowEl) {
-    const targetId = rowEl.dataset.target;
-    const type = rowEl.dataset.type; // 'comfort' | 'danger'
-    const btns = rowEl.querySelectorAll('.star-btn');
+  function initLevelRating(groupEl) {
+    const targetId = groupEl.dataset.target;
+    const cards = groupEl.querySelectorAll('.level-card');
     const select = document.getElementById(targetId);
-    const hintEl = rowEl.closest('.star-rating-group')
-      .querySelector('.star-hint');
 
-    const labels = {
-      comfort: ['Tidak nyaman saat sendiri', 'Kurang nyaman saat sendiri', 'Nyaman saat sendiri'],
-      danger: ['Tidak rawan', 'Cukup rawan', 'Sangat rawan']
-    };
-
-    function paint(val) {
-      btns.forEach((b, i) => {
-        b.classList.remove('active', 'active-red');
-        if (i < val) {
-          b.classList.add(type === 'danger' ? 'active-red' : 'active');
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        const val = card.dataset.val;
+        cards.forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        if (select) {
+          select.value = val;
+          select.dispatchEvent(new Event('change'));
         }
-      });
-      if (hintEl && val > 0) {
-        hintEl.textContent = (labels[type] || [])[val - 1] || '';
-      }
-    }
-
-    btns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const val = parseInt(btn.dataset.val);
-        if (select) { select.value = val; }
-        paint(val);
         updateProgress();
       });
-      btn.addEventListener('mouseenter', () => paint(parseInt(btn.dataset.val)));
-      btn.addEventListener('mouseleave', () => paint(select ? parseInt(select.value) || 0 : 0));
     });
   }
 
@@ -2005,7 +1987,7 @@ window.addEventListener('resize', () => {
   /* ── Boot ─────────────────────────────────────────────── */
   function boot() {
     /* star rows */
-    document.querySelectorAll('.star-row').forEach(initStarRating);
+    document.querySelectorAll('.level-rating-group').forEach(initLevelRating);
     /* pill groups */
     document.querySelectorAll('.pill-group').forEach(initPillGroup);
     /* progress: listen to all form fields */
