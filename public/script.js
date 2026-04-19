@@ -485,16 +485,25 @@ function createCaseIcon(color) {
 // PICKER MAP (mini Leaflet di form)
 // ============================================================
 function initPickerMap() {
-  if (pickerMap) return;
+  if (pickerMap) {
+    setTimeout(() => pickerMap.invalidateSize(), 300);
+    return;
+  }
+  const container = document.getElementById('pickerMap');
+  if (!container) return;
+
   pickerMap = L.map('pickerMap', { zoomControl: true }).setView(ITS, ZOOM);
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
+  
   fixedLocationLayerPicker = L.layerGroup().addTo(pickerMap);
   renderFixedLocations(fixedLocationLayerPicker);
   loadBoundaryLayer(pickerMap, 'picker');
+  
   pickerMap.on('click', e => setPin(e.latlng.lat, e.latlng.lng, { fromPreset: false }));
 
-  // Force size refresh for grey map issue
-  setTimeout(() => { if(pickerMap) pickerMap.invalidateSize(); }, 500);
+  // Multiple invalidateSize attempts to fix grey box browser quirks
+  setTimeout(() => pickerMap.invalidateSize(), 500);
+  setTimeout(() => pickerMap.invalidateSize(), 1500);
 }
 
 function setPin(lat, lng, opts = {}) {
@@ -1257,8 +1266,10 @@ function applyPinToggleVisual(el, isActive) {
 
 function setPinVisibility(type, isActive, opts = {}) {
   const render = opts.render !== false;
-  if (type === 'fixedpin') visFixedPin = isActive;
-  if (type === 'jurusan') visJurusan = isActive;
+  if (type === 'fixedpin') visFixedPinForm = isActive;
+  if (type === 'jurusan') visJurusanForm = isActive;
+  if (type === 'fixedpin-main') visFixedPinMain = isActive;
+  if (type === 'jurusan-main') visJurusanMain = isActive;
 
   // Sync EVERY element that starts with id="tog-[type]"
   document.querySelectorAll('[id^="tog-' + type + '"]').forEach(el => {
@@ -1336,8 +1347,8 @@ function initPinToggles() {
     });
   });
 
-  setPinVisibility('fixedpin', visFixedPin, { render: false });
-  setPinVisibility('jurusan', visJurusan, { render: false });
+  setPinVisibility('fixedpin', visFixedPinForm, { render: false });
+  setPinVisibility('jurusan', visJurusanForm, { render: false });
 }
 
 // ============================================================
