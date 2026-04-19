@@ -259,10 +259,10 @@
                   </div>
                   <div class="form-group full-width" style="margin-top: .5rem; margin-bottom: 0.5rem;">
                     <div style="display: flex; gap: .6rem; flex-wrap: wrap;">
-                      <button type="button" class="btn btn-outline btn-xs btn-pin-toggle" id="tog-fixedpin" data-active="true" onclick="setPinVisibility('fixedpin', this.dataset.active === 'false')">
+                      <button type="button" class="btn btn-outline btn-xs btn-pin-toggle" id="tog-fixedpin-form" data-active="true" onclick="setPinVisibility('fixedpin', this.dataset.active === 'false')">
                         <i class="fas fa-check-circle"></i> Pin Lokasi Tetap (Aduan QR)
                       </button>
-                      <button type="button" class="btn btn-outline btn-xs btn-pin-toggle" id="tog-jurusan" data-active="true" onclick="setPinVisibility('jurusan', this.dataset.active === 'false')">
+                      <button type="button" class="btn btn-outline btn-xs btn-pin-toggle" id="tog-jurusan-form" data-active="true" onclick="setPinVisibility('jurusan', this.dataset.active === 'false')">
                         <i class="fas fa-check-circle"></i> Pin Penanda Jurusan/Fakultas
                       </button>
                     </div>
@@ -633,19 +633,8 @@
               <button class="bm-btn" data-bm="topo" onclick="switchBasemap(this)"><i class="fas fa-mountain"></i>
                 Topografi</button>
             </div>
-            <div style="display:flex; flex-direction:column; gap:0.4rem; margin-top:1rem;">
-              <div id="tog-fixedpin"
-                style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; padding:0.35rem 0.7rem; border-radius:6px; font-size:0.82rem; font-weight:600; transition:all .2s; background:rgba(242,132,130,.14); border:1px solid rgba(242,132,130,.45); color:#D56A6A; user-select:none;">
-                <i class="fas fa-check-circle" style="font-size:0.85rem;"></i>
-                <i class="fas fa-location-dot"></i> Pin Lokasi Tetap (Aduan QR)
-              </div>
-              <div id="tog-jurusan"
-                style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; padding:0.35rem 0.7rem; border-radius:6px; font-size:0.82rem; font-weight:600; transition:all .2s; background:rgba(242,132,130,.14); border:1px solid rgba(242,132,130,.45); color:#D56A6A; user-select:none;">
-                <i class="fas fa-check-circle" style="font-size:0.85rem;"></i>
-                <i class="fas fa-building-columns"></i> Pin Penanda Jurusan/Fakultas
-              </div>
-            </div>
           </div>
+
 
           <!-- Layer kategori -->
           <div class="map-panel-section">
@@ -765,6 +754,15 @@
                 <label class="vis-toggle" id="tog-cluster">
                   <input type="checkbox" onchange="toggleVis('cluster',this)" />
                   <i class="fas fa-circle-nodes"></i> Cluster
+                </label>
+                <div style="width: 100%; border-top: 1px dashed rgba(var(--ink-rgb), .1); margin: .4rem 0;"></div>
+                <label class="vis-toggle active" id="tog-jurusan-main">
+                  <input type="checkbox" checked onchange="toggleVis('jurusan',this)" />
+                  <i class="fas fa-graduation-cap"></i> Jurusan
+                </label>
+                <label class="vis-toggle active" id="tog-fixedpin-main">
+                  <input type="checkbox" checked onchange="toggleVis('fixedpin',this)" />
+                  <i class="fas fa-qrcode"></i> Pin QR
                 </label>
               </div>
             </div>
@@ -1179,7 +1177,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
-  <script src="script.js?v=8.2"></script>
+  <script src="script.js?v=8.4"></script>
 
   <!-- ===== ITSafe UI ANIMATIONS ===== -->
   <script>

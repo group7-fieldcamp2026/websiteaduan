@@ -858,9 +858,9 @@ function mapGeoJSONCoords(gj, fn) {
 }
 
 function getNyamanLabel(val) {
-  if (val === 1) return '<div class="popup-status-badge badge-danger"><i class="fas fa-exclamation-circle"></i> Tidak Nyaman</div>';
-  if (val === 2) return '<div class="popup-status-badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Kurang Nyaman</div>';
-  if (val === 3) return '<div class="popup-status-badge badge-safe"><i class="fas fa-check-circle"></i> Nyaman</div>';
+  if (val === 1) return '<div class="popup-status-badge badge-danger"><i class="fas fa-exclamation-circle"></i> Tidak Nyaman Saat Sendiri</div>';
+  if (val === 2) return '<div class="popup-status-badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Kurang Nyaman Saat Sendiri</div>';
+  if (val === 3) return '<div class="popup-status-badge badge-safe"><i class="fas fa-check-circle"></i> Nyaman Saat Sendiri</div>';
   return '';
 }
 
@@ -1203,7 +1203,17 @@ function toggleVis(type, cb) {
   if (type === 'jurusan') visJurusan = cb.checked;
   if (type === 'fixedpin') visFixedPin = cb.checked;
 
-  document.getElementById('tog-' + type)?.classList.toggle('active', cb.checked);
+  // Sync with all similar toggles (labels)
+  document.querySelectorAll('#tog-' + type + ', #tog-' + type + '-main').forEach(el => {
+    el.classList.toggle('active', cb.checked);
+    const inp = el.querySelector('input');
+    if (inp) inp.checked = cb.checked;
+  });
+
+  // Sync with form toggles (buttons)
+  const formEl = document.getElementById('tog-' + type + '-form');
+  if (formEl) applyPinToggleVisual(formEl, cb.checked);
+
   renderLeafletMap();
 }
 
@@ -1234,22 +1244,22 @@ function applyPinToggleVisual(el, isActive) {
 
 function setPinVisibility(type, isActive, opts = {}) {
   const render = opts.render !== false;
-
   if (type === 'fixedpin') visFixedPin = isActive;
   if (type === 'jurusan') visJurusan = isActive;
 
-  const id = type === 'fixedpin' ? 'tog-fixedpin' : 'tog-jurusan';
-  applyPinToggleVisual(document.getElementById(id), isActive);
+  // Sync back to label-style toggles
+  document.querySelectorAll('#tog-' + type + ', #tog-' + type + '-main').forEach(el => {
+    el.classList.toggle('active', isActive);
+    const inp = el.querySelector('input');
+    if (inp) inp.checked = isActive;
+  });
+
+  // Sync to button-style toggles
+  const formEl = document.getElementById('tog-' + type + '-form');
+  if (formEl) applyPinToggleVisual(formEl, isActive);
 
   if (!render) return;
-  if (fixedLocationLayerPicker) {
-    renderFixedLocations(fixedLocationLayerPicker);
-  }
-  if (leafletMap) {
-    renderLeafletMap();
-  } else if (fixedLocationLayerMain) {
-    renderFixedLocations(fixedLocationLayerMain);
-  }
+  renderLeafletMap();
 }
 
 function handlePinToggle(type, el) {
