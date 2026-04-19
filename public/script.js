@@ -566,8 +566,6 @@ function initLeafletMap() {
   fixedLocationLayerMain = L.layerGroup().addTo(leafletMap);
   renderFixedLocations(fixedLocationLayerMain);
   loadBoundaryLayer(leafletMap, 'main');
-  // Pasang event listener toggle pin (lebih andal dari inline onclick)
-  initPinToggles();
 }
 
 function renderLeafletMap() {
