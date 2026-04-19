@@ -66,10 +66,8 @@ const FACULTY_COLORS = {
 
 const RISK_COLORS = {
   1: '#10B981', // Hijau (Rawan Rendah)
-  2: '#10B981', // Hijau (Rawan Rendah)
-  3: '#F59E0B', // Kuning (Rawan Sedang)
-  4: '#EF4444', // Merah (Rawan Tinggi)
-  5: '#EF4444', // Merah (Rawan Tinggi)
+  2: '#F59E0B', // Kuning (Rawan Sedang)
+  3: '#EF4444', // Merah (Rawan Tinggi)
 };
 
 let locationFacultyMap = {};
@@ -106,28 +104,28 @@ const TEAM = [
 function itsafeInit() {
   if (window._itsInitDone) return;
   window._itsInitDone = true;
-  
+
   // Navigation & Form
   initNav();
   initForm();
   initPinToggles();
   buildLocationFacultyMap();
-  
+
   // Data Fetching
   fetchReports();       // ambil data dari API
   fetchStats();         // ambil statistik dari API
   fetchLocations();     // ambil lokasi titik pengaduan
-  
+
   // App Logic
   startRealtimeSync();  // sinkronisasi realtime (polling)
   renderTeam();
   generateQR();
   initPickerMap();
-  
+
   // Exposed Globals
   window.navigateTo = navigateTo;
   window.scrollToForm = scrollToForm;
-  window.itsafeInit = itsafeInit; 
+  window.itsafeInit = itsafeInit;
 }
 
 if (document.readyState === 'loading') {
@@ -1706,17 +1704,17 @@ function getRiskColor(score) {
 
 function isRawanTinggi(score) {
   const s = parseInt(score, 10);
-  return !isNaN(s) && s >= 4;
+  return !isNaN(s) && s >= 3;
 }
 
 function isRawanSedang(score) {
   const s = parseInt(score, 10);
-  return s === 3;
+  return s === 2;
 }
 
 function isRawanRendah(score) {
   const s = parseInt(score, 10);
-  return !isNaN(s) && s <= 2;
+  return !isNaN(s) && s <= 1;
 }
 
 function isSepi(val) {
@@ -1887,8 +1885,8 @@ window.addEventListener('resize', () => {
       .querySelector('.star-hint');
 
     const labels = {
-      comfort: ['Sangat tidak nyaman', 'Tidak nyaman', 'Cukup nyaman', 'Nyaman', 'Sangat nyaman'],
-      danger: ['Tidak rawan', 'Sedikit rawan', 'Cukup rawan', 'Rawan', 'Sangat rawan']
+      comfort: ['Tidak nyaman saat sendiri', 'Kurang nyaman saat sendiri', 'Nyaman saat sendiri'],
+      danger: ['Tidak rawan', 'Cukup rawan', 'Sangat rawan']
     };
 
     function paint(val) {
@@ -1923,8 +1921,8 @@ window.addEventListener('resize', () => {
         const targetId = btn.dataset.target;
         const val = btn.dataset.val;
         /* deselect all in group */
-        btns.forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
         /* sync hidden select */
         const sel = document.getElementById(targetId);
         if (sel) {
