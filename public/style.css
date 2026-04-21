@@ -111,6 +111,8 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .brand-icon {
@@ -327,6 +329,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
 }
 
 .brand-name {
@@ -384,12 +387,18 @@ body {
     gap: .6rem;
   }
 
+  .brand-text {
+    overflow: hidden;
+  }
+
   .brand-sub {
     display: block !important;
     font-size: .54rem !important;
     letter-spacing: .04em;
     background-size: 200% auto;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     opacity: 1 !important;
     visibility: visible !important;
   }
@@ -5853,6 +5862,7 @@ body {
 .logo-img {
   width: 100%;
   height: 100%;
+  display: block;
   object-fit: contain;
   padding: 0;
   filter: drop-shadow(0 4px 10px rgba(var(--primary-rgb), 0.2));
@@ -5863,10 +5873,6 @@ body {
 .brand-icon:hover .logo-img {
   transform: scale(1.1);
   filter: drop-shadow(0 6px 18px rgba(var(--primary-rgb), 0.35));
-}
-
-[data-theme="dark"] .logo-img {
-  content: url('./logo_terang.png');
 }
 
 /* ── Responsive ──────────────────────────────────────────── */
