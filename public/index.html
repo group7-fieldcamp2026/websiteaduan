@@ -1085,37 +1085,88 @@
 
         <div class="about-section reveal">
           <h2 class="about-section-title"><span class="section-number">02</span> Tujuan &amp; Metode Penelitian</h2>
-          <div class="about-cards-row stagger">
-            <div class="about-info-card">
-              <div class="about-info-icon"><i class="fas fa-bullseye"></i></div>
-              <h3>Tujuan</h3>
-              <ul>
-                <li>Mengidentifikasi area di lingkungan ITS yang berpotensi rawan tindak asusila berdasarkan kondisi
-                  fisiknya.</li>
-                <li>Memetakan secara spasial persebaran area rawan berdasarkan laporan warga kampus.</li>
-                <li>Mengoptimalkan WebGIS untuk visualisasi zona rawan berdasarkan waktu dan kondisi fisik area.</li>
-              </ul>
+
+          <!-- Tujuan Penelitian -->
+          <div class="research-block reveal">
+            <div class="research-block-header">
+              <div class="research-block-icon"><i class="fas fa-bullseye"></i></div>
+              <div>
+                <div class="research-block-title">Tujuan Penelitian</div>
+                <div class="research-block-sub">Berdasarkan Proposal Kemah Kerja Field Camp 2026</div>
+              </div>
             </div>
-            <div class="about-info-card">
-              <div class="about-info-icon"><i class="fas fa-microscope"></i></div>
-              <h3>Metode</h3>
-              <ul>
-                <li>Tahap persiapan: identifikasi masalah, studi literatur, penentuan data, survei awal.</li>
-                <li>Tahap akuisisi: data primer (kuesioner, GPS, laporan ITSafe) dan data sekunder.</li>
-                <li>Tahap pengolahan: pengembangan website, integrasi data spasial, peta persebaran & heatmap.</li>
-                <li>Tahap analisis: analisis spasial-temporal dan rekomendasi kebijakan.</li>
-                <li>Tahap penyajian: WebGIS ITSafe, peta persebaran, heatmap, dan QR Code.</li>
-              </ul>
+            <div class="research-goals-grid">
+              <div class="research-goal-item">
+                <div class="goal-number">01</div>
+                <div class="goal-text">Menganalisis <strong>kondisi fisik lokasi</strong> yang berkontribusi terhadap tingginya tingkat kerawanan tindak asusila di lingkungan ITS berdasarkan aspek pencahayaan, kepadatan aktivitas, keberadaan CCTV, keberadaan petugas keamanan, dan kondisi vegetasi.</div>
+              </div>
+              <div class="research-goal-item">
+                <div class="goal-number">02</div>
+                <div class="goal-text">Membangun <strong>sistem WebGIS pelaporan anonim</strong> berbasis web dan PostgreSQL yang memudahkan warga kampus ITS melaporkan lokasi-lokasi berpotensi rawan melalui website maupun QR-Code di titik-titik strategis kampus.</div>
+              </div>
+              <div class="research-goal-item">
+                <div class="goal-number">03</div>
+                <div class="goal-text">Menghasilkan <strong>pemetaan berbasis WebGIS</strong> berupa Peta Sebaran Titik Lokasi Rawan, Peta Heatmap Kerawanan, dan Peta Zonasi Tingkat Risiko untuk mengidentifikasi dan memvisualisasikan zona rawan di lingkungan kampus ITS.</div>
+              </div>
             </div>
-            <div class="about-info-card">
-              <div class="about-info-icon"><i class="fas fa-user-shield"></i></div>
-              <h3>Etika Penelitian</h3>
-              <ul>
-                <li>Semua data pelapor bersifat anonim dan rahasia</li>
-                <li>Data hanya digunakan untuk kepentingan penelitian akademik</li>
-                <li>Tidak ada identitas personal yang dipublikasikan</li>
-                <li>Pelapor berhak menarik laporan kapan saja</li>
-              </ul>
+          </div>
+
+          <!-- Metode Penelitian -->
+          <div class="research-block reveal" style="margin-top:1.5rem;">
+            <div class="research-block-header">
+              <div class="research-block-icon" style="background:linear-gradient(135deg,var(--accent-blue),#A7C4BC)"><i class="fas fa-diagram-project"></i></div>
+              <div>
+                <div class="research-block-title">Tahapan Metode Penelitian</div>
+                <div class="research-block-sub">5 tahap sistematis dari persiapan hingga penyajian data</div>
+              </div>
+            </div>
+            <div class="method-timeline">
+              <div class="method-step">
+                <div class="method-step-badge" style="background:linear-gradient(135deg,#F28482,#F5CAC3)">A</div>
+                <div class="method-step-body">
+                  <div class="method-step-title">Tahap Persiapan &amp; Survei Pendahuluan</div>
+                  <div class="method-step-desc">Identifikasi masalah tindak asusila di kampus ITS, studi literatur (regulasi Permendikbudristek No. 55/2024 &amp; KUHP Pasal 281–283), penentuan kebutuhan data, serta survei pendahuluan ke Satgas PPK ITS untuk identifikasi area dan sumber data.</div>
+                </div>
+              </div>
+              <div class="method-step">
+                <div class="method-step-badge" style="background:linear-gradient(135deg,#84A59D,#A7C4BC)">B</div>
+                <div class="method-step-body">
+                  <div class="method-step-title">Tahap Akuisisi Data</div>
+                  <div class="method-step-desc"><strong>Data Primer:</strong> kuesioner persepsi keamanan warga kampus, koordinat GPS titik lokasi, dan data pelaporan melalui form ITSafe (koordinat, waktu rawan, pencahayaan, kepadatan, CCTV, skor kerawanan). <strong>Data Sekunder:</strong> peta batas administrasi kampus, citra satelit, data civitas akademika ITS, dan peraturan terkait.</div>
+                </div>
+              </div>
+              <div class="method-step">
+                <div class="method-step-badge" style="background:linear-gradient(135deg,#F6BD60,#F5E0D5)">C</div>
+                <div class="method-step-body">
+                  <div class="method-step-title">Tahap Pengolahan Data</div>
+                  <div class="method-step-desc">Pengembangan website ITSafe (HTML/CSS/JS + Laravel 12 + PostgreSQL), pengolahan data koordinat lokasi menjadi data spasial titik, pembuatan <strong>Peta Persebaran Titik Lokasi Rawan</strong>, pembuatan <strong>Heatmap Skoring Kerawanan</strong> berbasis Kernel Density Estimation (KDE) di ArcGIS Pro, dan <strong>Peta Kelayakan Fasilitas</strong> berdasarkan 5 parameter fisik.</div>
+                </div>
+              </div>
+              <div class="method-step">
+                <div class="method-step-badge" style="background:linear-gradient(135deg,#D56A6A,#F28482)">D</div>
+                <div class="method-step-body">
+                  <div class="method-step-title">Tahap Analisis Data</div>
+                  <div class="method-step-desc">Analisis pola persebaran lokasi rawan (distribusi spasial), analisis tingkat kerawanan area berdasarkan skor pelapor (hotspot), dan analisis kelayakan fasilitas serta identifikasi zona prioritas yang memerlukan intervensi perbaikan pencahayaan, penambahan CCTV, atau peningkatan patroli.</div>
+                </div>
+              </div>
+              <div class="method-step">
+                <div class="method-step-badge" style="background:linear-gradient(135deg,#84A59D,#F6BD60)">E</div>
+                <div class="method-step-body">
+                  <div class="method-step-title">Tahap Penyajian Data</div>
+                  <div class="method-step-desc">Penyajian Sistem <strong>WebGIS ITSafe</strong> interaktif, <strong>Peta 1</strong> – Sebaran Titik Lokasi Rawan, <strong>Peta 2</strong> – Heatmap Tingkat Kerawanan dengan filter waktu (pagi/siang/malam), <strong>Peta 3</strong> – Kelayakan Fasilitas (Layak/Cukup Layak/Tidak Layak), dan penyebaran <strong>QR-Code</strong> di titik-titik strategis kampus ITS.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Etika Penelitian -->
+          <div class="research-ethics-bar reveal" style="margin-top:1.5rem;">
+            <div class="ethics-header"><i class="fas fa-user-shield"></i> Etika Penelitian</div>
+            <div class="ethics-items">
+              <div class="ethics-item"><i class="fas fa-eye-slash"></i><span>Semua data pelapor bersifat <strong>anonim &amp; rahasia</strong> sepenuhnya</span></div>
+              <div class="ethics-item"><i class="fas fa-graduation-cap"></i><span>Data hanya digunakan untuk <strong>kepentingan penelitian akademik</strong></span></div>
+              <div class="ethics-item"><i class="fas fa-id-card-clip"></i><span><strong>Tidak ada identitas</strong> personal yang dipublikasikan</span></div>
+              <div class="ethics-item"><i class="fas fa-rotate-left"></i><span>Pelapor <strong>berhak menarik</strong> laporan kapan saja</span></div>
             </div>
           </div>
         </div>
