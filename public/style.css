@@ -3795,6 +3795,283 @@ main {
   overflow-wrap: anywhere;
 }
 
+/* ===== CONTACT BLOCKS (redesign) ===== */
+.contact-intro-text {
+  margin: 0 0 1.8rem 0;
+  color: var(--text-muted);
+  font-size: 0.96rem;
+  line-height: 1.75;
+  max-width: 760px;
+  text-align: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.contact-support-section .about-section-title {
+  justify-content: flex-start;
+  text-align: left;
+  background-position: bottom left;
+  background-size: min(100%, 720px) 1px;
+}
+
+.contact-block {
+  background: linear-gradient(145deg, rgba(247,237,226,.97), rgba(245,224,213,.92));
+  border: 1px solid rgba(242,132,130,.18);
+  border-radius: 22px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 24px rgba(213,106,106,.07), inset 0 1px 0 rgba(255,255,255,.85);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.contact-block::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-blue), var(--primary-dk), var(--accent));
+  border-radius: 22px 22px 0 0;
+}
+
+.contact-block-satgas::before {
+  background: linear-gradient(90deg, #D56A6A, #F28482, #F6BD60);
+}
+
+.contact-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: .75rem;
+  margin-bottom: 1.4rem;
+  text-align: center;
+}
+
+.contact-block-header > div:last-child {
+  text-align: center;
+}
+
+.contact-block-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(242,132,130,.22), rgba(213,106,106,.12));
+  border: 1px solid rgba(242,132,130,.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: var(--primary-dk);
+  flex-shrink: 0;
+}
+
+.satgas-avatar {
+  background: linear-gradient(135deg, rgba(213,106,106,.22), rgba(213,106,106,.08));
+  color: #D56A6A;
+}
+
+.contact-block-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.contact-block-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Channel cards row */
+.contact-channels {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  margin-bottom: 1.1rem;
+  width: 100%;
+}
+
+.contact-channel-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 1.1rem 1.4rem;
+  background: rgba(255,255,255,.72);
+  border: 1px solid rgba(242,132,130,.15);
+  border-radius: 18px;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, background .2s ease;
+  text-align: center;
+  min-width: 170px;
+  width: fit-content;
+  max-width: min(100%, 230px);
+  min-height: 156px;
+  flex: 0 1 auto;
+}
+
+.contact-channel-card:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 8px 24px rgba(213,106,106,.15);
+  background: rgba(255,255,255,.95);
+}
+
+.channel-card-wide {
+  min-width: 240px;
+  max-width: min(100%, 320px);
+}
+
+.channel-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.channel-logo svg {
+  width: 48px;
+  height: 48px;
+}
+
+.phone-logo {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.form-logo {
+  background: linear-gradient(135deg, #4B57E0, #7B6FE0);
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.gmail-logo {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.ig-logo {
+  background: transparent;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.channel-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.channel-handle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+  max-width: 100%;
+}
+
+.satgas-channel {
+  border-color: rgba(213,106,106,.18);
+}
+
+.satgas-channel:hover {
+  box-shadow: 0 8px 24px rgba(213,106,106,.2);
+}
+
+/* Bottom meta row */
+.contact-block-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(242,132,130,.12);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  width: 100%;
+}
+
+.contact-block-meta span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.contact-block-meta i {
+  color: var(--primary-dk);
+  font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .contact-channels {
+    gap: 0.75rem;
+  }
+  .contact-channel-card {
+    min-width: min(100%, 170px);
+    padding: 0.9rem 1rem;
+    width: min(100%, 320px);
+    max-width: 100%;
+    min-height: 148px;
+  }
+  .channel-card-wide {
+    min-width: min(100%, 220px);
+  }
+  .contact-block-header {
+    gap: .65rem;
+  }
+  .contact-block {
+    padding: 1.4rem 1.2rem;
+  }
+}
+
+/* Dark mode */
+[data-theme="dark"] .contact-block {
+  background: linear-gradient(145deg, rgba(40,32,30,.95), rgba(50,40,37,.9));
+  border-color: rgba(242,132,130,.15);
+}
+
+[data-theme="dark"] .contact-channel-card {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(242,132,130,.12);
+  color: var(--text);
+}
+
+[data-theme="dark"] .contact-channel-card:hover {
+  background: rgba(255,255,255,.12);
+}
+
+[data-theme="dark"] .gmail-logo {
+  background: rgba(255,255,255,.1);
+  border-color: rgba(255,255,255,.12);
+}
+
+[data-theme="dark"] .channel-handle {
+  color: rgba(255,255,255,.85);
+}
+
 /* ===== TOAST ===== */
 .toast {
   position: fixed;
