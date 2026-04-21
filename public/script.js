@@ -91,14 +91,7 @@ const DEFAULT_LOCATIONS = [
 ];
 let LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
 
-const TEAM = [
-  { name: 'Wisnu Aditya Duane', nrp: '5016221087', initial: 'W', photo: 'assets/Wisnu.png' },
-  { name: 'Josephine Novellia A.', nrp: '5016231044', initial: 'J', photo: 'assets/Josephine.png' },
-  { name: 'Duta Satrio Wibowo', nrp: '5016231047', initial: 'D', photo: 'assets/Duta.png' },
-  { name: 'Muhammad Farid Farhan', nrp: '5016231069', initial: 'M', photo: 'assets/Muhammad.png' },
-  { name: 'Farrel Valentino Y.', nrp: '5016231075', initial: 'F', photo: 'assets/Farrel.png' },
-  { name: 'Ananda Adellia C. S.', nrp: '5016231092', initial: 'A', photo: 'assets/Adellia.png' },
-];
+
 
 // ============================================================
 // INIT
@@ -120,7 +113,7 @@ function itsafeInit() {
 
   // App Logic
   startRealtimeSync();  // sinkronisasi realtime (polling)
-  renderTeam();
+
   generateQR();
   initPickerMap();
 
@@ -1718,22 +1711,7 @@ function filterLocations(btn) {
   renderLocationCards(btn.dataset.filter);
 }
 
-// ============================================================
-// TEAM
-// ============================================================
-function renderTeam() {
-  const g = document.getElementById('teamGrid');
-  if (!g) return;
-  g.innerHTML = TEAM.map(m => `
-    <div class="team-card">
-      <div class="team-avatar">
-        ${m.photo ? `<img src="${m.photo}" alt="Foto ${esc(m.name)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-        <div class="team-avatar-fallback" ${m.photo ? 'style="display:none"' : ''}>${m.initial}</div>
-      </div>
-      <div class="team-name">${m.name}</div>
-      <div class="team-nrp">${m.nrp}</div>
-    </div>`).join('');
-}
+
 
 // ============================================================
 // HELPERS

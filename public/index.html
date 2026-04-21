@@ -21,7 +21,7 @@
   <nav class="navbar" id="navbar">
     <div class="nav-brand">
       <div class="brand-icon">
-        <img src="assets/logo-its-1.png" alt="Logo ITS" class="logo-img"
+        <img id="navbarLogo" src="assets/logo/logo gelap.png" alt="Logo ITSafe" class="logo-img"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
         <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
       </div>
@@ -354,8 +354,10 @@
                     <label>Keterbukaan Area <span class="req">*</span></label>
                     <select id="vegetasi" required>
                       <option value="">-- Pilih --</option>
-                      <option value="Terbuka / Akses Utama Orang (Jalan, Taman, Lapangan)">Terbuka / Akses Utama Orang (Jalan, Taman, Lapangan)</option>
-                      <option value="Tertutup (Dalam Ruangan/Bangunan, Jauh dari Jalan, Ruang Sempit, dan Lain-Lain)">Tertutup (Dalam Ruangan/Bangunan, Jauh dari Jalan, Ruang Sempit, dan Lain-Lain)</option>
+                      <option value="Terbuka / Akses Utama Orang (Jalan, Taman, Lapangan)">Terbuka / Akses Utama Orang
+                        (Jalan, Taman, Lapangan)</option>
+                      <option value="Tertutup (Dalam Ruangan/Bangunan, Jauh dari Jalan, Ruang Sempit, dan Lain-Lain)">
+                        Tertutup (Dalam Ruangan/Bangunan, Jauh dari Jalan, Ruang Sempit, dan Lain-Lain)</option>
                     </select>
                   </div>
                   <div class="form-group">
@@ -1119,8 +1121,104 @@
         </div>
 
         <div class="about-section reveal">
-          <h2 class="about-section-title"><span class="section-number">03</span> Tim Peneliti</h2>
-          <div class="team-grid stagger" id="teamGrid"></div>
+          <h2 class="about-section-title"><span class="section-number">03</span> Filosofi Logo</h2>
+          
+          <!-- Main Logo Display -->
+          <div class="logo-philosophy-hero reveal">
+            <div class="logo-hero-inner">
+              <div class="logo-hero-glow"></div>
+              <img id="philHeroImg" src="assets/logo/Logo dengan background gelap.png" alt="Logo Utama ITSafe" class="logo-hero-img" />
+            </div>
+          </div>
+
+          <!-- Logo Philosophy Grid -->
+          <div class="logo-philosophy-grid" id="logoPhilosophyGrid">
+            
+            <!-- 1. ITSafe -->
+            <div class="logo-phil-card reveal-scale" style="--i:0">
+              <div class="logo-phil-img-wrap">
+                <div class="logo-phil-glow glow-itsafe"></div>
+                <img src="assets/logo/ITSafe.png" alt="Logo ITSafe" class="logo-phil-img bounce-hover" />
+              </div>
+              <div class="logo-phil-content">
+                <h3 class="logo-phil-title">ITSafe</h3>
+                <p class="logo-phil-desc">Platform pelaporan dan pemetaan area berpotensi rawan tindak asusila di lingkungan ITS. Dikembangkan sebagai alat analisis geospasial untuk mengidentifikasi kerawanan area berdasarkan perspektif civitas kampus.</p>
+              </div>
+            </div>
+
+            <!-- 2. Perisai -->
+            <div class="logo-phil-card reveal-scale" style="--i:1">
+              <div class="logo-phil-img-wrap">
+                <div class="logo-phil-glow glow-shield"></div>
+                <img src="assets/logo/Shield.png" alt="Perisai" class="logo-phil-img wiggle-hover" />
+              </div>
+              <div class="logo-phil-content">
+                <h3 class="logo-phil-title">Perisai</h3>
+                <p class="logo-phil-desc">Perisai melambangkan perlindungan dan rasa aman bagi seluruh civitas kampus. Elemen ini mencerminkan komitmen ITSafe dalam menjaga keamanan melalui sistem yang terstruktur dan terpercaya.</p>
+              </div>
+            </div>
+
+            <!-- 3. Pin Lokasi -->
+            <div class="logo-phil-card reveal-scale" style="--i:2">
+              <div class="logo-phil-img-wrap">
+                <div class="logo-phil-glow glow-pin"></div>
+                <img src="assets/logo/Pin.png" alt="Pin Lokasi" class="logo-phil-img float-hover" />
+              </div>
+              <div class="logo-phil-content">
+                <h3 class="logo-phil-title">Pin Lokasi</h3>
+                <p class="logo-phil-desc">Pin lokasi merepresentasikan pelaporan berbasis titik atau lokasi kejadian. Simbol ini menegaskan bahwa setiap laporan memiliki konteks spasial yang jelas untuk dianalisis.</p>
+              </div>
+            </div>
+
+            <!-- 4. Peta -->
+            <div class="logo-phil-card reveal-scale" style="--i:3">
+              <div class="logo-phil-img-wrap">
+                <div class="logo-phil-glow glow-map"></div>
+                <img src="assets/logo/Map.png" alt="Peta" class="logo-phil-img grow-hover" />
+              </div>
+              <div class="logo-phil-content">
+                <h3 class="logo-phil-title">Peta</h3>
+                <p class="logo-phil-desc">Elemen peta menggambarkan visualisasi wilayah dan persebaran area rawan. Hal ini menunjukkan fungsi ITSafe sebagai alat analisis berbasis geospasial untuk mendukung pengambilan keputusan.</p>
+              </div>
+            </div>
+
+            <!-- 5. Warna Pink -->
+            <div class="logo-phil-card reveal-scale" style="--i:4">
+              <div class="logo-phil-img-wrap">
+                <div class="logo-phil-glow glow-pink" style="background: rgba(242, 132, 130, 0.4);"></div>
+                <img src="assets/logo/Pink.png" alt="Warna Pink" class="logo-phil-img pulse-hover" />
+              </div>
+              <div class="logo-phil-content">
+                <h3 class="logo-phil-title">Warna Pink</h3>
+                <p class="logo-phil-desc">Warna pink mencerminkan empati, kepedulian, dan pendekatan humanis terhadap isu keamanan.</p>
+              </div>
+            </div>
+
+            <!-- 6. Warna Biru -->
+            <div class="logo-phil-card reveal-scale" style="--i:5">
+              <div class="logo-phil-img-wrap">
+                <div class="logo-phil-glow glow-blue" style="background: rgba(132, 165, 157, 0.4);"></div>
+                <img src="assets/logo/Biru.png" alt="Warna Biru" class="logo-phil-img pulse-hover" />
+              </div>
+              <div class="logo-phil-content">
+                <h3 class="logo-phil-title">Warna Biru</h3>
+                <p class="logo-phil-desc">Warna biru melambangkan kepercayaan, stabilitas, dan profesionalitas sistem.</p>
+              </div>
+            </div>
+
+            <!-- 7. Warna Cream -->
+            <div class="logo-phil-card reveal-scale" style="--i:6">
+              <div class="logo-phil-img-wrap">
+                <div class="logo-phil-glow glow-cream" style="background: rgba(245, 224, 213, 0.4);"></div>
+                <img src="assets/logo/Beige.png" alt="Warna Cream" class="logo-phil-img pulse-hover" />
+              </div>
+              <div class="logo-phil-content">
+                <h3 class="logo-phil-title">Warna Cream</h3>
+                <p class="logo-phil-desc">Warna beige memberikan kesan netral, seimbang, dan nyaman secara visual.</p>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         <div class="about-section reveal">
@@ -1547,13 +1645,27 @@
       function initThemeToggle() {
         const btn = document.getElementById('themeToggle');
         const icon = document.getElementById('themeIcon');
+        const navbarLogo = document.getElementById('navbarLogo');
+        const philHeroImg = document.getElementById('philHeroImg');
         if (!btn || !icon) return;
+
+        function updateLogos(isDark) {
+          if (navbarLogo) {
+            navbarLogo.src = isDark ? 'assets/logo/logo terang.png' : 'assets/logo/logo gelap.png';
+          }
+          if (philHeroImg) {
+            philHeroImg.src = isDark ? 'assets/logo/Logo dengan background terang.png' : 'assets/logo/Logo dengan background gelap.png';
+          }
+        }
 
         // Load saved theme
         const saved = localStorage.getItem('itsafe-theme');
         if (saved === 'dark') {
           document.documentElement.setAttribute('data-theme', 'dark');
           icon.className = 'fas fa-sun';
+          updateLogos(true);
+        } else {
+          updateLogos(false);
         }
 
         btn.addEventListener('click', function () {
@@ -1562,10 +1674,12 @@
             document.documentElement.removeAttribute('data-theme');
             icon.className = 'fas fa-moon';
             localStorage.setItem('itsafe-theme', 'light');
+            updateLogos(false);
           } else {
             document.documentElement.setAttribute('data-theme', 'dark');
             icon.className = 'fas fa-sun';
             localStorage.setItem('itsafe-theme', 'dark');
+            updateLogos(true);
           }
         });
       }
@@ -1574,7 +1688,7 @@
       function masterBoot() {
         // 1. Run the script.js logic first if not already done
         if (typeof itsafeInit === 'function') itsafeInit();
-        
+
         // 2. Run the premium UI effects
         initThemeToggle();      // dark/light mode toggle
         initGlobalBubbles();    // floating bubble background
@@ -1587,7 +1701,7 @@
         initAboutParticles();   // about page particles
         patchNavReveal();       // patch navigateTo for reveal effects
         initNavSparkle();       // sparkles!
-        
+
         // 3. Run the script.js secondary UI boot
         if (typeof itsafeBootUI === 'function') itsafeBootUI();
       }

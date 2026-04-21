@@ -152,9 +152,165 @@ body {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 8px;
-  filter: brightness(0) invert(1);
-  /* Force white logo like in the image */
+  padding: 4px;
+  transition: transform 0.3s ease;
+}
+
+.brand-icon:hover .logo-img {
+  transform: scale(1.1);
+}
+
+/* ===== LOGO PHILOSOPHY SECTION ===== */
+.logo-philosophy-hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.logo-hero-inner {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-hero-glow {
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, transparent 70%);
+  animation: logoPulse 4s ease-in-out infinite;
+}
+
+.logo-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 2;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes logoPulse {
+  0%, 100% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.logo-philosophy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.logo-phil-card {
+  background: rgba(var(--bg-rgb), 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-phil-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--primary);
+  box-shadow: 0 20px 40px rgba(var(--primary-rgb), 0.15);
+  background: rgba(var(--bg-rgb), 0.9);
+}
+
+.logo-phil-img-wrap {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-phil-glow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(var(--primary-rgb), 0.1);
+  border-radius: 50%;
+  filter: blur(20px);
+  z-index: 0;
+}
+
+.logo-phil-img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  z-index: 1;
+  transition: all 0.5s ease;
+}
+
+/* Hover Animations */
+.bounce-hover:hover { animation: logoBounce 0.6s ease infinite alternate; }
+.wiggle-hover:hover { animation: logoWiggle 0.4s ease infinite; }
+.float-hover:hover { animation: logoFloat 2s ease-in-out infinite; }
+.grow-hover:hover { transform: scale(1.2); }
+.pulse-hover:hover { animation: logoPulseSmall 1s ease-in-out infinite; }
+
+@keyframes logoBounce {
+  to { transform: translateY(-15px); }
+}
+@keyframes logoWiggle {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes logoPulseSmall {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.logo-phil-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+  color: var(--text);
+}
+
+.logo-phil-desc {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-soft);
+}
+
+/* Dark Mode Adjustments */
+[data-theme="dark"] .logo-phil-card {
+  background: rgba(20, 25, 45, 0.4);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .logo-phil-card:hover {
+  background: rgba(20, 25, 45, 0.7);
+  border-color: var(--primary-dk);
+}
+
+[data-theme="dark"] .logo-phil-desc {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .logo-hero-img {
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.4));
 }
 
 .logo-fallback {
@@ -1108,7 +1264,7 @@ main {
   -webkit-appearance: none;
   width: 100%;
   min-width: 0;
-  box-shadow: 0 1px 2px rgba(0,0,0,.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .02);
 }
 
 .form-group select {
@@ -1234,7 +1390,7 @@ main {
   cursor: pointer;
   transition: all .2s ease;
   text-align: left;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   font-family: var(--font-body);
   display: flex;
   align-items: center;
@@ -1447,7 +1603,7 @@ main {
   text-align: center;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
 
 .level-card .level-icon {
@@ -1488,13 +1644,21 @@ main {
   color: var(--primary-dk) !important;
 }
 
-.text-danger { color: #EF4444 !important; }
-.text-warning { color: #F59E0B !important; }
-.text-success { color: #10B981 !important; }
+.text-danger {
+  color: #EF4444 !important;
+}
+
+.text-warning {
+  color: #F59E0B !important;
+}
+
+.text-success {
+  color: #10B981 !important;
+}
 
 [data-theme="dark"] .level-card {
-  background: rgba(255,255,255,0.03);
-  border-color: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 [data-theme="dark"] .level-card.active {
@@ -1517,7 +1681,7 @@ main {
   font-size: 0.78rem;
   font-weight: 700;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   border-width: 1.5px !important;
 }
 
@@ -1528,7 +1692,7 @@ main {
 
 .btn-pin-toggle:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .btn-pin-toggle:active {
@@ -3718,7 +3882,8 @@ main {
     display: none;
     flex-direction: column;
     position: absolute;
-    top: 72px; /* sesuaikan min-height navbar 72px */
+    top: 72px;
+    /* sesuaikan min-height navbar 72px */
     left: 0;
     right: 0;
     background: rgba(var(--bg-rgb), .98);
@@ -3937,25 +4102,32 @@ main {
 .leaflet-popup-content-wrapper {
   border-radius: 16px !important;
   box-shadow:
-    0 4px 6px rgba(0,0,0,.07),
-    0 12px 28px rgba(0,0,0,.15),
-    0 0 0 1px rgba(0,0,0,.04) !important;
+    0 4px 6px rgba(0, 0, 0, .07),
+    0 12px 28px rgba(0, 0, 0, .15),
+    0 0 0 1px rgba(0, 0, 0, .04) !important;
   max-width: 260px !important;
   width: 260px !important;
   transform: none !important;
   max-height: 340px !important;
   overflow: hidden !important;
   padding: 0 !important;
-  background: rgba(255,255,255,.97) !important;
+  background: rgba(255, 255, 255, .97) !important;
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-  border: 1px solid rgba(0,0,0,.06) !important;
-  animation: popupSlideIn .25s cubic-bezier(.34,1.56,.64,1) both;
+  border: 1px solid rgba(0, 0, 0, .06) !important;
+  animation: popupSlideIn .25s cubic-bezier(.34, 1.56, .64, 1) both;
 }
 
 @keyframes popupSlideIn {
-  from { opacity: 0; transform: translateY(8px) scale(.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .leaflet-popup-content {
@@ -3980,19 +4152,30 @@ main {
 /* Popup scrollbar */
 .leaflet-popup-content {
   scrollbar-width: thin;
-  scrollbar-color: rgba(242,132,130,.45) transparent;
+  scrollbar-color: rgba(242, 132, 130, .45) transparent;
 }
-.leaflet-popup-content::-webkit-scrollbar { width: 3px; }
-.leaflet-popup-content::-webkit-scrollbar-track { background: transparent; margin: 12px 0; }
+
+.leaflet-popup-content::-webkit-scrollbar {
+  width: 3px;
+}
+
+.leaflet-popup-content::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 12px 0;
+}
+
 .leaflet-popup-content::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #F28482, #D56A6A);
   border-radius: 8px;
 }
-.leaflet-popup-content::-webkit-scrollbar-thumb:hover { background: #D56A6A; }
+
+.leaflet-popup-content::-webkit-scrollbar-thumb:hover {
+  background: #D56A6A;
+}
 
 /* Close button */
 .leaflet-popup-close-button {
-  color: rgba(0,0,0,.35) !important;
+  color: rgba(0, 0, 0, .35) !important;
   font-size: 20px !important;
   font-weight: 300 !important;
   width: 28px !important;
@@ -4005,9 +4188,10 @@ main {
   transition: all .2s ease !important;
   z-index: 10 !important;
 }
+
 .leaflet-popup-close-button:hover {
   color: #fff !important;
-  background: rgba(242,132,130,.85) !important;
+  background: rgba(242, 132, 130, .85) !important;
 }
 
 /* ── Popup inner layout classes ────────────────────────── */
@@ -4019,13 +4203,16 @@ main {
 
 .popup-header {
   padding: 14px 16px 10px;
-  border-bottom: 1px solid rgba(0,0,0,.06);
+  border-bottom: 1px solid rgba(0, 0, 0, .06);
   position: relative;
 }
+
 .popup-header::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 3px;
   background: linear-gradient(90deg, #F28482, #F6BD60, #84A59D);
   border-radius: 16px 16px 0 0;
@@ -4056,19 +4243,20 @@ main {
 
 .popup-desc {
   padding: 10px 16px;
-  background: linear-gradient(135deg, rgba(242,132,130,.06), rgba(246,189,96,.04));
-  border-bottom: 1px solid rgba(0,0,0,.04);
+  background: linear-gradient(135deg, rgba(242, 132, 130, .06), rgba(246, 189, 96, .04));
+  border-bottom: 1px solid rgba(0, 0, 0, .04);
   font-style: italic;
   font-size: 12px;
   color: #64748b;
   line-height: 1.5;
   position: relative;
 }
+
 .popup-desc::before {
   content: '\201C';
   font-size: 28px;
   font-family: Georgia, serif;
-  color: rgba(242,132,130,.35);
+  color: rgba(242, 132, 130, .35);
   position: absolute;
   top: 2px;
   left: 8px;
@@ -4091,20 +4279,23 @@ main {
   letter-spacing: .4px;
   margin-bottom: 8px;
 }
+
 .popup-status-badge.badge-danger {
-  background: rgba(239,68,68,.1);
+  background: rgba(239, 68, 68, .1);
   color: #dc2626;
-  border: 1px solid rgba(239,68,68,.2);
+  border: 1px solid rgba(239, 68, 68, .2);
 }
+
 .popup-status-badge.badge-warning {
-  background: rgba(245,158,11,.1);
+  background: rgba(245, 158, 11, .1);
   color: #d97706;
-  border: 1px solid rgba(245,158,11,.2);
+  border: 1px solid rgba(245, 158, 11, .2);
 }
+
 .popup-status-badge.badge-safe {
-  background: rgba(16,185,129,.1);
+  background: rgba(16, 185, 129, .1);
   color: #059669;
-  border: 1px solid rgba(16,185,129,.2);
+  border: 1px solid rgba(16, 185, 129, .2);
 }
 
 .popup-meta-grid {
@@ -4119,9 +4310,12 @@ main {
   justify-content: space-between;
   font-size: 11.5px;
   padding: 3px 0;
-  border-bottom: 1px dashed rgba(0,0,0,.05);
+  border-bottom: 1px dashed rgba(0, 0, 0, .05);
 }
-.popup-meta-row:last-child { border-bottom: none; }
+
+.popup-meta-row:last-child {
+  border-bottom: none;
+}
 
 .popup-meta-label {
   color: #94a3b8;
@@ -4143,16 +4337,21 @@ main {
   padding: 8px 16px 12px;
   text-align: center;
 }
+
 .popup-foto img {
   max-width: 100%;
   max-height: 120px;
   border-radius: 8px;
   object-fit: cover;
   cursor: zoom-in;
-  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
   transition: transform .2s;
 }
-.popup-foto img:hover { transform: scale(1.03); }
+
+.popup-foto img:hover {
+  transform: scale(1.03);
+}
+
 .popup-foto-caption {
   font-size: 10px;
   color: #94a3b8;
@@ -4161,8 +4360,8 @@ main {
 
 /* Leaflet tip arrow color sync */
 .leaflet-popup-tip {
-  background: rgba(255,255,255,.97) !important;
-  box-shadow: 0 3px 6px rgba(0,0,0,.08) !important;
+  background: rgba(255, 255, 255, .97) !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, .08) !important;
 }
 
 @media (max-width: 480px) {
@@ -4171,6 +4370,7 @@ main {
     width: 250px !important;
     max-height: 320px !important;
   }
+
   .leaflet-popup-content {
     max-height: 300px !important;
   }
@@ -4668,11 +4868,13 @@ main {
 }
 
 [data-theme="dark"] .star-btn.active {
-  color: #f59e0b !important; /* Amber cerah */
+  color: #f59e0b !important;
+  /* Amber cerah */
 }
 
 [data-theme="dark"] .star-btn.active-red {
-  color: #ff8fa3 !important; /* Pink cerah */
+  color: #ff8fa3 !important;
+  /* Pink cerah */
 }
 
 [data-theme="dark"] .star-hint {
@@ -5256,9 +5458,9 @@ main {
   background: rgba(17, 22, 48, .96) !important;
   border-color: rgba(200, 210, 255, .12) !important;
   box-shadow:
-    0 4px 6px rgba(0,0,0,.2),
-    0 12px 28px rgba(0,0,0,.4),
-    0 0 0 1px rgba(200,210,255,.06) !important;
+    0 4px 6px rgba(0, 0, 0, .2),
+    0 12px 28px rgba(0, 0, 0, .4),
+    0 0 0 1px rgba(200, 210, 255, .06) !important;
 }
 
 [data-theme="dark"] .leaflet-popup-content {
@@ -5266,12 +5468,12 @@ main {
 }
 
 [data-theme="dark"] .leaflet-popup-close-button {
-  color: rgba(200,210,255,.35) !important;
+  color: rgba(200, 210, 255, .35) !important;
 }
 
 [data-theme="dark"] .leaflet-popup-close-button:hover {
   color: #fff !important;
-  background: rgba(212,135,154,.7) !important;
+  background: rgba(212, 135, 154, .7) !important;
 }
 
 [data-theme="dark"] .leaflet-popup-tip {
@@ -5279,7 +5481,7 @@ main {
 }
 
 [data-theme="dark"] .popup-header {
-  border-bottom-color: rgba(200,210,255,.08);
+  border-bottom-color: rgba(200, 210, 255, .08);
 }
 
 [data-theme="dark"] .popup-loc-name {
@@ -5295,17 +5497,17 @@ main {
 }
 
 [data-theme="dark"] .popup-desc {
-  background: linear-gradient(135deg, rgba(212,135,154,.08), rgba(214,169,90,.04));
-  border-bottom-color: rgba(200,210,255,.06);
+  background: linear-gradient(135deg, rgba(212, 135, 154, .08), rgba(214, 169, 90, .04));
+  border-bottom-color: rgba(200, 210, 255, .06);
   color: #a0a4c0;
 }
 
 [data-theme="dark"] .popup-desc::before {
-  color: rgba(212,135,154,.3);
+  color: rgba(212, 135, 154, .3);
 }
 
 [data-theme="dark"] .popup-meta-row {
-  border-bottom-color: rgba(200,210,255,.06);
+  border-bottom-color: rgba(200, 210, 255, .06);
 }
 
 [data-theme="dark"] .popup-meta-label {
@@ -5317,18 +5519,18 @@ main {
 }
 
 [data-theme="dark"] .popup-status-badge.badge-danger {
-  background: rgba(239,68,68,.12);
-  border-color: rgba(239,68,68,.25);
+  background: rgba(239, 68, 68, .12);
+  border-color: rgba(239, 68, 68, .25);
 }
 
 [data-theme="dark"] .popup-status-badge.badge-warning {
-  background: rgba(245,158,11,.12);
-  border-color: rgba(245,158,11,.25);
+  background: rgba(245, 158, 11, .12);
+  border-color: rgba(245, 158, 11, .25);
 }
 
 [data-theme="dark"] .popup-status-badge.badge-safe {
-  background: rgba(16,185,129,.12);
-  border-color: rgba(16,185,129,.25);
+  background: rgba(16, 185, 129, .12);
+  border-color: rgba(16, 185, 129, .25);
 }
 
 /* Smooth transition for theme switch */
