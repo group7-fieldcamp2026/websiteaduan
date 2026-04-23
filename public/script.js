@@ -289,15 +289,30 @@ function initNav() {
 }
 
 function navigateTo(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  document.getElementById(page)?.classList.add('active');
-  document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const isMobile = window.innerWidth <= 820;
+  
+  if (isMobile) {
+    const target = document.getElementById(page);
+    if (target) {
+      const navHeight = 65;
+      const targetPos = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
+      window.scrollTo({ top: targetPos, behavior: 'smooth' });
+    }
+  } else {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.getElementById(page)?.classList.add('active');
+    document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   if (page === 'peta') {
     updateLayerCounts();
-    setTimeout(() => { initLeafletMap(); renderLeafletMap(); }, 100);
+    setTimeout(() => { 
+      initLeafletMap(); 
+      renderLeafletMap(); 
+      if (leafletMap) leafletMap.invalidateSize();
+    }, 150);
   }
 }
 
