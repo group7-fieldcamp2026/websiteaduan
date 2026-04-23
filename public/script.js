@@ -103,7 +103,6 @@ function itsafeInit() {
   // Navigation & Form
   initNav();
   initForm();
-  initPinToggles();
   buildLocationFacultyMap();
 
   // Data Fetching
@@ -586,8 +585,6 @@ function initLeafletMap() {
   fixedLocationLayerMain = L.layerGroup().addTo(leafletMap);
   renderFixedLocations(fixedLocationLayerMain);
   loadBoundaryLayer(leafletMap, 'main');
-  // Pasang event listener toggle pin (lebih andal dari inline onclick)
-  initPinToggles();
 }
 
 function renderLeafletMap() {
@@ -1268,65 +1265,6 @@ function toggleVis(type, cb) {
   }
 }
 
-function applyPinToggleVisual(el, isActive) {
-  if (!el) return;
-  el.dataset.active = isActive ? 'true' : 'false';
-  el.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-
-  const icon = el.querySelector('i');
-  if (icon) {
-    icon.className = isActive ? 'fas fa-check-circle' : 'fas fa-times-circle';
-    icon.style.fontSize = '0.85rem';
-  }
-
-  if (isActive) {
-    el.style.background = 'rgba(242,132,130,.14)';
-    el.style.border = '1px solid rgba(242,132,130,.45)';
-    el.style.color = '#D56A6A';
-    el.style.opacity = '1';
-    return;
-  }
-
-  el.style.background = 'rgba(0,0,0,.05)';
-  el.style.border = '1px solid rgba(0,0,0,.15)';
-  el.style.color = '#aaa';
-  el.style.opacity = '0.65';
-}
-
-function setPinVisibility(type, isActive, opts = {}) {
-  const render = opts.render !== false;
-  if (type === 'fixedpin') visFixedPinForm = isActive;
-  if (type === 'jurusan') visJurusanForm = isActive;
-  if (type === 'fixedpin-main') visFixedPinMain = isActive;
-  if (type === 'jurusan-main') visJurusanMain = isActive;
-
-  // Sync EVERY element that starts with id="tog-[type]"
-  document.querySelectorAll('[id^="tog-' + type + '"]').forEach(el => {
-    if (el.tagName === 'LABEL') {
-      el.classList.toggle('active', isActive);
-      const inp = el.querySelector('input');
-      if (inp) inp.checked = isActive;
-    } else {
-      applyPinToggleVisual(el, isActive);
-    }
-  });
-
-  if (!render) return;
-  renderLeafletMap();
-}
-
-function handlePinToggle(type, el) {
-  // For LABEL elements, read state from the checkbox inside; for button-style, read data-active
-  let currentlyActive;
-  if (el.tagName === 'LABEL') {
-    const inp = el.querySelector('input[type="checkbox"]');
-    currentlyActive = inp ? inp.checked : el.classList.contains('active');
-  } else {
-    currentlyActive = el.dataset.active !== 'false';
-  }
-  setPinVisibility(type, !currentlyActive, { render: true });
-}
-
 function openLightbox(url) {
   const lb = document.getElementById('photoLightbox');
   const img = document.getElementById('lightboxImg');
@@ -1352,39 +1290,6 @@ function getPhotoUrl(path) {
     ? window.location.origin
     : '';
   return `${base}/media/${encodeURI(clean)}`;
-}
-
-// Init pin toggle buttons via addEventListener (more robust than inline onclick)
-function initPinToggles() {
-  const defs = [
-    { id: 'tog-fixedpin', type: 'fixedpin' },
-    { id: 'tog-jurusan', type: 'jurusan' },
-  ];
-
-  defs.forEach(({ id, type }) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.cursor = 'pointer';
-    el.setAttribute('role', 'button');
-    el.setAttribute('tabindex', '0');
-    if (el.dataset.bound === '1') return;
-    el.dataset.bound = '1';
-
-    el.addEventListener('click', function (e) {
-      e.stopPropagation();
-      handlePinToggle(type, this);
-    });
-
-    el.addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      e.preventDefault();
-      e.stopPropagation();
-      handlePinToggle(type, this);
-    });
-  });
-
-  setPinVisibility('fixedpin', visFixedPinForm, { render: false });
-  setPinVisibility('jurusan', visJurusanForm, { render: false });
 }
 
 // ============================================================

@@ -54,7 +54,7 @@ $renderVersionedPublicHtml = function (string $file, array $versionPaths = []) u
     ]);
 };
 
-Route::get('/', function () {
+Route::get('/', function () use ($renderVersionedPublicHtml) {
     return $renderVersionedPublicHtml('index.html', [
         'style.css',
         'script.js',
@@ -62,7 +62,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/admin', function () {
+Route::get('/admin', function () use ($renderVersionedPublicHtml) {
     return $renderVersionedPublicHtml('admin.html', [
         'assets/logo',
     ]);
