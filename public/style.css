@@ -7123,6 +7123,7 @@ body {
 .hc2-stats {
   display: flex !important;
   flex-direction: row !important;
+  flex-wrap: nowrap !important;
   align-items: center;
   gap: 1.75rem;
   margin-top: 2rem;
@@ -7132,9 +7133,10 @@ body {
 }
 
 .hc2-stat {
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
   gap: .15rem;
+  min-width: 0;
 }
 
 .hc2-stat-n {
@@ -7143,6 +7145,7 @@ body {
   font-weight: 700;
   color: var(--primary-dk);
   line-height: 1;
+  white-space: nowrap;
 }
 
 .hc2-stat-l {
@@ -7151,6 +7154,7 @@ body {
   text-transform: uppercase;
   letter-spacing: .08em;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .hc2-stat-div {
@@ -7165,11 +7169,12 @@ body {
   position: relative;
   flex: 1;
   min-width: 0;
-  display: flex;
+  display: flex !important;
   align-items: flex-end;
   justify-content: center;
   z-index: 2;
   overflow: visible;
+  background: transparent !important;
 }
 
 /* Glowing aura rings under maskot */
