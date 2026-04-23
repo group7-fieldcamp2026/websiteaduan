@@ -10,8 +10,8 @@
   <title>ITSafe x Satgas PPK ITS</title>
   <script>
     (function () {
-      const rawVersion = '1.2.9';
-      const version = rawVersion === '1.2.9' ? String(Date.now()) : rawVersion;
+      const rawVersion = '1.3.0';
+      const version = rawVersion === '1.3.0' ? String(Date.now()) : rawVersion;
       window.ITSAFE_ASSET_VERSION = version;
 
       const stylesheet = document.createElement('link');
@@ -137,8 +137,12 @@
       .hc2-right { display: flex !important; }
       /* Bigger desktop maskot */
       .hc2-maskot {
-        width: clamp(320px, 42vw, 460px) !important;
+        width: clamp(450px, 55vw, 650px) !important;
       }
+      /* Scale up desktop orbit to match new mascot size */
+      .hc2-orbit-1 { --orbit-size-x: 650px !important; --orbit-size-y: 340px !important; }
+      .hc2-orbit-2 { --orbit-size-x: 600px !important; --orbit-size-y: 300px !important; }
+      .hc2-orbit-3 { --orbit-size-x: 700px !important; --orbit-size-y: 380px !important; }
     }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
