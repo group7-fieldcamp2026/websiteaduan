@@ -56,21 +56,24 @@
 
     <!-- ===== PAGE: HOME ===== -->
     <section id="home" class="page active">
-      <div class="hero">
+      <div class="hero hero-cinematic">
         <div class="hero-bg-shapes">
           <canvas id="particleCanvas"></canvas>
           <div class="shape shape-1"></div>
           <div class="shape shape-2"></div>
           <div class="shape shape-3"></div>
         </div>
-        <div class="hero-content">
+        <div class="hero-spotlight"></div>
+        <div class="hero-content hero-content-cinematic">
           <div class="hero-badge"><i class="fas fa-lock"></i> Anonim &amp; Aman</div>
-          <h1>Amati. Laporkan.<br><span class="gradient-text">Buat Kampus Lebih Aman!</span></h1>
-          <div class="hero-desc-wrapper">
-            <p class="hero-lead">Platform pelaporan dan pemetaan area berpotensi rawan tindak asusila di lingkungan ITS.
-            </p>
-            <p class="hero-sub">Laporanmu tentang kondisi area yang gelap, sepi, minim pengawasan dapat membantu kampus
-              mengambil tindakan nyata untuk menjaga keamanan semua warga ITS.</p>
+          <h1 class="hero-headline">
+            <span class="hero-hl-small">Amati.</span>
+            <span class="hero-hl-small">Laporkan.</span>
+            <span class="gradient-text hero-hl-big">Kampus<br>Lebih Aman.</span>
+          </h1>
+          <div class="hero-tagline-block">
+            <p class="hero-tagline-quote">"Keamananmu adalah tanggung jawab kita bersama."</p>
+            <p class="hero-sub">Platform pelaporan &amp; pemetaan area rawan tindak asusila di lingkungan ITS — anonim, cepat, berdampak nyata.</p>
           </div>
           <div class="collab-badge">
             <div class="collab-icon"><i class="fas fa-handshake"></i></div>
@@ -80,28 +83,27 @@
             </div>
           </div>
           <div class="hero-actions">
-            <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Buat
-              Laporan</button>
+            <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Buat Laporan</button>
             <button class="btn btn-outline" onclick="navigateTo('peta')"><i class="fas fa-map"></i> Lihat Peta</button>
             <a class="btn btn-admin-entry" href="/admin?v=20260423-08"><i class="fas fa-user-shield"></i> Masuk Admin</a>
           </div>
+          <div class="hero-stats-inline">
+            <div class="stat-inline"><span class="stat-num-inline" id="totalLaporan">0</span><span class="stat-lbl-inline">Laporan</span></div>
+            <div class="stat-inline-divider"></div>
+            <div class="stat-inline"><span class="stat-num-inline" id="bulanIni">0</span><span class="stat-lbl-inline">Bulan Ini</span></div>
+            <div class="stat-inline-divider"></div>
+            <div class="stat-inline"><span class="stat-num-inline" id="terverifikasi">0</span><span class="stat-lbl-inline">Terverifikasi</span></div>
+          </div>
         </div>
-        <div class="hero-stats">
-          <div class="stat-card" style="--i:0">
-            <div class="stat-icon"><i class="fas fa-file-lines"></i></div>
-            <span class="stat-number" id="totalLaporan">0</span>
-            <span class="stat-label">Total Laporan</span>
-          </div>
-          <div class="stat-card" style="--i:1">
-            <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
-            <span class="stat-number" id="bulanIni">0</span>
-            <span class="stat-label">Bulan Ini</span>
-          </div>
-          <div class="stat-card" style="--i:2">
-            <div class="stat-icon"><i class="fas fa-circle-check"></i></div>
-            <span class="stat-number" id="terverifikasi">0</span>
-            <span class="stat-label">Terverifikasi</span>
-          </div>
+        <div class="hero-maskot-stage">
+          <div class="maskot-glow-ring maskot-ring-1"></div>
+          <div class="maskot-glow-ring maskot-ring-2"></div>
+          <div class="maskot-glow-ring maskot-ring-3"></div>
+          <div class="maskot-pedestal"></div>
+          <img src="assets/maskot/Maskot.png" alt="Maskot ITSafe" class="hero-maskot-img" id="heroMaskot" />
+          <div class="maskot-float-tag tag-top-left"><i class="fas fa-shield-halved"></i> Terlindungi</div>
+          <div class="maskot-float-tag tag-top-right"><i class="fas fa-map-pin"></i> Terdeteksi</div>
+          <div class="maskot-float-tag tag-bottom"><i class="fas fa-bolt"></i> Cepat &amp; Aman</div>
         </div>
       </div>
 
