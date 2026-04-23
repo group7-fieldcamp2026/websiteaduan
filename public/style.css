@@ -8450,3 +8450,19 @@ body {
 .qr-frame { background: #fff !important; padding: 12px !important; border-radius: 16px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important; }
 .qr-final-img { width: 100% !important; max-width: 250px !important; height: auto !important; border-radius: 8px !important; margin: 0 auto; display: block; }
 
+
+/* REFINED ORBIT: Closer and more organic */
+.hc2-orbit-1 { --orbit-radius: 155px !important; --orbit-duration: 22s !important; --orbit-y-off: -25px !important; }
+.hc2-orbit-2 { --orbit-radius: 125px !important; --orbit-duration: 28s !important; --orbit-y-off: 45px !important; }
+.hc2-orbit-3 { --orbit-radius: 180px !important; --orbit-duration: 34s !important; --orbit-y-off: 10px !important; }
+
+@keyframes hc2OrbitPath {
+  0% { transform: translate(-50%, -50%) rotate(0deg) translateX(var(--orbit-radius)) translateY(var(--orbit-y-off)) rotate(0deg) scale(1.05); z-index: 12; opacity: 1; }
+  50% { transform: translate(-50%, -50%) rotate(180deg) translateX(var(--orbit-radius)) translateY(var(--orbit-y-off)) rotate(-180deg) scale(0.85); z-index: 3; opacity: 0.65; filter: blur(1px); }
+  100% { transform: translate(-50%, -50%) rotate(360deg) translateX(var(--orbit-radius)) translateY(var(--orbit-y-off)) rotate(-360deg) scale(1.05); z-index: 12; opacity: 1; }
+}
+/* Fix form buttons z-index to be clickable */
+.section-container { position: relative; z-index: 10; }
+.form-col-panel { position: relative; z-index: 20; }
+.level-card, .pill-btn { pointer-events: auto !important; position: relative; z-index: 30; }
+

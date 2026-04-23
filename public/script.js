@@ -682,7 +682,7 @@ async function loadBoundaryLayer(map, target) {
     if (target === 'picker' && boundaryLayerPicker) return;
     let buf = null;
     try {
-      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.0.7';
+      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.0.8';
       const res = await fetch(`assets/its_boundary.zip?v=${assetVersion}`);
       if (res.ok) buf = await res.arrayBuffer();
     } catch (e) {
@@ -2026,8 +2026,56 @@ window.addEventListener('resize', () => {
     initScrollAnimate();
     /* pop-up animations */
     initPopUpAnimations();
+    /* Robust Button Delegate */
+    initGlobalButtonDelegate();
     /* initial paint */
     updateProgress();
+  }
+
+  function initGlobalButtonDelegate() {
+    document.addEventListener('click', (e) => {
+      // 1. Level Card Logic
+      const card = e.target.closest('.level-card');
+      if (card) {
+        const group = card.closest('.level-rating-group');
+        if (group) {
+          const targetId = group.dataset.target;
+          const cards = group.querySelectorAll('.level-card');
+          const select = document.getElementById(targetId);
+          cards.forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          if (select) {
+            select.value = card.dataset.val;
+            select.dispatchEvent(new Event('change'));
+          }
+          updateProgress();
+        }
+      }
+      // 2. Pill Button Logic
+      const pill = e.target.closest('.pill-btn');
+      if (pill) {
+        const group = pill.closest('.pill-group');
+        if (group) {
+          const btns = group.querySelectorAll('.pill-btn');
+          const targetId = pill.dataset.target;
+          const val = pill.dataset.val;
+          btns.forEach(b => b.classList.remove('active'));
+          pill.classList.add('active');
+          const sel = document.getElementById(targetId);
+          if (sel) {
+            for (let opt of sel.options) {
+              if (opt.value === val || opt.text === val) {
+                sel.value = opt.value; break;
+              }
+            }
+            sel.dispatchEvent(new Event('change'));
+          }
+          pill.style.transform = 'scale(1.15)';
+          setTimeout(() => pill.style.transform = '', 150);
+          updateProgress();
+        }
+      }
+    });
   }
 
   // Ensure boot is accessible if needed, but we typically call it from the master boot
