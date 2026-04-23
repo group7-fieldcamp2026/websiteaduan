@@ -8365,37 +8365,260 @@ body {
 }
 
 
-/* FINAL MASTER REFINEMENT: Orbit, Buttons, QR, Mobile */
-.hc2-right { perspective: 1200px !important; min-height: 480px !important; display: flex !important; align-items: center; justify-content: center; overflow: visible !important; }
-.hc2-orbit-stage { position: relative; width: 300px; height: 300px; display: flex !important; align-items: center; justify-content: center; transform-style: preserve-3d !important; }
+/* ============================================================
+   MASTER REFINEMENT v1.1.0 — 3D Orbit, Buttons, QR, Mobile
+   ============================================================ */
+
+/* ── hc2-right: 3D perspective container ── */
+.hc2-right {
+  perspective: 900px !important;
+  min-height: 500px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  overflow: visible !important;
+}
+
+/* ── Orbit stage: preserve-3d so chips cross in front/behind maskot ── */
+.hc2-orbit-stage {
+  position: relative;
+  width: 340px;
+  height: 340px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d !important;
+}
+
+/* ── Orbit anchor at center of stage ── */
 .hc2-orbit {
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
-  width: 1px !important;
-  height: 1px !important;
+  width: 0 !important;
+  height: 0 !important;
   pointer-events: none !important;
+  transform-style: preserve-3d !important;
 }
-.hc2-orbit-1 { --orbit-radius: 140px; --orbit-duration: 18s; --orbit-delay: 0s; }
-.hc2-orbit-2 { --orbit-radius: 120px; --orbit-duration: 25s; --orbit-delay: -9s; }
-.hc2-orbit-3 { --orbit-radius: 160px; --orbit-duration: 22s; --orbit-delay: -4s; }
+
+/* ── Chip: animated around its orbit's tilt plane ── */
 .hc2-orbit .hc2-chip {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
-  animation: hc2OrbitPath var(--orbit-duration) linear infinite var(--orbit-delay) !important;
+  transform-style: preserve-3d !important;
+  display: block !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  animation: none !important; /* overridden per-orbit below */
 }
-@keyframes hc2OrbitPath {
-  0% { transform: translate(-50%, -50%) rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg); z-index: 10; opacity: 1; filter: none; scale: 1.05; }
-  50% { transform: translate(-50%, -50%) rotate(180deg) translateX(var(--orbit-radius)) rotate(-180deg); z-index: 1; opacity: 0.7; filter: blur(1.5px); scale: 0.85; }
-  100% { transform: translate(-50%, -50%) rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg); z-index: 10; opacity: 1; filter: none; scale: 1.05; }
+
+/* ── Per-orbit unique keyframes with fixed tilt baked in ── */
+.hc2-orbit-1 .hc2-chip {
+  animation: orbit3d_1 9s linear infinite 0s !important;
 }
-.hc2-maskot { position: relative !important; z-index: 5 !important; width: clamp(230px, 40vw, 320px) !important; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.2)) !important; }
-.qr-final-wrap { background: #fff !important; padding: 10px !important; border-radius: 16px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important; }
-.qr-final-img { width: 100% !important; max-width: 260px !important; height: auto !important; display: block !important; border-radius: 8px !important; margin: 0 auto; }
-.level-card, .pill-btn { pointer-events: auto !important; cursor: pointer !important; z-index: 100 !important; }
-/* Revert mobile all-visible scroll */
+.hc2-orbit-2 .hc2-chip {
+  animation: orbit3d_2 14s linear infinite -5s !important;
+}
+.hc2-orbit-3 .hc2-chip {
+  animation: orbit3d_3 11s linear infinite -3s !important;
+}
+
+/* Orbit 1 — tilt: rotateX(62deg) rotateZ(-20deg), r=155px */
+@keyframes orbit3d_1 {
+  0%   { transform: translate(-50%,-50%) rotateX(62deg) rotateZ(calc(-20deg + 0deg))   translateX(155px) rotateX(-62deg) rotateZ(0deg); }
+  25%  { transform: translate(-50%,-50%) rotateX(62deg) rotateZ(calc(-20deg + 90deg))  translateX(155px) rotateX(-62deg) rotateZ(-90deg); }
+  50%  { transform: translate(-50%,-50%) rotateX(62deg) rotateZ(calc(-20deg + 180deg)) translateX(155px) rotateX(-62deg) rotateZ(-180deg); }
+  75%  { transform: translate(-50%,-50%) rotateX(62deg) rotateZ(calc(-20deg + 270deg)) translateX(155px) rotateX(-62deg) rotateZ(-270deg); }
+  100% { transform: translate(-50%,-50%) rotateX(62deg) rotateZ(calc(-20deg + 360deg)) translateX(155px) rotateX(-62deg) rotateZ(-360deg); }
+}
+
+/* Orbit 2 — tilt: rotateX(55deg) rotateZ(40deg), r=130px */
+@keyframes orbit3d_2 {
+  0%   { transform: translate(-50%,-50%) rotateX(55deg) rotateZ(calc(40deg + 0deg))   translateX(130px) rotateX(-55deg) rotateZ(0deg); }
+  25%  { transform: translate(-50%,-50%) rotateX(55deg) rotateZ(calc(40deg + 90deg))  translateX(130px) rotateX(-55deg) rotateZ(-90deg); }
+  50%  { transform: translate(-50%,-50%) rotateX(55deg) rotateZ(calc(40deg + 180deg)) translateX(130px) rotateX(-55deg) rotateZ(-180deg); }
+  75%  { transform: translate(-50%,-50%) rotateX(55deg) rotateZ(calc(40deg + 270deg)) translateX(130px) rotateX(-55deg) rotateZ(-270deg); }
+  100% { transform: translate(-50%,-50%) rotateX(55deg) rotateZ(calc(40deg + 360deg)) translateX(130px) rotateX(-55deg) rotateZ(-360deg); }
+}
+
+/* Orbit 3 — tilt: rotateX(70deg) rotateZ(15deg), r=160px */
+@keyframes orbit3d_3 {
+  0%   { transform: translate(-50%,-50%) rotateX(70deg) rotateZ(calc(15deg + 0deg))   translateX(160px) rotateX(-70deg) rotateZ(0deg); }
+  25%  { transform: translate(-50%,-50%) rotateX(70deg) rotateZ(calc(15deg + 90deg))  translateX(160px) rotateX(-70deg) rotateZ(-90deg); }
+  50%  { transform: translate(-50%,-50%) rotateX(70deg) rotateZ(calc(15deg + 180deg)) translateX(160px) rotateX(-70deg) rotateZ(-180deg); }
+  75%  { transform: translate(-50%,-50%) rotateX(70deg) rotateZ(calc(15deg + 270deg)) translateX(160px) rotateX(-70deg) rotateZ(-270deg); }
+  100% { transform: translate(-50%,-50%) rotateX(70deg) rotateZ(calc(15deg + 360deg)) translateX(160px) rotateX(-70deg) rotateZ(-360deg); }
+}
+
+/* ── Maskot: float gently, sits in the center of the preserve-3d stage ── */
+.hc2-maskot {
+  position: relative !important;
+  z-index: 5 !important;
+  width: clamp(220px, 35vw, 310px) !important;
+  filter: drop-shadow(0 24px 48px rgba(var(--primary-rgb), 0.35)) drop-shadow(0 8px 16px rgba(0,0,0,0.15)) !important;
+  animation: hc2MaskotFloat3D 7s ease-in-out infinite !important;
+  transform-style: flat !important;
+}
+
+@keyframes hc2MaskotFloat3D {
+  0%,100% { transform: translateY(0) scale(1); }
+  40%     { transform: translateY(-14px) scale(1.01); }
+  70%     { transform: translateY(-6px) scale(1.005); }
+}
+
+/* ── QR container ── */
+#qrCodeContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  min-height: 220px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 4px;
+}
+
+#qrCodeContainer canvas,
+#qrCodeContainer img {
+  display: block !important;
+  border-radius: 8px !important;
+}
+
+/* ── Buttons always clickable ── */
+.level-card, .pill-btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 50 !important;
+}
+
+.level-rating-group, .pill-group {
+  position: relative !important;
+  z-index: 50 !important;
+}
+
+/* ── Mobile: chips row ABOVE the headline, no desktop orbit ── */
+.hc2-mobile-chips {
+  display: none;
+}
+
 @media (max-width: 820px) {
+  /* Hide orbit stage on mobile */
+  .hc2-right {
+    display: none !important;
+  }
+
+  /* Show compact chip bar */
+  .hc2-mobile-chips {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: 1rem;
+    justify-content: center;
+  }
+
+  .hc2-mobile-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .38rem .9rem;
+    background: rgba(var(--primary-rgb), .08);
+    border: 1px solid rgba(var(--primary-rgb), .22);
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--primary-dk);
+    white-space: nowrap;
+  }
+
+  .hc2-mobile-chip i { font-size: .65rem; color: var(--primary); }
+
+  /* Compact hero */
+  .hero-cinema2 {
+    flex-direction: column !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    padding: 4.5rem 5vw 2.5rem !important;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hc2-left {
+    max-width: 100% !important;
+    padding: 0 !important;
+    align-items: center;
+    width: 100%;
+  }
+
+  .hc2-h1 { margin: .6rem 0 .9rem; }
+  .hc2-line-a { font-size: clamp(1rem, 4vw, 1.3rem); }
+  .hc2-line-b { font-size: clamp(1.8rem, 7.5vw, 2.6rem); }
+  .hc2-quote { border-left: none; padding-left: 0; border-top: 3px solid var(--primary); padding-top: .5rem; }
+  .hc2-stats { justify-content: center; }
+  .hero-actions { justify-content: center; }
+
+  /* Page visibility */
   .page:not(.active) { display: none !important; }
   .page.active { display: block !important; }
+}
+
+/* ── Dark mode chip-face in orbit ── */
+[data-theme="dark"] .hc2-chip-face {
+  background: rgba(22, 16, 14, .92) !important;
+  border-color: rgba(var(--primary-rgb), .5) !important;
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] .hc2-mobile-chip {
+  background: rgba(var(--primary-rgb), .15);
+  border-color: rgba(var(--primary-rgb), .35);
+  color: var(--primary-lt);
+}
+
+
+
+/* ── Form subjektif: ensure level-cards and pill-btns always receive clicks ── */
+.form-col-panel {
+  isolation: isolate;
+}
+
+.form-subgrid,
+.col-subjektif .form-subgrid {
+  position: relative;
+  z-index: 10;
+}
+
+.level-rating-group {
+  position: relative;
+  z-index: 20 !important;
+  isolation: isolate;
+}
+
+.level-card {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative !important;
+  z-index: 20 !important;
+  isolation: isolate;
+}
+
+.pill-group {
+  position: relative;
+  z-index: 20 !important;
+  isolation: isolate;
+}
+
+.pill-btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative !important;
+  z-index: 20 !important;
 }

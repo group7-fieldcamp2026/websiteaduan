@@ -693,7 +693,7 @@ async function loadBoundaryLayer(map, target) {
     if (target === 'picker' && boundaryLayerPicker) return;
     let buf = null;
     try {
-      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.0.9';
+      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.1.0';
       const res = await fetch(`assets/its_boundary.zip?v=${assetVersion}`);
       if (res.ok) buf = await res.arrayBuffer();
     } catch (e) {
@@ -1688,9 +1688,28 @@ function generateQR() {
   if (!cont) return;
   cont.innerHTML = '';
   try {
-    qrInstance = new QRCode(cont, { text: url, width: 220, height: 220, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.H });
+    if (typeof QRCode !== 'undefined') {
+      qrInstance = new QRCode(cont, {
+        text: url,
+        width: 220,
+        height: 220,
+        colorDark: '#1e293b',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    } else {
+      throw new Error('QRCode not loaded');
+    }
   } catch (e) {
-    cont.innerHTML = `<div class="qr-placeholder-inner"><i class="fas fa-qrcode"></i><p>QR Code</p></div>`;
+    // Fallback: use external API image
+    const img = document.createElement('img');
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}&margin=4`;
+    img.alt = 'QR Code ITSafe';
+    img.style.cssText = 'width:220px;height:220px;display:block;border-radius:8px;';
+    img.onerror = function() {
+      cont.innerHTML = `<div class="qr-placeholder-inner"><i class="fas fa-qrcode"></i><p>QR Code</p></div>`;
+    };
+    cont.appendChild(img);
   }
   const d = document.getElementById('qrUrlDisplay');
   if (d) d.textContent = url;
