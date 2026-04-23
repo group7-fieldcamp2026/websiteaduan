@@ -3884,12 +3884,29 @@ main {
   height: 64px;
 }
 
+.satgas-logo-frame {
+  width: 78px;
+  height: 78px;
+  padding: .35rem !important;
+  border-radius: 22px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.92), rgba(245,224,213,.88)) !important;
+  border: 1px solid rgba(242,132,130,.24) !important;
+  box-shadow:
+    0 10px 24px rgba(213,106,106,.14),
+    inset 0 1px 0 rgba(255,255,255,.85) !important;
+}
+
 .contact-brand-logo,
 .satgas-logo-img {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: contain;
+}
+
+.satgas-logo-img {
+  transform: scale(1.02);
+  filter: drop-shadow(0 6px 14px rgba(40, 28, 34, .12));
 }
 
 .contact-block-title {
@@ -6993,6 +7010,18 @@ body {
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
+}
+
+[data-theme="dark"] .satgas-logo-frame {
+  background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.06)) !important;
+  border-color: rgba(255,255,255,.14) !important;
+  box-shadow:
+    0 14px 28px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+
+[data-theme="dark"] .satgas-logo-img {
+  filter: drop-shadow(0 8px 18px rgba(255,255,255,.08));
 }
 
 /* ===== METHOD STEP BULLETS ===== */
