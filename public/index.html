@@ -8,7 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>ITSafe x Satgas PPK ITS</title>
-  <link rel="stylesheet" href="style.css?v=9.6" />
+  <link rel="stylesheet" href="style.css?v=20260423-01" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Nunito:wght@300;400;500;600;700&display=swap"
@@ -24,7 +24,7 @@
   <nav class="navbar" id="navbar">
     <div class="nav-brand">
       <div class="brand-icon">
-        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=9.4" alt="Logo ITSafe" class="logo-img"
+        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=20260423-01" alt="Logo ITSafe" class="logo-img"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
         <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
       </div>
@@ -1063,26 +1063,136 @@
       </div>
 
       <div class="section-container">
-        <div class="about-section reveal">
-          <h2 class="about-section-title"><span class="section-number">01</span> Latar Belakang</h2>
-          <div class="about-text-card reveal">
-            <p>ITS merupakan kampus besar dengan aktivitas tinggi dan beragam area, mulai dari <strong>lorong gedung,
-                area parkir, taman, hingga toilet</strong> yang tidak semuanya terpantau dengan baik. Kondisi fisik
-              seperti minimnya pencahayaan, sedikitnya orang yang berlalu-lalang, dan ketiadaan CCTV dapat menciptakan
-              area yang berpotensi menjadi lokasi tindak asusila.</p>
-            <div class="about-callout">
-              <i class="fas fa-shield-halved"></i>
-              <div>
-                <strong>ITSafe</strong> dikembangkan sebagai platform pelaporan kondisi area berbasis
-                <em>crowdsourcing</em> sekaligus pemetaan spasial, untuk mengidentifikasi area berpotensi rawan dan
-                mendukung kebijakan peningkatan keamanan kampus yang lebih tepat sasaran.
+        <!-- ===== SECTION 01: WHAT IS ITSAFE? ===== -->
+        <div class="about-section reveal" id="whatIsItsafe">
+          <div class="wii-header reveal">
+            <div class="wii-label-pill"><i class="fas fa-circle-question"></i> Mengenal Platform</div>
+            <h2 class="wii-title">What is <span class="gradient-text">ITSafe</span>?</h2>
+            <p class="wii-subtitle">Sebuah jawaban atas kebutuhan nyata akan kampus yang lebih aman — bukan sekadar aplikasi, melainkan gerakan berbasis data.</p>
+          </div>
+
+          <!-- INTRO SPLIT CARD -->
+          <div class="wii-intro-split reveal">
+            <div class="wii-intro-text">
+              <div class="wii-section-chip"><i class="fas fa-map-location-dot"></i> Konteks</div>
+              <h3>Kampus Luas, Pengawasan Terbatas</h3>
+              <p>Institut Teknologi Sepuluh Nopember memiliki kawasan kampus yang sangat luas dengan dinamika aktivitas tinggi. Namun tidak semua sudut terpantau secara optimal — lorong gedung, area parkir tertutup, jalan pintas, taman, hingga toilet kerap menjadi titik buta dengan pencahayaan minim, lalu-lalang sepi, atau tanpa kamera pengawas.</p>
+              <p style="margin-top:1rem">Kondisi seperti ini menciptakan ruang bagi potensi tindak asusila yang seringkali dinormalisasi dan diabaikan. <strong>ITSafe hadir untuk memutus rantai tersebut.</strong></p>
+            </div>
+            <div class="wii-intro-visual">
+              <div class="wii-visual-card">
+                <div class="wii-visual-icon-ring">
+                  <i class="fas fa-shield-halved"></i>
+                </div>
+                <div class="wii-visual-tagline">"Pencegahan dimulai dari memperbaiki kondisi tata ruang kampus"</div>
+                <div class="wii-visual-chips">
+                  <span class="wii-chip chip-pink"><i class="fas fa-eye-slash"></i> 100% Anonim</span>
+                  <span class="wii-chip chip-teal"><i class="fas fa-clock"></i> 24/7 Aktif</span>
+                  <span class="wii-chip chip-gold"><i class="fas fa-globe"></i> WebGIS</span>
+                </div>
               </div>
             </div>
-            <div class="about-fact-row">
-              <div class="about-fact"><span class="about-fact-num">100%</span><span>Anonim & Rahasia</span></div>
-              <div class="about-fact"><span class="about-fact-num">24/7</span><span>Bisa Dilaporkan</span></div>
-              <div class="about-fact"><span class="about-fact-num">WebGIS</span><span>Berbasis Spasial</span></div>
+          </div>
+
+          <!-- WHAT IT IS DEFINITION CARD -->
+          <div class="wii-definition-card reveal">
+            <div class="wii-def-badge"><i class="fas fa-lightbulb"></i> Definisi</div>
+            <div class="wii-def-content">
+              <p class="wii-def-text"><span class="wii-def-highlight">ITSafe</span> adalah platform pelaporan kondisi area berbasis <em>crowdsourcing</em> sekaligus pemetaan spasial yang dikembangkan untuk mengidentifikasi area berpotensi rawan tindak asusila di lingkungan Kampus ITS Sukolilo — guna mendukung kebijakan peningkatan keamanan yang lebih tepat sasaran.</p>
             </div>
+          </div>
+
+          <!-- FOKUS & BATASAN -->
+          <div class="wii-blocks-row reveal">
+            <div class="wii-block wii-block-focus">
+              <div class="wii-block-header">
+                <div class="wii-block-icon" style="background:linear-gradient(135deg,#F28482,#F5CAC3)"><i class="fas fa-crosshairs"></i></div>
+                <div>
+                  <div class="wii-block-title">Fokus Platform</div>
+                  <div class="wii-block-sub">Apa yang dilaporkan di ITSafe?</div>
+                </div>
+              </div>
+              <ul class="wii-list">
+                <li><i class="fas fa-check-circle"></i><span>Khusus untuk warga ITS: mahasiswa, dosen, tendik, dan staf kampus</span></li>
+                <li><i class="fas fa-check-circle"></i><span>Hanya lokasi di dalam batas wilayah Kampus ITS Sukolilo</span></li>
+                <li><i class="fas fa-check-circle"></i><span>Rasa tidak nyaman atau terancam mengarah pada potensi tindak asusila</span></li>
+                <li><i class="fas fa-check-circle"></i><span>Bentuk pelecehan: siulan nakal, komentar seksual, penguntitan, hingga pelecehan fisik</span></li>
+                <li><i class="fas fa-check-circle"></i><span>Data berbasis spasial dan temporal: lokasi GPS, waktu rawan, kondisi fisik area</span></li>
+              </ul>
+            </div>
+
+            <div class="wii-block wii-block-limit">
+              <div class="wii-block-header">
+                <div class="wii-block-icon" style="background:linear-gradient(135deg,#84A59D,#A7C4BC)"><i class="fas fa-triangle-exclamation"></i></div>
+                <div>
+                  <div class="wii-block-title">Batas Wewenang</div>
+                  <div class="wii-block-sub">ITSafe BUKAN layanan darurat</div>
+                </div>
+              </div>
+              <ul class="wii-list">
+                <li><i class="fas fa-circle-xmark" style="color:#D56A6A"></i><span>Tidak dapat menindaklanjuti kasus ke ranah hukum</span></li>
+                <li><i class="fas fa-circle-xmark" style="color:#D56A6A"></i><span>Tidak melakukan investigasi terhadap pelaku</span></li>
+                <li><i class="fas fa-circle-xmark" style="color:#D56A6A"></i><span>Tidak mendampingi korban secara langsung</span></li>
+                <li><i class="fas fa-shield-halved" style="color:#84A59D"></i><span>Untuk kasus nyata, hubungi <strong>Satgas PPK ITS: 0811-3333-6000</strong></span></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- VALIDASI & TINDAK LANJUT FLOW -->
+          <div class="wii-flow-section reveal">
+            <div class="wii-flow-header">
+              <div class="wii-section-chip" style="background:rgba(246,189,96,.15);color:#A87A10;border-color:rgba(246,189,96,.3)"><i class="fas fa-arrows-rotate"></i> Alur Kerja</div>
+              <h3>Dari Laporan ke Perubahan Nyata</h3>
+            </div>
+            <div class="wii-flow-steps">
+              <div class="wii-flow-step">
+                <div class="wii-flow-num">1</div>
+                <div class="wii-flow-body">
+                  <strong>Warga Melaporkan</strong>
+                  <p>Pelapor mengisi form ITSafe dengan lokasi GPS, waktu rawan, kondisi fisik, dan foto opsional secara anonim</p>
+                </div>
+              </div>
+              <div class="wii-flow-arrow"><i class="fas fa-arrow-right"></i></div>
+              <div class="wii-flow-step">
+                <div class="wii-flow-num">2</div>
+                <div class="wii-flow-body">
+                  <strong>Verifikasi Admin</strong>
+                  <p>Tim admin memverifikasi kualitas data. Laporan semakin lengkap → semakin cepat tervalidasi</p>
+                </div>
+              </div>
+              <div class="wii-flow-arrow"><i class="fas fa-arrow-right"></i></div>
+              <div class="wii-flow-step">
+                <div class="wii-flow-num">3</div>
+                <div class="wii-flow-body">
+                  <strong>Analisis Spasial</strong>
+                  <p>Data tervalidasi dianalisis menjadi peta sebaran, heatmap kerawanan, dan zonasi risiko</p>
+                </div>
+              </div>
+              <div class="wii-flow-arrow"><i class="fas fa-arrow-right"></i></div>
+              <div class="wii-flow-step">
+                <div class="wii-flow-num">4</div>
+                <div class="wii-flow-body">
+                  <strong>Rekomendasi ke Kampus</strong>
+                  <p>Hasil diteruskan ke BUK4L & Satgas PPK ITS untuk perbaikan CCTV, lampu, dan rute patroli</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PRIVASI JAMINAN -->
+          <div class="wii-privacy-banner reveal">
+            <div class="wii-privacy-icon"><i class="fas fa-lock"></i></div>
+            <div class="wii-privacy-content">
+              <strong>Jaminan Privasi Data</strong>
+              <p>Seluruh data pribadi — email dan foto sensitif — dijamin kerahasiaannya. Tidak akan dipublikasikan, tidak akan disalahgunakan. ITSafe murni platform penelitian pencegahan berbasis tata ruang.</p>
+            </div>
+          </div>
+
+          <!-- FACT ROW -->
+          <div class="about-fact-row reveal" style="margin-top: 2rem">
+            <div class="about-fact"><span class="about-fact-num">100%</span><span>Anonim & Rahasia</span></div>
+            <div class="about-fact"><span class="about-fact-num">24/7</span><span>Bisa Dilaporkan</span></div>
+            <div class="about-fact"><span class="about-fact-num">WebGIS</span><span>Berbasis Spasial</span></div>
           </div>
         </div>
 
@@ -1181,7 +1291,7 @@
           <div class="logo-philosophy-hero reveal">
             <div class="logo-hero-inner">
               <div class="logo-hero-glow"></div>
-              <img id="philHeroImg" src="assets/logo/Logo dengan background gelap.png?v=9.4" alt="Logo Utama ITSafe" class="logo-hero-img" />
+              <img id="philHeroImg" src="assets/logo/Logo dengan background gelap.png?v=20260423-01" alt="Logo Utama ITSafe" class="logo-hero-img" />
             </div>
           </div>
 
@@ -1514,7 +1624,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
-  <script src="script.js?v=9.6"></script>
+  <script src="script.js?v=20260423-01"></script>
 
   <!-- ===== ITSafe UI ANIMATIONS ===== -->
   <script>
@@ -1884,7 +1994,7 @@
         const icon = document.getElementById('themeIcon');
         const navbarLogo = document.getElementById('navbarLogo');
         const philHeroImg = document.getElementById('philHeroImg');
-        const assetVersion = '9.6';
+        const assetVersion = '20260423-01';
         if (!btn || !icon) return;
 
         function updateLogos(isDark) {
