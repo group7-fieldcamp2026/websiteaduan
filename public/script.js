@@ -1316,7 +1316,14 @@ function setPinVisibility(type, isActive, opts = {}) {
 }
 
 function handlePinToggle(type, el) {
-  const currentlyActive = el.dataset.active !== 'false';
+  // For LABEL elements, read state from the checkbox inside; for button-style, read data-active
+  let currentlyActive;
+  if (el.tagName === 'LABEL') {
+    const inp = el.querySelector('input[type="checkbox"]');
+    currentlyActive = inp ? inp.checked : el.classList.contains('active');
+  } else {
+    currentlyActive = el.dataset.active !== 'false';
+  }
   setPinVisibility(type, !currentlyActive, { render: true });
 }
 
