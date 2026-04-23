@@ -1800,6 +1800,39 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- Submit Success Modal -->
+  <div class="its-modal" id="submitSuccessModal" aria-hidden="true">
+    <div class="its-modal-backdrop" onclick="closeSubmitSuccessModal()"></div>
+    <div class="its-modal-card" role="dialog" aria-modal="true" aria-labelledby="submitSuccessTitle"
+      aria-describedby="submitSuccessDesc">
+      <button type="button" class="its-modal-close" onclick="closeSubmitSuccessModal()" aria-label="Tutup">
+        <i class="fas fa-xmark"></i>
+      </button>
+
+      <div class="its-modal-icon" aria-hidden="true">
+        <i class="fas fa-circle-check"></i>
+      </div>
+      <h3 id="submitSuccessTitle">Terima kasih!</h3>
+      <p id="submitSuccessDesc">Pengaduan kamu sudah kami terima.</p>
+
+      <div id="submitSuccessCodeWrap" class="its-modal-code" style="display:none;">
+        <i class="fas fa-hashtag"></i>
+        <span>Kode:</span>
+        <span id="submitSuccessCode">—</span>
+      </div>
+      <div id="submitSuccessNote" class="its-modal-note" style="display:none;">
+        Catatan: email admin belum terkirim, tapi laporan sudah tersimpan.
+      </div>
+
+      <div class="its-modal-actions">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeSubmitSuccessModal()">Tutup</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeSubmitSuccessModal(); navigateTo('peta')">
+          <i class="fas fa-map"></i> Lihat Peta
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Lightbox Modal -->
   <div id="photoLightbox" onclick="closeLightbox()" style="
     display:none; position:fixed; inset:0; z-index:99999;

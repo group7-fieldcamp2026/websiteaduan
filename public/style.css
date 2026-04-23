@@ -4258,6 +4258,141 @@ main {
   border-color: rgba(var(--primary-rgb), .4);
 }
 
+/* ===== SUBMIT SUCCESS MODAL ===== */
+.its-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.its-modal.open {
+  display: flex;
+}
+
+.its-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+.its-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 100%);
+  padding: 1.25rem 1.15rem 1.1rem;
+  border-radius: calc(var(--radius) + 2px);
+  background: linear-gradient(180deg, rgba(var(--bg-rgb), .96), rgba(var(--bg-rgb), .86));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow), var(--shadow-glow);
+  text-align: center;
+  transform: translateY(10px) scale(.98);
+  opacity: 0;
+  transition: all .18s ease;
+}
+
+.its-modal.open .its-modal-card {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.its-modal-close {
+  position: absolute;
+  top: .7rem;
+  right: .7rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(var(--ink-rgb), .06);
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--t);
+}
+
+.its-modal-close:hover {
+  transform: translateY(-1px);
+  background: rgba(var(--ink-rgb), .1);
+  border-color: rgba(var(--primary-rgb), .35);
+}
+
+.its-modal-close i {
+  text-shadow: none;
+}
+
+.its-modal-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 999px;
+  margin: 0 auto .75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--primary-rgb), .16);
+  border: 1px solid rgba(var(--primary-rgb), .35);
+  color: var(--primary-dk);
+  box-shadow: 0 10px 30px rgba(var(--primary-rgb), .18);
+}
+
+.its-modal-icon i {
+  font-size: 1.75rem;
+  text-shadow: none;
+}
+
+.its-modal-card h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.55rem;
+  line-height: 1.15;
+  margin-bottom: .35rem;
+}
+
+.its-modal-card p {
+  color: var(--text-muted);
+  font-size: .95rem;
+  margin-bottom: .2rem;
+}
+
+.its-modal-code {
+  margin: .75rem auto 0;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .45rem .8rem;
+  border-radius: 999px;
+  border: 1px dashed rgba(var(--primary-rgb), .45);
+  background: rgba(var(--primary-rgb), .12);
+  color: var(--text);
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+.its-modal-note {
+  margin-top: .6rem;
+  color: var(--text-soft);
+  font-size: .85rem;
+}
+
+.its-modal-actions {
+  margin-top: 1.15rem;
+  display: flex;
+  gap: .6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.its-modal-actions .btn {
+  min-width: 132px;
+  justify-content: center;
+}
+
 
 .fas,
 .far,

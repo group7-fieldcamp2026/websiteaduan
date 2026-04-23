@@ -408,6 +408,12 @@ async function handleSubmit(e) {
       clearPin();
       await fetchReports();
       await fetchStats();
+
+      openSubmitSuccessModal({
+        reportCode: result.report_code,
+        mailSent: result.mail_sent !== false,
+      });
+
       if (result.mail_sent === false) {
         showToast(`Laporan tersimpan (kode: ${result.report_code}), tapi email admin belum terkirim.`, 'error');
       } else {
@@ -1794,6 +1800,69 @@ function showToast(msg, type = 'success') {
   clearTimeout(t._t);
   t._t = setTimeout(() => { t.className = 'toast'; }, 3500);
 }
+
+let submitSuccessModalTimer = null;
+
+function openSubmitSuccessModal(opts = {}) {
+  const modal = document.getElementById('submitSuccessModal');
+  if (!modal) return;
+
+  const codeWrap = document.getElementById('submitSuccessCodeWrap');
+  const codeEl = document.getElementById('submitSuccessCode');
+  const noteEl = document.getElementById('submitSuccessNote');
+
+  const reportCode = opts.reportCode ? String(opts.reportCode) : '';
+  const mailSent = opts.mailSent !== false;
+
+  if (codeWrap) {
+    if (reportCode) {
+      codeWrap.style.display = 'inline-flex';
+      if (codeEl) codeEl.textContent = reportCode;
+    } else {
+      codeWrap.style.display = 'none';
+      if (codeEl) codeEl.textContent = '—';
+    }
+  }
+
+  if (noteEl) {
+    noteEl.style.display = mailSent ? 'none' : 'block';
+  }
+
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+
+  clearTimeout(submitSuccessModalTimer);
+  submitSuccessModalTimer = setTimeout(() => closeSubmitSuccessModal(), 6500);
+
+  requestAnimationFrame(() => {
+    const btn = modal.querySelector('.its-modal-actions .btn');
+    if (btn && typeof btn.focus === 'function') btn.focus();
+  });
+}
+
+function closeSubmitSuccessModal() {
+  const modal = document.getElementById('submitSuccessModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  clearTimeout(submitSuccessModalTimer);
+  submitSuccessModalTimer = null;
+}
+
+function initSubmitSuccessModal() {
+  if (window._itsSubmitModalInit) return;
+  window._itsSubmitModalInit = true;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const modal = document.getElementById('submitSuccessModal');
+    if (!modal || !modal.classList.contains('open')) return;
+    e.preventDefault();
+    closeSubmitSuccessModal();
+  });
+}
+
+initSubmitSuccessModal();
 
 window.addEventListener('resize', () => {
   if (leafletMap) leafletMap.invalidateSize();
