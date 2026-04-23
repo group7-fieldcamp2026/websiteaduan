@@ -8378,3 +8378,75 @@ body {
     max-height: none !important;
   }
 }
+
+/* Premium 3D Orbit Refinement */
+.hc2-right { perspective: 1200px !important; }
+.hc2-orbit-stage { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; transform-style: preserve-3d !important; }
+.hc2-orbit {
+  position: absolute !important;
+  width: var(--orbit-size-x) !important;
+  height: var(--orbit-size-y) !important;
+  border: 1.5px solid rgba(var(--primary-rgb), .15);
+  border-radius: 50%;
+  transform-style: preserve-3d !important;
+  animation: hc2Orbit3D var(--orbit-duration) linear infinite var(--orbit-delay) !important;
+}
+@keyframes hc2Orbit3D {
+  0% { transform: rotateX(70deg) rotateZ(0deg); }
+  100% { transform: rotateX(70deg) rotateZ(360deg); }
+}
+.hc2-chip {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%) rotateX(-70deg);
+  transform-style: preserve-3d;
+}
+.hc2-chip-face {
+  animation: hc2OrbitCounter var(--orbit-duration) linear infinite var(--orbit-delay) !important;
+}
+@keyframes hc2OrbitCounter {
+  0% { transform: rotateZ(0deg); }
+  100% { transform: rotateZ(-360deg); }
+}
+.hc2-maskot { z-index: 5; transform: translateZ(10px); }
+/* QR Final Style */
+.qr-final-wrap { background: #fff; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.qr-final-img { width: 100%; height: auto; display: block; border-radius: 8px; }
+
+
+/* FINAL 3D ORBIT REFINEMENT */
+.hc2-right { min-height: 600px !important; perspective: 1200px !important; display: flex !important; align-items: center; justify-content: center; overflow: visible !important; }
+.hc2-orbit-stage { position: relative; width: 100%; height: 100%; display: flex !important; align-items: center; justify-content: center; transform-style: preserve-3d !important; }
+.hc2-orbit {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 1px !important;
+  height: 1px !important;
+  pointer-events: none !important;
+  display: block !important;
+  border: none !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  transform: none !important;
+}
+.hc2-orbit-1 { --orbit-radius: 280px; --orbit-duration: 25s; --orbit-delay: 0s; }
+.hc2-orbit-2 { --orbit-radius: 220px; --orbit-duration: 35s; --orbit-delay: -12s; }
+.hc2-orbit-3 { --orbit-radius: 340px; --orbit-duration: 45s; --orbit-delay: -5s; }
+.hc2-orbit .hc2-chip {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  animation: hc2OrbitPath var(--orbit-duration) linear infinite var(--orbit-delay) !important;
+}
+@keyframes hc2OrbitPath {
+  0% { transform: translate(-50%, -50%) rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg) scale(1.1); z-index: 10; opacity: 1; filter: blur(0); }
+  50% { transform: translate(-50%, -50%) rotate(180deg) translateX(var(--orbit-radius)) rotate(-180deg) scale(0.9); z-index: 2; opacity: 0.8; filter: blur(1.5px); }
+  100% { transform: translate(-50%, -50%) rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg) scale(1.1); z-index: 10; opacity: 1; filter: blur(0); }
+}
+.hc2-maskot { position: relative !important; z-index: 5 !important; width: clamp(260px, 40vw, 380px) !important; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.25)) !important; animation: hc2MaskotHover 6s ease-in-out infinite !important; }
+@keyframes hc2MaskotHover { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-15px) rotate(1deg); } }
+.qr-frame { background: #fff !important; padding: 12px !important; border-radius: 16px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important; }
+.qr-final-img { width: 100% !important; max-width: 250px !important; height: auto !important; border-radius: 8px !important; margin: 0 auto; display: block; }
+

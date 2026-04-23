@@ -682,7 +682,7 @@ async function loadBoundaryLayer(map, target) {
     if (target === 'picker' && boundaryLayerPicker) return;
     let buf = null;
     try {
-      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.0.6';
+      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.0.7';
       const res = await fetch(`assets/its_boundary.zip?v=${assetVersion}`);
       if (res.ok) buf = await res.arrayBuffer();
     } catch (e) {
