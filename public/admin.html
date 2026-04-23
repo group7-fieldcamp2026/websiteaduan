@@ -111,14 +111,14 @@
 
     .brand-icon {
       position: relative;
-      background: linear-gradient(135deg, var(--primary-dk), var(--primary));
+      background: transparent;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 8px 16px rgba(var(--primary-rgb), 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 25% 25% 55% 55% / 20% 20% 80% 80%;
+      box-shadow: none;
+      border: none;
+      border-radius: 0;
       animation: none;
       transition: all 0.4s ease;
     }
@@ -143,12 +143,15 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      padding: 4px;
-      transition: transform 0.3s ease;
+      display: block;
+      padding: 0;
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.28));
+      transition: transform 0.3s ease, filter 0.3s ease;
     }
 
     .brand-icon:hover img {
       transform: scale(1.1);
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.34));
     }
 
     .login-logo {
@@ -1564,6 +1567,8 @@
     [data-theme="dark"] .sidebar-nav a.active { background: rgba(242,132,130,.12); color: var(--primary); }
     [data-theme="dark"] .login-card { background: var(--bg3); border-color: rgba(255,255,255,.1); }
     [data-theme="dark"] #loginScreen { background: var(--bg); }
+    [data-theme="dark"] .brand-icon img { filter: drop-shadow(0 0 14px rgba(255,255,255,.55)); }
+    [data-theme="dark"] .brand-icon:hover img { filter: drop-shadow(0 0 18px rgba(255,255,255,.68)); }
     [data-theme="dark"] .search-box input { background: var(--bg3); color: var(--text); border-color: rgba(255,255,255,.1); }
     [data-theme="dark"] .btn-outline { border-color: rgba(255,255,255,.15); color: var(--text-muted); }
     [data-theme="dark"] .btn-outline:hover { background: rgba(255,255,255,.06); }
@@ -1617,7 +1622,7 @@
     <div class="login-card">
       <div class="login-logo">
         <div class="brand-icon">
-          <img id="loginLogo" src="assets/logo/logo gelap.png?v=20260423-07" alt="Logo ITSafe"
+          <img id="loginLogo" src="assets/logo/logo gelap.png?v=20260423-08" alt="Logo ITSafe"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
           <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
         </div>
@@ -1649,7 +1654,7 @@
     <aside class="sidebar">
       <div class="sidebar-brand">
         <div class="brand-icon">
-          <img id="sidebarLogo" src="assets/logo/logo gelap.png?v=20260423-07" alt="Logo ITSafe"
+          <img id="sidebarLogo" src="assets/logo/logo gelap.png?v=20260423-08" alt="Logo ITSafe"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
           <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
         </div>
@@ -3917,7 +3922,7 @@
     (function initAdminTheme() {
       const btn    = document.getElementById('adminThemeToggle');
       const icon   = document.getElementById('adminThemeIcon');
-      const assetVersion = '20260423-07';
+      const assetVersion = '20260423-08';
       const logos  = () => [
         document.getElementById('loginLogo'),
         document.getElementById('sidebarLogo')
