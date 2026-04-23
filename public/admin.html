@@ -7,6 +7,11 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
+  <script>
+    window.ITSAFE_ASSET_VERSION = '__ASSET_VERSION__' === '__ASSET_VERSION__'
+      ? String(Date.now())
+      : '__ASSET_VERSION__';
+  </script>
   <title>ITSafe – Admin Panel</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link
@@ -1622,7 +1627,7 @@
     <div class="login-card">
       <div class="login-logo">
         <div class="brand-icon">
-          <img id="loginLogo" src="assets/logo/logo gelap.png?v=20260423-14" alt="Logo ITSafe"
+          <img id="loginLogo" src="assets/logo/logo gelap.png?v=__ASSET_VERSION__" alt="Logo ITSafe"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
           <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
         </div>
@@ -1654,7 +1659,7 @@
     <aside class="sidebar">
       <div class="sidebar-brand">
         <div class="brand-icon">
-          <img id="sidebarLogo" src="assets/logo/logo gelap.png?v=20260423-14" alt="Logo ITSafe"
+          <img id="sidebarLogo" src="assets/logo/logo gelap.png?v=__ASSET_VERSION__" alt="Logo ITSafe"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
           <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
         </div>
@@ -3922,7 +3927,7 @@
     (function initAdminTheme() {
       const btn    = document.getElementById('adminThemeToggle');
       const icon   = document.getElementById('adminThemeIcon');
-      const assetVersion = '20260423-14';
+      const assetVersion = window.ITSAFE_ASSET_VERSION || '__ASSET_VERSION__';
       const logos  = () => [
         document.getElementById('loginLogo'),
         document.getElementById('sidebarLogo')
