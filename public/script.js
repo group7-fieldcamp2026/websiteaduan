@@ -485,7 +485,11 @@ function initPickerMap() {
   const container = document.getElementById('pickerMap');
   if (!container) return;
 
-  pickerMap = L.map('pickerMap', { zoomControl: true }).setView(ITS, ZOOM);
+  pickerMap = L.map('pickerMap', { 
+    zoomControl: true,
+    scrollWheelZoom: false,
+    tap: !L.Browser.mobile
+  }).setView(ITS, ZOOM);
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
   
   fixedLocationLayerPicker = L.layerGroup().addTo(pickerMap);
@@ -518,7 +522,7 @@ function setPin(lat, lng, opts = {}) {
       iconAnchor: [10, 10]
     })
   }).addTo(pickerMap);
-  pickerMap.setView([lat, lng], Math.max(pickerMap.getZoom(), 16));
+  pickerMap.setView([lat, lng], Math.max(pickerMap.getZoom(), 16), { animate: false });
 
   if (!fromPreset) {
     setLokasiToLainnya();
@@ -546,7 +550,10 @@ function getLocation() {
 // ============================================================
 function initLeafletMap() {
   if (leafletMap) return;
-  leafletMap = L.map('leafletMap').setView(ITS, ZOOM);
+  leafletMap = L.map('leafletMap', {
+    scrollWheelZoom: false,
+    tap: !L.Browser.mobile
+  }).setView(ITS, ZOOM);
   baseTile = L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(leafletMap);
   fixedLocationLayerMain = L.layerGroup().addTo(leafletMap);
   renderFixedLocations(fixedLocationLayerMain);

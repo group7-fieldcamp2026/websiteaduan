@@ -7859,11 +7859,9 @@ body {
   }
 
   /* Orbit semua disembunyikan — penyebab overflow utama */
-  .hc2-orbit,
-  .hc2-orbit-1,
-  .hc2-orbit-2,
-  .hc2-orbit-3 {
-    display: none !important;
+  .hc2-orbit {
+    display: block !important;
+    transform: scale(0.65); /* Scale down for mobile */
   }
 
   /* Maskot ukuran masuk akal */
@@ -8069,3 +8067,24 @@ body {
   }
 }
 
+
+/* Premium Dark Mode Adjustments */
+[data-theme='dark'] .analysis-card {
+  background: linear-gradient(145deg, rgba(17, 22, 48, .95), rgba(23, 29, 58, .95)) !important;
+  border-color: rgba(212, 135, 154, .12) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, .2), inset 0 1px 0 rgba(200, 210, 255, .04) !important;
+}
+
+[data-theme='dark'] .leaflet-popup-content-wrapper {
+  background: rgba(17, 22, 48, .96) !important;
+  border-color: rgba(200, 210, 255, .12) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, .2), 0 12px 28px rgba(0, 0, 0, .4), 0 0 0 1px rgba(200, 210, 255, .06) !important;
+}
+
+[data-theme='dark'] .leaflet-popup-content {
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .leaflet-popup-tip {
+  background: rgba(17, 22, 48, .96) !important;
+}
