@@ -503,15 +503,28 @@ function initPickerMap() {
   pickerMap = L.map('pickerMap', { 
     zoomControl: true,
     scrollWheelZoom: false,
-    tap: !L.Browser.mobile
+    tap: true,           // Always enable Leaflet tap — prevents raw touch bubbling to page
+    tapTolerance: 15     // Slightly generous for finger accuracy
   }).setView(ITS, ZOOM);
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
   
   fixedLocationLayerPicker = L.layerGroup().addTo(pickerMap);
   renderFixedLocations(fixedLocationLayerPicker);
   loadBoundaryLayer(pickerMap, 'picker');
-  
-  pickerMap.on('click', e => setPin(e.latlng.lat, e.latlng.lng, { fromPreset: false }));
+
+  // Prevent touch-scroll bubbling on mobile by locking touch-action on container
+  const mapEl = document.getElementById('pickerMap');
+  if (mapEl) mapEl.style.touchAction = 'none';
+
+  pickerMap.on('click', e => {
+    // Save scroll position before setPin (mobile browsers sometimes jump on DOM change)
+    const savedScroll = window.scrollY || document.documentElement.scrollTop;
+    setPin(e.latlng.lat, e.latlng.lng, { fromPreset: false });
+    // Restore instantly after any DOM/focus change triggered by setPin
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: savedScroll, behavior: 'instant' });
+    });
+  });
 
   // Multiple invalidateSize attempts to fix grey box browser quirks
   setTimeout(() => pickerMap.invalidateSize(), 500);
@@ -693,7 +706,7 @@ async function loadBoundaryLayer(map, target) {
     if (target === 'picker' && boundaryLayerPicker) return;
     let buf = null;
     try {
-      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.1.4';
+      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.2.9';
       const res = await fetch(`assets/its_boundary.zip?v=${assetVersion}`);
       if (res.ok) buf = await res.arrayBuffer();
     } catch (e) {
