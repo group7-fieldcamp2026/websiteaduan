@@ -1525,6 +1525,7 @@
         font-size: 0.5rem !important;
       }
     }
+
     /* ===== DARK MODE ===== */
     [data-theme="dark"] {
       --bg: #0F1117;
@@ -1545,7 +1546,8 @@
     [data-theme="dark"] .topbar { background: var(--bg2); border-color: rgba(255,255,255,.07); }
     [data-theme="dark"] .card { background: var(--bg3); border-color: rgba(255,255,255,.08); }
     [data-theme="dark"] .stat-card { background: var(--bg3); border-color: rgba(255,255,255,.08); }
-    [data-theme="dark"] .modal-box, [data-theme="dark"] .confirm-box { background: var(--bg3); border-color: rgba(255,255,255,.1); }
+    [data-theme="dark"] .modal-box,
+    [data-theme="dark"] .confirm-box { background: var(--bg3); border-color: rgba(255,255,255,.1); }
     [data-theme="dark"] .form-group input,
     [data-theme="dark"] .form-group select,
     [data-theme="dark"] .form-group textarea { background: var(--bg4); border-color: rgba(255,255,255,.12); color: var(--text); }
@@ -1553,7 +1555,6 @@
     [data-theme="dark"] .table-wrap table thead th { background: var(--bg4); color: var(--text-muted); }
     [data-theme="dark"] .table-wrap table tbody tr { border-color: rgba(255,255,255,.05); }
     [data-theme="dark"] .table-wrap table tbody tr:hover { background: rgba(255,255,255,.04); }
-    [data-theme="dark"] .badge { opacity: .9; }
     [data-theme="dark"] .sidebar-nav a { color: var(--text-muted); }
     [data-theme="dark"] .sidebar-nav a:hover,
     [data-theme="dark"] .sidebar-nav a.active { background: rgba(242,132,130,.12); color: var(--primary); }
@@ -1568,7 +1569,7 @@
     [data-theme="dark"] ::-webkit-scrollbar-track { background: var(--bg2); }
     [data-theme="dark"] .leaflet-container { filter: brightness(0.85) saturate(0.9); }
 
-    /* Dark mode toggle button */
+    /* Theme toggle button */
     .admin-theme-toggle {
       background: none;
       border: 1.5px solid var(--border);
@@ -1586,6 +1587,19 @@
       color: var(--primary);
       border-color: var(--primary);
     }
+
+    /* Satgas PPK logo in contact block */
+    .satgas-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+    .contact-block-avatar.satgas-img-avatar {
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
   <link rel="stylesheet"
@@ -1599,7 +1613,7 @@
     <div class="login-card">
       <div class="login-logo">
         <div class="brand-icon">
-          <img src="assets/logo-its-1.png?v=20260423-04" alt="Logo ITS"
+          <img id="loginLogo" src="assets/logo/logo gelap.png?v=20260423-05" alt="Logo ITSafe"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
           <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
         </div>
@@ -1631,7 +1645,7 @@
     <aside class="sidebar">
       <div class="sidebar-brand">
         <div class="brand-icon">
-          <img src="assets/logo-its-1.png?v=20260423-04" alt="Logo ITS"
+          <img id="sidebarLogo" src="assets/logo/logo gelap.png?v=20260423-05" alt="Logo ITSafe"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
           <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
         </div>
@@ -3895,30 +3909,42 @@
       startAutoRefresh();
     });
 
-    // ===== DARK MODE TOGGLE =====
+    // ===== DARK MODE + LOGO SWITCH =====
     (function initAdminTheme() {
-      const btn = document.getElementById('adminThemeToggle');
-      const icon = document.getElementById('adminThemeIcon');
-      if (!btn || !icon) return;
+      const btn    = document.getElementById('adminThemeToggle');
+      const icon   = document.getElementById('adminThemeIcon');
+      const assetVersion = '20260423-05';
+      const logos  = () => [
+        document.getElementById('loginLogo'),
+        document.getElementById('sidebarLogo')
+      ];
 
-      const saved = localStorage.getItem('itsafe-admin-theme');
-      if (saved === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        icon.className = 'fas fa-sun';
+      function applyTheme(isDark) {
+        if (isDark) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          if (icon) icon.className = 'fas fa-sun';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          if (icon) icon.className = 'fas fa-moon';
+        }
+        logos().forEach(el => {
+          if (el) el.src = isDark
+            ? `assets/logo/logo terang.png?v=${assetVersion}`
+            : `assets/logo/logo gelap.png?v=${assetVersion}`;
+        });
       }
 
-      btn.addEventListener('click', function () {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        if (isDark) {
-          document.documentElement.removeAttribute('data-theme');
-          icon.className = 'fas fa-moon';
-          localStorage.setItem('itsafe-admin-theme', 'light');
-        } else {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          icon.className = 'fas fa-sun';
-          localStorage.setItem('itsafe-admin-theme', 'dark');
-        }
-      });
+      // Apply saved theme on load
+      const saved = localStorage.getItem('itsafe-admin-theme');
+      applyTheme(saved === 'dark');
+
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          localStorage.setItem('itsafe-admin-theme', isDark ? 'light' : 'dark');
+          applyTheme(!isDark);
+        });
+      }
     })();
   </script>
   <div style="display:none">
