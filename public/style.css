@@ -7170,7 +7170,7 @@ body {
   flex: 1;
   min-width: 0;
   display: flex !important;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   z-index: 2;
   overflow: visible;
@@ -7240,14 +7240,14 @@ body {
   height: auto;
   object-fit: contain;
   display: block;
-  align-self: flex-end;
+  align-self: center;
   filter:
     drop-shadow(0 40px 60px rgba(var(--primary-rgb),.4))
     drop-shadow(0 10px 20px rgba(0,0,0,.12));
   animation:
     hc2MaskotReveal 1.2s cubic-bezier(.22,1,.36,1) .3s both,
     hc2MaskotFloat  7s   ease-in-out              infinite;
-  transform-origin: center bottom;
+  transform-origin: center center;
 }
 
 @keyframes hc2MaskotReveal {
@@ -7284,20 +7284,20 @@ body {
 .hc2-chip i { font-size: .72rem; color: var(--primary); }
 
 .hc2-chip-1 {
-  top: 22%;
-  left: 4%;
+  top: 28%;
+  left: 8%;
   animation: chipFloat1 4.5s ease-in-out infinite;
 }
 
 .hc2-chip-2 {
-  top: 15%;
-  right: 8%;
+  top: 20%;
+  right: 12%;
   animation: chipFloat2 5.5s ease-in-out infinite .4s;
 }
 
 .hc2-chip-3 {
-  bottom: 18%;
-  right: 5%;
+  bottom: 22%;
+  right: 8%;
   animation: chipFloat1 5s ease-in-out infinite .8s;
 }
 
@@ -7349,9 +7349,9 @@ body {
   .hc2-maskot {
     width: clamp(260px, 70vw, 380px);
   }
-  .hc2-chip-1 { left: 2%; top: 10%; }
-  .hc2-chip-2 { right: 2%; top: 5%; }
-  .hc2-chip-3 { right: 2%; bottom: 8%; }
+  .hc2-chip-1 { left: 5%; top: 15%; }
+  .hc2-chip-2 { right: 5%; top: 10%; }
+  .hc2-chip-3 { right: 5%; bottom: 12%; }
 }
 
 @media (max-width: 480px) {
