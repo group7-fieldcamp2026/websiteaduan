@@ -8,7 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>ITSafe x Satgas PPK ITS</title>
-  <link rel="stylesheet" href="style.css?v=20260423-02" />
+  <link rel="stylesheet" href="style.css?v=20260423-03" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Nunito:wght@300;400;500;600;700&display=swap"
@@ -24,7 +24,7 @@
   <nav class="navbar" id="navbar">
     <div class="nav-brand">
       <div class="brand-icon">
-        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=20260423-02" alt="Logo ITSafe" class="logo-img"
+        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=20260423-03" alt="Logo ITSafe" class="logo-img"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
         <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
       </div>
@@ -45,7 +45,7 @@
             class="fas fa-location-crosshairs"></i><span>Titik Pengaduan</span></a></li>
       <li><a href="#tentang" class="nav-link" data-page="tentang"><i
             class="fas fa-circle-info"></i><span>Tentang</span></a></li>
-      <li><a href="/admin" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
+      <li><a href="/admin?v=20260423-04" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
     </ul>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Mode Gelap/Terang">
       <i class="fas fa-moon" id="themeIcon"></i>
@@ -83,7 +83,7 @@
             <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Buat
               Laporan</button>
             <button class="btn btn-outline" onclick="navigateTo('peta')"><i class="fas fa-map"></i> Lihat Peta</button>
-            <a class="btn btn-admin-entry" href="/admin"><i class="fas fa-user-shield"></i> Masuk Admin</a>
+            <a class="btn btn-admin-entry" href="/admin?v=20260423-04"><i class="fas fa-user-shield"></i> Masuk Admin</a>
           </div>
         </div>
         <div class="hero-stats">
@@ -1082,7 +1082,7 @@
             <div class="wii-intro-visual">
               <div class="wii-visual-card">
                 <div class="wii-visual-icon-ring">
-                  <img id="wiiThemeLogo" src="assets/logo/logo gelap.png?v=20260423-02" alt="Logo ITSafe" class="wii-theme-logo" />
+                  <img id="wiiThemeLogo" src="assets/logo/logo gelap.png?v=20260423-03" alt="Logo ITSafe" class="wii-theme-logo" />
                 </div>
                 <div class="wii-visual-tagline">"Pencegahan dimulai dari memperbaiki kondisi tata ruang kampus"</div>
                 <div class="wii-visual-chips">
@@ -1238,35 +1238,60 @@
                 <div class="method-step-badge" style="background:linear-gradient(135deg,#F28482,#F5CAC3)">A</div>
                 <div class="method-step-body">
                   <div class="method-step-title">Tahap Persiapan &amp; Survei Pendahuluan</div>
-                  <div class="method-step-desc">Identifikasi masalah tindak asusila di kampus ITS, studi literatur (regulasi Permendikbudristek No. 55/2024 &amp; KUHP Pasal 281–283), penentuan kebutuhan data, serta survei pendahuluan ke Satgas PPK ITS untuk identifikasi area dan sumber data.</div>
+                  <ul class="method-step-bullets">
+                    <li>Identifikasi masalah area rawan di kampus ITS</li>
+                    <li>Studi literatur regulasi (Permendikbudristek No. 55/2024 &amp; KUHP Pasal 281–283)</li>
+                    <li>Penentuan kebutuhan data primer &amp; sekunder</li>
+                    <li>Survei pendahuluan ke Satgas PPK ITS</li>
+                  </ul>
                 </div>
               </div>
               <div class="method-step">
                 <div class="method-step-badge" style="background:linear-gradient(135deg,#84A59D,#A7C4BC)">B</div>
                 <div class="method-step-body">
                   <div class="method-step-title">Tahap Akuisisi Data</div>
-                  <div class="method-step-desc"><strong>Data Primer:</strong> kuesioner persepsi keamanan warga kampus, koordinat GPS titik lokasi, dan data pelaporan melalui form ITSafe (koordinat, waktu rawan, pencahayaan, kepadatan, CCTV, skor kerawanan). <strong>Data Sekunder:</strong> peta batas administrasi kampus, citra satelit, data civitas akademika ITS, dan peraturan terkait.</div>
+                  <ul class="method-step-bullets">
+                    <li>Kuesioner persepsi keamanan warga kampus</li>
+                    <li>Koordinat GPS titik lokasi via survei lapangan</li>
+                    <li>Data pelaporan form ITSafe (waktu, pencahayaan, CCTV, skor)</li>
+                    <li>Data sekunder: peta kampus, citra satelit, data civitas ITS</li>
+                  </ul>
                 </div>
               </div>
               <div class="method-step">
                 <div class="method-step-badge" style="background:linear-gradient(135deg,#F6BD60,#F5E0D5)">C</div>
                 <div class="method-step-body">
                   <div class="method-step-title">Tahap Pengolahan Data</div>
-                  <div class="method-step-desc">Pengembangan website ITSafe (HTML/CSS/JS + Laravel 12 + PostgreSQL), pengolahan data koordinat lokasi menjadi data spasial titik, pembuatan <strong>Peta Persebaran Titik Lokasi Rawan</strong>, pembuatan <strong>Heatmap Skoring Kerawanan</strong> berbasis Kernel Density Estimation (KDE) di ArcGIS Pro, dan <strong>Peta Kelayakan Fasilitas</strong> berdasarkan 5 parameter fisik.</div>
+                  <ul class="method-step-bullets">
+                    <li>Pengembangan website ITSafe (HTML/CSS/JS + Laravel + PostgreSQL)</li>
+                    <li>Pengolahan koordinat lokasi menjadi data spasial titik</li>
+                    <li>Pembuatan Peta Persebaran Titik Lokasi Rawan</li>
+                    <li>Pembuatan Heatmap KDE &amp; Peta Kelayakan Fasilitas (5 parameter)</li>
+                  </ul>
                 </div>
               </div>
               <div class="method-step">
                 <div class="method-step-badge" style="background:linear-gradient(135deg,#D56A6A,#F28482)">D</div>
                 <div class="method-step-body">
                   <div class="method-step-title">Tahap Analisis Data</div>
-                  <div class="method-step-desc">Analisis pola persebaran lokasi rawan (distribusi spasial), analisis tingkat kerawanan area berdasarkan skor pelapor (hotspot), dan analisis kelayakan fasilitas serta identifikasi zona prioritas yang memerlukan intervensi perbaikan pencahayaan, penambahan CCTV, atau peningkatan patroli.</div>
+                  <ul class="method-step-bullets">
+                    <li>Analisis pola sebaran lokasi rawan (distribusi spasial)</li>
+                    <li>Analisis tingkat kerawanan berdasarkan skor pelapor (hotspot)</li>
+                    <li>Analisis kelayakan fasilitas fisik area kampus</li>
+                    <li>Identifikasi zona prioritas intervensi kampus</li>
+                  </ul>
                 </div>
               </div>
               <div class="method-step">
                 <div class="method-step-badge" style="background:linear-gradient(135deg,#84A59D,#F6BD60)">E</div>
                 <div class="method-step-body">
                   <div class="method-step-title">Tahap Penyajian Data</div>
-                  <div class="method-step-desc">Penyajian Sistem <strong>WebGIS ITSafe</strong> interaktif, <strong>Peta 1</strong> – Sebaran Titik Lokasi Rawan, <strong>Peta 2</strong> – Heatmap Tingkat Kerawanan dengan filter waktu (pagi/siang/malam), <strong>Peta 3</strong> – Kelayakan Fasilitas (Layak/Cukup Layak/Tidak Layak), dan penyebaran <strong>QR-Code</strong> di titik-titik strategis kampus ITS.</div>
+                  <ul class="method-step-bullets">
+                    <li>Sistem WebGIS ITSafe interaktif berbasis web</li>
+                    <li>Peta 1 – Sebaran Titik Lokasi Rawan</li>
+                    <li>Peta 2 – Heatmap Kerawanan dengan filter waktu</li>
+                    <li>Peta 3 – Kelayakan Fasilitas &amp; penyebaran QR-Code strategis</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -1279,7 +1304,7 @@
               <div class="ethics-item"><i class="fas fa-eye-slash"></i><span>Semua data pelapor bersifat <strong>anonim &amp; rahasia</strong> sepenuhnya</span></div>
               <div class="ethics-item"><i class="fas fa-graduation-cap"></i><span>Data hanya digunakan untuk <strong>kepentingan penelitian akademik</strong></span></div>
               <div class="ethics-item"><i class="fas fa-id-card-clip"></i><span><strong>Tidak ada identitas</strong> personal yang dipublikasikan</span></div>
-              <div class="ethics-item"><i class="fas fa-rotate-left"></i><span>Pelapor <strong>berhak menarik</strong> laporan kapan saja</span></div>
+              <div class="ethics-item"><i class="fas fa-shield-halved"></i><span>Data laporan <strong>tidak akan disalahgunakan</strong> di luar kepentingan penelitian</span></div>
             </div>
           </div>
         </div>
@@ -1291,7 +1316,7 @@
           <div class="logo-philosophy-hero reveal">
             <div class="logo-hero-inner">
               <div class="logo-hero-glow"></div>
-              <img id="philHeroImg" src="assets/logo/Logo dengan background gelap.png?v=20260423-02" alt="Logo Utama ITSafe" class="logo-hero-img" />
+              <img id="philHeroImg" src="assets/logo/logo gelap.png?v=20260423-03" alt="Logo Utama ITSafe" class="logo-hero-img" />
             </div>
           </div>
 
@@ -1533,8 +1558,9 @@
           <!-- ── SATGAS PPK ITS BLOCK ── -->
           <div class="contact-block contact-block-satgas">
             <div class="contact-block-header">
-              <div class="contact-block-avatar satgas-avatar">
-                <i class="fas fa-shield-halved"></i>
+              <div class="contact-block-avatar satgas-avatar satgas-avatar-img">
+                <img src="assets/logo/SatgasPPK.png" alt="Logo Satgas PPK ITS" class="satgas-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <i class="fas fa-shield-halved" style="display:none"></i>
               </div>
               <div>
                 <div class="contact-block-title">Satgas PPK ITS</div>
@@ -1624,7 +1650,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
-  <script src="script.js?v=20260423-02"></script>
+  <script src="script.js?v=20260423-03"></script>
 
   <!-- ===== ITSafe UI ANIMATIONS ===== -->
   <script>
@@ -1995,7 +2021,7 @@
         const navbarLogo = document.getElementById('navbarLogo');
         const philHeroImg = document.getElementById('philHeroImg');
         const wiiThemeLogo = document.getElementById('wiiThemeLogo');
-        const assetVersion = '20260423-02';
+        const assetVersion = '20260423-03';
         if (!btn || !icon) return;
 
         function updateLogos(isDark) {
@@ -2006,8 +2032,8 @@
           }
           if (philHeroImg) {
             philHeroImg.src = isDark
-              ? `assets/logo/Logo dengan background terang.png?v=${assetVersion}`
-              : `assets/logo/Logo dengan background gelap.png?v=${assetVersion}`;
+              ? `assets/logo/logo terang.png?v=${assetVersion}`
+              : `assets/logo/logo gelap.png?v=${assetVersion}`;
           }
           if (wiiThemeLogo) {
             wiiThemeLogo.src = isDark

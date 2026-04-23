@@ -4,6 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>ITSafe – Admin Panel</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link
@@ -1522,6 +1525,67 @@
         font-size: 0.5rem !important;
       }
     }
+    /* ===== DARK MODE ===== */
+    [data-theme="dark"] {
+      --bg: #0F1117;
+      --bg2: #161B24;
+      --bg3: #1C2232;
+      --bg4: #1E2535;
+      --text: #F0EBE3;
+      --text-muted: #9BA3AF;
+      --text-soft: #8892A0;
+      --border: rgba(255,255,255,.1);
+      --border-glow: rgba(242,132,130,.25);
+      --shadow: 0 12px 28px rgba(0,0,0,.45);
+      --bg-rgb: 15, 17, 23;
+      --ink-rgb: 240, 235, 227;
+    }
+    [data-theme="dark"] body { background: var(--bg); color: var(--text); }
+    [data-theme="dark"] .sidebar { background: var(--bg2); border-color: rgba(255,255,255,.07); }
+    [data-theme="dark"] .topbar { background: var(--bg2); border-color: rgba(255,255,255,.07); }
+    [data-theme="dark"] .card { background: var(--bg3); border-color: rgba(255,255,255,.08); }
+    [data-theme="dark"] .stat-card { background: var(--bg3); border-color: rgba(255,255,255,.08); }
+    [data-theme="dark"] .modal-box, [data-theme="dark"] .confirm-box { background: var(--bg3); border-color: rgba(255,255,255,.1); }
+    [data-theme="dark"] .form-group input,
+    [data-theme="dark"] .form-group select,
+    [data-theme="dark"] .form-group textarea { background: var(--bg4); border-color: rgba(255,255,255,.12); color: var(--text); }
+    [data-theme="dark"] .form-group input::placeholder { color: var(--text-soft); }
+    [data-theme="dark"] .table-wrap table thead th { background: var(--bg4); color: var(--text-muted); }
+    [data-theme="dark"] .table-wrap table tbody tr { border-color: rgba(255,255,255,.05); }
+    [data-theme="dark"] .table-wrap table tbody tr:hover { background: rgba(255,255,255,.04); }
+    [data-theme="dark"] .badge { opacity: .9; }
+    [data-theme="dark"] .sidebar-nav a { color: var(--text-muted); }
+    [data-theme="dark"] .sidebar-nav a:hover,
+    [data-theme="dark"] .sidebar-nav a.active { background: rgba(242,132,130,.12); color: var(--primary); }
+    [data-theme="dark"] .login-card { background: var(--bg3); border-color: rgba(255,255,255,.1); }
+    [data-theme="dark"] #loginScreen { background: var(--bg); }
+    [data-theme="dark"] .search-box input { background: var(--bg3); color: var(--text); border-color: rgba(255,255,255,.1); }
+    [data-theme="dark"] .btn-outline { border-color: rgba(255,255,255,.15); color: var(--text-muted); }
+    [data-theme="dark"] .btn-outline:hover { background: rgba(255,255,255,.06); }
+    [data-theme="dark"] .admin-profile { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.08); }
+    [data-theme="dark"] .filter-group select { background: var(--bg3); color: var(--text); border-color: rgba(255,255,255,.1); }
+    [data-theme="dark"] .topbar-badge { background: rgba(16,185,129,.15); color: #34D399; }
+    [data-theme="dark"] ::-webkit-scrollbar-track { background: var(--bg2); }
+    [data-theme="dark"] .leaflet-container { filter: brightness(0.85) saturate(0.9); }
+
+    /* Dark mode toggle button */
+    .admin-theme-toggle {
+      background: none;
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: .9rem;
+      transition: all .2s ease;
+      flex-shrink: 0;
+    }
+    .admin-theme-toggle:hover {
+      background: rgba(var(--primary-rgb), .1);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
   <link rel="stylesheet"
@@ -1535,7 +1599,7 @@
     <div class="login-card">
       <div class="login-logo">
         <div class="brand-icon">
-          <img src="assets/logo-its-1.png" alt="Logo ITS"
+          <img src="assets/logo-its-1.png?v=20260423-04" alt="Logo ITS"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
           <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
         </div>
@@ -1567,7 +1631,7 @@
     <aside class="sidebar">
       <div class="sidebar-brand">
         <div class="brand-icon">
-          <img src="assets/logo-its-1.png" alt="Logo ITS"
+          <img src="assets/logo-its-1.png?v=20260423-04" alt="Logo ITS"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
           <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
         </div>
@@ -1608,6 +1672,9 @@
       <div class="topbar">
         <span class="topbar-title" id="topbarTitle">Dashboard</span>
         <div class="topbar-right">
+          <button class="admin-theme-toggle" id="adminThemeToggle" title="Mode Gelap/Terang">
+            <i class="fas fa-moon" id="adminThemeIcon"></i>
+          </button>
           <button class="btn btn-outline" id="btnMailHealth" onclick="testMailHealth()">
             <i class="fas fa-envelope"></i> Test Email
           </button>
@@ -3827,6 +3894,32 @@
       fetchLocations({ skipIfModal: true });
       startAutoRefresh();
     });
+
+    // ===== DARK MODE TOGGLE =====
+    (function initAdminTheme() {
+      const btn = document.getElementById('adminThemeToggle');
+      const icon = document.getElementById('adminThemeIcon');
+      if (!btn || !icon) return;
+
+      const saved = localStorage.getItem('itsafe-admin-theme');
+      if (saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        icon.className = 'fas fa-sun';
+      }
+
+      btn.addEventListener('click', function () {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+          document.documentElement.removeAttribute('data-theme');
+          icon.className = 'fas fa-moon';
+          localStorage.setItem('itsafe-admin-theme', 'light');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          icon.className = 'fas fa-sun';
+          localStorage.setItem('itsafe-admin-theme', 'dark');
+        }
+      });
+    })();
   </script>
   <div style="display:none">
     <select id="lokasiInsidenAdminHidden">

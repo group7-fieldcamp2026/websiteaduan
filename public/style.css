@@ -6969,3 +6969,40 @@ body {
 [data-theme="dark"] .wii-privacy-banner {
   background: linear-gradient(135deg, rgba(var(--sage-rgb),.1), rgba(var(--sage-rgb),.05));
 }
+
+/* ===== SATGAS PPK LOGO IMAGE ===== */
+.satgas-avatar-img {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.satgas-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+/* ===== METHOD STEP BULLETS ===== */
+.method-step-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  margin-top: .25rem;
+}
+.method-step-bullets li {
+  font-size: .86rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  padding-left: 1.1rem;
+  position: relative;
+}
+.method-step-bullets li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: var(--primary);
+  font-weight: 700;
+}
+[data-theme="dark"] .method-step-bullets li { color: rgba(255,255,255,.65); }
