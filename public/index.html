@@ -10,8 +10,8 @@
   <title>ITSafe x Satgas PPK ITS</title>
   <script>
     (function () {
-      const rawVersion = '1.0.5';
-      const version = rawVersion === '1.0.5' ? String(Date.now()) : rawVersion;
+      const rawVersion = '1.0.6';
+      const version = rawVersion === '1.0.6' ? String(Date.now()) : rawVersion;
       window.ITSAFE_ASSET_VERSION = version;
 
       const stylesheet = document.createElement('link');
@@ -35,7 +35,7 @@
   <nav class="navbar" id="navbar">
     <div class="nav-brand">
       <div class="brand-icon">
-        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=1.0.5" alt="Logo ITSafe" class="logo-img"
+        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=1.0.6" alt="Logo ITSafe" class="logo-img"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
         <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
       </div>
@@ -56,7 +56,7 @@
             class="fas fa-location-crosshairs"></i><span>Titik Pengaduan</span></a></li>
       <li><a href="#tentang" class="nav-link" data-page="tentang"><i
             class="fas fa-circle-info"></i><span>Tentang</span></a></li>
-      <li><a href="/admin?v=1.0.5" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
+      <li><a href="/admin?v=1.0.6" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
     </ul>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Mode Gelap/Terang">
       <i class="fas fa-moon" id="themeIcon"></i>
@@ -99,7 +99,6 @@
           <div class="hero-actions">
             <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Buat Laporan</button>
             <button class="btn btn-outline" onclick="navigateTo('peta')"><i class="fas fa-map"></i> Lihat Peta</button>
-            <a class="btn btn-admin-entry" href="/admin?v=1.0.5"><i class="fas fa-user-shield"></i> Masuk Admin</a>
           </div>
 
           <div class="hc2-stats">
@@ -131,7 +130,7 @@
           <div class="hc2-shadow"></div>
           
           <!-- maskot -->
-          <img src="assets/logo/Maskot_Lapor.png?v=1.0.5" alt="Mascot ITSafe" class="hc2-maskot" />
+          <img src="assets/logo/Maskot_Lapor.png?v=1.0.6" alt="Mascot ITSafe" class="hc2-maskot hc2-maskot-spin" />
         </div>
       </div>
       <!-- Chart Tren Banyak Laporan -->
@@ -1118,7 +1117,7 @@
             <div class="wii-intro-visual">
               <div class="wii-visual-card">
                 <div class="wii-visual-icon-ring">
-                  <img id="wiiThemeLogo" src="assets/logo/logo gelap.png?v=1.0.5" alt="Logo ITSafe" class="wii-theme-logo" />
+                  <img id="wiiThemeLogo" src="assets/logo/logo gelap.png?v=1.0.6" alt="Logo ITSafe" class="wii-theme-logo" />
                 </div>
                 <div class="wii-visual-tagline">"Pencegahan dimulai dari memperbaiki kondisi tata ruang kampus"</div>
                 <div class="wii-visual-chips">
@@ -1352,7 +1351,7 @@
           <div class="logo-philosophy-hero reveal">
             <div class="logo-hero-inner">
               <div class="logo-hero-glow"></div>
-              <img id="philHeroImg" src="assets/logo/logo gelap.png?v=1.0.5" alt="Logo Utama ITSafe" class="logo-hero-img" />
+              <img id="philHeroImg" src="assets/logo/logo gelap.png?v=1.0.6" alt="Logo Utama ITSafe" class="logo-hero-img" />
             </div>
           </div>
 
@@ -1530,7 +1529,7 @@
           <div class="contact-block">
             <div class="contact-block-header">
               <div class="contact-block-avatar contact-logo-avatar">
-                <img id="fieldcampThemeLogo" src="assets/logo/logo gelap.png?v=1.0.5" alt="Logo ITSafe Kelompok 7" class="contact-brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <img id="fieldcampThemeLogo" src="assets/logo/logo gelap.png?v=1.0.6" alt="Logo ITSafe Kelompok 7" class="contact-brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                 <i class="fas fa-users" style="display:none;"></i>
               </div>
               <div>
@@ -1596,7 +1595,7 @@
           <div class="contact-block contact-block-satgas">
             <div class="contact-block-header">
               <div class="contact-block-avatar contact-logo-avatar satgas-avatar satgas-avatar-img satgas-logo-frame">
-                <img src="assets/logo/SatgasPPK.png?v=1.0.5" alt="Logo Satgas PPK ITS" class="satgas-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <img src="assets/logo/SatgasPPK.png?v=1.0.6" alt="Logo Satgas PPK ITS" class="satgas-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                 <i class="fas fa-shield-halved" style="display:none"></i>
               </div>
               <div>
@@ -1689,7 +1688,7 @@
     src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
   <script>
     (function () {
-      const version = window.ITSAFE_ASSET_VERSION || '1.0.5';
+      const version = window.ITSAFE_ASSET_VERSION || '1.0.6';
       const appScript = document.createElement('script');
       appScript.src = `script.js?v=${version}`;
       document.currentScript.after(appScript);
@@ -2067,7 +2066,7 @@
         const wiiThemeLogo = document.getElementById('wiiThemeLogo');
         const fieldcampThemeLogo = document.getElementById('fieldcampThemeLogo');
         const heroMaskot = document.querySelector('.hc2-maskot');
-        const assetVersion = window.ITSAFE_ASSET_VERSION || '1.0.5';
+        const assetVersion = window.ITSAFE_ASSET_VERSION || '1.0.6';
         if (!btn || !icon) return;
 
         function updateLogos(isDark) {
@@ -2092,7 +2091,7 @@
               : `assets/logo/logo gelap.png?v=${assetVersion}`;
           }
           if (heroMaskot) {
-            heroMaskot.src = `assets/logo/Maskot.png?v=${assetVersion}`;
+            heroMaskot.src = `assets/logo/Maskot_Lapor.png?v=${assetVersion}`;
           }
         }
 

@@ -1666,13 +1666,29 @@ main {
 }
 
 [data-theme="dark"] .level-card {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(200, 210, 255, .8);
+}
+
+[data-theme="dark"] .level-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(212, 135, 154, .3);
 }
 
 [data-theme="dark"] .level-card.active {
-  background: rgba(212, 135, 154, 0.1);
+  background: rgba(212, 135, 154, 0.22);
   border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(212, 135, 154, 0.25), 0 0 0 2px rgba(212, 135, 154, .3);
+}
+
+[data-theme="dark"] .level-card.active .level-icon {
+  color: var(--primary-lt);
+  filter: drop-shadow(0 0 6px rgba(212, 135, 154, .5));
+}
+
+[data-theme="dark"] .level-card.active .level-label {
+  color: #f5cac3 !important;
 }
 
 #laporanTable th {
@@ -4722,12 +4738,14 @@ main {
 [data-theme="dark"] .pill-btn:hover {
   background: rgba(255, 255, 255, .08);
   border-color: rgba(212, 135, 154, .3);
+  color: rgba(245, 202, 195, .9);
 }
 
 [data-theme="dark"] .pill-btn.active {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dk));
   border-color: var(--primary);
   color: #fff !important;
+  box-shadow: 0 4px 16px rgba(212, 135, 154, .4), 0 0 0 2px rgba(212, 135, 154, .2);
 }
 
 /* Progress bar */
@@ -5490,6 +5508,242 @@ main {
 }
 
 /* Leaflet popups */
+/* ── Premium Leaflet Popup ──────────────────────────────── */
+.leaflet-popup-content-wrapper {
+  border-radius: 16px !important;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, .07),
+    0 12px 28px rgba(0, 0, 0, .15),
+    0 0 0 1px rgba(0, 0, 0, .04) !important;
+  max-width: 260px !important;
+  width: 260px !important;
+  transform: none !important;
+  max-height: 360px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  background: rgba(255, 255, 255, .97) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(0, 0, 0, .06) !important;
+  animation: popupSlideIn .25s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+
+@keyframes popupSlideIn {
+  from { opacity: 0; transform: translateY(8px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  max-width: 100% !important;
+  font-size: 12.5px !important;
+  line-height: 1.5 !important;
+  transform: none !important;
+  max-height: 330px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 0 !important;
+  display: block !important;
+  color: #334155;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-content {
+  transform-origin: center center !important;
+}
+
+.leaflet-popup-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(242, 132, 130, .45) transparent;
+}
+
+.leaflet-popup-content::-webkit-scrollbar { width: 3px; }
+.leaflet-popup-content::-webkit-scrollbar-track { background: transparent; margin: 12px 0; }
+.leaflet-popup-content::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #F28482, #D56A6A); border-radius: 8px; }
+.leaflet-popup-content::-webkit-scrollbar-thumb:hover { background: #D56A6A; }
+
+.leaflet-popup-close-button {
+  color: rgba(0, 0, 0, .35) !important;
+  font-size: 20px !important;
+  font-weight: 300 !important;
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 28px !important;
+  text-align: center !important;
+  right: 6px !important;
+  top: 6px !important;
+  border-radius: 50% !important;
+  transition: all .2s ease !important;
+  z-index: 10 !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #fff !important;
+  background: rgba(242, 132, 130, .85) !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(255, 255, 255, .97) !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, .08) !important;
+}
+
+/* ── Popup inner layout classes ────────────────────────── */
+.popup-card {
+  font-family: 'Nunito', 'DM Sans', sans-serif;
+  min-width: 200px;
+  max-width: 260px;
+}
+
+.popup-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, .06);
+  position: relative;
+}
+
+.popup-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #F28482, #F6BD60, #84A59D);
+  border-radius: 16px 16px 0 0;
+}
+
+.popup-loc-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 2px;
+  line-height: 1.3;
+}
+
+.popup-faculty {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.popup-coords {
+  font-size: 10.5px;
+  color: #b0b8c9;
+  margin-top: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+.popup-desc {
+  padding: 10px 16px 10px 28px;
+  background: linear-gradient(135deg, rgba(242, 132, 130, .06), rgba(246, 189, 96, .04));
+  border-bottom: 1px solid rgba(0, 0, 0, .04);
+  font-style: italic;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+  position: relative;
+}
+
+.popup-desc::before {
+  content: '\201C';
+  font-size: 28px;
+  font-family: Georgia, serif;
+  color: rgba(242, 132, 130, .35);
+  position: absolute;
+  top: 2px; left: 8px;
+  line-height: 1;
+}
+
+.popup-body {
+  padding: 10px 16px 12px;
+}
+
+.popup-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-bottom: 8px;
+}
+
+.popup-status-badge.badge-danger {
+  background: rgba(239, 68, 68, .1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, .2);
+}
+
+.popup-status-badge.badge-warning {
+  background: rgba(245, 158, 11, .1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, .2);
+}
+
+.popup-status-badge.badge-safe {
+  background: rgba(16, 185, 129, .1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, .2);
+}
+
+.popup-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.popup-meta-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 11.5px;
+  padding: 3px 0;
+  border-bottom: 1px dashed rgba(0, 0, 0, .05);
+}
+
+.popup-meta-row:last-child { border-bottom: none; }
+
+.popup-meta-label {
+  color: #94a3b8;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-right: 8px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+.popup-meta-value {
+  font-weight: 700;
+  text-align: right;
+  font-size: 11.5px;
+}
+
+.popup-foto {
+  padding: 8px 16px 12px;
+  text-align: center;
+}
+
+.popup-foto img {
+  max-width: 100%;
+  max-height: 120px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: zoom-in;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+  transition: transform .2s;
+}
+
+.popup-foto img:hover { transform: scale(1.03); }
+
+.popup-foto-caption {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 5px;
+}
+
 [data-theme="dark"] .leaflet-popup-content-wrapper {
   background: rgba(17, 22, 48, .96) !important;
   border-color: rgba(200, 210, 255, .12) !important;
@@ -6986,6 +7240,21 @@ body {
   transform-origin: center center;
 }
 
+/* Slow gentle body rotation for the mascot */
+.hc2-maskot-spin {
+  animation:
+    hc2MaskotReveal 1.2s cubic-bezier(.22,1,.36,1) .3s both,
+    hc2MaskotBodySpin 12s ease-in-out infinite;
+}
+
+@keyframes hc2MaskotBodySpin {
+  0%   { transform: translateY(0)    rotate(-4deg) scale(1); }
+  25%  { transform: translateY(-10px) rotate(2deg) scale(1.01); }
+  50%  { transform: translateY(-16px) rotate(5deg) scale(1.015); }
+  75%  { transform: translateY(-8px)  rotate(1deg) scale(1.01); }
+  100% { transform: translateY(0)    rotate(-4deg) scale(1); }
+}
+
 @keyframes hc2MaskotReveal {
   from { opacity:0; transform: translateY(60px) scale(.88); }
   to   { opacity:1; transform: translateY(0)   scale(1); }
@@ -7139,6 +7408,12 @@ body {
   animation:
     hc2MaskotReveal 1.2s cubic-bezier(.22, 1, .36, 1) .2s both,
     hc2MaskotFloat 7s ease-in-out infinite;
+}
+
+.hc2-maskot.hc2-maskot-spin {
+  animation:
+    hc2MaskotReveal 1.2s cubic-bezier(.22, 1, .36, 1) .2s both,
+    hc2MaskotBodySpin 12s ease-in-out infinite;
 }
 
 .hc2-orbit {

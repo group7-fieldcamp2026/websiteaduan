@@ -289,22 +289,11 @@ function initNav() {
 }
 
 function navigateTo(page) {
-  const isMobile = window.innerWidth <= 820;
-  
-  if (isMobile) {
-    const target = document.getElementById(page);
-    if (target) {
-      const navHeight = 65;
-      const targetPos = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
-      window.scrollTo({ top: targetPos, behavior: 'smooth' });
-    }
-  } else {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    document.getElementById(page)?.classList.add('active');
-    document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById(page)?.classList.add('active');
+  document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (page === 'peta') {
     updateLayerCounts();
@@ -693,7 +682,8 @@ async function loadBoundaryLayer(map, target) {
     if (target === 'picker' && boundaryLayerPicker) return;
     let buf = null;
     try {
-      const res = await fetch('assets/its_boundary.zip');
+      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.0.6';
+      const res = await fetch(`assets/its_boundary.zip?v=${assetVersion}`);
       if (res.ok) buf = await res.arrayBuffer();
     } catch (e) {
       console.warn('[boundary] fetch failed', e);
