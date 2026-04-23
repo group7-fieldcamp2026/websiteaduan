@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    ITSafe - script.js
    Laravel API + Leaflet (OSM / Satelit / Dark / Topo)
    Heatmap - Titik - Cluster - Basemap switcher
@@ -45,10 +45,10 @@ const BOUNDARY_ZIP_B64 = 'UEsDBBQAAAAIAGJzbFwBUcDk+QQAAJwMAAAQAAAAQmF0YXNXaWxheW
 
 // --- BASEMAP CONFIGS ----------------------------------------
 const BASEMAPS = {
-  osm: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: '© <a href="https://www.openstreetmap.org">OpenStreetMap</a>', opt: {} },
-  satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles © Esri', opt: {} },
-  dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: '© <a href="https://carto.com">CARTO</a>', opt: { subdomains: 'abcd' } },
-  topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: '© <a href="https://opentopomap.org">OpenTopoMap</a>', opt: {} },
+  osm: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: 'Â© <a href="https://www.openstreetmap.org">OpenStreetMap</a>', opt: {} },
+  satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles Â© Esri', opt: {} },
+  dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: 'Â© <a href="https://carto.com">CARTO</a>', opt: { subdomains: 'abcd' } },
+  topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: 'Â© <a href="https://opentopomap.org">OpenTopoMap</a>', opt: {} },
 };
 
 const ITS = [-7.2756, 112.7951];
@@ -693,7 +693,7 @@ async function loadBoundaryLayer(map, target) {
     if (target === 'picker' && boundaryLayerPicker) return;
     let buf = null;
     try {
-      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.1.0';
+      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.1.4';
       const res = await fetch(`assets/its_boundary.zip?v=${assetVersion}`);
       if (res.ok) buf = await res.arrayBuffer();
     } catch (e) {
@@ -925,7 +925,7 @@ function getScoreHtml(val, type) {
     else if ((val || '').includes('Tertutup')) { color = '#EF4444'; }
   }
 
-  if (!val || val === '-') return '<span class="popup-meta-value" style="color:#94a3b8">—</span>';
+  if (!val || val === '-') return '<span class="popup-meta-value" style="color:#94a3b8">â€”</span>';
   return `<span class="popup-meta-value" style="color:${color}">${val}</span>`;
 }
 
@@ -958,11 +958,11 @@ function buildPopup(r) {
   bodyHtml += `<div class="popup-meta-grid">
     <div class="popup-meta-row">
       <span class="popup-meta-label">Waktu Rawan</span>
-      <span class="popup-meta-value" style="color:#64748b">${r.waktu || '—'}</span>
+      <span class="popup-meta-value" style="color:#64748b">${r.waktu || 'â€”'}</span>
     </div>
     <div class="popup-meta-row">
       <span class="popup-meta-label">Hari Rawan</span>
-      <span class="popup-meta-value" style="color:#64748b">${r.hariRawan === 'Keduanya sama' ? 'Hari Kerja dan Libur' : (r.hariRawan || '—')}</span>
+      <span class="popup-meta-value" style="color:#64748b">${r.hariRawan === 'Keduanya sama' ? 'Hari Kerja dan Libur' : (r.hariRawan || 'â€”')}</span>
     </div>
     <div class="popup-meta-row">
       <span class="popup-meta-label">Cahaya</span>
@@ -1157,9 +1157,9 @@ function switchPetaTab(tab) {
 
   // Update judul & deskripsi panel
   const titles = {
-    sebaran: { title: 'Peta 1 — Sebaran Titik Lokasi Rawan', desc: 'Menampilkan sebaran titik lokasi area rawan berdasarkan jumlah laporan masuk dari warga kampus ITS.' },
-    heatmap: { title: 'Peta 2 — Heatmap Kerawanan', desc: 'Menampilkan konsentrasi area rawan berdasarkan skor kerawanan yang diberikan oleh pelapor.' },
-    fasilitas: { title: 'Peta 3 — Kelayakan Fasilitas', desc: 'Menampilkan penilaian kondisi fisik area berdasarkan parameter pencahayaan, CCTV, kepadatan, petugas keamanan, dan vegetasi.' },
+    sebaran: { title: 'Peta 1 â€” Sebaran Titik Lokasi Rawan', desc: 'Menampilkan sebaran titik lokasi area rawan berdasarkan jumlah laporan masuk dari warga kampus ITS.' },
+    heatmap: { title: 'Peta 2 â€” Heatmap Kerawanan', desc: 'Menampilkan konsentrasi area rawan berdasarkan skor kerawanan yang diberikan oleh pelapor.' },
+    fasilitas: { title: 'Peta 3 â€” Kelayakan Fasilitas', desc: 'Menampilkan penilaian kondisi fisik area berdasarkan parameter pencahayaan, CCTV, kepadatan, petugas keamanan, dan vegetasi.' },
   };
 
   // Update tampilan layer sesuai tab
@@ -1320,7 +1320,7 @@ function closeLightbox() {
   if (lb) { lb.style.display = 'none'; document.getElementById('lightboxImg').src = ''; }
 }
 
-// Identical to admin.html getPhotoUrl — use /media/ route (storage/ blocked on hosting)
+// Identical to admin.html getPhotoUrl â€” use /media/ route (storage/ blocked on hosting)
 function getPhotoUrl(path) {
   if (!path) return '';
   if (/^https?:\/\//i.test(path)) return path;
@@ -1693,7 +1693,7 @@ function generateQR() {
         text: url,
         width: 220,
         height: 220,
-        colorDark: '#1e293b',
+        colorDark: '#000000',
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.H
       });
@@ -1876,13 +1876,13 @@ window.addEventListener('resize', () => {
 });
 
 /* ============================================================
-   ITSafe – Form UX Enhancements
-   Progress bar · Star ratings · Pill buttons · Fill highlight
+   ITSafe â€“ Form UX Enhancements
+   Progress bar Â· Star ratings Â· Pill buttons Â· Fill highlight
 ============================================================ */
 
 (function () {
 
-  /* ── Progress bar ─────────────────────────────────────── */
+  /* â”€â”€ Progress bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   const REQUIRED_IDS = [
     'emailIts', 'peranKampus', 'lokasiInsiden', 'lokasiDeskripsi',
     'pencahayaan', 'kepadatan', 'cctv', 'petugasKeamanan', 'waktuInsiden',
@@ -1918,10 +1918,10 @@ window.addEventListener('resize', () => {
     if (fill) fill.style.width = pct + '%';
     if (label) {
       let msg = pct === 0 ? '0% terisi' :
-        pct < 40 ? `${pct}% — Lanjutkan pengisian.` :
-          pct < 70 ? `${pct}% — Sudah mendekati setengah.` :
-            pct < 100 ? `${pct}% — Hampir selesai.` :
-              `100% — Siap dikirim.`;
+        pct < 40 ? `${pct}% â€” Lanjutkan pengisian.` :
+          pct < 70 ? `${pct}% â€” Sudah mendekati setengah.` :
+            pct < 100 ? `${pct}% â€” Hampir selesai.` :
+              `100% â€” Siap dikirim.`;
       label.textContent = msg;
     }
     /* highlight filled inputs */
@@ -1936,114 +1936,57 @@ window.addEventListener('resize', () => {
     });
   }
 
-  /* ── Star ratings ─────────────────────────────────────── */
-  function initLevelRating(groupEl) {
-    const targetId = groupEl.dataset.target;
-    const cards = groupEl.querySelectorAll('.level-card');
-    const select = document.getElementById(targetId);
-
-    cards.forEach(card => {
-      card.addEventListener('click', () => {
-        const val = card.dataset.val;
-        cards.forEach(c => c.classList.remove('active'));
+  /* â”€â”€ Unified event delegation (pill + level cards) â”€â”€ */
+  function initFormInteractions() {
+    if (window._formInteractionsInited) return;
+    window._formInteractionsInited = true;
+    // Single delegated listener on document - works for all dynamic content
+    document.addEventListener('click', function(e) {
+      // ---- Level Card ----
+      const card = e.target.closest('.level-card');
+      if (card) {
+        const group = card.closest('.level-rating-group');
+        if (!group) return;
+        const targetId = group.dataset.target;
+        group.querySelectorAll('.level-card').forEach(c => c.classList.remove('active'));
         card.classList.add('active');
-        if (select) {
-          select.value = val;
-          select.dispatchEvent(new Event('change'));
-        }
-        updateProgress();
-      });
-    });
-  }
-
-  /* ── Pill buttons ─────────────────────────────────────── */
-  function initPillGroup(groupEl) {
-    const btns = groupEl.querySelectorAll('.pill-btn');
-    btns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.dataset.target;
-        const val = btn.dataset.val;
-        /* deselect all in group */
-        btns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        /* sync hidden select */
         const sel = document.getElementById(targetId);
         if (sel) {
-          for (let opt of sel.options) {
+          sel.value = card.dataset.val;
+          sel.dispatchEvent(new Event('change'));
+        }
+        updateProgress();
+        return;
+      }
+
+      // ---- Pill Button ----
+      const pill = e.target.closest('.pill-btn');
+      if (pill) {
+        const group = pill.closest('.pill-group');
+        if (!group) return;
+        const targetId = pill.dataset.target;
+        const val = pill.dataset.val;
+        group.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        pill.classList.add('active');
+        const sel = document.getElementById(targetId);
+        if (sel) {
+          for (const opt of sel.options) {
             if (opt.value === val || opt.text === val) {
-              sel.value = opt.value; break;
+              sel.value = opt.value;
+              break;
             }
           }
+          sel.dispatchEvent(new Event('change'));
         }
-        /* little bounce animation */
-        btn.style.transform = 'scale(1.08)';
-        setTimeout(() => btn.style.transform = '', 150);
         updateProgress();
-      });
-    });
+      }
+    }, { passive: false });
   }
 
-  /* ── Animate panels in on scroll ─────────────────────── */
-  function initScrollAnimate() {
-    const panels = document.querySelectorAll('.form-col-panel.animate-in');
-    if (!panels.length) return;
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.style.animationPlayState = 'running';
-          obs.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.08 });
-    panels.forEach(p => {
-      p.style.animationPlayState = 'paused';
-      obs.observe(p);
-    });
-  }
-
-  /* ── Pop-up animations on scroll ──────────────────────– */
-  function initPopUpAnimations() {
-    // Auto-add animate-pop to stat-cards, team-cards, location-cards, etc
-    const elementsToAnimate = document.querySelectorAll(
-      '.stat-card, .team-card, .location-card, .about-info-card, .hero-content h1, .hero-actions, .info-card'
-    );
-
-    let delayCounter = 0;
-    elementsToAnimate.forEach(el => {
-      if (el.classList.contains('animate-pop')) return; // Skip if already has it
-      el.classList.add('animate-pop');
-      const delayClass = `delay-${(delayCounter % 5) + 1}`;
-      el.classList.add(delayClass);
-      delayCounter++;
-    });
-
-    // Intersection Observer untuk trigger animasi
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -100px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && entry.target.classList.contains('animate-pop')) {
-          // Already animated from CSS, just make sure opacity is 1
-          if (window.getComputedStyle(entry.target).opacity !== '1') {
-            entry.target.style.opacity = '1';
-          }
-          observer.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-
-    elementsToAnimate.forEach(el => observer.observe(el));
-  }
-
-  /* ── Boot ─────────────────────────────────────────────── */
+  /* â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   function boot() {
-    /* star rows */
-    document.querySelectorAll('.level-rating-group').forEach(initLevelRating);
-    /* pill groups */
-    document.querySelectorAll('.pill-group').forEach(initPillGroup);
+    /* unified form interactions (level-card + pill-btn) */
+    initFormInteractions();
     /* progress: listen to all form fields */
     ALL_IDS.forEach(id => {
       const el = document.getElementById(id);
@@ -2056,56 +1999,8 @@ window.addEventListener('resize', () => {
     initScrollAnimate();
     /* pop-up animations */
     initPopUpAnimations();
-    /* Robust Button Delegate */
-    initGlobalButtonDelegate();
     /* initial paint */
     updateProgress();
-  }
-
-  function initGlobalButtonDelegate() {
-    document.addEventListener('click', (e) => {
-      // 1. Level Card Logic
-      const card = e.target.closest('.level-card');
-      if (card) {
-        const group = card.closest('.level-rating-group');
-        if (group) {
-          const targetId = group.dataset.target;
-          const cards = group.querySelectorAll('.level-card');
-          const select = document.getElementById(targetId);
-          cards.forEach(c => c.classList.remove('active'));
-          card.classList.add('active');
-          if (select) {
-            select.value = card.dataset.val;
-            select.dispatchEvent(new Event('change'));
-          }
-          updateProgress();
-        }
-      }
-      // 2. Pill Button Logic
-      const pill = e.target.closest('.pill-btn');
-      if (pill) {
-        const group = pill.closest('.pill-group');
-        if (group) {
-          const btns = group.querySelectorAll('.pill-btn');
-          const targetId = pill.dataset.target;
-          const val = pill.dataset.val;
-          btns.forEach(b => b.classList.remove('active'));
-          pill.classList.add('active');
-          const sel = document.getElementById(targetId);
-          if (sel) {
-            for (let opt of sel.options) {
-              if (opt.value === val || opt.text === val) {
-                sel.value = opt.value; break;
-              }
-            }
-            sel.dispatchEvent(new Event('change'));
-          }
-          pill.style.transform = 'scale(1.15)';
-          setTimeout(() => pill.style.transform = '', 150);
-          updateProgress();
-        }
-      }
-    });
   }
 
   // Ensure boot is accessible if needed, but we typically call it from the master boot

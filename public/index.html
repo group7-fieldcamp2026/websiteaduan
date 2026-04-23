@@ -10,8 +10,8 @@
   <title>ITSafe x Satgas PPK ITS</title>
   <script>
     (function () {
-      const rawVersion = '1.1.0';
-      const version = rawVersion === '1.1.0' ? String(Date.now()) : rawVersion;
+      const rawVersion = '1.2.0';
+      const version = rawVersion === '1.2.0' ? String(Date.now()) : rawVersion;
       window.ITSAFE_ASSET_VERSION = version;
 
       const stylesheet = document.createElement('link');
@@ -20,6 +20,40 @@
       document.currentScript.after(stylesheet);
     })();
   </script>
+  <!-- CRITICAL INLINE FIX: force-override button CSS (bypasses cache) -->
+  <style id="itsafe-btn-fix">
+    .level-card, .level-card:hover, .level-card.active {
+      transform: none !important;
+      position: static !important;
+      z-index: auto !important;
+      pointer-events: auto !important;
+      cursor: pointer !important;
+      -webkit-tap-highlight-color: rgba(0,0,0,0.05);
+      touch-action: manipulation;
+    }
+    .level-card.active {
+      border-color: var(--primary, #D4879A) !important;
+      box-shadow: 0 0 0 2.5px var(--primary, #D4879A) !important;
+      background: rgba(212,135,154,0.08) !important;
+    }
+    .pill-btn, .pill-btn:hover, .pill-btn.active {
+      transform: none !important;
+      position: static !important;
+      z-index: auto !important;
+      pointer-events: auto !important;
+      cursor: pointer !important;
+      touch-action: manipulation;
+    }
+    .form-col-panel, .form-col-panel:hover {
+      transform: none !important;
+      isolation: auto !important;
+    }
+    .level-rating-group, .pill-group, .form-group, .form-subgrid {
+      position: static !important;
+      z-index: auto !important;
+      isolation: auto !important;
+    }
+  </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Nunito:wght@300;400;500;600;700&display=swap"
@@ -35,7 +69,7 @@
   <nav class="navbar" id="navbar">
     <div class="nav-brand">
       <div class="brand-icon">
-        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=1.1.0" alt="Logo ITSafe" class="logo-img"
+        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=1.1.4" alt="Logo ITSafe" class="logo-img"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
         <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
       </div>
@@ -56,7 +90,7 @@
             class="fas fa-location-crosshairs"></i><span>Titik Pengaduan</span></a></li>
       <li><a href="#tentang" class="nav-link" data-page="tentang"><i
             class="fas fa-circle-info"></i><span>Tentang</span></a></li>
-      <li><a href="/admin?v=1.1.0" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
+      <li><a href="/admin?v=1.1.4" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
     </ul>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Mode Gelap/Terang">
       <i class="fas fa-moon" id="themeIcon"></i>
@@ -80,17 +114,22 @@
         <div class="hc2-left">
           <div class="hero-badge"><i class="fas fa-lock"></i> Anonim &amp; Aman</div>
 
-          <!-- Mobile-only chip row (desktop shows orbit in hc2-right) -->
-          <div class="hc2-mobile-chips">
-            <span class="hc2-mobile-chip"><i class="fas fa-shield"></i> Aman</span>
-            <span class="hc2-mobile-chip"><i class="fas fa-eye-slash"></i> Anonim</span>
-            <span class="hc2-mobile-chip"><i class="fas fa-clock"></i> 24/7</span>
+          <!-- Mobile-only mascot (shows above heading on mobile) -->
+          <div class="hc2-mobile-mascot">
+            <img src="assets/logo/Maskot_Lapor.png?v=1.1.4" alt="Mascot ITSafe" class="hc2-mobile-mascot-img" />
           </div>
 
           <h1 class="hc2-h1">
             <span class="hc2-line-a">Amati. Laporkan.</span>
             <span class="hc2-line-b gradient-text">Buat Kampus<br>Lebih Aman!</span>
           </h1>
+
+          <!-- Mobile-only chip row -->
+          <div class="hc2-mobile-chips">
+            <span class="hc2-mobile-chip"><i class="fas fa-shield"></i> Aman</span>
+            <span class="hc2-mobile-chip"><i class="fas fa-eye-slash"></i> Anonim</span>
+            <span class="hc2-mobile-chip"><i class="fas fa-clock"></i> 24/7</span>
+          </div>
 
           <p class="hc2-quote">"Keamananmu adalah tanggung jawab kita bersama."</p>
           <p class="hc2-desc">Platform pelaporan &amp; pemetaan area rawan asusila di ITS — anonim, cepat, berdampak nyata.</p>
@@ -136,7 +175,7 @@
               <span class="hc2-chip hc2-chip-3"><span class="hc2-chip-face"><i class="fas fa-clock"></i> 24/7</span></span>
             </div>
             <div class="hc2-shadow"></div>
-            <img src="assets/logo/Maskot_Lapor.png?v=1.1.0" alt="Mascot ITSafe" class="hc2-maskot" />
+            <img src="assets/logo/Maskot_Lapor.png?v=1.1.4" alt="Mascot ITSafe" class="hc2-maskot" />
           </div>
         </div>
       </div>
@@ -1124,7 +1163,7 @@
             <div class="wii-intro-visual">
               <div class="wii-visual-card">
                 <div class="wii-visual-icon-ring">
-                  <img id="wiiThemeLogo" src="assets/logo/logo gelap.png?v=1.1.0" alt="Logo ITSafe" class="wii-theme-logo" />
+                  <img id="wiiThemeLogo" src="assets/logo/logo gelap.png?v=1.1.4" alt="Logo ITSafe" class="wii-theme-logo" />
                 </div>
                 <div class="wii-visual-tagline">"Pencegahan dimulai dari memperbaiki kondisi tata ruang kampus"</div>
                 <div class="wii-visual-chips">
@@ -1358,7 +1397,7 @@
           <div class="logo-philosophy-hero reveal">
             <div class="logo-hero-inner">
               <div class="logo-hero-glow"></div>
-              <img id="philHeroImg" src="assets/logo/logo gelap.png?v=1.1.0" alt="Logo Utama ITSafe" class="logo-hero-img" />
+              <img id="philHeroImg" src="assets/logo/logo gelap.png?v=1.1.4" alt="Logo Utama ITSafe" class="logo-hero-img" />
             </div>
           </div>
 
@@ -1536,7 +1575,7 @@
           <div class="contact-block">
             <div class="contact-block-header">
               <div class="contact-block-avatar contact-logo-avatar">
-                <img id="fieldcampThemeLogo" src="assets/logo/logo gelap.png?v=1.1.0" alt="Logo ITSafe Kelompok 7" class="contact-brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <img id="fieldcampThemeLogo" src="assets/logo/logo gelap.png?v=1.1.4" alt="Logo ITSafe Kelompok 7" class="contact-brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                 <i class="fas fa-users" style="display:none;"></i>
               </div>
               <div>
@@ -1554,7 +1593,7 @@
                     <path fill="#EA4335" d="M6 40h6V22.8L4 17v20c0 1.66 1.34 3 2 3z"/>
                     <path fill="#34A853" d="M36 40h6c.66 0 2-1.34 2-3V17l-8 5.8z"/>
                     <path fill="#4285F4" d="M36 10l-12 8.7L12 10H6l18 13 18-13z"/>
-                    <path fill="#FBBC04" d="M4 17l8 5.8V10H6c-1.1 0-2 .9-2 2z"/>
+                    <path fill="#FBBC04" d="M4 17l8 5.8V10H6c-1.1.4-2 .9-2 2z"/>
                     <path fill="#C5221F" d="M44 12c0-1.1-.9-2-2-2h-6v12.8L44 17z"/>
                   </svg>
                 </div>
@@ -1602,7 +1641,7 @@
           <div class="contact-block contact-block-satgas">
             <div class="contact-block-header">
               <div class="contact-block-avatar contact-logo-avatar satgas-avatar satgas-avatar-img satgas-logo-frame">
-                <img src="assets/logo/SatgasPPK.png?v=1.1.0" alt="Logo Satgas PPK ITS" class="satgas-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <img src="assets/logo/SatgasPPK.png?v=1.1.4" alt="Logo Satgas PPK ITS" class="satgas-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                 <i class="fas fa-shield-halved" style="display:none"></i>
               </div>
               <div>
@@ -1695,7 +1734,7 @@
     src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
   <script>
     (function () {
-      const version = window.ITSAFE_ASSET_VERSION || '1.1.0';
+      const version = window.ITSAFE_ASSET_VERSION || '1.1.4';
       const appScript = document.createElement('script');
       appScript.src = `script.js?v=${version}`;
       document.currentScript.after(appScript);
@@ -2073,7 +2112,7 @@
         const wiiThemeLogo = document.getElementById('wiiThemeLogo');
         const fieldcampThemeLogo = document.getElementById('fieldcampThemeLogo');
         const heroMaskot = document.querySelector('.hc2-maskot');
-        const assetVersion = window.ITSAFE_ASSET_VERSION || '1.1.0';
+        const assetVersion = window.ITSAFE_ASSET_VERSION || '1.1.4';
         if (!btn || !icon) return;
 
         function updateLogos(isDark) {
@@ -2148,6 +2187,42 @@
 
         // 3. Run the script.js secondary UI boot
         if (typeof itsafeBootUI === 'function') itsafeBootUI();
+
+        // 4. INLINE BUTTON FIX — guaranteed, embedded in HTML, bypasses all caching
+        if (!window._inlineBtnFixed) {
+          window._inlineBtnFixed = true;
+          document.addEventListener('click', function(ev) {
+            // Level Card (kenyamanan, kerawanan, dll)
+            var card = ev.target.closest ? ev.target.closest('.level-card') : null;
+            if (card) {
+              var grp = card.closest('.level-rating-group');
+              if (grp) {
+                grp.querySelectorAll('.level-card').forEach(function(c) { c.classList.remove('active'); });
+                card.classList.add('active');
+                var sel = document.getElementById(grp.dataset.target);
+                if (sel) { sel.value = card.dataset.val; sel.dispatchEvent(new Event('change')); }
+              }
+              return;
+            }
+            // Pill Button (pernah/tidak, ya/tidak, dll)
+            var pill = ev.target.closest ? ev.target.closest('.pill-btn') : null;
+            if (pill) {
+              var pg = pill.closest('.pill-group');
+              if (pg) {
+                pg.querySelectorAll('.pill-btn').forEach(function(b) { b.classList.remove('active'); });
+                pill.classList.add('active');
+                var ps = document.getElementById(pill.dataset.target);
+                if (ps) {
+                  var dv = pill.dataset.val;
+                  Array.from(ps.options).forEach(function(o) {
+                    if (o.value === dv || o.text === dv) ps.value = o.value;
+                  });
+                  ps.dispatchEvent(new Event('change'));
+                }
+              }
+            }
+          });
+        }
       }
 
       if (document.readyState === 'loading') {

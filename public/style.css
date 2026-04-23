@@ -1,5 +1,5 @@
-/* ============================================================
-   ITSafe – style.css
+﻿/* ============================================================
+   ITSafe â€“ style.css
    Font: DM Sans + DM Serif Display
    Theme: Deep navy/slate dark, coral-rose accent
 ============================================================ */
@@ -1087,7 +1087,7 @@ main {
   font-family: var(--font-body);
 }
 
-/* ===== FORM — 2-COLUMN REDESIGN ===== */
+/* ===== FORM â€” 2-COLUMN REDESIGN ===== */
 
 /* Progress bar above form */
 .form-progress-wrap {
@@ -1172,7 +1172,7 @@ main {
 
 .form-col-panel:hover {
   box-shadow: 0 16px 40px rgba(var(--ink-rgb), .1);
-  transform: translateY(-2px);
+  /* transform removed: causes panel shift that breaks click accuracy */
 }
 
 /* Column panel headers */
@@ -1449,7 +1449,7 @@ main {
   display: none;
 }
 
-/* hidden — replaced by col-panel-header */
+/* hidden â€” replaced by col-panel-header */
 .form-subgrid {
   display: flex;
   flex-direction: column;
@@ -1632,7 +1632,7 @@ main {
 }
 
 .level-card:hover {
-  transform: translateY(-3px);
+  /* no transform */
   border-color: rgba(var(--primary-rgb), 0.2);
   background: rgba(var(--primary-rgb), 0.02);
 }
@@ -1641,7 +1641,7 @@ main {
   border-color: var(--primary);
   background: #fff;
   box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.15);
-  transform: translateY(-4px);
+  /* no transform - prevents blocking clicks */
 }
 
 .level-card.active .level-icon {
@@ -2113,7 +2113,7 @@ main {
   display: block;
 }
 
-/* ── Picker map di form ── */
+/* â”€â”€ Picker map di form â”€â”€ */
 .picker-map-shell {
   border-radius: 12px;
   overflow: hidden;
@@ -2128,7 +2128,7 @@ main {
   background: var(--bg2);
 }
 
-/* ── Basemap switcher buttons (Improved) ── */
+/* â”€â”€ Basemap switcher buttons (Improved) â”€â”€ */
 .basemap-row {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -3716,7 +3716,7 @@ main {
 }
 
 .about-info-card li::before {
-  content: '→';
+  content: 'â†’';
   position: absolute;
   left: 0;
   color: var(--primary-dk);
@@ -4590,7 +4590,7 @@ main {
   box-shadow: 0 10px 30px rgba(0, 0, 0, .2) !important;
 }
 
-/* Form panels — glassmorphism matching admin-notice card */
+/* Form panels â€” glassmorphism matching admin-notice card */
 [data-theme="dark"] .form-col-panel {
   background: linear-gradient(135deg, rgba(200, 210, 255, .04), rgba(212, 135, 154, .06));
   border-color: rgba(200, 210, 255, .1);
@@ -4635,7 +4635,7 @@ main {
     inset 0 1px 1px rgba(200, 210, 255, .08);
 }
 
-/* Panel icons — subtle glow in dark mode */
+/* Panel icons â€” subtle glow in dark mode */
 [data-theme="dark"] .col-lokasi .col-panel-icon {
   background: linear-gradient(135deg, rgba(127, 181, 172, .15), rgba(212, 169, 90, .1));
   color: var(--accent-blue);
@@ -4771,7 +4771,7 @@ main {
   box-shadow: 0 8px 28px rgba(212, 135, 154, .4) !important;
 }
 
-/* Form footer — matching glassmorphism */
+/* Form footer â€” matching glassmorphism */
 [data-theme="dark"] .form-footer-wrap {
   background: linear-gradient(135deg, rgba(200, 210, 255, .04), rgba(212, 135, 154, .06));
   border-color: rgba(200, 210, 255, .1);
@@ -5508,7 +5508,7 @@ main {
 }
 
 /* Leaflet popups */
-/* ── Premium Leaflet Popup ──────────────────────────────── */
+/* â”€â”€ Premium Leaflet Popup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .leaflet-popup-content-wrapper {
   border-radius: 16px !important;
   box-shadow:
@@ -5587,7 +5587,7 @@ main {
   box-shadow: 0 3px 6px rgba(0, 0, 0, .08) !important;
 }
 
-/* ── Popup inner layout classes ────────────────────────── */
+/* â”€â”€ Popup inner layout classes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .popup-card {
   font-family: 'Nunito', 'DM Sans', sans-serif;
   min-width: 200px;
@@ -5877,11 +5877,11 @@ body {
   transition: background .4s ease, border-color .4s ease, color .3s ease, box-shadow .4s ease, transform .25s ease;
 }
 /* ============================================================
-   LOGO PHILOSOPHY — REDESIGNED (Proportional & Animated)
+   LOGO PHILOSOPHY â€” REDESIGNED (Proportional & Animated)
    Patch ini menimpa aturan yang ada di atas
 ============================================================ */
 
-/* ── Hero logo (gambar utama) ─────────────────────────────── */
+/* â”€â”€ Hero logo (gambar utama) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .logo-philosophy-hero {
   display: flex;
   justify-content: center;
@@ -5925,7 +5925,7 @@ body {
   filter: drop-shadow(0 20px 40px rgba(var(--primary-rgb), 0.3));
 }
 
-/* ── Logo card grid ───────────────────────────────────────── */
+/* â”€â”€ Logo card grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .logo-philosophy-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -5975,7 +5975,7 @@ body {
   background: rgba(var(--bg-rgb), 0.95);
 }
 
-/* ── Logo image wrapper (PROPORTIONAL FIX) ───────────────── */
+/* â”€â”€ Logo image wrapper (PROPORTIONAL FIX) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .logo-phil-img-wrap {
   width: 180px;
   height: 180px;
@@ -6013,7 +6013,7 @@ body {
   filter: drop-shadow(0 6px 16px rgba(0,0,0,0.1));
 }
 
-/* ── Hover animations per card ────────────────────────────── */
+/* â”€â”€ Hover animations per card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bounce-hover:hover .logo-phil-img {
   animation: logoBounce 0.7s ease infinite alternate;
 }
@@ -6056,7 +6056,7 @@ body {
   100% { transform: rotate(360deg) scale(1); }
 }
 
-/* ── Card text ───────────────────────────────────────────── */
+/* â”€â”€ Card text â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .logo-phil-title {
   font-family: var(--font-display);
   font-size: 1.3rem;
@@ -6075,7 +6075,7 @@ body {
   color: var(--text-soft);
 }
 
-/* ── Tag badge on card ───────────────────────────────────── */
+/* â”€â”€ Tag badge on card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .logo-phil-tag {
   display: inline-flex;
   align-items: center;
@@ -6098,7 +6098,7 @@ body {
   border-color: rgba(var(--primary-rgb), 0.35);
 }
 
-/* ── Dark mode overrides ─────────────────────────────────── */
+/* â”€â”€ Dark mode overrides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 [data-theme="dark"] .logo-phil-card {
   background: rgba(17, 22, 48, 0.6);
   border-color: rgba(212, 135, 154, 0.1);
@@ -6142,7 +6142,7 @@ body {
   color: var(--primary-dk);
 }
 
-/* ── Navbar brand icon — fix to show actual logo ─────────── */
+/* â”€â”€ Navbar brand icon â€” fix to show actual logo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .brand-icon {
   background: transparent !important;
   border: none !important;
@@ -6176,7 +6176,7 @@ body {
   filter: drop-shadow(0 6px 18px rgba(var(--primary-rgb), 0.35));
 }
 
-/* ── Responsive ──────────────────────────────────────────── */
+/* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 700px) {
   .logo-hero-inner {
     width: 180px;
@@ -6199,9 +6199,9 @@ body {
   }
 }
 
-/* ══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    LOGO STORY SECTION
-══════════════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .logo-story-section {
   margin: 2.5rem 0 3rem;
   display: flex;
@@ -6209,7 +6209,7 @@ body {
   gap: 2rem;
 }
 
-/* ── Quote Tagline ── */
+/* â”€â”€ Quote Tagline â”€â”€ */
 .logo-story-tagline {
   position: relative;
   display: flex;
@@ -6243,7 +6243,7 @@ body {
   margin-top: 0;
 }
 
-/* ── Story Grid (3 cards) ── */
+/* â”€â”€ Story Grid (3 cards) â”€â”€ */
 .logo-story-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -6371,7 +6371,7 @@ body {
   line-height: 1.3;
 }
 
-/* ── Strip ── */
+/* â”€â”€ Strip â”€â”€ */
 .logo-story-strip {
   display: flex;
   align-items: stretch;
@@ -6448,9 +6448,9 @@ body {
   background: linear-gradient(135deg, rgba(var(--primary-rgb),.12) 0%, rgba(var(--sage-rgb),.12) 50%, rgba(var(--accent-rgb),.12) 100%);
 }
 
-/* ══════════════════════════════════════════════════════════
-   RESEARCH BLOCK — Tujuan & Metode
-══════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   RESEARCH BLOCK â€” Tujuan & Metode
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .research-block {
   background: rgba(var(--bg-rgb), 0.55);
   border: 1.5px solid rgba(var(--ink-rgb), .08);
@@ -6636,7 +6636,7 @@ body {
 }
 
 /* ============================================================
-   WHAT IS ITSAFE? SECTION — wii-*
+   WHAT IS ITSAFE? SECTION â€” wii-*
 ============================================================ */
 
 /* Header */
@@ -7030,7 +7030,7 @@ body {
   position: relative;
 }
 .method-step-bullets li::before {
-  content: '›';
+  content: 'â€º';
   position: absolute;
   left: 0;
   color: var(--primary);
@@ -7039,7 +7039,7 @@ body {
 [data-theme="dark"] .method-step-bullets li { color: rgba(255,255,255,.65); }
 
 /* ============================================================
-   HERO CINEMA 2 — Full Cinematic Redesign
+   HERO CINEMA 2 â€” Full Cinematic Redesign
    ============================================================ */
 
 .hero-cinema2 {
@@ -7055,7 +7055,7 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-/* ── LEFT COLUMN ── */
+/* â”€â”€ LEFT COLUMN â”€â”€ */
 .hc2-left {
   position: relative;
   z-index: 3;
@@ -7154,7 +7154,7 @@ body {
   flex-shrink: 0;
 }
 
-/* ── RIGHT COLUMN — maskot stage ── */
+/* â”€â”€ RIGHT COLUMN â€” maskot stage â”€â”€ */
 .hc2-right {
   position: relative;
   flex: 1;
@@ -7222,7 +7222,7 @@ body {
   pointer-events: none;
 }
 
-/* THE MASKOT — big, dramatic, cinematic */
+/* THE MASKOT â€” big, dramatic, cinematic */
 .hc2-maskot {
   position: relative;
   z-index: 4;
@@ -7315,7 +7315,7 @@ body {
   50%     { transform: translateY(-12px); }
 }
 
-/* ── DARK MODE ── */
+/* â”€â”€ DARK MODE â”€â”€ */
 [data-theme="dark"] .hc2-right {
   background: none;
 }
@@ -7329,7 +7329,7 @@ body {
   border-color: rgba(var(--primary-rgb),.45);
 }
 
-/* ── RESPONSIVE ── */
+/* â”€â”€ RESPONSIVE â”€â”€ */
 @media (max-width: 960px) {
   .hero-cinema2 {
     flex-direction: column !important;
@@ -7980,7 +7980,7 @@ body {
 }
 
 /* ============================================================
-   MOBILE STABLE PATCH v3 — itsafe.geowebgis.id
+   MOBILE STABLE PATCH v3 â€” itsafe.geowebgis.id
    TARGET: Fix navbar logo terpotong, hero overflow, 
            form 2-col, peta tab kepotong
    ============================================================ */
@@ -8007,7 +8007,7 @@ body {
     gap: .5rem !important;
   }
 
-  /* Brand tidak boleh melebihi ruang — sisakan tempat untuk hamburger + toggle */
+  /* Brand tidak boleh melebihi ruang â€” sisakan tempat untuk hamburger + toggle */
   .nav-brand {
     flex: 1 1 0 !important;
     min-width: 0 !important;
@@ -8133,7 +8133,7 @@ body {
     justify-content: center !important;
   }
 
-  /* Orbit semua disembunyikan — penyebab overflow utama */
+  /* Orbit semua disembunyikan â€” penyebab overflow utama */
   .hc2-orbit {
     display: block !important;
     transform: scale(0.65); /* Scale down for mobile */
@@ -8215,7 +8215,7 @@ body {
 }
 
 /* =========================================================
-   PETA TAB: 3-kartu grid → horizontal scroll
+   PETA TAB: 3-kartu grid â†’ horizontal scroll
    ========================================================= */
 @media (max-width: 820px) {
   /* Container: scroll horizontal, tidak melebihi lebar layar */
@@ -8262,7 +8262,7 @@ body {
 }
 
 /* =========================================================
-   FORM PENGADUAN: 2-kolom → 1-kolom di mobile
+   FORM PENGADUAN: 2-kolom â†’ 1-kolom di mobile
    ========================================================= */
 @media (max-width: 820px) {
   .form-two-col {
@@ -8366,10 +8366,10 @@ body {
 
 
 /* ============================================================
-   MASTER REFINEMENT v1.1.0 — 3D Orbit, Buttons, QR, Mobile
+   MASTER REFINEMENT v1.1.0 â€” 3D Orbit, Buttons, QR, Mobile
    ============================================================ */
 
-/* ── hc2-right: 3D perspective container ── */
+/* â”€â”€ hc2-right: 3D perspective container â”€â”€ */
 .hc2-right {
   perspective: 900px !important;
   min-height: 500px !important;
@@ -8379,7 +8379,7 @@ body {
   overflow: visible !important;
 }
 
-/* ── Orbit stage: preserve-3d so chips cross in front/behind maskot ── */
+/* â”€â”€ Orbit stage: preserve-3d so chips cross in front/behind maskot â”€â”€ */
 .hc2-orbit-stage {
   position: relative;
   width: 340px;
@@ -8390,7 +8390,7 @@ body {
   transform-style: preserve-3d !important;
 }
 
-/* ── Orbit anchor at center of stage ── */
+/* â”€â”€ Orbit anchor at center of stage â”€â”€ */
 .hc2-orbit {
   position: absolute !important;
   top: 50% !important;
@@ -8401,7 +8401,7 @@ body {
   transform-style: preserve-3d !important;
 }
 
-/* ── Chip: animated around its orbit's tilt plane ── */
+/* â”€â”€ Chip: animated around its orbit's tilt plane â”€â”€ */
 .hc2-orbit .hc2-chip {
   position: absolute !important;
   top: 0 !important;
@@ -8416,7 +8416,7 @@ body {
   animation: none !important; /* overridden per-orbit below */
 }
 
-/* ── Per-orbit unique keyframes with fixed tilt baked in ── */
+/* â”€â”€ Per-orbit unique keyframes with fixed tilt baked in â”€â”€ */
 .hc2-orbit-1 .hc2-chip {
   animation: orbit3d_1 9s linear infinite 0s !important;
 }
@@ -8427,7 +8427,7 @@ body {
   animation: orbit3d_3 11s linear infinite -3s !important;
 }
 
-/* Orbit 1 — tilt: rotateX(62deg) rotateZ(-20deg), r=155px */
+/* Orbit 1 â€” tilt: rotateX(62deg) rotateZ(-20deg), r=155px */
 @keyframes orbit3d_1 {
   0%   { transform: translate(-50%,-50%) rotateX(62deg) rotateZ(calc(-20deg + 0deg))   translateX(155px) rotateX(-62deg) rotateZ(0deg); }
   25%  { transform: translate(-50%,-50%) rotateX(62deg) rotateZ(calc(-20deg + 90deg))  translateX(155px) rotateX(-62deg) rotateZ(-90deg); }
@@ -8436,7 +8436,7 @@ body {
   100% { transform: translate(-50%,-50%) rotateX(62deg) rotateZ(calc(-20deg + 360deg)) translateX(155px) rotateX(-62deg) rotateZ(-360deg); }
 }
 
-/* Orbit 2 — tilt: rotateX(55deg) rotateZ(40deg), r=130px */
+/* Orbit 2 â€” tilt: rotateX(55deg) rotateZ(40deg), r=130px */
 @keyframes orbit3d_2 {
   0%   { transform: translate(-50%,-50%) rotateX(55deg) rotateZ(calc(40deg + 0deg))   translateX(130px) rotateX(-55deg) rotateZ(0deg); }
   25%  { transform: translate(-50%,-50%) rotateX(55deg) rotateZ(calc(40deg + 90deg))  translateX(130px) rotateX(-55deg) rotateZ(-90deg); }
@@ -8445,7 +8445,7 @@ body {
   100% { transform: translate(-50%,-50%) rotateX(55deg) rotateZ(calc(40deg + 360deg)) translateX(130px) rotateX(-55deg) rotateZ(-360deg); }
 }
 
-/* Orbit 3 — tilt: rotateX(70deg) rotateZ(15deg), r=160px */
+/* Orbit 3 â€” tilt: rotateX(70deg) rotateZ(15deg), r=160px */
 @keyframes orbit3d_3 {
   0%   { transform: translate(-50%,-50%) rotateX(70deg) rotateZ(calc(15deg + 0deg))   translateX(160px) rotateX(-70deg) rotateZ(0deg); }
   25%  { transform: translate(-50%,-50%) rotateX(70deg) rotateZ(calc(15deg + 90deg))  translateX(160px) rotateX(-70deg) rotateZ(-90deg); }
@@ -8454,7 +8454,7 @@ body {
   100% { transform: translate(-50%,-50%) rotateX(70deg) rotateZ(calc(15deg + 360deg)) translateX(160px) rotateX(-70deg) rotateZ(-360deg); }
 }
 
-/* ── Maskot: float gently, sits in the center of the preserve-3d stage ── */
+/* â”€â”€ Maskot: float gently, sits in the center of the preserve-3d stage â”€â”€ */
 .hc2-maskot {
   position: relative !important;
   z-index: 5 !important;
@@ -8470,7 +8470,7 @@ body {
   70%     { transform: translateY(-6px) scale(1.005); }
 }
 
-/* ── QR container ── */
+/* â”€â”€ QR container â”€â”€ */
 #qrCodeContainer {
   display: flex;
   align-items: center;
@@ -8488,7 +8488,7 @@ body {
   border-radius: 8px !important;
 }
 
-/* ── Buttons always clickable ── */
+/* â”€â”€ Buttons always clickable â”€â”€ */
 .level-card, .pill-btn {
   pointer-events: auto !important;
   cursor: pointer !important;
@@ -8501,15 +8501,23 @@ body {
   z-index: 50 !important;
 }
 
-/* ── Mobile: chips row ABOVE the headline, no desktop orbit ── */
+/* â”€â”€ Mobile: chips row ABOVE the headline, no desktop orbit â”€â”€ */
 .hc2-mobile-chips {
   display: none;
 }
 
 @media (max-width: 820px) {
   /* Hide orbit stage on mobile */
+  /* Show Mascot Stage on mobile */
   .hc2-right {
-    display: none !important;
+    display: flex !important;
+    order: 2 !important;
+    width: 100% !important;
+    min-height: 220px !important;
+    perspective: 800px !important;
+    margin-top: 1rem !important;
+    justify-content: center !important;
+    overflow: visible !important;
   }
 
   /* Show compact chip bar */
@@ -8566,7 +8574,7 @@ body {
   .page.active { display: block !important; }
 }
 
-/* ── Dark mode chip-face in orbit ── */
+/* â”€â”€ Dark mode chip-face in orbit â”€â”€ */
 [data-theme="dark"] .hc2-chip-face {
   background: rgba(22, 16, 14, .92) !important;
   border-color: rgba(var(--primary-rgb), .5) !important;
@@ -8581,7 +8589,7 @@ body {
 
 
 
-/* ── Form subjektif: ensure level-cards and pill-btns always receive clicks ── */
+/* â”€â”€ Form subjektif: ensure level-cards and pill-btns always receive clicks â”€â”€ */
 .form-col-panel {
   isolation: isolate;
 }
@@ -8621,4 +8629,221 @@ body {
   -webkit-user-select: none;
   position: relative !important;
   z-index: 20 !important;
+}
+
+/* ===== FIX BATCH v1.1.2 ===== */
+
+/* 1. PILL BTN - remove hover transform that causes click miss */
+.pill-btn:hover {
+  transform: none !important; 
+  border-color: rgba(var(--primary-rgb), .3) !important;
+  color: var(--primary-dk) !important;
+  background: rgba(var(--primary-rgb), .04) !important;
+}
+.pill-btn {
+  touch-action: manipulation !important;
+}
+.pill-btn.active {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
+  transform: none !important;
+}
+
+/* 2. QR CODE - fixed square, no overflow */
+.qr-frame {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important;
+}
+#qrCodeContainer {
+  width: 220px !important;
+  height: 220px !important;
+  min-width: 220px !important;
+  min-height: 220px !important;
+  max-width: 220px !important;
+  max-height: 220px !important;
+  background: #fff !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+#qrCodeContainer canvas {
+  width: 220px !important;
+  height: 220px !important;
+  display: block !important;
+}
+#qrCodeContainer img {
+  width: 220px !important;
+  height: 220px !important;
+  display: block !important;
+  object-fit: contain !important;
+}
+
+/* 3. MOBILE MASCOT - above heading */
+.hc2-mobile-mascot {
+  display: none;
+}
+@media (max-width: 820px) {
+  .hc2-mobile-mascot {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0.5rem auto 0.75rem !important;
+  }
+  .hc2-mobile-mascot-img {
+    width: clamp(120px, 35vw, 180px) !important;
+    height: auto !important;
+    filter: drop-shadow(0 8px 20px rgba(var(--primary-rgb), 0.3)) !important;
+    animation: hc2MaskotHover 5s ease-in-out infinite !important;
+  }
+  /* hide the desktop mascot on mobile */
+  .hc2-right {
+    display: none !important;
+  }
+  .hc2-mobile-chips {
+    display: flex !important;
+  }
+}
+@media (min-width: 821px) {
+  .hc2-mobile-mascot {
+    display: none !important;
+  }
+  .hc2-mobile-chips {
+    display: none !important;
+  }
+  .hc2-right {
+    display: flex !important;
+  }
+}
+
+/* ================================================================
+   DEFINITIVE FIX v1.1.3 - Form panel hover/click fix
+   ================================================================ */
+
+/* Remove ALL transforms from form panels to prevent click miss */
+.form-col-panel,
+.form-col-panel:hover,
+.form-col-panel:focus-within {
+  transform: none !important;
+}
+
+/* Remove isolation that can break event propagation */
+.form-col-panel {
+  isolation: auto !important;
+  overflow: visible !important;
+}
+
+/* Level-rating-group: no z-index stacking issues */
+.level-rating-group {
+  position: static !important;
+  z-index: auto !important;
+  isolation: auto !important;
+}
+
+.form-subgrid,
+.col-subjektif .form-subgrid {
+  position: static !important;
+  z-index: auto !important;
+}
+
+/* Ensure all interactive elements are ALWAYS on top and clickable */
+.level-card,
+.pill-btn {
+  position: relative !important;
+  z-index: 999 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: rgba(var(--primary-rgb), 0.15) !important;
+  touch-action: manipulation !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+/* NO hover transform on pill-btn - most likely culprit on mobile */
+.pill-btn:hover {
+  transform: none !important;
+}
+
+.pill-btn.active {
+  transform: none !important;
+}
+
+/* Dark mode hover - no transform */
+[data-theme="dark"] .form-col-panel:hover {
+  transform: none !important;
+}
+
+[data-theme="dark"] .form-col-panel.col-subjektif:hover {
+  transform: none !important;
+}
+
+/* ================================================================
+   FINAL DEFINITIVE FIX v1.1.4 - Level cards and pill-btns NEVER block
+   ================================================================ */
+
+/* Level cards: NO transform ever (prevents stacking context issues) */
+.level-card,
+.level-card:hover,
+.level-card.active {
+  transform: none !important;
+  position: static !important;
+  z-index: auto !important;
+}
+
+/* .level-card.active - highlight via border/shadow only, no movement */
+.level-card.active {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px var(--primary), 0 4px 16px rgba(var(--primary-rgb), 0.2) !important;
+  background: rgba(var(--primary-rgb), 0.06) !important;
+}
+
+.level-card:hover {
+  border-color: rgba(var(--primary-rgb), 0.35) !important;
+  background: rgba(var(--primary-rgb), 0.03) !important;
+}
+
+/* Pill buttons: no transform, no z-index, just pointer-events */
+.pill-btn,
+.pill-btn:hover,
+.pill-btn.active {
+  transform: none !important;
+  position: static !important;
+  z-index: auto !important;
+}
+
+/* All form interaction elements: guaranteed clickable, no stacking games */
+.level-rating-group,
+.pill-group,
+.form-group,
+.form-subgrid {
+  position: static !important;
+  z-index: auto !important;
+  isolation: auto !important;
+  transform: none !important;
+}
+
+/* Form panels: static positioning, no transform, no isolation */
+.form-col-panel,
+.form-col-panel:hover,
+.form-col-panel:focus-within,
+[data-theme="dark"] .form-col-panel:hover,
+[data-theme="dark"] .form-col-panel.col-subjektif:hover {
+  transform: none !important;
+  isolation: auto !important;
+  position: relative !important;
+}
+
+/* BUTTONS: the only thing that needs pointer-events guaranteed */
+.level-card,
+.pill-btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.05) !important;
 }
