@@ -8,7 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>ITSafe x Satgas PPK ITS</title>
-  <link rel="stylesheet" href="style.css?v=20260423-06" />
+  <link rel="stylesheet" href="style.css?v=20260423-09" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Nunito:wght@300;400;500;600;700&display=swap"
@@ -24,7 +24,7 @@
   <nav class="navbar" id="navbar">
     <div class="nav-brand">
       <div class="brand-icon">
-        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=20260423-06" alt="Logo ITSafe" class="logo-img"
+        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=20260423-09" alt="Logo ITSafe" class="logo-img"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
         <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
       </div>
@@ -1082,7 +1082,7 @@
             <div class="wii-intro-visual">
               <div class="wii-visual-card">
                 <div class="wii-visual-icon-ring">
-                  <img id="wiiThemeLogo" src="assets/logo/logo gelap.png?v=20260423-06" alt="Logo ITSafe" class="wii-theme-logo" />
+                  <img id="wiiThemeLogo" src="assets/logo/logo gelap.png?v=20260423-09" alt="Logo ITSafe" class="wii-theme-logo" />
                 </div>
                 <div class="wii-visual-tagline">"Pencegahan dimulai dari memperbaiki kondisi tata ruang kampus"</div>
                 <div class="wii-visual-chips">
@@ -1316,7 +1316,7 @@
           <div class="logo-philosophy-hero reveal">
             <div class="logo-hero-inner">
               <div class="logo-hero-glow"></div>
-              <img id="philHeroImg" src="assets/logo/logo gelap.png?v=20260423-06" alt="Logo Utama ITSafe" class="logo-hero-img" />
+              <img id="philHeroImg" src="assets/logo/logo gelap.png?v=20260423-09" alt="Logo Utama ITSafe" class="logo-hero-img" />
             </div>
           </div>
 
@@ -1493,8 +1493,9 @@
           <!-- ── KELOMPOK 7 BLOCK ── -->
           <div class="contact-block">
             <div class="contact-block-header">
-              <div class="contact-block-avatar">
-                <i class="fas fa-users"></i>
+              <div class="contact-block-avatar contact-logo-avatar">
+                <img id="fieldcampThemeLogo" src="assets/logo/logo gelap.png?v=20260423-09" alt="Logo ITSafe Kelompok 7" class="contact-brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                <i class="fas fa-users" style="display:none;"></i>
               </div>
               <div>
                 <div class="contact-block-title">Kelompok 7 Field Camp</div>
@@ -1558,8 +1559,8 @@
           <!-- ── SATGAS PPK ITS BLOCK ── -->
           <div class="contact-block contact-block-satgas">
             <div class="contact-block-header">
-              <div class="contact-block-avatar satgas-avatar satgas-avatar-img">
-                <img src="assets/logo/SatgasPPK.png" alt="Logo Satgas PPK ITS" class="satgas-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+              <div class="contact-block-avatar contact-logo-avatar satgas-avatar satgas-avatar-img">
+                <img src="assets/logo/SatgasPPK.png?v=20260423-09" alt="Logo Satgas PPK ITS" class="satgas-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                 <i class="fas fa-shield-halved" style="display:none"></i>
               </div>
               <div>
@@ -1650,7 +1651,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
-  <script src="script.js?v=20260423-06"></script>
+  <script src="script.js?v=20260423-09"></script>
 
   <!-- ===== ITSafe UI ANIMATIONS ===== -->
   <script>
@@ -2021,7 +2022,8 @@
         const navbarLogo = document.getElementById('navbarLogo');
         const philHeroImg = document.getElementById('philHeroImg');
         const wiiThemeLogo = document.getElementById('wiiThemeLogo');
-        const assetVersion = '20260423-06';
+        const fieldcampThemeLogo = document.getElementById('fieldcampThemeLogo');
+        const assetVersion = '20260423-09';
         if (!btn || !icon) return;
 
         function updateLogos(isDark) {
@@ -2037,6 +2039,11 @@
           }
           if (wiiThemeLogo) {
             wiiThemeLogo.src = isDark
+              ? `assets/logo/logo terang.png?v=${assetVersion}`
+              : `assets/logo/logo gelap.png?v=${assetVersion}`;
+          }
+          if (fieldcampThemeLogo) {
+            fieldcampThemeLogo.src = isDark
               ? `assets/logo/logo terang.png?v=${assetVersion}`
               : `assets/logo/logo gelap.png?v=${assetVersion}`;
           }

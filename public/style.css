@@ -3875,6 +3875,23 @@ main {
   color: #D56A6A;
 }
 
+.contact-logo-avatar {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 64px;
+  height: 64px;
+}
+
+.contact-brand-logo,
+.satgas-logo-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
 .contact-block-title {
   font-size: 1rem;
   font-weight: 700;
@@ -6973,14 +6990,9 @@ body {
 /* ===== SATGAS PPK LOGO IMAGE ===== */
 .satgas-avatar-img {
   background: transparent !important;
+  border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
-}
-.satgas-logo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 50%;
 }
 
 /* ===== METHOD STEP BULLETS ===== */
