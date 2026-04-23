@@ -7266,6 +7266,7 @@ body {
     gap: .7rem;
     min-width: 0;
     flex: 1 1 auto;
+    max-width: calc(100% - 96px);
   }
 
   .brand-icon {
@@ -7280,6 +7281,15 @@ body {
   .hamburger {
     display: flex;
     flex-shrink: 0;
+    margin: 0;
+    padding: 8px;
+  }
+
+  .theme-toggle {
+    width: 38px;
+    height: 38px;
+    margin-left: 0;
+    font-size: .96rem;
   }
 
   .nav-links {
@@ -7321,23 +7331,23 @@ body {
   }
 
   .hero-cinema2 {
-    padding: .75rem 1rem 2rem;
-    gap: .5rem;
+    padding: .85rem 1rem 2rem;
+    gap: .85rem;
   }
 
   .hc2-right {
-    order: 1;
+    order: 2;
     width: 100%;
-    min-height: 280px;
-    margin-top: .5rem;
-    margin-bottom: .75rem;
+    min-height: 220px;
+    margin-top: .25rem;
+    margin-bottom: 0;
   }
 
   .hc2-left {
-    order: 2;
+    order: 1;
     width: 100%;
     max-width: 100%;
-    padding: 0 0 .5rem;
+    padding: 0;
     gap: 0;
   }
 
@@ -7432,27 +7442,28 @@ body {
   }
 
   .hc2-maskot {
-    width: clamp(220px, 56vw, 300px);
+    width: clamp(170px, 42vw, 230px);
   }
 
   .hc2-orbit-1 {
-    --orbit-size-x: min(88vw, 360px);
-    --orbit-size-y: min(46vw, 180px);
+    --orbit-size-x: min(64vw, 250px);
+    --orbit-size-y: min(32vw, 120px);
   }
 
   .hc2-orbit-2 {
-    --orbit-size-x: min(64vw, 280px);
-    --orbit-size-y: min(60vw, 230px);
+    --orbit-size-x: min(48vw, 170px);
+    --orbit-size-y: min(40vw, 150px);
   }
 
   .hc2-orbit-3 {
-    --orbit-size-x: min(78vw, 320px);
-    --orbit-size-y: min(42vw, 170px);
+    --orbit-size-x: min(58vw, 220px);
+    --orbit-size-y: min(28vw, 105px);
   }
 
   .hc2-chip-face {
-    font-size: .68rem;
-    padding: .42rem .78rem;
+    font-size: .59rem;
+    padding: .34rem .56rem;
+    gap: .28rem;
   }
 }
 
@@ -7482,8 +7493,8 @@ body {
   }
 
   .hc2-right {
-    min-height: 240px;
-    margin-bottom: .5rem;
+    min-height: 170px;
+    margin-top: 0;
   }
 
   .hc2-left {
@@ -7491,7 +7502,7 @@ body {
   }
 
   .hc2-maskot {
-    width: 190px;
+    width: 148px;
   }
 
   .hc2-line-a {
@@ -7551,19 +7562,27 @@ body {
   }
 
   .hc2-orbit-1 {
-    --orbit-size-x: 250px;
-    --orbit-size-y: 145px;
+    --orbit-size-x: 190px;
+    --orbit-size-y: 92px;
+  }
+
+  .hc2-orbit-2 {
+    display: none;
   }
 
   .hc2-orbit-3 {
-    --orbit-size-x: 220px;
-    --orbit-size-y: 130px;
-    --orbit-rotation: 8deg;
+    --orbit-size-x: 170px;
+    --orbit-size-y: 84px;
+    --orbit-rotation: 6deg;
   }
 
   .hc2-chip-face {
-    font-size: .61rem;
-    padding: .38rem .65rem;
-    gap: .35rem;
+    font-size: .52rem;
+    padding: .28rem .46rem;
+    gap: .22rem;
+  }
+
+  .hc2-chip-face i {
+    font-size: .55rem;
   }
 }
