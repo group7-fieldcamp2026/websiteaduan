@@ -291,8 +291,17 @@ function initNav() {
 function navigateTo(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  document.getElementById(page)?.classList.add('active');
-  document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+  
+  const target = document.getElementById(page);
+  if (target) {
+    target.classList.add('active');
+  }
+  
+  const navLink = document.querySelector(`[data-page="${page}"]`);
+  if (navLink) {
+    navLink.classList.add('active');
+  }
+  
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (page === 'peta') {
@@ -300,8 +309,10 @@ function navigateTo(page) {
     setTimeout(() => { 
       initLeafletMap(); 
       renderLeafletMap(); 
-      if (leafletMap) leafletMap.invalidateSize();
-    }, 150);
+      if (leafletMap) {
+        leafletMap.invalidateSize();
+      }
+    }, 200);
   }
 }
 
@@ -682,7 +693,7 @@ async function loadBoundaryLayer(map, target) {
     if (target === 'picker' && boundaryLayerPicker) return;
     let buf = null;
     try {
-      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.0.8';
+      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.0.9';
       const res = await fetch(`assets/its_boundary.zip?v=${assetVersion}`);
       if (res.ok) buf = await res.arrayBuffer();
     } catch (e) {
