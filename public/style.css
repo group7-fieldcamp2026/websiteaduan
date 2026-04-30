@@ -4258,6 +4258,44 @@ main {
   border-color: rgba(var(--primary-rgb), .4);
 }
 
+/* ===== FLOATING CTA ===== */
+.report-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  right: calc(1rem + env(safe-area-inset-right));
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  z-index: 9990;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .5rem .75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--primary-rgb), .35);
+  background: linear-gradient(135deg, rgba(var(--primary-rgb), .95), rgba(var(--accent-rgb), .85));
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: .8rem;
+  letter-spacing: .01em;
+  box-shadow: 0 12px 26px rgba(var(--ink-rgb), .18);
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.report-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(var(--ink-rgb), .22);
+}
+.report-fab:active { transform: translateY(-1px) scale(.99); }
+.report-fab:focus-visible {
+  outline: 3px solid rgba(var(--primary-rgb), .35);
+  outline-offset: 3px;
+}
+.report-fab i { font-size: .85rem; }
+@media (max-width: 480px) {
+  .report-fab { padding: .48rem .7rem; font-size: .78rem; }
+}
+
 /* ===== SUBMIT SUCCESS MODAL ===== */
 .its-modal {
   position: fixed;
@@ -8999,7 +9037,10 @@ body {
   width: 95vw;
   padding: 2.5rem 2rem 2rem;
   position: relative;
-  overflow: hidden;
+  max-height: 90vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Confetti burst */
@@ -9067,6 +9108,9 @@ body {
 
 /* Code block v2 */
 .its-modal-code-v2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   background: linear-gradient(135deg, rgba(var(--primary-rgb),.07), rgba(var(--sage-rgb),.06));
   border: 1.5px dashed rgba(var(--primary-rgb),.35);
   border-radius: 12px;
@@ -9102,7 +9146,7 @@ body {
 }
 .code-copy-btn:hover { background: rgba(var(--primary-rgb),.22); transform: scale(1.05); }
 .code-hint {
-  font-size: .78rem;
+  font-size: .72rem;
   color: var(--text-muted);
   margin-top: .5rem;
 }
@@ -9137,24 +9181,56 @@ body {
 }
 .email-status-flow {
   display: flex;
-  align-items: center;
-  gap: .4rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: .55rem;
   margin-bottom: .65rem;
+  position: relative;
+  padding-left: 1.35rem;
+}
+.email-status-flow::before {
+  content: '';
+  position: absolute;
+  left: .55rem;
+  top: .55rem;
+  bottom: .55rem;
+  width: 2px;
+  background: rgba(var(--ink-rgb),.14);
+  border-radius: 999px;
 }
 .email-status-step {
-  display: flex; align-items: center; gap: .35rem;
-  font-size: .75rem; font-weight: 600;
-  padding: .3rem .65rem;
-  border-radius: 999px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  font-size: .82rem;
+  font-weight: 650;
+  padding: .55rem .8rem;
+  border-radius: 12px;
   background: rgba(var(--ink-rgb),.05);
-  color: var(--text-muted);
+  color: var(--text);
   border: 1px solid rgba(var(--ink-rgb),.1);
 }
+.email-step-marker {
+  position: absolute;
+  left: -1.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: 1px solid rgba(var(--ink-rgb),.18);
+  color: var(--text-muted);
+}
+.email-step-marker i { font-size: .65rem; }
 .step-pending { background: rgba(246,189,96,.12); color: #A87A10; border-color: rgba(246,189,96,.3); }
 .step-review  { background: rgba(132,165,157,.12); color: #4A8078; border-color: rgba(132,165,157,.3); }
 .step-valid   { background: rgba(16,185,129,.1);  color: #059669; border-color: rgba(16,185,129,.25); }
-.email-flow-arrow { font-size: .7rem; color: var(--text-muted); opacity: .6; }
+.step-pending .email-step-marker { background: rgba(246,189,96,.2); border-color: rgba(246,189,96,.5); color: #A87A10; }
+.step-review  .email-step-marker { background: rgba(132,165,157,.18); border-color: rgba(132,165,157,.45); color: #4A8078; }
+.step-valid   .email-step-marker { background: rgba(16,185,129,.14); border-color: rgba(16,185,129,.35); color: #059669; }
 .email-reminder {
   font-size: .78rem;
   color: var(--text-muted);
@@ -9192,6 +9268,10 @@ body {
   max-width: 540px;
   width: 95vw;
   padding: 2rem;
+  max-height: 90vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .history-modal-header {
   text-align: center;

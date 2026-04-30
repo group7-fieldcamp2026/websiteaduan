@@ -515,7 +515,7 @@ function initPickerMap() {
   pickerMap = L.map('pickerMap', { 
     zoomControl: true,
     scrollWheelZoom: false,
-    tap: true,           // Always enable Leaflet tap — prevents raw touch bubbling to page
+    tap: true,           // Always enable Leaflet tap to prevent raw touch bubbling to page
     tapTolerance: 15     // Slightly generous for finger accuracy
   }).setView(ITS, ZOOM);
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
@@ -1821,7 +1821,7 @@ function openSubmitSuccessModal(opts = {}) {
 
   if (codeWrap) {
     if (reportCode) {
-      codeWrap.style.display = 'inline-flex';
+      codeWrap.style.display = '';
       if (codeEl) codeEl.textContent = reportCode;
     } else {
       codeWrap.style.display = 'none';
