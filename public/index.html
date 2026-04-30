@@ -239,6 +239,7 @@
 
           <div class="hero-actions">
             <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Buat Laporan</button>
+            <button class="btn btn-outline" onclick="openHistoryModal()"><i class="fas fa-clock-rotate-left"></i> History Laporan</button>
             <button class="btn btn-outline" onclick="navigateTo('peta')"><i class="fas fa-map"></i> Lihat Peta</button>
           </div>
 
@@ -1504,120 +1505,7 @@
         </div>
 
         <div class="about-section reveal">
-          <h2 class="about-section-title"><span class="section-number">02</span> Tujuan &amp; Metode Penelitian</h2>
-
-          <!-- Tujuan Penelitian -->
-          <div class="research-block reveal">
-            <div class="research-block-header">
-              <div class="research-block-icon"><i class="fas fa-bullseye"></i></div>
-              <div>
-                <div class="research-block-title">Tujuan Penelitian</div>
-                <div class="research-block-sub">Berdasarkan Proposal Kemah Kerja Field Camp 2026</div>
-              </div>
-            </div>
-            <div class="research-goals-grid">
-              <div class="research-goal-item">
-                <div class="goal-number">01</div>
-                <div class="goal-text">Menganalisis <strong>kondisi fisik lokasi</strong> yang berkontribusi terhadap tingginya tingkat kerawanan tindak asusila di lingkungan ITS berdasarkan aspek pencahayaan, kepadatan aktivitas, keberadaan CCTV, keberadaan petugas keamanan, dan kondisi vegetasi.</div>
-              </div>
-              <div class="research-goal-item">
-                <div class="goal-number">02</div>
-                <div class="goal-text">Membangun <strong>sistem WebGIS pelaporan anonim</strong> berbasis web dan PostgreSQL yang memudahkan warga kampus ITS melaporkan lokasi-lokasi berpotensi rawan melalui website maupun QR-Code di titik-titik strategis kampus.</div>
-              </div>
-              <div class="research-goal-item">
-                <div class="goal-number">03</div>
-                <div class="goal-text">Menghasilkan <strong>pemetaan berbasis WebGIS</strong> berupa Peta Sebaran Titik Lokasi Rawan, Peta Heatmap Kerawanan, dan Peta Zonasi Tingkat Risiko untuk mengidentifikasi dan memvisualisasikan zona rawan di lingkungan kampus ITS.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Metode Penelitian -->
-          <div class="research-block reveal" style="margin-top:1.5rem;">
-            <div class="research-block-header">
-              <div class="research-block-icon" style="background:linear-gradient(135deg,var(--accent-blue),#A7C4BC)"><i class="fas fa-diagram-project"></i></div>
-              <div>
-                <div class="research-block-title">Tahapan Metode Penelitian</div>
-                <div class="research-block-sub">5 tahap sistematis dari persiapan hingga penyajian data</div>
-              </div>
-            </div>
-            <div class="method-timeline">
-              <div class="method-step">
-                <div class="method-step-badge" style="background:linear-gradient(135deg,#F28482,#F5CAC3)">A</div>
-                <div class="method-step-body">
-                  <div class="method-step-title">Tahap Persiapan &amp; Survei Pendahuluan</div>
-                  <ul class="method-step-bullets">
-                    <li>Identifikasi masalah area rawan di kampus ITS</li>
-                    <li>Studi literatur regulasi (Permendikbudristek No. 55/2024 &amp; KUHP Pasal 281–283)</li>
-                    <li>Penentuan kebutuhan data primer &amp; sekunder</li>
-                    <li>Survei pendahuluan ke Satgas PPK ITS</li>
-                  </ul>
-                </div>
-              </div>
-              <div class="method-step">
-                <div class="method-step-badge" style="background:linear-gradient(135deg,#84A59D,#A7C4BC)">B</div>
-                <div class="method-step-body">
-                  <div class="method-step-title">Tahap Akuisisi Data</div>
-                  <ul class="method-step-bullets">
-                    <li>Kuesioner persepsi keamanan warga kampus</li>
-                    <li>Koordinat GPS titik lokasi via survei lapangan</li>
-                    <li>Data pelaporan form ITSafe (waktu, pencahayaan, CCTV, skor)</li>
-                    <li>Data sekunder: peta kampus, citra satelit, data civitas ITS</li>
-                  </ul>
-                </div>
-              </div>
-              <div class="method-step">
-                <div class="method-step-badge" style="background:linear-gradient(135deg,#F6BD60,#F5E0D5)">C</div>
-                <div class="method-step-body">
-                  <div class="method-step-title">Tahap Pengolahan Data</div>
-                  <ul class="method-step-bullets">
-                    <li>Pengembangan website ITSafe (HTML/CSS/JS + Laravel + PostgreSQL)</li>
-                    <li>Pengolahan koordinat lokasi menjadi data spasial titik</li>
-                    <li>Pembuatan Peta Persebaran Titik Lokasi Rawan</li>
-                    <li>Pembuatan Heatmap KDE &amp; Peta Kelayakan Fasilitas (5 parameter)</li>
-                  </ul>
-                </div>
-              </div>
-              <div class="method-step">
-                <div class="method-step-badge" style="background:linear-gradient(135deg,#D56A6A,#F28482)">D</div>
-                <div class="method-step-body">
-                  <div class="method-step-title">Tahap Analisis Data</div>
-                  <ul class="method-step-bullets">
-                    <li>Analisis pola sebaran lokasi rawan (distribusi spasial)</li>
-                    <li>Analisis tingkat kerawanan berdasarkan skor pelapor (hotspot)</li>
-                    <li>Analisis kelayakan fasilitas fisik area kampus</li>
-                    <li>Identifikasi zona prioritas intervensi kampus</li>
-                  </ul>
-                </div>
-              </div>
-              <div class="method-step">
-                <div class="method-step-badge" style="background:linear-gradient(135deg,#84A59D,#F6BD60)">E</div>
-                <div class="method-step-body">
-                  <div class="method-step-title">Tahap Penyajian Data</div>
-                  <ul class="method-step-bullets">
-                    <li>Sistem WebGIS ITSafe interaktif berbasis web</li>
-                    <li>Peta 1 – Sebaran Titik Lokasi Rawan</li>
-                    <li>Peta 2 – Heatmap Kerawanan dengan filter waktu</li>
-                    <li>Peta 3 – Kelayakan Fasilitas &amp; penyebaran QR-Code strategis</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Etika Penelitian -->
-          <div class="research-ethics-bar reveal" style="margin-top:1.5rem;">
-            <div class="ethics-header"><i class="fas fa-user-shield"></i> Etika Penelitian</div>
-            <div class="ethics-items">
-              <div class="ethics-item"><i class="fas fa-eye-slash"></i><span>Semua data pelapor bersifat <strong>anonim &amp; rahasia</strong> sepenuhnya</span></div>
-              <div class="ethics-item"><i class="fas fa-graduation-cap"></i><span>Data hanya digunakan untuk <strong>kepentingan penelitian akademik</strong></span></div>
-              <div class="ethics-item"><i class="fas fa-id-card-clip"></i><span><strong>Tidak ada identitas</strong> personal yang dipublikasikan</span></div>
-              <div class="ethics-item"><i class="fas fa-shield-halved"></i><span>Data laporan <strong>tidak akan disalahgunakan</strong> di luar kepentingan penelitian</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="about-section reveal">
-          <h2 class="about-section-title"><span class="section-number">03</span> Filosofi Logo</h2>
+          <h2 class="about-section-title"><span class="section-number">02</span> Filosofi Logo</h2>
           
           <!-- Main Logo Display -->
           <div class="logo-philosophy-hero reveal">
@@ -1788,7 +1676,7 @@
         </div>
 
         <div class="about-section reveal contact-support-section">
-          <h2 class="about-section-title"><span class="section-number">04</span> Kontak &amp; Dukungan</h2>
+          <h2 class="about-section-title"><span class="section-number">03</span> Kontak &amp; Dukungan</h2>
 
           <!-- Intro -->
           <p class="contact-intro-text">
@@ -1960,7 +1848,7 @@
           <span>Kode Laporan Kamu</span>
         </div>
         <div class="code-value-row">
-          <span id="submitSuccessCode" class="code-value-big">—</span>
+          <span id="submitSuccessCode" class="code-value-big">Memuat...</span>
           <button type="button" class="code-copy-btn" onclick="copyReportCode()" title="Salin kode">
             <i class="fas fa-copy"></i>
           </button>
@@ -2023,33 +1911,71 @@
       <div class="history-modal-header">
         <div class="history-modal-icon"><i class="fas fa-clock-rotate-left"></i></div>
         <h3 id="historyModalTitle">History Laporan Saya</h3>
-        <p>Cek kode laporan kamu dan status validasinya di bawah ini.</p>
+        <p>Cari riwayat laporan menggunakan email atau kode laporan yang kamu miliki.</p>
       </div>
 
-      <!-- Input kode laporan -->
-      <div class="history-search-row">
-        <div class="history-input-wrap">
-          <i class="fas fa-barcode history-input-icon"></i>
-          <input type="text" id="historyCodeInput" placeholder="Masukkan kode laporan (cth: RPT-2026-XXXXX)" class="history-input" />
-        </div>
-        <button type="button" class="btn btn-primary" onclick="checkReportStatus()">
-          <i class="fas fa-magnifying-glass"></i> Cek Status
+      <!-- Tab Pilihan Pencarian -->
+      <div class="history-tab-row">
+        <button type="button" class="history-tab-btn active" id="historyTabEmail" onclick="switchHistoryTab('email')">
+          <i class="fas fa-envelope"></i> Cari via Email
         </button>
+        <button type="button" class="history-tab-btn" id="historyTabCode" onclick="switchHistoryTab('code')">
+          <i class="fas fa-barcode"></i> Cari via Kode
+        </button>
+      </div>
+
+      <!-- Panel Email -->
+      <div id="historyPanelEmail" class="history-panel">
+        <p class="history-panel-desc">Masukkan email yang kamu pakai saat melapor. Semua kode laporan yang terhubung ke email tersebut akan ditampilkan.</p>
+        <div class="history-search-row">
+          <div class="history-input-wrap">
+            <i class="fas fa-envelope history-input-icon"></i>
+            <input type="email" id="historyEmailInput" placeholder="Masukkan email pelapor kamu" class="history-input" />
+          </div>
+          <button type="button" class="btn btn-primary" onclick="checkReportsByEmail()">
+            <i class="fas fa-magnifying-glass"></i> Cari
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel Kode -->
+      <div id="historyPanelCode" class="history-panel" style="display:none;">
+        <p class="history-panel-desc">Masukkan kode laporan yang tersimpan di email konfirmasi kamu untuk melihat status validasinya.</p>
+        <div class="history-search-row">
+          <div class="history-input-wrap">
+            <i class="fas fa-barcode history-input-icon"></i>
+            <input type="text" id="historyCodeInput" placeholder="Contoh: ITS-XXXXXXXX" class="history-input" />
+          </div>
+          <button type="button" class="btn btn-primary" onclick="checkReportStatus()">
+            <i class="fas fa-magnifying-glass"></i> Cek Status
+          </button>
+        </div>
       </div>
 
       <!-- Result area -->
       <div id="historyResult" class="history-result" style="display:none;"></div>
 
+      <!-- Detail laporan (muncul saat klik kode dari list email) -->
+      <div id="historyDetailWrap" style="display:none;">
+        <button type="button" class="btn btn-outline btn-sm history-back-btn" onclick="closeHistoryDetail()">
+          <i class="fas fa-arrow-left"></i> Kembali ke Daftar
+        </button>
+        <div id="historyDetailResult" class="history-result"></div>
+      </div>
+
       <!-- Info box -->
       <div class="history-info-box">
         <i class="fas fa-circle-info"></i>
         <div>
-          <strong>Di mana saya bisa menemukan kode laporan?</strong>
-          <p>Kode laporan dikirim ke email yang kamu daftarkan saat mengisi form pengaduan. Kamu juga bisa menyimpannya dari popup konfirmasi setelah mengirim laporan.</p>
+          <strong>Tips menemukan laporan kamu</strong>
+          <p>Kode laporan dikirim ke email yang kamu daftarkan saat mengisi form. Kamu juga bisa langsung cari dengan email untuk melihat semua laporan yang pernah kamu buat.</p>
         </div>
       </div>
 
       <div class="its-modal-actions" style="margin-top:1.5rem;">
+        <button type="button" class="btn btn-ghost" onclick="closeHistoryModal()">
+          <i class="fas fa-arrow-left"></i> Kembali
+        </button>
         <button type="button" class="btn btn-outline" onclick="closeHistoryModal(); scrollToForm()">
           <i class="fas fa-pen-to-square"></i> Buat Laporan Baru
         </button>
