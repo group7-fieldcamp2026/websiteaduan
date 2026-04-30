@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/reports', [ReportController::class, 'store']);
 Route::get('/reports', [ReportController::class, 'index']);
+Route::get('/reports/by-email', [ReportController::class, 'byEmail']);
 Route::get('/reports/admin', [ReportController::class, 'adminIndex']);
 Route::get('/reports/stats', [ReportController::class, 'stats']);
 Route::get('/reports/status/{code}', [ReportController::class, 'checkStatus']);

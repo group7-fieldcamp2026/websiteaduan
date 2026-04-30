@@ -30,11 +30,10 @@ class ReportSubmittedNotification extends Mailable
      */
     public function build()
     {
-        return $this->subject('Konfirmasi Pengaduan Anda di ITSafe')
+        return $this->subject('Terimakasih Telah Melapor ke ITSafe')
                     ->view('emails.report-submitted')
                     ->with([
                         'reportCode' => $this->report->report_code,
-                        'reportDetails' => $this->report,
                     ]);
     }
 }

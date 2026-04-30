@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ReportSubmittedNotification;
+use App\Mail\ReportAdminNotification;
 use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,16 @@ use Illuminate\Support\Str;
 
 class ReportController extends Controller
 {
+    private function mapReportStatusForHistory(?string $status): string
+    {
+        return match ($status) {
+            'resolved', 'verified' => 'valid',
+            'in_review' => 'review',
+            'rejected' => 'rejected',
+            default => $status ?: 'pending',
+        };
+    }
+
     private function buildMailErrorHint(string $errorMessage): string
     {
         $msg = strtolower($errorMessage);
@@ -246,9 +257,9 @@ class ReportController extends Controller
             'vegetasi'             => 'nullable|string',
             'waktu_rawan'          => 'required|in:Pagi,Siang,Malam,Sepanjang Hari',
             'hari_rawan'           => 'nullable|string',
-            'skor_nyaman'          => 'required|integer|min:1|max:5',
+            'skor_nyaman'          => 'required|integer|min:1|max:3',
             'alasan_tidak_nyaman'  => 'nullable|string',
-            'skor_rawan'           => 'required|integer|min:1|max:5',
+            'skor_rawan'           => 'required|integer|min:1|max:3',
             'pernah_hindari'       => 'nullable|string',
             'orang_lain'           => 'nullable|string',
             'situasi_mencurigakan' => 'nullable|string',
@@ -276,7 +287,7 @@ class ReportController extends Controller
         // Kirim email notifikasi ke alamat admin (configurable via .env)
         try {
             $sentMessage = Mail::mailer('smtp')->to($mailTo)->send(
-                new ReportSubmittedNotification($report)
+                new ReportAdminNotification($report)
             );
             $mailSent = $sentMessage !== null;
         } catch (\Throwable $e) {
@@ -348,18 +359,55 @@ class ReportController extends Controller
         return response()->json($reports);
     }
 
+    // Ambil semua laporan berdasarkan email pelapor (untuk fitur History Laporan)
+    public function byEmail(Request $request)
+    {
+        $email = trim((string) $request->query('email', ''));
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email tidak valid.',
+            ], 400);
+        }
+
+        $reports = Report::query()
+            ->where('email_its', $email)
+            ->orderByDesc('created_at')
+            ->get(['report_code', 'status', 'lokasi_kejadian', 'created_at']);
+
+        return response()->json([
+            'success' => true,
+            'reports' => $reports->map(function (Report $report) {
+                return [
+                    'report_code' => $report->report_code,
+                    'status' => $this->mapReportStatusForHistory($report->status),
+                    'lokasi' => $report->lokasi_kejadian,
+                    'created_at' => $report->created_at,
+                ];
+            }),
+        ]);
+    }
+
     // Cek status laporan by kode
     public function checkStatus($code)
     {
         $report = Report::where('report_code', $code)
-            ->select('report_code', 'status', 'skor_rawan', 'waktu_rawan', 'created_at')
+            ->select('report_code', 'status', 'skor_rawan', 'waktu_rawan', 'lokasi_kejadian', 'created_at')
             ->first();
 
         if (!$report) {
             return response()->json(['success' => false, 'message' => 'Kode laporan tidak ditemukan.'], 404);
         }
 
-        return response()->json(['success' => true, 'data' => $report]);
+        return response()->json([
+            'success' => true,
+            // field top-level untuk frontend (history modal)
+            'status' => $this->mapReportStatusForHistory($report->status),
+            'lokasi' => $report->lokasi_kejadian,
+            'createdAt' => $report->created_at,
+            // field legacy
+            'data' => $report,
+        ]);
     }
 
     // Statistik untuk hero section
@@ -403,9 +451,9 @@ class ReportController extends Controller
             'vegetasi'             => 'nullable|string',
             'waktu_rawan'          => 'nullable|in:Pagi,Siang,Malam,Sepanjang Hari',
             'hari_rawan'           => 'nullable|string',
-            'skor_nyaman'          => 'nullable|integer|min:1|max:5',
+            'skor_nyaman'          => 'nullable|integer|min:1|max:3',
             'alasan_tidak_nyaman'  => 'nullable|string',
-            'skor_rawan'           => 'nullable|integer|min:1|max:5',
+            'skor_rawan'           => 'nullable|integer|min:1|max:3',
             'pernah_hindari'       => 'nullable|string',
             'orang_lain'           => 'nullable|string',
             'situasi_mencurigakan' => 'nullable|string',
