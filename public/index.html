@@ -8,143 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>ITSafe x Satgas PPK ITS</title>
-  <script>
-    (function () {
-      const rawVersion = '1.3.0';
-      const version = rawVersion === '1.3.0' ? String(Date.now()) : rawVersion;
-      window.ITSAFE_ASSET_VERSION = version;
-
-      const stylesheet = document.createElement('link');
-      stylesheet.rel = 'stylesheet';
-      stylesheet.href = `style.css?v=${version}`;
-      document.currentScript.after(stylesheet);
-    })();
-  </script>
-  <!-- CRITICAL INLINE FIX: force-override button CSS (bypasses cache) -->
-  <style id="itsafe-btn-fix">
-    .level-card, .level-card:hover, .level-card.active {
-      transform: none !important;
-      position: static !important;
-      z-index: auto !important;
-      pointer-events: auto !important;
-      cursor: pointer !important;
-      -webkit-tap-highlight-color: rgba(0,0,0,0.05);
-      touch-action: manipulation;
-    }
-    .level-card.active {
-      border-color: var(--primary, #D4879A) !important;
-      box-shadow: 0 0 0 2.5px var(--primary, #D4879A) !important;
-      background: rgba(212,135,154,0.08) !important;
-    }
-    .pill-btn, .pill-btn:hover, .pill-btn.active {
-      transform: none !important;
-      position: static !important;
-      z-index: auto !important;
-      pointer-events: auto !important;
-      cursor: pointer !important;
-      touch-action: manipulation;
-    }
-    .form-col-panel, .form-col-panel:hover {
-      transform: none !important;
-      isolation: auto !important;
-    }
-    .level-rating-group, .pill-group, .form-group, .form-subgrid {
-      position: static !important;
-      z-index: auto !important;
-      isolation: auto !important;
-    }
-
-    /* ── Brand subtitle always visible on all screens ── */
-    .brand-sub {
-      display: block !important;
-      font-size: .54rem !important;
-      letter-spacing: .05em !important;
-      white-space: nowrap !important;
-    }
-
-    /* ── Mobile Orbit Stage ── */
-    .hc2-mobile-mascot {
-      display: none; /* hidden on desktop */
-    }
-    @media (max-width: 820px) {
-      .hc2-mobile-mascot {
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        width: 100% !important;
-        height: 300px !important;
-        margin: 0 auto -1.5rem !important;
-        overflow: visible !important;
-        position: relative !important;
-      }
-      .hc2-mobile-mascot .hc2-orbit-stage {
-        position: relative !important;
-        width: 340px !important;
-        height: 340px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-      }
-      /* Orbit radii: dekat badan tapi cukup untuk chip besar */
-      .hc2-mobile-mascot .hc2-orbit-1 { --orbit-radius: 115px !important; }
-      .hc2-mobile-mascot .hc2-orbit-2 { --orbit-radius: 110px !important; }
-      .hc2-mobile-mascot .hc2-orbit-3 { --orbit-radius: 120px !important; }
-      /* Mascot besar */
-      .hc2-mobile-mascot .hc2-maskot {
-        width: 360px !important;
-        height: auto !important;
-        position: relative !important;
-        z-index: 5 !important;
-        filter: drop-shadow(0 8px 22px rgba(212,135,154,0.5)) !important;
-        animation: hc2MaskotHover 5s ease-in-out infinite !important;
-      }
-      /* Keep orbit chip animations working */
-      .hc2-mobile-mascot .hc2-orbit {
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        width: 1px !important;
-        height: 1px !important;
-      }
-      .hc2-mobile-mascot .hc2-chip {
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
-      }
-      /* Chip label: readable on mobile */
-      .hc2-mobile-mascot .hc2-chip-face {
-        font-size: .8rem !important;
-        font-weight: 700 !important;
-        padding: .45rem 1rem !important;
-        gap: .4rem !important;
-        border-radius: 999px !important;
-        white-space: nowrap !important;
-        box-shadow: 0 4px 14px rgba(212,135,154,0.25) !important;
-      }
-      .hc2-mobile-mascot .hc2-chip-face i {
-        font-size: .75rem !important;
-      }
-      /* Hide desktop orbit stage on mobile */
-      .hc2-right { display: none !important; }
-      /* Hide the old static chip row since orbit chips replace them */
-      .hc2-mobile-chips { display: none !important; }
-      /* Reduce gap pada hero-badge margin dan h1 margin */
-      .hero-badge { margin-bottom: 0 !important; }
-      .hc2-h1 { margin-top: 0.4rem !important; }
-    }
-    @media (min-width: 821px) {
-      .hc2-mobile-mascot { display: none !important; }
-      .hc2-right { display: flex !important; }
-      /* Bigger desktop maskot */
-      .hc2-maskot {
-        width: clamp(450px, 55vw, 650px) !important;
-      }
-      /* Scale up desktop orbit to match new mascot size */
-      .hc2-orbit-1 { --orbit-size-x: 650px !important; --orbit-size-y: 340px !important; }
-      .hc2-orbit-2 { --orbit-size-x: 600px !important; --orbit-size-y: 300px !important; }
-      .hc2-orbit-3 { --orbit-size-x: 700px !important; --orbit-size-y: 380px !important; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css?v=9.6" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Nunito:wght@300;400;500;600;700&display=swap"
@@ -160,7 +24,7 @@
   <nav class="navbar" id="navbar">
     <div class="nav-brand">
       <div class="brand-icon">
-        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=1.1.4" alt="Logo ITSafe" class="logo-img"
+        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=9.4" alt="Logo ITSafe" class="logo-img"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
         <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
       </div>
@@ -181,7 +45,7 @@
             class="fas fa-location-crosshairs"></i><span>Titik Pengaduan</span></a></li>
       <li><a href="#tentang" class="nav-link" data-page="tentang"><i
             class="fas fa-circle-info"></i><span>Tentang</span></a></li>
-      <li><a href="admin.html" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
+      <li><a href="/admin" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
     </ul>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Mode Gelap/Terang">
       <i class="fas fa-moon" id="themeIcon"></i>
@@ -192,43 +56,22 @@
 
     <!-- ===== PAGE: HOME ===== -->
     <section id="home" class="page active">
-      <div class="hero hero-cinema2">
-        <!-- bg particles & blobs -->
+      <div class="hero">
         <div class="hero-bg-shapes">
           <canvas id="particleCanvas"></canvas>
           <div class="shape shape-1"></div>
           <div class="shape shape-2"></div>
           <div class="shape shape-3"></div>
         </div>
-
-        <!-- KIRI: text -->
-        <div class="hc2-left">
+        <div class="hero-content">
           <div class="hero-badge"><i class="fas fa-lock"></i> Anonim &amp; Aman</div>
-
-          <!-- Mobile-only orbit mascot (shows above heading on mobile) -->
-          <div class="hc2-mobile-mascot">
-            <div class="hc2-orbit-stage">
-              <div class="hc2-orbit hc2-orbit-1">
-                <span class="hc2-chip"><span class="hc2-chip-face"><i class="fas fa-shield"></i> Aman</span></span>
-              </div>
-              <div class="hc2-orbit hc2-orbit-2">
-                <span class="hc2-chip"><span class="hc2-chip-face"><i class="fas fa-eye-slash"></i> Anonim</span></span>
-              </div>
-              <div class="hc2-orbit hc2-orbit-3">
-                <span class="hc2-chip"><span class="hc2-chip-face"><i class="fas fa-clock"></i> 24/7</span></span>
-              </div>
-              <img src="assets/logo/Maskot_Lapor.png?v=1.2.0" alt="Mascot ITSafe" class="hc2-maskot" />
-            </div>
+          <h1>Amati. Laporkan.<br><span class="gradient-text">Buat Kampus Lebih Aman!</span></h1>
+          <div class="hero-desc-wrapper">
+            <p class="hero-lead">Platform pelaporan dan pemetaan area berpotensi rawan tindak asusila di lingkungan ITS.
+            </p>
+            <p class="hero-sub">Laporanmu tentang kondisi area yang gelap, sepi, minim pengawasan dapat membantu kampus
+              mengambil tindakan nyata untuk menjaga keamanan semua warga ITS.</p>
           </div>
-
-          <h1 class="hc2-h1">
-            <span class="hc2-line-a">Amati. Laporkan.</span>
-            <span class="hc2-line-b gradient-text">Buat Kampus<br>Lebih Aman!</span>
-          </h1>
-
-          <p class="hc2-quote">"Keamananmu adalah tanggung jawab kita bersama."</p>
-          <p class="hc2-desc">Platform pelaporan &amp; pemetaan area rawan asusila di ITS yang anonim, cepat, dan berdampak nyata.</p>
-
           <div class="collab-badge">
             <div class="collab-icon"><i class="fas fa-handshake"></i></div>
             <div class="collab-text">
@@ -236,45 +79,32 @@
               <strong>Satgas PPK ITS</strong>
             </div>
           </div>
-
           <div class="hero-actions">
-            <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Buat Laporan</button>
-            <button class="btn btn-outline" onclick="openHistoryModal()"><i class="fas fa-clock-rotate-left"></i> History Laporan</button>
+            <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Buat
+              Laporan</button>
             <button class="btn btn-outline" onclick="navigateTo('peta')"><i class="fas fa-map"></i> Lihat Peta</button>
-          </div>
-
-          <div class="hc2-stats">
-            <div class="hc2-stat"><span class="hc2-stat-n" id="totalLaporan">0</span><span class="hc2-stat-l">Laporan</span></div>
-            <div class="hc2-stat-div"></div>
-            <div class="hc2-stat"><span class="hc2-stat-n" id="bulanIni">0</span><span class="hc2-stat-l">Bulan Ini</span></div>
-            <div class="hc2-stat-div"></div>
-            <div class="hc2-stat"><span class="hc2-stat-n" id="terverifikasi">0</span><span class="hc2-stat-l">Terverifikasi</span></div>
+            <a class="btn btn-admin-entry" href="/admin"><i class="fas fa-user-shield"></i> Masuk Admin</a>
           </div>
         </div>
-
-        <!-- KANAN: maskot stage -->
-        <div class="hc2-right">
-          <!-- aura rings -->
-          <div class="hc2-aura hc2-aura-1"></div>
-          <div class="hc2-aura hc2-aura-2"></div>
-          <div class="hc2-aura hc2-aura-3"></div>
-          
-          <!-- Orbit animations -->
-          <div class="hc2-orbit-stage">
-            <div class="hc2-orbit hc2-orbit-1">
-              <span class="hc2-chip hc2-chip-1"><span class="hc2-chip-face"><i class="fas fa-shield"></i> Aman</span></span>
-            </div>
-            <div class="hc2-orbit hc2-orbit-2">
-              <span class="hc2-chip hc2-chip-2"><span class="hc2-chip-face"><i class="fas fa-eye-slash"></i> Anonim</span></span>
-            </div>
-            <div class="hc2-orbit hc2-orbit-3">
-              <span class="hc2-chip hc2-chip-3"><span class="hc2-chip-face"><i class="fas fa-clock"></i> 24/7</span></span>
-            </div>
-            <div class="hc2-shadow"></div>
-            <img src="assets/logo/Maskot_Lapor.png?v=1.1.4" alt="Mascot ITSafe" class="hc2-maskot" />
+        <div class="hero-stats">
+          <div class="stat-card" style="--i:0">
+            <div class="stat-icon"><i class="fas fa-file-lines"></i></div>
+            <span class="stat-number" id="totalLaporan">0</span>
+            <span class="stat-label">Total Laporan</span>
+          </div>
+          <div class="stat-card" style="--i:1">
+            <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+            <span class="stat-number" id="bulanIni">0</span>
+            <span class="stat-label">Bulan Ini</span>
+          </div>
+          <div class="stat-card" style="--i:2">
+            <div class="stat-icon"><i class="fas fa-circle-check"></i></div>
+            <span class="stat-number" id="terverifikasi">0</span>
+            <span class="stat-label">Terverifikasi</span>
           </div>
         </div>
       </div>
+
       <!-- Chart Tren Banyak Laporan -->
       <div class="section-container reveal" id="chartSection" style="margin-top:2rem">
         <div class="section-header">
@@ -424,10 +254,10 @@
                   </div>
                   <!-- Leaflet mini picker -->
                   <div class="form-group full-width">
-                    <label>Pin Lokasi di Peta <span class="label-opt">wajib jika pilih Lainnya, lalu klik peta untuk
+                    <label>Pin Lokasi di Peta <span class="label-opt">wajib jika pilih Lainnya — klik peta untuk
                         pin</span></label>
-                    <div id="pickerMapContainer" class="picker-map-shell">
-                      <div id="pickerMap" class="picker-map-canvas"></div>
+                    <div id="pickerMapContainer">
+                      <div id="pickerMap"></div>
                     </div>
                   </div>
                   <div class="form-group full-width" style="margin-top: .5rem; margin-bottom: 0.5rem;">
@@ -457,6 +287,7 @@
                     <button type="button" class="btn btn-outline btn-sm" onclick="clearPin()">
                       <i class="fas fa-xmark"></i> Hapus Pin
                     </button>
+                    <span class="form-hint" id="locStatus"></span>
                   </div>
                   <div class="form-group full-width">
                     <label>Deskripsi Lokasi dan Alasan Pelaporan <span class="req">*</span></label>
@@ -566,7 +397,7 @@
 
                 <div class="form-subgrid">
 
-                  <!-- Skor Nyaman menggunakan bintang -->
+                  <!-- Skor Nyaman — bintang -->
                   <div class="form-group full-width">
                     <label>Kenyamanan Saat Sendiri <span class="req">*</span></label>
                     <div class="level-rating-group" data-target="skorNyaman" data-type="comfort">
@@ -591,7 +422,7 @@
                     </select>
                   </div>
 
-                  <!-- Skor Rawan menggunakan bintang merah -->
+                  <!-- Skor Rawan — bintang merah -->
                   <div class="form-group full-width">
                     <label>Tingkat Kerawanan Area <span class="req">*</span></label>
                     <div class="level-rating-group" data-target="skorRawan" data-type="danger">
@@ -677,9 +508,9 @@
 
 
                   <div class="form-group full-width">
-                    <label>Kritik dan Saran Tambahan pada Lokasi <span class="label-opt">(opsional)</span></label>
+                    <label>Keterangan Tambahan <span class="label-opt">opsional</span></label>
                     <textarea id="kronologi" rows="4"
-                      placeholder="Tulis kritik dan saran tambahan pada lokasi ini jika diperlukan"></textarea>
+                      placeholder="Ceritakan detail kejadian/kondisi atau informasi tambahan lainnya jika diperlukan"></textarea>
                   </div>
 
                   <div class="form-group full-width">
@@ -799,35 +630,15 @@
           <!-- Basemap -->
           <div class="map-panel-section">
             <div class="panel-title"><i class="fas fa-globe"></i> Basemap</div>
-            <div class="basemap-row" role="group" aria-label="Pilihan basemap">
-              <button class="bm-btn active" data-bm="osm" onclick="switchBasemap(this)">
-                <span class="bm-btn-preview bm-osm"><i class="fas fa-map"></i></span>
-                <span class="bm-btn-copy">
-                  <span class="bm-btn-label">OpenStreetMap</span>
-                  <span class="bm-btn-meta">Jalan, gedung, dan label utama</span>
-                </span>
-              </button>
-              <button class="bm-btn" data-bm="satellite" onclick="switchBasemap(this)">
-                <span class="bm-btn-preview bm-satellite"><i class="fas fa-satellite"></i></span>
-                <span class="bm-btn-copy">
-                  <span class="bm-btn-label">Satelit</span>
-                  <span class="bm-btn-meta">Citra nyata untuk cek konteks lokasi</span>
-                </span>
-              </button>
-              <button class="bm-btn" data-bm="dark" onclick="switchBasemap(this)">
-                <span class="bm-btn-preview bm-dark"><i class="fas fa-moon"></i></span>
-                <span class="bm-btn-copy">
-                  <span class="bm-btn-label">Dark</span>
-                  <span class="bm-btn-meta">Kontras tinggi untuk hotspot</span>
-                </span>
-              </button>
-              <button class="bm-btn" data-bm="topo" onclick="switchBasemap(this)">
-                <span class="bm-btn-preview bm-topo"><i class="fas fa-mountain"></i></span>
-                <span class="bm-btn-copy">
-                  <span class="bm-btn-label">Topografi</span>
-                  <span class="bm-btn-meta">Kontur dan relief area kampus</span>
-                </span>
-              </button>
+            <div class="basemap-row">
+              <button class="bm-btn active" data-bm="osm" onclick="switchBasemap(this)"><i class="fas fa-map"></i>
+                OpenStreetMap</button>
+              <button class="bm-btn" data-bm="satellite" onclick="switchBasemap(this)"><i class="fas fa-satellite"></i>
+                Satelit</button>
+              <button class="bm-btn" data-bm="dark" onclick="switchBasemap(this)"><i class="fas fa-moon"></i>
+                Dark</button>
+              <button class="bm-btn" data-bm="topo" onclick="switchBasemap(this)"><i class="fas fa-mountain"></i>
+                Topografi</button>
             </div>
           </div>
 
@@ -846,25 +657,29 @@
               </label>
               <label class="layer-card layer-p1" data-layer="gelap">
                 <input type="radio" name="layerKategori" value="gelap" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#4B5563,#1F2937)"><i class="fas fa-moon"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#4B5563,#1F2937)"><i
+                    class="fas fa-moon"></i></div>
                 <span class="layer-card-label">Area Gelap</span>
                 <span class="layer-card-count" id="cnt-gelap">0</span>
               </label>
               <label class="layer-card layer-p1" data-layer="sepi">
                 <input type="radio" name="layerKategori" value="sepi" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#60A5FA,#93C5FD)"><i class="fas fa-person-walking"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#60A5FA,#93C5FD)"><i
+                    class="fas fa-person-walking"></i></div>
                 <span class="layer-card-label">Area Sepi</span>
                 <span class="layer-card-count" id="cnt-sepi">0</span>
               </label>
               <label class="layer-card layer-p1" data-layer="nocctv">
                 <input type="radio" name="layerKategori" value="nocctv" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#B9ADA5,#D8CFC8)"><i class="fas fa-video-slash"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#B9ADA5,#D8CFC8)"><i
+                    class="fas fa-video-slash"></i></div>
                 <span class="layer-card-label">Tanpa CCTV</span>
                 <span class="layer-card-count" id="cnt-nocctv">0</span>
               </label>
               <label class="layer-card layer-p1" data-layer="minim-petugas">
                 <input type="radio" name="layerKategori" value="minim-petugas" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#CFA29B,#F5CAC3)"><i class="fas fa-user-slash"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#CFA29B,#F5CAC3)"><i
+                    class="fas fa-user-slash"></i></div>
                 <span class="layer-card-label">Minim Petugas</span>
                 <span class="layer-card-count" id="cnt-minim">0</span>
               </label>
@@ -872,25 +687,29 @@
               <!-- Layer Peta 2 -->
               <label class="layer-card layer-p2" data-layer="semua-2" style="display:none;">
                 <input type="radio" name="layerKategori" value="semua" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#84A59D,#F6BD60)"><i class="fas fa-layer-group"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#84A59D,#F6BD60)"><i
+                    class="fas fa-layer-group"></i></div>
                 <span class="layer-card-label">Semua Laporan</span>
                 <span class="layer-card-count" id="cnt-semua-2">0</span>
               </label>
               <label class="layer-card layer-p2" data-layer="rawan-tinggi" style="display:none;">
                 <input type="radio" name="layerKategori" value="rawan-tinggi" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#F28482,#D56A6A)"><i class="fas fa-triangle-exclamation"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#F28482,#D56A6A)"><i
+                    class="fas fa-triangle-exclamation"></i></div>
                 <span class="layer-card-label">Rawan Tinggi</span>
                 <span class="layer-card-count" id="cnt-tinggi">0</span>
               </label>
               <label class="layer-card layer-p2" data-layer="rawan-sedang" style="display:none;">
                 <input type="radio" name="layerKategori" value="rawan-sedang" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#F6BD60,#F5CAC3)"><i class="fas fa-circle-exclamation"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#F6BD60,#F5CAC3)"><i
+                    class="fas fa-circle-exclamation"></i></div>
                 <span class="layer-card-label">Rawan Sedang</span>
                 <span class="layer-card-count" id="cnt-sedang">0</span>
               </label>
               <label class="layer-card layer-p2" data-layer="rawan-rendah" style="display:none;">
                 <input type="radio" name="layerKategori" value="rawan-rendah" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#84A59D,#A7C4BC)"><i class="fas fa-shield"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#84A59D,#A7C4BC)"><i
+                    class="fas fa-shield"></i></div>
                 <span class="layer-card-label">Rawan Rendah</span>
                 <span class="layer-card-count" id="cnt-rendah">0</span>
               </label>
@@ -898,25 +717,29 @@
               <!-- Layer Peta 3 -->
               <label class="layer-card layer-p3" data-layer="semua-3" style="display:none;">
                 <input type="radio" name="layerKategori" value="semua" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#84A59D,#F6BD60)"><i class="fas fa-layer-group"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#84A59D,#F6BD60)"><i
+                    class="fas fa-layer-group"></i></div>
                 <span class="layer-card-label">Semua Fasilitas</span>
                 <span class="layer-card-count" id="cnt-semua-3">0</span>
               </label>
               <label class="layer-card layer-p3" data-layer="layak" style="display:none;">
                 <input type="radio" name="layerKategori" value="layak" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#10B981,#34D399)"><i class="fas fa-check-circle"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#10B981,#34D399)"><i
+                    class="fas fa-check-circle"></i></div>
                 <span class="layer-card-label">Layak</span>
                 <span class="layer-card-count" id="cnt-layak">0</span>
               </label>
               <label class="layer-card layer-p3" data-layer="cukup-layak" style="display:none;">
                 <input type="radio" name="layerKategori" value="cukup-layak" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#F59E0B,#FBBF24)"><i class="fas fa-exclamation-circle"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#F59E0B,#FBBF24)"><i
+                    class="fas fa-exclamation-circle"></i></div>
                 <span class="layer-card-label">Cukup Layak</span>
                 <span class="layer-card-count" id="cnt-cukup-layak">0</span>
               </label>
               <label class="layer-card layer-p3" data-layer="kurang-layak" style="display:none;">
                 <input type="radio" name="layerKategori" value="kurang-layak" onchange="switchLayer(this)" />
-                <div class="layer-card-icon" style="background:linear-gradient(135deg,#EF4444,#F87171)"><i class="fas fa-times-circle"></i></div>
+                <div class="layer-card-icon" style="background:linear-gradient(135deg,#EF4444,#F87171)"><i
+                    class="fas fa-times-circle"></i></div>
                 <span class="layer-card-label">Kurang Layak</span>
                 <span class="layer-card-count" id="cnt-kurang-layak">0</span>
               </label>
@@ -940,11 +763,11 @@
                   <i class="fas fa-circle-nodes"></i> Cluster
                 </label>
                 <div style="width: 100%; border-top: 1px dashed rgba(var(--ink-rgb), .1); margin: .4rem 0;"></div>
-                <label class="vis-toggle active" id="tog-jurusan">
+                <label class="vis-toggle active" id="tog-jurusan-main">
                   <input type="checkbox" checked onchange="toggleVis('jurusan',this)" />
                   <i class="fas fa-graduation-cap"></i> Jurusan
                 </label>
-                <label class="vis-toggle active" id="tog-fixedpin">
+                <label class="vis-toggle active" id="tog-fixedpin-main">
                   <input type="checkbox" checked onchange="toggleVis('fixedpin',this)" />
                   <i class="fas fa-qrcode"></i> Pin QR
                 </label>
@@ -958,6 +781,7 @@
                   <option value="Pagi">Pagi</option>
                   <option value="Siang">Siang</option>
                   <option value="Malam">Malam</option>
+                  <option value="Sepanjang Hari">Sepanjang Hari</option>
                 </select>
                 <select id="filterBulan" onchange="renderLeafletMap()" class="map-select">
                   <option value="">Semua Bulan</option>
@@ -993,7 +817,7 @@
         </div>
 
         <!-- Leaflet Map -->
-        <div class="map-container map-surface-main" id="mapContainer">
+        <div class="map-container" id="mapContainer">
           <div id="leafletMap"></div>
           <div class="map-overlay" id="mapOverlay">
             <div class="map-placeholder">
@@ -1153,192 +977,60 @@
 
     <!-- ===== PAGE: TITIK PENGADUAN ===== -->
     <section id="titikpengaduan" class="page" style="position:relative;">
-      <!-- Hero -->
-      <div class="hero hero-sm htfu-hero" style="position:relative;z-index:1;">
+      <div class="hero hero-sm" style="position:relative;z-index:1;">
         <div class="hero-bg-shapes" style="z-index:0;">
           <div class="shape shape-1"></div>
           <div class="shape shape-2"></div>
         </div>
         <div class="hero-content" style="position:relative;z-index:2;">
-          <div class="hero-badge htfu-badge"><i class="fas fa-compass"></i> How to Find Us</div>
-          <h1>Temukan <span class="gradient-text">ITSafe di Kampus!</span></h1>
-          <p>ITSafe tersebar di area-area strategis kampus ITS. Temukan poster kami, scan QR, atau akses langsung lewat website, lalu laporkan kondisi area secara anonim & gratis kapan saja.</p>
-          <div class="htfu-hero-ctas">
-            <button class="btn btn-primary" onclick="scrollToSection('htfu-ways')"><i class="fas fa-route"></i> Cara Menemukan Kami</button>
-            <button class="btn btn-outline" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Lapor Sekarang</button>
-          </div>
+          <div class="hero-badge"><i class="fas fa-qrcode"></i> QR Code Pengaduan</div>
+          <h1>Titik <span class="gradient-text">Pengaduan Area Rawan</span></h1>
+          <p>Lokasi-lokasi strategis di kampus ITS yang telah dipasangi QR Code pengaduan. Scan untuk melaporkan kondisi
+            area secara langsung dan anonim.</p>
         </div>
       </div>
 
       <div class="section-container">
-
-        <!-- ===== HOW TO FIND US: 3 CARA ===== -->
-        <div id="htfu-ways" class="htfu-ways-section reveal">
-          <div class="section-header htfu-section-header">
-            <div class="htfu-section-chip"><i class="fas fa-map-signs"></i> 3 Cara Temukan Kami</div>
-            <h2>How to Find <span class="gradient-text">ITSafe</span>?</h2>
-            <p>Tidak perlu daftar, tidak perlu login karena ITSafe dirancang agar siapapun bisa lapor dalam hitungan detik.</p>
+        <div class="qr-section">
+          <div class="section-header">
+            <h2><i class="fas fa-qrcode"></i> QR Code Pengaduan ITSafe</h2>
+            <p>QR Code ini dicetak dan ditempel di area-area kampus. Scan akan langsung membuka form pengaduan kondisi
+              area.</p>
           </div>
-
-          <div class="htfu-ways-grid">
-            <!-- Cara 1: Poster di Kampus -->
-            <div class="htfu-way-card htfu-way-primary reveal-scale" style="--i:0">
-              <div class="htfu-way-num">01</div>
-              <div class="htfu-way-icon-ring htfu-icon-pink">
-                <i class="fas fa-image"></i>
+          <div class="qr-generator-card reveal">
+            <div class="qr-display">
+              <div class="qr-scan-hint"><i class="fas fa-mobile-screen-button"></i> Arahkan kamera ke QR untuk lapor
               </div>
-              <h3>Temukan Poster di Kampus</h3>
-              <p>Kami telah menempel poster ITSafe di titik-titik strategis kampus ITS seperti toilet, koridor, parkiran, dan area rawan lainnya. Cukup scan QR yang ada di poster!</p>
-              <div class="htfu-way-steps">
-                <div class="htfu-step"><span class="htfu-step-dot"></span><span>Cari poster merah muda ITSafe</span></div>
-                <div class="htfu-step"><span class="htfu-step-dot"></span><span>Scan QR Code dengan kamera HP</span></div>
-                <div class="htfu-step"><span class="htfu-step-dot"></span><span>Isi form dan kirim laporan</span></div>
+              <div class="qr-frame">
+                <div id="qrCodeContainer">
+                  <div class="qr-placeholder-inner">
+                    <i class="fas fa-qrcode"></i>
+                    <p>QR Code akan tampil di sini</p>
+                  </div>
+                </div>
+                <div class="qr-corner qr-tl"></div>
+                <div class="qr-corner qr-tr"></div>
+                <div class="qr-corner qr-bl"></div>
+                <div class="qr-corner qr-br"></div>
               </div>
-              <div class="htfu-way-badge"><i class="fas fa-thumbtack"></i> Di lokasi rawan kampus</div>
-            </div>
-
-            <!-- Cara 2: Website Langsung -->
-            <div class="htfu-way-card htfu-way-secondary reveal-scale" style="--i:1">
-              <div class="htfu-way-num">02</div>
-              <div class="htfu-way-icon-ring htfu-icon-teal">
-                <i class="fas fa-globe"></i>
-              </div>
-              <h3>Akses Website Langsung</h3>
-              <p>Kunjungi <strong>itsafe.geowebgis.id</strong> langsung dari browser HP atau laptop kamu. Tidak perlu instal aplikasi apapun!</p>
-              <div class="htfu-way-steps">
-                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-teal"></span><span>Buka browser (Chrome/Safari)</span></div>
-                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-teal"></span><span>Ketik: itsafe.geowebgis.id</span></div>
-                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-teal"></span><span>Klik "Buat Laporan"</span></div>
-              </div>
-              <a href="https://itsafe.geowebgis.id/" target="_blank" class="htfu-way-cta btn btn-outline">
-                <i class="fas fa-arrow-up-right-from-square"></i> Buka Website
-              </a>
-            </div>
-
-            <!-- Cara 3: Scan QR dari Poster -->
-            <div class="htfu-way-card htfu-way-tertiary reveal-scale" style="--i:2">
-              <div class="htfu-way-num">03</div>
-              <div class="htfu-way-icon-ring htfu-icon-gold">
-                <i class="fas fa-share-nodes"></i>
-              </div>
-              <h3>Sebarkan ke Teman</h3>
-              <p>Satu laporan bermakna besar. Semakin banyak warga ITS melapor, semakin akurat peta kerawanan kampus kita.</p>
-              <div class="htfu-way-steps">
-                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-gold"></span><span>Bagikan link ke grup angkatan</span></div>
-                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-gold"></span><span>Ajak teman yang merasa tidak aman</span></div>
-                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-gold"></span><span>Bersama buat kampus lebih aman</span></div>
-              </div>
-              <div class="htfu-way-badge htfu-badge-gold"><i class="fas fa-users"></i> Gerakan kolektif warga ITS</div>
+              <div class="qr-url-display" id="qrUrlDisplay">https://itsafe.geowebgis.id/</div>
             </div>
           </div>
         </div>
 
-        <!-- ===== POSTER SHOWCASE ===== -->
-        <div class="htfu-poster-section reveal">
-          <div class="htfu-poster-label">
-            <div class="htfu-section-chip htfu-chip-pink"><i class="fas fa-image"></i> Poster Resmi ITSafe</div>
-          </div>
-
-          <div class="htfu-poster-showcase">
-            <!-- Kiri: info -->
-            <div class="htfu-poster-info">
-              <h2>Kenali Poster <span class="gradient-text">ITSafe</span> di Kampus</h2>
-              <p class="htfu-poster-tagline">Poster berwarna merah muda &amp; putih ini adalah tanda bahwa area tersebut dalam pantauan komunitas ITSafe.</p>
-
-              <div class="htfu-poster-features">
-                <div class="htfu-poster-feature">
-                  <div class="htfu-pf-icon"><i class="fas fa-eye-slash"></i></div>
-                  <div>
-                    <strong>100% Anonim</strong>
-                    <p>Identitas pelapor tidak pernah dipublikasikan. Lapor dengan aman.</p>
-                  </div>
-                </div>
-                <div class="htfu-poster-feature">
-                  <div class="htfu-pf-icon"><i class="fas fa-bolt"></i></div>
-                  <div>
-                    <strong>Lapor dalam 2 Menit</strong>
-                    <p>Form singkat, langsung ke sistem jadi tidak perlu buat akun.</p>
-                  </div>
-                </div>
-                <div class="htfu-poster-feature">
-                  <div class="htfu-pf-icon"><i class="fas fa-map-location-dot"></i></div>
-                  <div>
-                    <strong>Tampil di Peta Kampus</strong>
-                    <p>Laporan tervalidasi langsung tampil di peta interaktif ITSafe.</p>
-                  </div>
-                </div>
-                <div class="htfu-poster-feature">
-                  <div class="htfu-pf-icon"><i class="fas fa-shield-halved"></i></div>
-                  <div>
-                    <strong>Dikelola Bersama Satgas PPK</strong>
-                    <p>Data diteruskan ke tim Satgas PPK ITS untuk tindakan nyata.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="htfu-poster-ctas">
-                <button class="btn btn-primary" onclick="scrollToForm()">
-                  <i class="fas fa-pen-to-square"></i> Lapor Sekarang
-                </button>
-                <button class="btn btn-outline" onclick="navigateTo('peta')">
-                  <i class="fas fa-map"></i> Lihat Peta
-                </button>
-              </div>
-            </div>
-
-            <!-- Kanan: Poster image -->
-            <div class="htfu-poster-visual">
-              <div class="htfu-poster-frame">
-                <div class="htfu-poster-glow"></div>
-                <img src="assets/POSTER.png" alt="Poster Resmi ITSafe – Laporkan Sekarang" class="htfu-poster-img" loading="lazy"
-                  onerror="this.closest('.htfu-poster-frame').classList.add('htfu-poster-fallback')" />
-                <div class="htfu-poster-badge-overlay">
-                  <i class="fas fa-certificate"></i> Poster Resmi ITSafe 2026
-                </div>
-              </div>
-              <div class="htfu-poster-note">
-                <i class="fas fa-thumbtack"></i>
-                Poster ini terpasang di titik-titik strategis Kampus ITS Sukolilo
-              </div>
-            </div>
+        <div class="section-header" style="margin-top:3rem">
+          <h2><i class="fas fa-map-pin"></i> Lokasi Titik Pengaduan Terpasang</h2>
+          <p>Titik-titik berikut adalah lokasi rawan yang telah atau akan dipasangi stiker QR pengaduan ITSafe.</p>
+        </div>
+        <div class="location-toolbar">
+          <div class="location-hint">Link Google Maps tersedia di tiap lokasi.</div>
+          <div class="location-filter">
+            <button class="loc-filter-btn active" data-filter="all" onclick="filterLocations(this)">Semua</button>
+            <button class="loc-filter-btn" data-filter="terpasang" onclick="filterLocations(this)">Terpasang</button>
+            <button class="loc-filter-btn" data-filter="rencana" onclick="filterLocations(this)">Rencana</button>
           </div>
         </div>
-
-        <!-- ===== LOKASI TITIK PENGADUAN ===== -->
-        <div class="htfu-locations-section">
-          <div class="section-header" style="margin-top:3rem">
-            <h2><i class="fas fa-map-pin"></i> Lokasi Titik Pengaduan Terpasang</h2>
-            <p>Titik-titik berikut adalah lokasi rawan yang telah atau akan dipasangi stiker QR pengaduan ITSafe.</p>
-          </div>
-          <div class="location-toolbar">
-            <div class="location-hint">Link Google Maps tersedia di tiap lokasi.</div>
-            <div class="location-filter">
-              <button class="loc-filter-btn active" data-filter="all" onclick="filterLocations(this)">Semua</button>
-              <button class="loc-filter-btn" data-filter="terpasang" onclick="filterLocations(this)">Terpasang</button>
-              <button class="loc-filter-btn" data-filter="rencana" onclick="filterLocations(this)">Rencana</button>
-            </div>
-          </div>
-          <div class="location-grid" id="locationGrid"></div>
-        </div>
-
-        <!-- ===== CTA BOTTOM ===== -->
-        <div class="htfu-bottom-cta reveal">
-          <div class="htfu-bottom-cta-inner">
-            <div class="htfu-bottom-icon"><i class="fas fa-bullhorn"></i></div>
-            <div class="htfu-bottom-text">
-              <h3>Setiap Laporan, Kampus Lebih Aman</h3>
-              <p>Bersama, ciptakan ITS yang aman dan nyaman untuk semua. Laporkan kondisi area yang tidak aman secara anonim, cepat, dan berdampak nyata.</p>
-            </div>
-            <div class="htfu-bottom-actions">
-              <button class="btn btn-primary" onclick="scrollToForm()">
-                <i class="fas fa-pen-to-square"></i> Buat Laporan
-              </button>
-              <a href="https://www.instagram.com/siapsetujuh" target="_blank" class="btn btn-outline">
-                <i class="fab fa-instagram"></i> Follow @siapsetujuh
-              </a>
-            </div>
-          </div>
-        </div>
+        <div class="location-grid" id="locationGrid"></div>
 
         <div id="stickerPrintArea" class="sticker-print-area" style="display:none">
           <div class="sticker-sheet">
@@ -1371,147 +1063,125 @@
       </div>
 
       <div class="section-container">
-        <!-- ===== SECTION 01: WHAT IS ITSAFE? ===== -->
-        <div class="about-section reveal" id="whatIsItsafe">
-          <div class="wii-header reveal">
-            <div class="wii-label-pill"><i class="fas fa-circle-question"></i> Mengenal Platform</div>
-            <h2 class="wii-title">What is <span class="gradient-text">ITSafe</span>?</h2>
-            <p class="wii-subtitle">Sebuah jawaban atas kebutuhan nyata akan kampus yang lebih aman, bukan sekadar aplikasi, tetapi juga gerakan berbasis data.</p>
-          </div>
-
-          <!-- INTRO SPLIT CARD -->
-          <div class="wii-intro-split reveal">
-            <div class="wii-intro-text">
-              <div class="wii-section-chip"><i class="fas fa-map-location-dot"></i> Konteks</div>
-              <h3>Kampus Luas, Pengawasan Terbatas</h3>
-              <p>Institut Teknologi Sepuluh Nopember memiliki kawasan kampus yang sangat luas dengan dinamika aktivitas tinggi. Namun tidak semua sudut terpantau secara optimal, misalnya lorong gedung, area parkir tertutup, jalan pintas, taman, hingga toilet. Titik-titik tersebut kerap menjadi titik buta dengan pencahayaan minim, lalu-lalang sepi, atau tanpa kamera pengawas.</p>
-              <p style="margin-top:1rem">Kondisi seperti ini menciptakan ruang bagi potensi tindak asusila yang seringkali dinormalisasi dan diabaikan. <strong>ITSafe hadir untuk memutus rantai tersebut.</strong></p>
-            </div>
-            <div class="wii-intro-visual">
-              <div class="wii-visual-card">
-                <div class="wii-visual-icon-ring">
-                  <img id="wiiThemeLogo" src="assets/logo/logo gelap.png?v=1.1.4" alt="Logo ITSafe" class="wii-theme-logo" />
-                </div>
-                <div class="wii-visual-tagline">"Pencegahan dimulai dari memperbaiki kondisi tata ruang kampus"</div>
-                <div class="wii-visual-chips">
-                  <span class="wii-chip chip-pink"><i class="fas fa-eye-slash"></i> 100% Anonim</span>
-                  <span class="wii-chip chip-teal"><i class="fas fa-clock"></i> 24/7 Aktif</span>
-                  <span class="wii-chip chip-gold"><i class="fas fa-globe"></i> WebGIS</span>
-                </div>
+        <div class="about-section reveal">
+          <h2 class="about-section-title"><span class="section-number">01</span> Latar Belakang</h2>
+          <div class="about-text-card reveal">
+            <p>ITS merupakan kampus besar dengan aktivitas tinggi dan beragam area, mulai dari <strong>lorong gedung,
+                area parkir, taman, hingga toilet</strong> yang tidak semuanya terpantau dengan baik. Kondisi fisik
+              seperti minimnya pencahayaan, sedikitnya orang yang berlalu-lalang, dan ketiadaan CCTV dapat menciptakan
+              area yang berpotensi menjadi lokasi tindak asusila.</p>
+            <div class="about-callout">
+              <i class="fas fa-shield-halved"></i>
+              <div>
+                <strong>ITSafe</strong> dikembangkan sebagai platform pelaporan kondisi area berbasis
+                <em>crowdsourcing</em> sekaligus pemetaan spasial, untuk mengidentifikasi area berpotensi rawan dan
+                mendukung kebijakan peningkatan keamanan kampus yang lebih tepat sasaran.
               </div>
             </div>
-          </div>
-
-          <!-- WHAT IT IS DEFINITION CARD -->
-          <div class="wii-definition-card reveal">
-            <div class="wii-def-badge"><i class="fas fa-lightbulb"></i> Definisi</div>
-            <div class="wii-def-content">
-              <p class="wii-def-text"><span class="wii-def-highlight">ITSafe</span> adalah platform pelaporan kondisi area berbasis <em>crowdsourcing</em> sekaligus pemetaan spasial yang dikembangkan untuk mengidentifikasi area berpotensi rawan tindak asusila di lingkungan Kampus ITS Sukolilo guna mendukung kebijakan peningkatan keamanan yang lebih tepat sasaran.</p>
+            <div class="about-fact-row">
+              <div class="about-fact"><span class="about-fact-num">100%</span><span>Anonim & Rahasia</span></div>
+              <div class="about-fact"><span class="about-fact-num">24/7</span><span>Bisa Dilaporkan</span></div>
+              <div class="about-fact"><span class="about-fact-num">WebGIS</span><span>Berbasis Spasial</span></div>
             </div>
-          </div>
-
-          <!-- FOKUS & BATASAN -->
-          <div class="wii-blocks-row reveal">
-            <div class="wii-block wii-block-focus">
-              <div class="wii-block-header">
-                <div class="wii-block-icon" style="background:linear-gradient(135deg,#F28482,#F5CAC3)"><i class="fas fa-crosshairs"></i></div>
-                <div>
-                  <div class="wii-block-title">Fokus Platform</div>
-                  <div class="wii-block-sub">Apa yang dilaporkan di ITSafe?</div>
-                </div>
-              </div>
-              <ul class="wii-list">
-                <li><i class="fas fa-check-circle"></i><span>Khusus untuk warga ITS: mahasiswa, dosen, tendik, dan staf kampus</span></li>
-                <li><i class="fas fa-check-circle"></i><span>Hanya lokasi di dalam batas wilayah Kampus ITS Sukolilo</span></li>
-                <li><i class="fas fa-check-circle"></i><span>Rasa tidak nyaman atau terancam mengarah pada potensi tindak asusila</span></li>
-                <li><i class="fas fa-check-circle"></i><span>Bentuk pelecehan: siulan nakal, komentar seksual, penguntitan, hingga pelecehan fisik</span></li>
-                <li><i class="fas fa-check-circle"></i><span>Data berbasis spasial dan temporal: lokasi GPS, waktu rawan, kondisi fisik area</span></li>
-              </ul>
-            </div>
-
-            <div class="wii-block wii-block-limit">
-              <div class="wii-block-header">
-                <div class="wii-block-icon" style="background:linear-gradient(135deg,#84A59D,#A7C4BC)"><i class="fas fa-triangle-exclamation"></i></div>
-                <div>
-                  <div class="wii-block-title">Batas Wewenang</div>
-                  <div class="wii-block-sub">ITSafe BUKAN layanan darurat</div>
-                </div>
-              </div>
-              <ul class="wii-list">
-                <li><i class="fas fa-circle-xmark" style="color:#D56A6A"></i><span>Tidak dapat menindaklanjuti kasus ke ranah hukum</span></li>
-                <li><i class="fas fa-circle-xmark" style="color:#D56A6A"></i><span>Tidak melakukan investigasi terhadap pelaku</span></li>
-                <li><i class="fas fa-circle-xmark" style="color:#D56A6A"></i><span>Tidak mendampingi korban secara langsung</span></li>
-                <li><i class="fas fa-shield-halved" style="color:#84A59D"></i><span>Untuk kasus nyata, hubungi <strong>Satgas PPK ITS: 0811-3333-6000</strong></span></li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- VALIDASI & TINDAK LANJUT FLOW -->
-          <div class="wii-flow-section reveal">
-            <div class="wii-flow-header">
-              <div class="wii-section-chip" style="background:rgba(246,189,96,.15);color:#A87A10;border-color:rgba(246,189,96,.3)"><i class="fas fa-arrows-rotate"></i> Alur Kerja</div>
-              <h3>Dari Laporan ke Perubahan Nyata</h3>
-            </div>
-            <div class="wii-flow-steps">
-              <div class="wii-flow-step">
-                <div class="wii-flow-num">1</div>
-                <div class="wii-flow-body">
-                  <strong>Warga Melaporkan</strong>
-                  <p>Pelapor mengisi form ITSafe dengan lokasi GPS, waktu rawan, kondisi fisik, dan foto opsional secara anonim</p>
-                </div>
-              </div>
-              <div class="wii-flow-arrow"><i class="fas fa-arrow-right"></i></div>
-              <div class="wii-flow-step">
-                <div class="wii-flow-num">2</div>
-                <div class="wii-flow-body">
-                  <strong>Verifikasi Admin</strong>
-                  <p>Tim admin memverifikasi kualitas data. Laporan semakin lengkap → semakin cepat tervalidasi</p>
-                </div>
-              </div>
-              <div class="wii-flow-arrow"><i class="fas fa-arrow-right"></i></div>
-              <div class="wii-flow-step">
-                <div class="wii-flow-num">3</div>
-                <div class="wii-flow-body">
-                  <strong>Analisis Spasial</strong>
-                  <p>Data tervalidasi dianalisis menjadi peta sebaran, heatmap kerawanan, dan zonasi risiko</p>
-                </div>
-              </div>
-              <div class="wii-flow-arrow"><i class="fas fa-arrow-right"></i></div>
-              <div class="wii-flow-step">
-                <div class="wii-flow-num">4</div>
-                <div class="wii-flow-body">
-                  <strong>Rekomendasi ke Kampus</strong>
-                  <p>Hasil diteruskan ke BUK4L & Satgas PPK ITS untuk perbaikan CCTV, lampu, dan rute patroli</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- PRIVASI JAMINAN -->
-          <div class="wii-privacy-banner reveal">
-            <div class="wii-privacy-icon"><i class="fas fa-lock"></i></div>
-            <div class="wii-privacy-content">
-              <strong>Jaminan Privasi Data</strong>
-              <p>Seluruh data pribadi, termasuk email dan foto sensitif, dijamin kerahasiaannya. Tidak akan dipublikasikan, tidak akan disalahgunakan. ITSafe murni platform penelitian pencegahan berbasis tata ruang.</p>
-            </div>
-          </div>
-
-          <!-- FACT ROW -->
-          <div class="about-fact-row reveal" style="margin-top: 2rem">
-            <div class="about-fact"><span class="about-fact-num">100%</span><span>Anonim & Rahasia</span></div>
-            <div class="about-fact"><span class="about-fact-num">24/7</span><span>Bisa Dilaporkan</span></div>
-            <div class="about-fact"><span class="about-fact-num">WebGIS</span><span>Berbasis Spasial</span></div>
           </div>
         </div>
 
         <div class="about-section reveal">
-          <h2 class="about-section-title"><span class="section-number">02</span> Filosofi Logo</h2>
+          <h2 class="about-section-title"><span class="section-number">02</span> Tujuan &amp; Metode Penelitian</h2>
+
+          <!-- Tujuan Penelitian -->
+          <div class="research-block reveal">
+            <div class="research-block-header">
+              <div class="research-block-icon"><i class="fas fa-bullseye"></i></div>
+              <div>
+                <div class="research-block-title">Tujuan Penelitian</div>
+                <div class="research-block-sub">Berdasarkan Proposal Kemah Kerja Field Camp 2026</div>
+              </div>
+            </div>
+            <div class="research-goals-grid">
+              <div class="research-goal-item">
+                <div class="goal-number">01</div>
+                <div class="goal-text">Menganalisis <strong>kondisi fisik lokasi</strong> yang berkontribusi terhadap tingginya tingkat kerawanan tindak asusila di lingkungan ITS berdasarkan aspek pencahayaan, kepadatan aktivitas, keberadaan CCTV, keberadaan petugas keamanan, dan kondisi vegetasi.</div>
+              </div>
+              <div class="research-goal-item">
+                <div class="goal-number">02</div>
+                <div class="goal-text">Membangun <strong>sistem WebGIS pelaporan anonim</strong> berbasis web dan PostgreSQL yang memudahkan warga kampus ITS melaporkan lokasi-lokasi berpotensi rawan melalui website maupun QR-Code di titik-titik strategis kampus.</div>
+              </div>
+              <div class="research-goal-item">
+                <div class="goal-number">03</div>
+                <div class="goal-text">Menghasilkan <strong>pemetaan berbasis WebGIS</strong> berupa Peta Sebaran Titik Lokasi Rawan, Peta Heatmap Kerawanan, dan Peta Zonasi Tingkat Risiko untuk mengidentifikasi dan memvisualisasikan zona rawan di lingkungan kampus ITS.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metode Penelitian -->
+          <div class="research-block reveal" style="margin-top:1.5rem;">
+            <div class="research-block-header">
+              <div class="research-block-icon" style="background:linear-gradient(135deg,var(--accent-blue),#A7C4BC)"><i class="fas fa-diagram-project"></i></div>
+              <div>
+                <div class="research-block-title">Tahapan Metode Penelitian</div>
+                <div class="research-block-sub">5 tahap sistematis dari persiapan hingga penyajian data</div>
+              </div>
+            </div>
+            <div class="method-timeline">
+              <div class="method-step">
+                <div class="method-step-badge" style="background:linear-gradient(135deg,#F28482,#F5CAC3)">A</div>
+                <div class="method-step-body">
+                  <div class="method-step-title">Tahap Persiapan &amp; Survei Pendahuluan</div>
+                  <div class="method-step-desc">Identifikasi masalah tindak asusila di kampus ITS, studi literatur (regulasi Permendikbudristek No. 55/2024 &amp; KUHP Pasal 281–283), penentuan kebutuhan data, serta survei pendahuluan ke Satgas PPK ITS untuk identifikasi area dan sumber data.</div>
+                </div>
+              </div>
+              <div class="method-step">
+                <div class="method-step-badge" style="background:linear-gradient(135deg,#84A59D,#A7C4BC)">B</div>
+                <div class="method-step-body">
+                  <div class="method-step-title">Tahap Akuisisi Data</div>
+                  <div class="method-step-desc"><strong>Data Primer:</strong> kuesioner persepsi keamanan warga kampus, koordinat GPS titik lokasi, dan data pelaporan melalui form ITSafe (koordinat, waktu rawan, pencahayaan, kepadatan, CCTV, skor kerawanan). <strong>Data Sekunder:</strong> peta batas administrasi kampus, citra satelit, data civitas akademika ITS, dan peraturan terkait.</div>
+                </div>
+              </div>
+              <div class="method-step">
+                <div class="method-step-badge" style="background:linear-gradient(135deg,#F6BD60,#F5E0D5)">C</div>
+                <div class="method-step-body">
+                  <div class="method-step-title">Tahap Pengolahan Data</div>
+                  <div class="method-step-desc">Pengembangan website ITSafe (HTML/CSS/JS + Laravel 12 + PostgreSQL), pengolahan data koordinat lokasi menjadi data spasial titik, pembuatan <strong>Peta Persebaran Titik Lokasi Rawan</strong>, pembuatan <strong>Heatmap Skoring Kerawanan</strong> berbasis Kernel Density Estimation (KDE) di ArcGIS Pro, dan <strong>Peta Kelayakan Fasilitas</strong> berdasarkan 5 parameter fisik.</div>
+                </div>
+              </div>
+              <div class="method-step">
+                <div class="method-step-badge" style="background:linear-gradient(135deg,#D56A6A,#F28482)">D</div>
+                <div class="method-step-body">
+                  <div class="method-step-title">Tahap Analisis Data</div>
+                  <div class="method-step-desc">Analisis pola persebaran lokasi rawan (distribusi spasial), analisis tingkat kerawanan area berdasarkan skor pelapor (hotspot), dan analisis kelayakan fasilitas serta identifikasi zona prioritas yang memerlukan intervensi perbaikan pencahayaan, penambahan CCTV, atau peningkatan patroli.</div>
+                </div>
+              </div>
+              <div class="method-step">
+                <div class="method-step-badge" style="background:linear-gradient(135deg,#84A59D,#F6BD60)">E</div>
+                <div class="method-step-body">
+                  <div class="method-step-title">Tahap Penyajian Data</div>
+                  <div class="method-step-desc">Penyajian Sistem <strong>WebGIS ITSafe</strong> interaktif, <strong>Peta 1</strong> – Sebaran Titik Lokasi Rawan, <strong>Peta 2</strong> – Heatmap Tingkat Kerawanan dengan filter waktu (pagi/siang/malam), <strong>Peta 3</strong> – Kelayakan Fasilitas (Layak/Cukup Layak/Tidak Layak), dan penyebaran <strong>QR-Code</strong> di titik-titik strategis kampus ITS.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Etika Penelitian -->
+          <div class="research-ethics-bar reveal" style="margin-top:1.5rem;">
+            <div class="ethics-header"><i class="fas fa-user-shield"></i> Etika Penelitian</div>
+            <div class="ethics-items">
+              <div class="ethics-item"><i class="fas fa-eye-slash"></i><span>Semua data pelapor bersifat <strong>anonim &amp; rahasia</strong> sepenuhnya</span></div>
+              <div class="ethics-item"><i class="fas fa-graduation-cap"></i><span>Data hanya digunakan untuk <strong>kepentingan penelitian akademik</strong></span></div>
+              <div class="ethics-item"><i class="fas fa-id-card-clip"></i><span><strong>Tidak ada identitas</strong> personal yang dipublikasikan</span></div>
+              <div class="ethics-item"><i class="fas fa-rotate-left"></i><span>Pelapor <strong>berhak menarik</strong> laporan kapan saja</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-section reveal">
+          <h2 class="about-section-title"><span class="section-number">03</span> Filosofi Logo</h2>
           
           <!-- Main Logo Display -->
           <div class="logo-philosophy-hero reveal">
             <div class="logo-hero-inner">
               <div class="logo-hero-glow"></div>
-              <img id="philHeroImg" src="assets/logo/logo gelap.png?v=1.1.4" alt="Logo Utama ITSafe" class="logo-hero-img" />
+              <img id="philHeroImg" src="assets/logo/Logo dengan background gelap.png?v=9.4" alt="Logo Utama ITSafe" class="logo-hero-img" />
             </div>
           </div>
 
@@ -1676,21 +1346,20 @@
         </div>
 
         <div class="about-section reveal contact-support-section">
-          <h2 class="about-section-title"><span class="section-number">03</span> Kontak &amp; Dukungan</h2>
+          <h2 class="about-section-title"><span class="section-number">04</span> Kontak &amp; Dukungan</h2>
 
           <!-- Intro -->
           <p class="contact-intro-text">
             Kami terbuka untuk <strong>kritik dan saran</strong> dari seluruh warga ITS demi terus memperbaiki platform
             ITSafe.<br />
-            Pilih kanal yang paling nyaman untuk menghubungi kami.
+            Pilih kanal yang paling nyaman untuk menghubungi kami :
           </p>
 
           <!-- ── KELOMPOK 7 BLOCK ── -->
           <div class="contact-block">
             <div class="contact-block-header">
-              <div class="contact-block-avatar contact-logo-avatar">
-                <img id="fieldcampThemeLogo" src="assets/logo/logo gelap.png?v=1.1.4" alt="Logo ITSafe Kelompok 7" class="contact-brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                <i class="fas fa-users" style="display:none;"></i>
+              <div class="contact-block-avatar">
+                <i class="fas fa-users"></i>
               </div>
               <div>
                 <div class="contact-block-title">Kelompok 7 Field Camp</div>
@@ -1707,7 +1376,7 @@
                     <path fill="#EA4335" d="M6 40h6V22.8L4 17v20c0 1.66 1.34 3 2 3z"/>
                     <path fill="#34A853" d="M36 40h6c.66 0 2-1.34 2-3V17l-8 5.8z"/>
                     <path fill="#4285F4" d="M36 10l-12 8.7L12 10H6l18 13 18-13z"/>
-                    <path fill="#FBBC04" d="M4 17l8 5.8V10H6c-1.1.4-2 .9-2 2z"/>
+                    <path fill="#FBBC04" d="M4 17l8 5.8V10H6c-1.1 0-2 .9-2 2z"/>
                     <path fill="#C5221F" d="M44 12c0-1.1-.9-2-2-2h-6v12.8L44 17z"/>
                   </svg>
                 </div>
@@ -1754,9 +1423,8 @@
           <!-- ── SATGAS PPK ITS BLOCK ── -->
           <div class="contact-block contact-block-satgas">
             <div class="contact-block-header">
-              <div class="contact-block-avatar contact-logo-avatar satgas-avatar satgas-avatar-img satgas-logo-frame">
-                <img src="assets/logo/SatgasPPK.png?v=1.1.4" alt="Logo Satgas PPK ITS" class="satgas-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                <i class="fas fa-shield-halved" style="display:none"></i>
+              <div class="contact-block-avatar satgas-avatar">
+                <i class="fas fa-shield-halved"></i>
               </div>
               <div>
                 <div class="contact-block-title">Satgas PPK ITS</div>
@@ -1820,167 +1488,6 @@
 
   <div class="toast" id="toast"></div>
 
-  <!-- Floating action button: Lapor Sekarang -->
-  <button type="button" class="fab-report" onclick="scrollToForm()" aria-label="Lapor Sekarang">
-    <i class="fas fa-pen-to-square" aria-hidden="true"></i>
-    <span class="fab-text">Lapor Sekarang</span>
-  </button>
-
-  <!-- Submit Success Modal -->
-  <div class="its-modal" id="submitSuccessModal" aria-hidden="true">
-    <div class="its-modal-backdrop" onclick="closeSubmitSuccessModal()"></div>
-    <div class="its-modal-card its-modal-card-v2" role="dialog" aria-modal="true" aria-labelledby="submitSuccessTitle"
-      aria-describedby="submitSuccessDesc">
-      <button type="button" class="its-modal-close" onclick="closeSubmitSuccessModal()" aria-label="Tutup">
-        <i class="fas fa-xmark"></i>
-      </button>
-
-      <div class="its-modal-icon its-modal-icon-v2" aria-hidden="true">
-        <i class="fas fa-circle-check"></i>
-      </div>
-      <h3 id="submitSuccessTitle" class="its-modal-title-v2">Laporan Terkirim!</h3>
-      <p id="submitSuccessDesc" class="its-modal-desc-v2">Pengaduan kamu sudah kami terima dan sedang menunggu verifikasi admin.</p>
-
-      <!-- Kode Laporan -->
-      <div id="submitSuccessCodeWrap" class="its-modal-code-v2" style="display:none;">
-        <div class="code-label-row">
-          <i class="fas fa-barcode"></i>
-          <span>Kode Laporan Kamu</span>
-        </div>
-        <div class="code-value-row">
-          <span id="submitSuccessCode" class="code-value-big">Memuat...</span>
-          <button type="button" class="code-copy-btn" onclick="copyReportCode()" title="Salin kode">
-            <i class="fas fa-copy"></i>
-          </button>
-        </div>
-        <p class="code-hint">Simpan kode ini untuk mengecek status validasi laporanmu.</p>
-      </div>
-
-      <!-- Email notification box -->
-      <div class="modal-email-box" id="modalEmailBox">
-        <div class="email-box-icon"><i class="fas fa-envelope-open-text"></i></div>
-        <div class="email-box-content">
-          <strong>Cek Email Kamu Secara Berkala</strong>
-          <p>Tim ITSafe akan mengirim notifikasi ke emailmu saat statusnya berubah:</p>
-          <div class="email-status-flow">
-            <div class="email-status-step step-pending">
-              <i class="fas fa-hourglass-half"></i>
-              <span>Menunggu Verifikasi</span>
-            </div>
-            <div class="email-status-step step-review">
-              <i class="fas fa-magnifying-glass"></i>
-              <span>Sedang Ditinjau</span>
-            </div>
-            <div class="email-status-step step-valid">
-              <i class="fas fa-check-circle"></i>
-              <span>Valid (Tampil di Peta)</span>
-            </div>
-          </div>
-          <p class="email-reminder">Laporan yang <strong>tervalidasi</strong> akan langsung tampil di <strong>Peta Persebaran</strong> ITSafe.</p>
-        </div>
-      </div>
-
-      <div id="submitSuccessNote" class="its-modal-note" style="display:none;">
-        <i class="fas fa-triangle-exclamation"></i> Catatan: email konfirmasi belum terkirim, tapi laporan sudah tersimpan dengan aman.
-      </div>
-
-      <!-- Actions -->
-      <div class="its-modal-actions its-modal-actions-v2">
-        <button type="button" class="btn btn-primary" onclick="closeSubmitSuccessModal(); scrollToForm()">
-          <i class="fas fa-pen-to-square"></i> Buat Laporan Lagi
-        </button>
-        <button type="button" class="btn btn-outline" onclick="closeSubmitSuccessModal(); openHistoryModal()">
-          <i class="fas fa-clock-rotate-left"></i> Lihat History Laporan
-        </button>
-        <button type="button" class="btn btn-ghost" onclick="closeSubmitSuccessModal(); navigateTo('peta')">
-          <i class="fas fa-map"></i> Lihat Peta
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- History Laporan Modal -->
-  <div class="its-modal" id="historyLaporanModal" aria-hidden="true">
-    <div class="its-modal-backdrop" onclick="closeHistoryModal()"></div>
-    <div class="its-modal-card its-modal-card-history" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
-      <button type="button" class="its-modal-close" onclick="closeHistoryModal()" aria-label="Tutup">
-        <i class="fas fa-xmark"></i>
-      </button>
-      <div class="history-modal-header">
-        <div class="history-modal-icon"><i class="fas fa-clock-rotate-left"></i></div>
-        <h3 id="historyModalTitle">History Laporan Saya</h3>
-        <p>Cari riwayat laporan menggunakan email atau kode laporan yang kamu miliki.</p>
-      </div>
-
-      <!-- Tab Pilihan Pencarian -->
-      <div class="history-tab-row">
-        <button type="button" class="history-tab-btn active" id="historyTabEmail" onclick="switchHistoryTab('email')">
-          <i class="fas fa-envelope"></i> Cari via Email
-        </button>
-        <button type="button" class="history-tab-btn" id="historyTabCode" onclick="switchHistoryTab('code')">
-          <i class="fas fa-barcode"></i> Cari via Kode
-        </button>
-      </div>
-
-      <!-- Panel Email -->
-      <div id="historyPanelEmail" class="history-panel">
-        <p class="history-panel-desc">Masukkan email yang kamu pakai saat melapor. Semua kode laporan yang terhubung ke email tersebut akan ditampilkan.</p>
-        <div class="history-search-row">
-          <div class="history-input-wrap">
-            <i class="fas fa-envelope history-input-icon"></i>
-            <input type="email" id="historyEmailInput" placeholder="Masukkan email pelapor kamu" class="history-input" />
-          </div>
-          <button type="button" class="btn btn-primary" onclick="checkReportsByEmail()">
-            <i class="fas fa-magnifying-glass"></i> Cari
-          </button>
-        </div>
-      </div>
-
-      <!-- Panel Kode -->
-      <div id="historyPanelCode" class="history-panel" style="display:none;">
-        <p class="history-panel-desc">Masukkan kode laporan yang tersimpan di email konfirmasi kamu untuk melihat status validasinya.</p>
-        <div class="history-search-row">
-          <div class="history-input-wrap">
-            <i class="fas fa-barcode history-input-icon"></i>
-            <input type="text" id="historyCodeInput" placeholder="Contoh: ITS-XXXXXXXX" class="history-input" />
-          </div>
-          <button type="button" class="btn btn-primary" onclick="checkReportStatus()">
-            <i class="fas fa-magnifying-glass"></i> Cek Status
-          </button>
-        </div>
-      </div>
-
-      <!-- Result area -->
-      <div id="historyResult" class="history-result" style="display:none;"></div>
-
-      <!-- Detail laporan (muncul saat klik kode dari list email) -->
-      <div id="historyDetailWrap" style="display:none;">
-        <button type="button" class="btn btn-outline btn-sm history-back-btn" onclick="closeHistoryDetail()">
-          <i class="fas fa-arrow-left"></i> Kembali ke Daftar
-        </button>
-        <div id="historyDetailResult" class="history-result"></div>
-      </div>
-
-      <!-- Info box -->
-      <div class="history-info-box">
-        <i class="fas fa-circle-info"></i>
-        <div>
-          <strong>Tips menemukan laporan kamu</strong>
-          <p>Kode laporan dikirim ke email yang kamu daftarkan saat mengisi form. Kamu juga bisa langsung cari dengan email untuk melihat semua laporan yang pernah kamu buat.</p>
-        </div>
-      </div>
-
-      <div class="its-modal-actions" style="margin-top:1.5rem;">
-        <button type="button" class="btn btn-ghost" onclick="closeHistoryModal()">
-          <i class="fas fa-arrow-left"></i> Kembali
-        </button>
-        <button type="button" class="btn btn-outline" onclick="closeHistoryModal(); scrollToForm()">
-          <i class="fas fa-pen-to-square"></i> Buat Laporan Baru
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- Lightbox Modal -->
   <div id="photoLightbox" onclick="closeLightbox()" style="
     display:none; position:fixed; inset:0; z-index:99999;
@@ -2007,14 +1514,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
-  <script>
-    (function () {
-      const version = window.ITSAFE_ASSET_VERSION || '1.1.4';
-      const appScript = document.createElement('script');
-      appScript.src = `script.js?v=${version}`;
-      document.currentScript.after(appScript);
-    })();
-  </script>
+  <script src="script.js?v=9.6"></script>
 
   <!-- ===== ITSafe UI ANIMATIONS ===== -->
   <script>
@@ -2178,7 +1678,7 @@
         resize();
         window.addEventListener('resize', resize);
 
-        // Bubble palette untuk warna soft tema ITSafe
+        // Bubble palette — soft ITSafe theme colors
         const palette = [
           'rgba(242,132,130,',   // coral
           'rgba(246,189,96,',    // amber
@@ -2291,7 +1791,7 @@
           });
         }, { threshold: 0.08 });
 
-        // Watch nav-link clicks (data-page links) dan juga menangkap onclick navigateTo calls
+        // Watch nav-link clicks (data-page links) — also catches onclick navigateTo calls
         const origNavigateTo = window.navigateTo;
         if (typeof origNavigateTo === 'function') {
           window.navigateTo = function (page) {
@@ -2361,7 +1861,7 @@
 
         navLinks.forEach(link => {
           link.addEventListener('mousemove', function (e) {
-            // Fire 60% of moves agar lebih padat dan sering
+            // Fire 60% of moves — dense and frequent
             if (Math.random() > 0.4) return;
             spawnSpark(e.clientX, e.clientY);
           });
@@ -2384,10 +1884,7 @@
         const icon = document.getElementById('themeIcon');
         const navbarLogo = document.getElementById('navbarLogo');
         const philHeroImg = document.getElementById('philHeroImg');
-        const wiiThemeLogo = document.getElementById('wiiThemeLogo');
-        const fieldcampThemeLogo = document.getElementById('fieldcampThemeLogo');
-        const heroMaskot = document.querySelector('.hc2-maskot');
-        const assetVersion = window.ITSAFE_ASSET_VERSION || '1.1.4';
+        const assetVersion = '9.6';
         if (!btn || !icon) return;
 
         function updateLogos(isDark) {
@@ -2398,21 +1895,8 @@
           }
           if (philHeroImg) {
             philHeroImg.src = isDark
-              ? `assets/logo/logo terang.png?v=${assetVersion}`
-              : `assets/logo/logo gelap.png?v=${assetVersion}`;
-          }
-          if (wiiThemeLogo) {
-            wiiThemeLogo.src = isDark
-              ? `assets/logo/logo terang.png?v=${assetVersion}`
-              : `assets/logo/logo gelap.png?v=${assetVersion}`;
-          }
-          if (fieldcampThemeLogo) {
-            fieldcampThemeLogo.src = isDark
-              ? `assets/logo/logo terang.png?v=${assetVersion}`
-              : `assets/logo/logo gelap.png?v=${assetVersion}`;
-          }
-          if (heroMaskot) {
-            heroMaskot.src = `assets/logo/Maskot_Lapor.png?v=${assetVersion}`;
+              ? `assets/logo/Logo dengan background terang.png?v=${assetVersion}`
+              : `assets/logo/Logo dengan background gelap.png?v=${assetVersion}`;
           }
         }
 
@@ -2462,42 +1946,6 @@
 
         // 3. Run the script.js secondary UI boot
         if (typeof itsafeBootUI === 'function') itsafeBootUI();
-
-        // 4. INLINE BUTTON FIX yang dijamin, tertanam di HTML, dan melewati cache
-        if (!window._inlineBtnFixed) {
-          window._inlineBtnFixed = true;
-          document.addEventListener('click', function(ev) {
-            // Level Card (kenyamanan, kerawanan, dll)
-            var card = ev.target.closest ? ev.target.closest('.level-card') : null;
-            if (card) {
-              var grp = card.closest('.level-rating-group');
-              if (grp) {
-                grp.querySelectorAll('.level-card').forEach(function(c) { c.classList.remove('active'); });
-                card.classList.add('active');
-                var sel = document.getElementById(grp.dataset.target);
-                if (sel) { sel.value = card.dataset.val; sel.dispatchEvent(new Event('change')); }
-              }
-              return;
-            }
-            // Pill Button (pernah/tidak, ya/tidak, dll)
-            var pill = ev.target.closest ? ev.target.closest('.pill-btn') : null;
-            if (pill) {
-              var pg = pill.closest('.pill-group');
-              if (pg) {
-                pg.querySelectorAll('.pill-btn').forEach(function(b) { b.classList.remove('active'); });
-                pill.classList.add('active');
-                var ps = document.getElementById(pill.dataset.target);
-                if (ps) {
-                  var dv = pill.dataset.val;
-                  Array.from(ps.options).forEach(function(o) {
-                    if (o.value === dv || o.text === dv) ps.value = o.value;
-                  });
-                  ps.dispatchEvent(new Event('change'));
-                }
-              }
-            }
-          });
-        }
       }
 
       if (document.readyState === 'loading') {
@@ -2508,8 +1956,6 @@
     })();
   </script>
 
-  <!-- Hidden locStatus so JS doesnt error (coordinate display removed from picker) -->
-  <span id="locStatus" style="display:none;"></span>
 </body>
 
 

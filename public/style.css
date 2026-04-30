@@ -9308,6 +9308,11 @@ body {
   max-width: 540px;
   width: 95vw;
   padding: 2rem;
+  max-height: calc(100vh - 2.5rem);
+  max-height: calc(100dvh - 2.5rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 .history-modal-header {
   text-align: center;

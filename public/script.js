@@ -1919,7 +1919,7 @@ async function checkReportsByEmail() {
     if (res.ok) {
       const data = await res.json();
       if (!data || !data.reports || data.reports.length === 0) {
-        result.innerHTML = `<div class="history-result-card status-pending"><i class="fas fa-inbox"></i> Tidak ada laporan yang ditemukan untuk email <strong>${esc(email)}</strong>. Pastikan email yang kamu masukkan sudah benar.</div>`;
+        result.innerHTML = `<div class="history-result-card status-pending"><i class="fas fa-inbox"></i> Tidak ada laporan yang ditemukan untuk email <strong>${esc(email)}</strong>Pastikan email yang kamu masukkan sudah benar.</div>`;
         return;
       }
       const statusMap = {
