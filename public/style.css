@@ -9220,57 +9220,25 @@ body {
   margin-bottom: .75rem;
 }
 .email-status-flow {
-  display: grid;
-  gap: .55rem;
-  margin-bottom: .75rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  flex-wrap: wrap;
+  margin-bottom: .65rem;
 }
 .email-status-step {
-  --dot: 28px;
-  position: relative;
-  display: grid;
-  grid-template-columns: var(--dot) 1fr;
-  align-items: start;
-  gap: .6rem;
-  width: 100%;
-  padding: .6rem .75rem;
-  font-size: .78rem;
-  font-weight: 700;
-  border-radius: 14px;
-  background: rgba(var(--ink-rgb), .04);
-  color: var(--text-muted);
-  border: 1px solid rgba(var(--ink-rgb), .12);
-  text-align: left;
-  line-height: 1.2;
-}
-.email-status-step i {
-  width: var(--dot);
-  height: var(--dot);
+  display: flex; align-items: center; gap: .35rem;
+  font-size: .75rem; font-weight: 600;
+  padding: .3rem .65rem;
   border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .85rem;
-  background: rgba(var(--bg-rgb), .55);
-  border: 1px solid rgba(var(--ink-rgb), .12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22);
-}
-.email-status-step span { padding-top: .15rem; }
-.email-status-step:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: calc(.75rem + 14px);
-  top: calc(.6rem + var(--dot));
-  bottom: calc(-.55rem);
-  width: 2px;
-  background: rgba(var(--ink-rgb), .14);
-  border-radius: 2px;
+  background: rgba(var(--ink-rgb),.05);
+  color: var(--text-muted);
+  border: 1px solid rgba(var(--ink-rgb),.1);
 }
 .step-pending { background: rgba(246,189,96,.12); color: #A87A10; border-color: rgba(246,189,96,.3); }
 .step-review  { background: rgba(132,165,157,.12); color: #4A8078; border-color: rgba(132,165,157,.3); }
 .step-valid   { background: rgba(16,185,129,.1);  color: #059669; border-color: rgba(16,185,129,.25); }
-.step-pending i { background: rgba(246,189,96,.12); border-color: rgba(246,189,96,.3); }
-.step-review i  { background: rgba(132,165,157,.12); border-color: rgba(132,165,157,.3); }
-.step-valid i   { background: rgba(16,185,129,.1);  border-color: rgba(16,185,129,.25); }
+.email-flow-arrow { font-size: .7rem; color: var(--text-muted); opacity: .6; }
 .email-reminder {
   font-size: .78rem;
   color: var(--text-muted);
