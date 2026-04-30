@@ -4254,6 +4254,55 @@ main {
   border-color: rgba(16, 185, 129, .4);
 }
 
+/* ===== FLOATING REPORT BUTTON ===== */
+.fab-report {
+  position: fixed;
+  right: 1.25rem;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom) + 1.75rem);
+  z-index: 9000; /* below toast (9999) and modal (99998) */
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .78rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--primary-rgb), .35);
+  background: linear-gradient(135deg, rgba(var(--primary-rgb), .92), rgba(var(--primary-rgb), .72));
+  color: #fff;
+  font-weight: 800;
+  font-size: .9rem;
+  box-shadow: 0 18px 50px rgba(var(--primary-rgb), .28);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transform: translateY(14px) scale(.98);
+  opacity: 0;
+  animation: fabPopIn .45s cubic-bezier(.34, 1.56, .64, 1) .15s both;
+}
+.fab-report i { font-size: 1rem; }
+.fab-report .fab-text { white-space: nowrap; }
+.fab-report:hover {
+  transform: translateY(-2px) scale(1);
+  box-shadow: 0 22px 60px rgba(var(--primary-rgb), .34);
+}
+.fab-report:active { transform: translateY(0) scale(.99); }
+.fab-report:focus-visible {
+  outline: 3px solid rgba(var(--primary-rgb), .35);
+  outline-offset: 3px;
+}
+@keyframes fabPopIn {
+  from { opacity: 0; transform: translateY(16px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0)  scale(1); }
+}
+@media (max-width: 420px) {
+  .fab-report {
+    right: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom) + 1.5rem);
+    padding: .72rem .9rem;
+    font-size: .85rem;
+  }
+  .fab-report i { font-size: .95rem; }
+}
+
 .toast.error {
   border-color: rgba(var(--primary-rgb), .4);
 }
@@ -9107,6 +9156,35 @@ body {
   margin-top: .5rem;
 }
 
+/* Responsive tweaks for success modal on small screens */
+@media (max-width: 420px) {
+  .its-modal-card-v2 {
+    padding: 2.2rem 1.25rem 1.6rem;
+    max-height: 90vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .its-modal-code-v2 {
+    padding: .95rem 1rem;
+  }
+  .code-value-row {
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  .code-value-big {
+    font-size: 1.2rem;
+    letter-spacing: .08em;
+    white-space: nowrap;
+  }
+  .modal-email-box {
+    flex-direction: column;
+  }
+  .email-box-icon {
+    margin-top: 0;
+  }
+}
+
 /* Email notification box */
 .modal-email-box {
   background: linear-gradient(135deg, rgba(var(--sage-rgb),.07), rgba(var(--accent-rgb),.05));
@@ -9376,6 +9454,8 @@ body {
   font-size: clamp(1.7rem, 3.5vw, 2.3rem);
   margin-bottom: .6rem;
   color: var(--text);
+  display: block;
+  text-align: center;
 }
 .htfu-section-header p {
   font-size: .95rem;
