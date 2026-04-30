@@ -508,7 +508,7 @@ function initPickerMap() {
   pickerMap = L.map('pickerMap', { 
     zoomControl: true,
     scrollWheelZoom: false,
-    tap: true,           // Always enable Leaflet tap - prevents raw touch bubbling to page
+    tap: true,           // Always enable Leaflet tap — prevents raw touch bubbling to page
     tapTolerance: 15     // Slightly generous for finger accuracy
   }).setView(ITS, ZOOM);
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
@@ -1818,7 +1818,7 @@ function openSubmitSuccessModal(opts = {}) {
       if (codeEl) codeEl.textContent = reportCode;
     } else {
       codeWrap.style.display = 'none';
-      if (codeEl) codeEl.textContent = '-';
+      if (codeEl) codeEl.textContent = '—';
     }
   }
 
@@ -1846,7 +1846,7 @@ function copyReportCode() {
   const codeEl = document.getElementById('submitSuccessCode');
   if (!codeEl) return;
   const code = codeEl.textContent.trim();
-  if (!code || code === '-') return;
+  if (!code || code === '—') return;
   navigator.clipboard.writeText(code).then(() => {
     showToast('Kode laporan berhasil disalin!', 'success');
   }).catch(() => {
@@ -1893,7 +1893,7 @@ async function checkReportStatus() {
       const statusMap = {
         'pending':  { cls: 'status-pending',  icon: 'fa-hourglass-half',   label: 'Menunggu Verifikasi' },
         'review':   { cls: 'status-review',   icon: 'fa-magnifying-glass', label: 'Sedang Ditinjau' },
-        'valid':    { cls: 'status-valid',    icon: 'fa-check-circle',     label: 'Valid, Tampil di Peta' },
+        'valid':    { cls: 'status-valid',    icon: 'fa-check-circle',     label: 'Valid – Tampil di Peta' },
         'rejected': { cls: 'status-rejected', icon: 'fa-circle-xmark',    label: 'Ditolak' },
       };
       const s = statusMap[data.status] || { cls: 'status-pending', icon: 'fa-question-circle', label: data.status || 'Tidak diketahui' };
@@ -1921,77 +1921,7 @@ async function checkReportStatus() {
   }
 }
 
-function switchHistoryTab(tab) {
-  const emailPanel = document.getElementById('historyEmailPanel');
-  const codePanel = document.getElementById('historyCodePanel');
-  const tabEmail = document.getElementById('tabByEmail');
-  const tabCode = document.getElementById('tabByCode');
-  const result = document.getElementById('historyResult');
-  if (result) result.style.display = 'none';
-  if (tab === 'email') {
-    if (emailPanel) emailPanel.style.display = 'flex';
-    if (codePanel) codePanel.style.display = 'none';
-    if (tabEmail) tabEmail.classList.add('active');
-    if (tabCode) tabCode.classList.remove('active');
-  } else {
-    if (emailPanel) emailPanel.style.display = 'none';
-    if (codePanel) codePanel.style.display = 'flex';
-    if (tabEmail) tabEmail.classList.remove('active');
-    if (tabCode) tabCode.classList.add('active');
-  }
-}
-
-async function checkReportsByEmail() {
-  const input = document.getElementById('historyEmailInput');
-  const result = document.getElementById('historyResult');
-  if (!input || !result) return;
-  const email = input.value.trim();
-  if (!email) { showToast('Masukkan email terlebih dahulu.', 'error'); return; }
-  result.style.display = 'block';
-  result.innerHTML = '<div class="history-loading"><i class="fas fa-spinner fa-spin"></i> Mencari laporan...</div>';
-  try {
-    const res = await fetch(`${API_BASE}/reports/by-email/${encodeURIComponent(email)}`);
-    if (res.ok) {
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : (data.data || []);
-      if (!list.length) {
-        result.innerHTML = '<div class="history-result-card status-rejected"><i class="fas fa-circle-xmark"></i> Tidak ada laporan yang ditemukan untuk email ini.</div>';
-        return;
-      }
-      const statusMap = {
-        'pending':  { cls: 'status-pending',  icon: 'fa-hourglass-half',   label: 'Menunggu Verifikasi' },
-        'review':   { cls: 'status-review',   icon: 'fa-magnifying-glass', label: 'Sedang Ditinjau' },
-        'valid':    { cls: 'status-valid',    icon: 'fa-check-circle',     label: 'Valid, Tampil di Peta' },
-        'rejected': { cls: 'status-rejected', icon: 'fa-circle-xmark',    label: 'Ditolak' },
-      };
-      result.innerHTML = list.map(item => {
-        const s = statusMap[item.status] || { cls: 'status-pending', icon: 'fa-question-circle', label: item.status || 'Tidak diketahui' };
-        const codeDisplay = item.report_code || item.id || '';
-        const note = item.status === 'valid' ? 'Laporan sudah tampil di peta persebaran ITSafe.' :
-                     item.status === 'rejected' ? 'Laporan tidak memenuhi kriteria.' :
-                     'Tim admin sedang memproses laporan ini.';
-        return `<div class="history-result-card ${s.cls}" style="margin-bottom:0.75rem; cursor:pointer;" onclick="switchHistoryTab('code'); document.getElementById('historyCodeInput').value='${esc(codeDisplay)}'; checkReportStatus();">
-          <div class="history-result-header">
-            <i class="fas ${s.icon}"></i>
-            <div>
-              <strong>Kode: ${esc(codeDisplay)}</strong>
-              <span class="history-status-badge">${s.label}</span>
-            </div>
-          </div>
-          ${item.lokasi ? `<div class="history-result-detail"><i class="fas fa-map-pin"></i> ${esc(item.lokasi)}</div>` : ''}
-          ${item.createdAt || item.created_at ? `<div class="history-result-detail"><i class="fas fa-calendar"></i> Dilaporkan: ${new Date(item.createdAt || item.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
-          <p class="history-result-note">${note} <small style="opacity:0.7">(Klik untuk lihat detail)</small></p>
-        </div>`;
-      }).join('');
-    } else {
-      result.innerHTML = '<div class="history-result-card status-rejected"><i class="fas fa-circle-xmark"></i> Email tidak ditemukan atau belum pernah melapor.</div>';
-    }
-  } catch {
-    result.innerHTML = '<div class="history-result-card status-pending"><i class="fas fa-wifi"></i> Tidak dapat terhubung ke server. Coba beberapa saat lagi.</div>';
-  }
-}
-
-
+function scrollToSection(id) {
   const el = document.getElementById(id);
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
