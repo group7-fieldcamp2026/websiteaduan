@@ -2032,7 +2032,7 @@ async function checkReportStatus() {
         'rejected': { cls: 'status-rejected', icon: 'fa-circle-xmark',    label: 'Ditolak' },
       };
       const s = statusMap[data.status] || { cls: 'status-pending', icon: 'fa-question-circle', label: data.status || 'Tidak diketahui' };
-      const note = data.status === 'valid' ? '✅ Laporan kamu sudah tampil di peta persebaran ITSafe!' :
+      const note = data.status === 'valid' ? 'Laporan kamu sudah tampil di peta persebaran ITSafe.' :
                    data.status === 'rejected' ? 'Laporan tidak memenuhi kriteria. Kamu bisa membuat laporan baru dengan data lebih lengkap.' :
                    'Tim admin sedang memproses laporanmu. Cek email kamu untuk notifikasi terbaru.';
       result.innerHTML = `

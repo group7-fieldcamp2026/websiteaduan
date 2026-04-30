@@ -2146,8 +2146,8 @@
           </div>
 
           <div class="detail-item full">
-            <label>Keterangan Tambahan (Opsional)</label>
-            <textarea id="dKronologi" rows="4" placeholder="Catatan tambahan tentang kondisi area..."></textarea>
+            <label>Kritik dan Saran Tambahan pada Lokasi (Opsional)</label>
+            <textarea id="dKronologi" rows="4" placeholder="Tulis kritik dan saran tambahan pada lokasi ini jika diperlukan..."></textarea>
           </div>
           <div class="detail-item full">
             <label>Kontak Pelapor (opsional)</label>
@@ -2158,10 +2158,10 @@
           <div class="detail-item full" style="border-top:1px solid var(--border);padding-top:1rem;margin-top:.25rem">
             <label>Status Verifikasi Admin</label>
             <select id="dVerifikasi">
-              <option value="pending">⏳ Pending</option>
-              <option value="in_review">📝 Dalam Tinjauan</option>
-              <option value="resolved">✅ Terverifikasi</option>
-              <option value="rejected">❌ Tidak Valid / Hapus</option>
+              <option value="pending">Pending</option>
+              <option value="in_review">Dalam Tinjauan</option>
+              <option value="resolved">Terverifikasi</option>
+              <option value="rejected">Tidak Valid / Hapus</option>
             </select>
           </div>
 
@@ -2312,7 +2312,7 @@
   <!-- CONFIRM DIALOG -->
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-box">
-      <div class="confirm-icon">🗑️</div>
+      <div class="confirm-icon"><i class="fas fa-trash"></i></div>
       <div class="confirm-title">Hapus Laporan?</div>
       <div class="confirm-msg">Tindakan ini tidak dapat dibatalkan.</div>
       <div class="confirm-btns">
@@ -2983,7 +2983,7 @@
     function previewPhoto(input) {
       const file = input.files[0];
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) { showToast('⚠ Ukuran foto maksimal 5 MB', 'error'); input.value = ''; return; }
+      if (file.size > 5 * 1024 * 1024) { showToast('Ukuran foto maksimal 5 MB', 'error'); input.value = ''; return; }
       const reader = new FileReader();
       reader.onload = e => {
         currentPhotoDataUrl = e.target.result;
@@ -3090,11 +3090,11 @@
     async function fetchGmapsCoords() {
       const gmapsUrl = document.getElementById('lGmaps').value.trim();
       if (!gmapsUrl) {
-        showToast('⚠ Masukkan URL Google Maps terlebih dahulu', 'error');
+        showToast('Masukkan URL Google Maps terlebih dahulu', 'error');
         return;
       }
 
-      showToast('⏳ Mendeteksi koordinat...', 'success');
+      showToast('Mendeteksi koordinat...', 'success');
 
       // Method 1: Langsung coba backend PHP
       try {
@@ -3107,7 +3107,7 @@
         if (response.ok) {
           const data = await response.json();
           if (data.lat && data.lng) {
-            showToast(`✅ Koordinat: ${data.lat}, ${data.lng}`, 'success');
+            showToast(`Koordinat: ${data.lat}, ${data.lng}`, 'success');
             return;
           }
         }
@@ -3129,7 +3129,7 @@
             // Cari koordinat di response
             const match = text.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
             if (match) {
-              showToast(`✅ Koordinat: ${match[1]}, ${match[2]}`, 'success');
+              showToast(`Koordinat: ${match[1]}, ${match[2]}`, 'success');
               return;
             }
             // Coba parse JSON jika ada
@@ -3139,7 +3139,7 @@
                 const url = json.long_url || json.original;
                 const coordMatch = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/) || url.match(/q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
                 if (coordMatch) {
-                  showToast(`✅ Koordinat: ${coordMatch[1]}, ${coordMatch[2]}`, 'success');
+                  showToast(`Koordinat: ${coordMatch[1]}, ${coordMatch[2]}`, 'success');
                   return;
                 }
               }
@@ -3158,7 +3158,7 @@
         img.src = gmapsUrl;
       } catch (e) { }
 
-      showToast('⚠ Tidak dapat mendeteksi. Pastikan URL valid atau coba cara lain.', 'error');
+      showToast('Tidak dapat mendeteksi. Pastikan URL valid atau coba cara lain.', 'error');
     }
 
     async function expandGoogleUrl(shortUrl) {
@@ -3333,8 +3333,8 @@
         photo: currentPhotoDataUrl || null,
       };
 
-      if (!data.name) { showToast('⚠ Nama lokasi wajib diisi', 'error'); return; }
-      if (lat === null || lng === null) { showToast('⚠ Silakan pilih lokasi di peta', 'error'); return; }
+      if (!data.name) { showToast('Nama lokasi wajib diisi', 'error'); return; }
+      if (lat === null || lng === null) { showToast('Silakan pilih lokasi di peta', 'error'); return; }
       // Jika foto tidak diubah saat edit, pertahankan foto lama
       if (editingLocId && !currentPhotoDataUrl) {
         const existing = LOCATIONS.find(x => x.id === editingLocId);
@@ -3351,7 +3351,7 @@
           body: JSON.stringify(data),
         });
       } catch (e) {
-        showToast('⚠ Tidak bisa terhubung ke server', 'error');
+        showToast('Tidak bisa terhubung ke server', 'error');
         return;
       }
       if (!res.ok) {
@@ -3360,13 +3360,13 @@
           const body = await res.json();
           if (body?.message) msg = body.message;
         } catch (e) { }
-        showToast(`⚠ ${msg}`, 'error');
+        showToast(`${msg}`, 'error');
         return;
       }
       currentPhotoDataUrl = null;
       closeModal('locModal');
       await fetchLocations();
-      showToast(isEdit ? '✅ Titik berhasil diperbarui' : '✅ Titik baru ditambahkan', 'success');
+      showToast(isEdit ? 'Titik berhasil diperbarui' : 'Titik baru ditambahkan', 'success');
     }
 
     function deleteLoc(id) {
@@ -3375,7 +3375,7 @@
         try {
           res = await fetch(`${LOCATION_ENDPOINT}/${id}`, { method: 'DELETE' });
         } catch (e) {
-          showToast('⚠ Tidak bisa terhubung ke server', 'error');
+          showToast('Tidak bisa terhubung ke server', 'error');
           return;
         }
         if (!res.ok) {
@@ -3384,7 +3384,7 @@
             const body = await res.json();
             if (body?.message) msg = body.message;
           } catch (e) { }
-          showToast(`⚠ ${msg}`, 'error');
+          showToast(`${msg}`, 'error');
           return;
         }
         await fetchLocations();
@@ -3868,7 +3868,7 @@
         document.getElementById('lCountDisplay').textContent = count;
       }
 
-      showToast('✅ Lokasi dipilih - URL otomatis terisi', 'success');
+      showToast('Lokasi dipilih, URL otomatis terisi', 'success');
     }
 
     function goToMyLocation() {
@@ -3877,7 +3877,7 @@
       }
 
       if (navigator.geolocation) {
-        showToast('⏳ Mendeteksi lokasi...', 'success');
+        showToast('Mendeteksi lokasi...', 'success');
         navigator.geolocation.getCurrentPosition(
           pos => {
             locationPickerMap.setView([pos.coords.latitude, pos.coords.longitude], 17);
@@ -3888,12 +3888,12 @@
             onLocationSelected({ lat: pos.coords.latitude, lng: pos.coords.longitude });
           },
           err => {
-            showToast('⚠ Tidak dapat mendapatkan lokasi. Pastikan GPS aktif.', 'error');
+            showToast('Tidak dapat mendapatkan lokasi. Pastikan GPS aktif.', 'error');
           },
           { enableHighAccuracy: true }
         );
       } else {
-        showToast('⚠ Browser tidak mendukung geolocation', 'error');
+        showToast('Browser tidak mendukung geolocation', 'error');
       }
     }
 
