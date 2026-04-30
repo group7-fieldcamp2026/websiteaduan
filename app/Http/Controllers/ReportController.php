@@ -292,6 +292,27 @@ class ReportController extends Controller
             ]);
         }
 
+        // Tambahkan log untuk mencatat email yang tidak valid
+        if (!filter_var($validated['email_its'], FILTER_VALIDATE_EMAIL)) {
+            Log::error('Email tidak valid', ['email' => $validated['email_its']]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Email yang dimasukkan tidak valid.',
+            ], 400);
+        }
+
+        // Tambahkan pengiriman email ke pelapor
+        try {
+            Mail::mailer('smtp')->to($validated['email_its'])->send(
+                new ReportSubmittedNotification($report)
+            );
+        } catch (\Throwable $e) {
+            Log::error('Gagal mengirim email ke pelapor', [
+                'email' => $validated['email_its'],
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         return response()->json([
             'success'     => true,
             'message'     => $mailSent
