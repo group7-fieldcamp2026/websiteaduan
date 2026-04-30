@@ -120,13 +120,6 @@ function itsafeInit() {
   window.navigateTo = navigateTo;
   window.scrollToForm = scrollToForm;
   window.itsafeInit = itsafeInit;
-  window.openHistoryModal = openHistoryModal;
-  window.closeHistoryModal = closeHistoryModal;
-  window.switchHistoryTab = switchHistoryTab;
-  window.checkReportsByEmail = checkReportsByEmail;
-  window.showReportDetail = showReportDetail;
-  window.closeHistoryDetail = closeHistoryDetail;
-  window.checkReportStatus = checkReportStatus;
 }
 
 if (document.readyState === 'loading') {
@@ -515,7 +508,7 @@ function initPickerMap() {
   pickerMap = L.map('pickerMap', { 
     zoomControl: true,
     scrollWheelZoom: false,
-    tap: true,           // Always enable Leaflet tap agar sentuhan tidak memantul ke halaman
+    tap: true,           // Always enable Leaflet tap — prevents raw touch bubbling to page
     tapTolerance: 15     // Slightly generous for finger accuracy
   }).setView(ITS, ZOOM);
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
@@ -948,7 +941,7 @@ function getScoreHtml(val, type) {
     else if ((val || '').includes('Tertutup')) { color = '#EF4444'; }
   }
 
-  if (!val || val === '-') return '<span class="popup-meta-value" style="color:#94a3b8">Tidak tersedia</span>';
+  if (!val || val === '-') return '<span class="popup-meta-value" style="color:#94a3b8">â€”</span>';
   return `<span class="popup-meta-value" style="color:${color}">${val}</span>`;
 }
 
@@ -981,11 +974,11 @@ function buildPopup(r) {
   bodyHtml += `<div class="popup-meta-grid">
     <div class="popup-meta-row">
       <span class="popup-meta-label">Waktu Rawan</span>
-      <span class="popup-meta-value" style="color:#64748b">${r.waktu || 'Belum diisi'}</span>
+      <span class="popup-meta-value" style="color:#64748b">${r.waktu || 'â€”'}</span>
     </div>
     <div class="popup-meta-row">
       <span class="popup-meta-label">Hari Rawan</span>
-      <span class="popup-meta-value" style="color:#64748b">${r.hariRawan === 'Keduanya sama' ? 'Hari Kerja dan Libur' : (r.hariRawan || 'Belum diisi')}</span>
+      <span class="popup-meta-value" style="color:#64748b">${r.hariRawan === 'Keduanya sama' ? 'Hari Kerja dan Libur' : (r.hariRawan || 'â€”')}</span>
     </div>
     <div class="popup-meta-row">
       <span class="popup-meta-label">Cahaya</span>
@@ -1180,9 +1173,9 @@ function switchPetaTab(tab) {
 
   // Update judul & deskripsi panel
   const titles = {
-    sebaran: { title: 'Peta 1: Sebaran Titik Lokasi Rawan', desc: 'Menampilkan sebaran titik lokasi area rawan berdasarkan jumlah laporan masuk dari warga kampus ITS.' },
-    heatmap: { title: 'Peta 2: Heatmap Kerawanan', desc: 'Menampilkan konsentrasi area rawan berdasarkan skor kerawanan yang diberikan oleh pelapor.' },
-    fasilitas: { title: 'Peta 3: Kelayakan Fasilitas', desc: 'Menampilkan penilaian kondisi fisik area berdasarkan parameter pencahayaan, CCTV, kepadatan, petugas keamanan, dan vegetasi.' },
+    sebaran: { title: 'Peta 1 â€” Sebaran Titik Lokasi Rawan', desc: 'Menampilkan sebaran titik lokasi area rawan berdasarkan jumlah laporan masuk dari warga kampus ITS.' },
+    heatmap: { title: 'Peta 2 â€” Heatmap Kerawanan', desc: 'Menampilkan konsentrasi area rawan berdasarkan skor kerawanan yang diberikan oleh pelapor.' },
+    fasilitas: { title: 'Peta 3 â€” Kelayakan Fasilitas', desc: 'Menampilkan penilaian kondisi fisik area berdasarkan parameter pencahayaan, CCTV, kepadatan, petugas keamanan, dan vegetasi.' },
   };
 
   // Update tampilan layer sesuai tab
@@ -1291,7 +1284,7 @@ function closeLightbox() {
   if (lb) { lb.style.display = 'none'; document.getElementById('lightboxImg').src = ''; }
 }
 
-// Identical to admin.html getPhotoUrl: use /media/ route (storage/ blocked on hosting)
+// Identical to admin.html getPhotoUrl â€” use /media/ route (storage/ blocked on hosting)
 function getPhotoUrl(path) {
   if (!path) return '';
   if (/^https?:\/\//i.test(path)) return path;
@@ -1821,11 +1814,11 @@ function openSubmitSuccessModal(opts = {}) {
 
   if (codeWrap) {
     if (reportCode) {
-      codeWrap.style.display = 'block';
+      codeWrap.style.display = 'inline-flex';
       if (codeEl) codeEl.textContent = reportCode;
     } else {
       codeWrap.style.display = 'none';
-      if (codeEl) codeEl.textContent = 'Tidak tersedia';
+      if (codeEl) codeEl.textContent = '—';
     }
   }
 
@@ -1853,7 +1846,7 @@ function copyReportCode() {
   const codeEl = document.getElementById('submitSuccessCode');
   if (!codeEl) return;
   const code = codeEl.textContent.trim();
-  if (!code || code === 'Tidak tersedia') return;
+  if (!code || code === '—') return;
   navigator.clipboard.writeText(code).then(() => {
     showToast('Kode laporan berhasil disalin!', 'success');
   }).catch(() => {
@@ -1872,138 +1865,10 @@ function openHistoryModal() {
   if (!modal) return;
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
-  // Reset to email tab
-  switchHistoryTab('email');
   const res = document.getElementById('historyResult');
-  const inp = document.getElementById('historyEmailInput');
-  const detailWrap = document.getElementById('historyDetailWrap');
-  if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+  const inp = document.getElementById('historyCodeInput');
+  if (res) res.style.display = 'none';
   if (inp) inp.value = '';
-  if (detailWrap) detailWrap.style.display = 'none';
-}
-
-function switchHistoryTab(tab) {
-  const tabEmail = document.getElementById('historyTabEmail');
-  const tabCode = document.getElementById('historyTabCode');
-  const panelEmail = document.getElementById('historyPanelEmail');
-  const panelCode = document.getElementById('historyPanelCode');
-  const res = document.getElementById('historyResult');
-  const detailWrap = document.getElementById('historyDetailWrap');
-  if (res) { res.style.display = 'none'; res.innerHTML = ''; }
-  if (detailWrap) detailWrap.style.display = 'none';
-  if (tab === 'email') {
-    if (tabEmail) tabEmail.classList.add('active');
-    if (tabCode) tabCode.classList.remove('active');
-    if (panelEmail) panelEmail.style.display = '';
-    if (panelCode) panelCode.style.display = 'none';
-  } else {
-    if (tabCode) tabCode.classList.add('active');
-    if (tabEmail) tabEmail.classList.remove('active');
-    if (panelCode) panelCode.style.display = '';
-    if (panelEmail) panelEmail.style.display = 'none';
-  }
-}
-
-async function checkReportsByEmail() {
-  const input = document.getElementById('historyEmailInput');
-  const result = document.getElementById('historyResult');
-  const detailWrap = document.getElementById('historyDetailWrap');
-  if (!input || !result) return;
-  const email = input.value.trim();
-  if (!email) { showToast('Masukkan email terlebih dahulu.', 'error'); return; }
-  if (detailWrap) detailWrap.style.display = 'none';
-  result.style.display = 'block';
-  result.innerHTML = '<div class="history-loading"><i class="fas fa-spinner fa-spin"></i> Mencari laporan...</div>';
-  try {
-    const res = await fetch(`${API_BASE}/reports/by-email?email=${encodeURIComponent(email)}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (!data || !data.reports || data.reports.length === 0) {
-        result.innerHTML = `<div class="history-result-card status-pending"><i class="fas fa-inbox"></i> Tidak ada laporan yang ditemukan untuk email <strong>${esc(email)}</strong>Pastikan email yang kamu masukkan sudah benar.</div>`;
-        return;
-      }
-      const statusMap = {
-        'pending':  { cls: 'status-pending',  icon: 'fa-hourglass-half',   label: 'Menunggu Verifikasi' },
-        'review':   { cls: 'status-review',   icon: 'fa-magnifying-glass', label: 'Sedang Ditinjau' },
-        'valid':    { cls: 'status-valid',    icon: 'fa-check-circle',     label: 'Valid' },
-        'rejected': { cls: 'status-rejected', icon: 'fa-circle-xmark',    label: 'Ditolak' },
-      };
-      let html = `<div class="history-email-list-header"><i class="fas fa-list-check"></i> Ditemukan <strong>${data.reports.length} laporan</strong> untuk <em>${esc(email)}</em></div>`;
-      html += '<div class="history-email-list">';
-      data.reports.forEach(r => {
-        const s = statusMap[r.status] || { cls: 'status-pending', icon: 'fa-question-circle', label: r.status || 'Tidak diketahui' };
-        const tgl = r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Tanggal tidak diketahui';
-        html += `<div class="history-email-item" onclick="showReportDetail('${esc(r.report_code)}')">
-          <div class="history-email-item-left">
-            <span class="history-email-code"><i class="fas fa-barcode"></i> ${esc(r.report_code)}</span>
-            <span class="history-email-lokasi">${esc(r.lokasi || 'Lokasi tidak tersedia')}</span>
-            <span class="history-email-tgl"><i class="fas fa-calendar-alt"></i> ${tgl}</span>
-          </div>
-          <div class="history-email-item-right">
-            <span class="history-status-badge ${s.cls}"><i class="fas ${s.icon}"></i> ${s.label}</span>
-            <i class="fas fa-chevron-right history-chevron"></i>
-          </div>
-        </div>`;
-      });
-      html += '</div>';
-      result.innerHTML = html;
-    } else {
-      result.innerHTML = `<div class="history-result-card status-rejected"><i class="fas fa-circle-xmark"></i> Tidak dapat mengambil data. Pastikan email sudah benar atau coba beberapa saat lagi.</div>`;
-    }
-  } catch {
-    result.innerHTML = '<div class="history-result-card status-pending"><i class="fas fa-wifi"></i> Tidak dapat terhubung ke server. Coba beberapa saat lagi.</div>';
-  }
-}
-
-async function showReportDetail(code) {
-  const result = document.getElementById('historyResult');
-  const detailWrap = document.getElementById('historyDetailWrap');
-  const detailResult = document.getElementById('historyDetailResult');
-  if (!detailWrap || !detailResult) return;
-  if (result) result.style.display = 'none';
-  detailWrap.style.display = 'block';
-  detailResult.innerHTML = '<div class="history-loading"><i class="fas fa-spinner fa-spin"></i> Memuat detail laporan...</div>';
-
-  try {
-    const res = await fetch(`${API_BASE}/reports/status/${encodeURIComponent(code)}`);
-    if (res.ok) {
-      const data = await res.json();
-      const statusMap = {
-        'pending':  { cls: 'status-pending',  icon: 'fa-hourglass-half',   label: 'Menunggu Verifikasi' },
-        'review':   { cls: 'status-review',   icon: 'fa-magnifying-glass', label: 'Sedang Ditinjau' },
-        'valid':    { cls: 'status-valid',    icon: 'fa-check-circle',     label: 'Valid, tampil di peta' },
-        'rejected': { cls: 'status-rejected', icon: 'fa-circle-xmark',    label: 'Ditolak' },
-      };
-      const s = statusMap[data.status] || { cls: 'status-pending', icon: 'fa-question-circle', label: data.status || 'Tidak diketahui' };
-      const note = data.status === 'valid' ? 'Laporan kamu sudah tampil di peta persebaran ITSafe.' :
-                   data.status === 'rejected' ? 'Laporan tidak memenuhi kriteria. Kamu bisa membuat laporan baru dengan data lebih lengkap.' :
-                   'Tim admin sedang memproses laporanmu. Cek email kamu untuk notifikasi terbaru.';
-      detailResult.innerHTML = `
-        <div class="history-result-card ${s.cls}">
-          <div class="history-result-header">
-            <i class="fas ${s.icon}"></i>
-            <div>
-              <strong>Kode: ${esc(code)}</strong>
-              <span class="history-status-badge">${s.label}</span>
-            </div>
-          </div>
-          ${data.lokasi ? `<div class="history-result-detail"><i class="fas fa-map-pin"></i> ${esc(data.lokasi)}</div>` : ''}
-          ${data.createdAt ? `<div class="history-result-detail"><i class="fas fa-calendar"></i> Dilaporkan pada ${new Date(data.createdAt).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
-          <p class="history-result-note">${note}</p>
-        </div>`;
-    } else {
-      detailResult.innerHTML = '<div class="history-result-card status-rejected"><i class="fas fa-circle-xmark"></i> Detail laporan tidak dapat dimuat.</div>';
-    }
-  } catch {
-    detailResult.innerHTML = '<div class="history-result-card status-pending"><i class="fas fa-wifi"></i> Tidak dapat terhubung ke server.</div>';
-  }
-}
-
-function closeHistoryDetail() {
-  const result = document.getElementById('historyResult');
-  const detailWrap = document.getElementById('historyDetailWrap');
-  if (detailWrap) detailWrap.style.display = 'none';
-  if (result) result.style.display = 'block';
 }
 
 function closeHistoryModal() {
@@ -2032,7 +1897,7 @@ async function checkReportStatus() {
         'rejected': { cls: 'status-rejected', icon: 'fa-circle-xmark',    label: 'Ditolak' },
       };
       const s = statusMap[data.status] || { cls: 'status-pending', icon: 'fa-question-circle', label: data.status || 'Tidak diketahui' };
-      const note = data.status === 'valid' ? 'Laporan kamu sudah tampil di peta persebaran ITSafe.' :
+      const note = data.status === 'valid' ? '✅ Laporan kamu sudah tampil di peta persebaran ITSafe!' :
                    data.status === 'rejected' ? 'Laporan tidak memenuhi kriteria. Kamu bisa membuat laporan baru dengan data lebih lengkap.' :
                    'Tim admin sedang memproses laporanmu. Cek email kamu untuk notifikasi terbaru.';
       result.innerHTML = `
@@ -2124,10 +1989,10 @@ window.addEventListener('resize', () => {
     if (fill) fill.style.width = pct + '%';
     if (label) {
       let msg = pct === 0 ? '0% terisi' :
-        pct < 40 ? `${pct}% yuk lanjutkan pengisian.` :
-          pct < 70 ? `${pct}% hampir setengah jalan.` :
-            pct < 100 ? `${pct}% hampir selesai, teruskan!` :
-              `100% siap dikirim!`;
+        pct < 40 ? `${pct}% â€” Lanjutkan pengisian.` :
+          pct < 70 ? `${pct}% â€” Sudah mendekati setengah.` :
+            pct < 100 ? `${pct}% â€” Hampir selesai.` :
+              `100% â€” Siap dikirim.`;
       label.textContent = msg;
     }
     /* highlight filled inputs */

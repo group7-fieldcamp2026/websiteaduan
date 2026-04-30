@@ -4254,70 +4254,6 @@ main {
   border-color: rgba(16, 185, 129, .4);
 }
 
-/* ===== FLOATING REPORT BUTTON ===== */
-.fab-report {
-  position: fixed;
-  right: 1.25rem;
-  bottom: calc(1.25rem + env(safe-area-inset-bottom) + 1.75rem);
-  z-index: 9000; /* below toast (9999) and modal (99998) */
-  display: inline-flex;
-  align-items: center;
-  gap: .55rem;
-  padding: .78rem 1rem;
-  border-radius: 999px;
-  border: 1px solid rgba(var(--primary-rgb), .35);
-  background: linear-gradient(135deg, rgba(var(--primary-rgb), .92), rgba(var(--primary-rgb), .72));
-  color: #fff;
-  font-weight: 800;
-  font-size: .9rem;
-  box-shadow: 0 18px 50px rgba(var(--primary-rgb), .28);
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  transform: translateY(14px) scale(.98);
-  opacity: 0;
-  will-change: transform, translate;
-  animation:
-    fabPopIn .45s cubic-bezier(.34, 1.56, .64, 1) .15s both,
-    fabFloat 3.2s ease-in-out 1.2s infinite;
-}
-.fab-report i { font-size: 1rem; }
-.fab-report .fab-text { white-space: nowrap; }
-.fab-report:hover {
-  transform: translateY(-2px) scale(1);
-  box-shadow: 0 22px 60px rgba(var(--primary-rgb), .34);
-}
-.fab-report:active { transform: translateY(0) scale(.99); }
-.fab-report:focus-visible {
-  outline: 3px solid rgba(var(--primary-rgb), .35);
-  outline-offset: 3px;
-}
-@keyframes fabPopIn {
-  from { opacity: 0; transform: translateY(16px) scale(.96); }
-  to   { opacity: 1; transform: translateY(0)  scale(1); }
-}
-@keyframes fabFloat {
-  0%, 100% { translate: 0 0; }
-  50%      { translate: 0 -8px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .fab-report {
-    animation: none;
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    translate: 0 0;
-  }
-}
-@media (max-width: 420px) {
-  .fab-report {
-    right: 1rem;
-    bottom: calc(1rem + env(safe-area-inset-bottom) + 1.5rem);
-    padding: .72rem .9rem;
-    font-size: .85rem;
-  }
-  .fab-report i { font-size: .95rem; }
-}
-
 .toast.error {
   border-color: rgba(var(--primary-rgb), .4);
 }
@@ -9066,6 +9002,38 @@ body {
   overflow: hidden;
 }
 
+/* Confetti burst */
+.modal-confetti {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.modal-confetti span {
+  position: absolute;
+  top: -10px;
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  animation: confettiFall 1.2s ease forwards;
+  opacity: 0;
+}
+.modal-confetti span:nth-child(1)  { left: 15%; background:#F28482; animation-delay:.05s; transform: rotate(20deg); }
+.modal-confetti span:nth-child(2)  { left: 28%; background:#F6BD60; animation-delay:.1s;  border-radius:50%; }
+.modal-confetti span:nth-child(3)  { left: 42%; background:#84A59D; animation-delay:.15s; transform: rotate(-15deg); }
+.modal-confetti span:nth-child(4)  { left: 57%; background:#F5CAC3; animation-delay:.08s; border-radius:50%; }
+.modal-confetti span:nth-child(5)  { left: 70%; background:#D56A6A; animation-delay:.2s;  transform: rotate(45deg); }
+.modal-confetti span:nth-child(6)  { left: 83%; background:#F6BD60; animation-delay:.12s; }
+.modal-confetti span:nth-child(7)  { left: 7%;  background:#84A59D; animation-delay:.18s; border-radius:50%; }
+.modal-confetti span:nth-child(8)  { left: 35%; background:#F28482; animation-delay:.22s; transform: rotate(30deg); }
+.modal-confetti span:nth-child(9)  { left: 63%; background:#F6BD60; animation-delay:.07s; }
+.modal-confetti span:nth-child(10) { left: 90%; background:#D56A6A; animation-delay:.14s; border-radius:50%; }
+
+@keyframes confettiFall {
+  0%   { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(120px) scale(.4) rotate(360deg); }
+}
+
 .its-modal-icon-v2 {
   width: 72px; height: 72px;
   border-radius: 50%;
@@ -9121,13 +9089,6 @@ body {
   font-weight: 800;
   color: var(--primary-dk);
   letter-spacing: .12em;
-  display: inline-block;
-  padding: .35rem .85rem;
-  border-radius: 10px;
-  background: rgba(var(--primary-rgb), .12);
-  border: 1px solid rgba(var(--primary-rgb), .28);
-  box-shadow: 0 10px 22px rgba(var(--primary-rgb), .12);
-  white-space: nowrap;
 }
 .code-copy-btn {
   background: rgba(var(--primary-rgb),.12);
@@ -9138,57 +9099,12 @@ body {
   color: var(--primary-dk);
   font-size: .85rem;
   transition: background .2s, transform .15s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 .code-copy-btn:hover { background: rgba(var(--primary-rgb),.22); transform: scale(1.05); }
 .code-hint {
-  font-size: .72rem;
+  font-size: .78rem;
   color: var(--text-muted);
   margin-top: .5rem;
-  letter-spacing: normal;
-  font-weight: 500;
-}
-
-/* Responsive tweaks for success modal on small screens */
-@media (max-width: 420px) {
-  .its-modal-card-v2 {
-    padding: 2.2rem 1.25rem 1.6rem;
-    max-height: 90vh;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .its-modal-code-v2 {
-    padding: .95rem 1rem;
-  }
-  .code-value-row {
-    flex-direction: column;
-    gap: .55rem;
-  }
-  .code-value-big {
-    font-size: 1.15rem;
-    letter-spacing: .06em;
-    max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .code-copy-btn {
-    width: 100%;
-    max-width: 220px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: .45rem;
-    padding: .45rem .8rem;
-  }
-  .modal-email-box {
-    flex-direction: column;
-  }
-  .email-box-icon {
-    margin-top: 0;
-  }
 }
 
 /* Email notification box */
@@ -9460,8 +9376,6 @@ body {
   font-size: clamp(1.7rem, 3.5vw, 2.3rem);
   margin-bottom: .6rem;
   color: var(--text);
-  display: block;
-  text-align: center;
 }
 .htfu-section-header p {
   font-size: .95rem;
@@ -9803,105 +9717,3 @@ body {
 [data-theme="dark"] .htfu-poster-section { background: rgba(var(--ink-rgb),.12); }
 [data-theme="dark"] .modal-email-box { background: rgba(var(--sage-rgb),.08); }
 
-
-/* ── History Modal: Tabs + Email List ── */
-.history-tab-row {
-  display: flex;
-  gap: .5rem;
-  margin-bottom: 1.25rem;
-}
-.history-tab-btn {
-  flex: 1;
-  padding: .55rem 1rem;
-  border-radius: 8px;
-  border: 2px solid var(--border);
-  background: transparent;
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: .9rem;
-  cursor: pointer;
-  transition: all .2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-}
-.history-tab-btn.active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
-}
-.history-panel-desc {
-  font-size: .88rem;
-  color: var(--text-muted);
-  margin-bottom: .9rem;
-}
-.history-email-list-header {
-  font-size: .9rem;
-  color: var(--text-muted);
-  margin-bottom: .75rem;
-  padding: .6rem .8rem;
-  background: rgba(var(--primary-rgb),.06);
-  border-radius: 8px;
-}
-.history-email-list {
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-}
-.history-email-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: .8rem 1rem;
-  border-radius: 10px;
-  border: 1.5px solid var(--border);
-  background: var(--surface);
-  cursor: pointer;
-  transition: all .2s;
-  gap: .75rem;
-}
-.history-email-item:hover {
-  border-color: var(--primary);
-  background: rgba(var(--primary-rgb),.06);
-}
-.history-email-item-left {
-  display: flex;
-  flex-direction: column;
-  gap: .2rem;
-  min-width: 0;
-}
-.history-email-code {
-  font-size: .85rem;
-  font-weight: 700;
-  color: var(--primary);
-}
-.history-email-lokasi {
-  font-size: .88rem;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;
-}
-.history-email-tgl {
-  font-size: .78rem;
-  color: var(--text-muted);
-}
-.history-email-item-right {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  flex-shrink: 0;
-}
-.history-chevron {
-  color: var(--text-muted);
-  font-size: .75rem;
-}
-.history-back-btn {
-  margin-bottom: 1rem;
-}
-.history-status-badge.status-valid { background: rgba(16,185,129,.12); color: #059669; }
-.history-status-badge.status-pending { background: rgba(246,189,96,.12); color: #A87A10; }
-.history-status-badge.status-review { background: rgba(132,165,157,.12); color: #4A8078; }
-.history-status-badge.status-rejected { background: rgba(239,68,68,.1); color: #EF4444; }
