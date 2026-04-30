@@ -182,6 +182,7 @@
       <li><a href="#tentang" class="nav-link" data-page="tentang"><i
             class="fas fa-circle-info"></i><span>Tentang</span></a></li>
       <li><a href="admin.html" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
+      <li><a href="#" class="nav-link nav-history-link" onclick="event.preventDefault(); openHistoryModal()"><i class="fas fa-clock-rotate-left"></i><span>History Laporan</span></a></li>
     </ul>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Mode Gelap/Terang">
       <i class="fas fa-moon" id="themeIcon"></i>
@@ -227,7 +228,7 @@
           </h1>
 
           <p class="hc2-quote">"Keamananmu adalah tanggung jawab kita bersama."</p>
-          <p class="hc2-desc">Platform pelaporan &amp; pemetaan area rawan asusila di ITS — anonim, cepat, berdampak nyata.</p>
+          <p class="hc2-desc">Platform pelaporan dan pemetaan area rawan asusila di ITS, anonim, cepat, serta berdampak nyata.</p>
 
           <div class="collab-badge">
             <div class="collab-icon"><i class="fas fa-handshake"></i></div>
@@ -423,7 +424,7 @@
                   </div>
                   <!-- Leaflet mini picker -->
                   <div class="form-group full-width">
-                    <label>Pin Lokasi di Peta <span class="label-opt">wajib jika pilih Lainnya — klik peta untuk
+                    <label>Pin Lokasi di Peta <span class="label-opt">wajib jika pilih Lainnya, klik peta untuk
                         pin</span></label>
                     <div id="pickerMapContainer" class="picker-map-shell">
                       <div id="pickerMap" class="picker-map-canvas"></div>
@@ -1161,7 +1162,7 @@
         <div class="hero-content" style="position:relative;z-index:2;">
           <div class="hero-badge htfu-badge"><i class="fas fa-compass"></i> How to Find Us</div>
           <h1>Temukan <span class="gradient-text">ITSafe di Kampus!</span></h1>
-          <p>ITSafe tersebar di area-area strategis kampus ITS. Temukan poster kami, scan QR, atau akses langsung lewat website — laporkan kondisi area secara anonim & gratis kapan saja.</p>
+          <p>ITSafe tersebar di area-area strategis kampus ITS. Temukan poster kami, scan QR, atau akses langsung lewat website untuk melaporkan kondisi area secara anonim dan gratis kapan saja.</p>
           <div class="htfu-hero-ctas">
             <button class="btn btn-primary" onclick="scrollToSection('htfu-ways')"><i class="fas fa-route"></i> Cara Menemukan Kami</button>
             <button class="btn btn-outline" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Lapor Sekarang</button>
@@ -1176,7 +1177,7 @@
           <div class="section-header htfu-section-header">
             <div class="htfu-section-chip"><i class="fas fa-map-signs"></i> 3 Cara Temukan Kami</div>
             <h2>How to Find <span class="gradient-text">ITSafe</span>?</h2>
-            <p>Tidak perlu daftar, tidak perlu login — ITSafe dirancang agar siapapun bisa lapor dalam hitungan detik.</p>
+            <p>Tidak perlu daftar, tidak perlu login. ITSafe dirancang agar siapapun bisa lapor dalam hitungan detik.</p>
           </div>
 
           <div class="htfu-ways-grid">
@@ -1187,7 +1188,7 @@
                 <i class="fas fa-image"></i>
               </div>
               <h3>Temukan Poster di Kampus</h3>
-              <p>Kami telah menempel poster ITSafe di titik-titik strategis kampus ITS — toilet, koridor, parkiran, dan area rawan lainnya. Cukup scan QR yang ada di poster!</p>
+              <p>Kami telah menempel poster ITSafe di titik-titik strategis kampus ITS seperti toilet, koridor, parkiran, dan area rawan lainnya. Cukup scan QR yang ada di poster!</p>
               <div class="htfu-way-steps">
                 <div class="htfu-step"><span class="htfu-step-dot"></span><span>Cari poster merah muda ITSafe</span></div>
                 <div class="htfu-step"><span class="htfu-step-dot"></span><span>Scan QR Code dengan kamera HP</span></div>
@@ -1256,7 +1257,7 @@
                   <div class="htfu-pf-icon"><i class="fas fa-bolt"></i></div>
                   <div>
                     <strong>Lapor dalam 2 Menit</strong>
-                    <p>Form singkat, langsung ke sistem — tidak perlu buat akun.</p>
+                    <p>Form singkat dan langsung masuk ke sistem, tidak perlu buat akun.</p>
                   </div>
                 </div>
                 <div class="htfu-poster-feature">
@@ -1326,7 +1327,7 @@
             <div class="htfu-bottom-icon"><i class="fas fa-bullhorn"></i></div>
             <div class="htfu-bottom-text">
               <h3>Setiap Laporan, Kampus Lebih Aman</h3>
-              <p>Bersama, ciptakan ITS yang aman dan nyaman untuk semua. Laporkan kondisi area yang tidak aman — anonim, cepat, berdampak nyata.</p>
+              <p>Bersama, ciptakan ITS yang aman dan nyaman untuk semua. Laporkan kondisi area yang tidak aman secara anonim, cepat, dan berdampak nyata.</p>
             </div>
             <div class="htfu-bottom-actions">
               <button class="btn btn-primary" onclick="scrollToForm()">
@@ -1375,7 +1376,7 @@
           <div class="wii-header reveal">
             <div class="wii-label-pill"><i class="fas fa-circle-question"></i> Mengenal Platform</div>
             <h2 class="wii-title">What is <span class="gradient-text">ITSafe</span>?</h2>
-            <p class="wii-subtitle">Sebuah jawaban atas kebutuhan nyata akan kampus yang lebih aman — bukan sekadar aplikasi, melainkan gerakan berbasis data.</p>
+            <p class="wii-subtitle">Sebuah jawaban atas kebutuhan nyata akan kampus yang lebih aman, bukan sekadar aplikasi melainkan gerakan berbasis data.</p>
           </div>
 
           <!-- INTRO SPLIT CARD -->
@@ -1383,7 +1384,7 @@
             <div class="wii-intro-text">
               <div class="wii-section-chip"><i class="fas fa-map-location-dot"></i> Konteks</div>
               <h3>Kampus Luas, Pengawasan Terbatas</h3>
-              <p>Institut Teknologi Sepuluh Nopember memiliki kawasan kampus yang sangat luas dengan dinamika aktivitas tinggi. Namun tidak semua sudut terpantau secara optimal — lorong gedung, area parkir tertutup, jalan pintas, taman, hingga toilet kerap menjadi titik buta dengan pencahayaan minim, lalu-lalang sepi, atau tanpa kamera pengawas.</p>
+              <p>Institut Teknologi Sepuluh Nopember memiliki kawasan kampus yang sangat luas dengan dinamika aktivitas tinggi. Namun tidak semua sudut terpantau secara optimal. Lorong gedung, area parkir tertutup, jalan pintas, taman, hingga toilet kerap menjadi titik buta dengan pencahayaan minim, lalu-lalang sepi, atau tanpa kamera pengawas.</p>
               <p style="margin-top:1rem">Kondisi seperti ini menciptakan ruang bagi potensi tindak asusila yang seringkali dinormalisasi dan diabaikan. <strong>ITSafe hadir untuk memutus rantai tersebut.</strong></p>
             </div>
             <div class="wii-intro-visual">
@@ -1405,7 +1406,7 @@
           <div class="wii-definition-card reveal">
             <div class="wii-def-badge"><i class="fas fa-lightbulb"></i> Definisi</div>
             <div class="wii-def-content">
-              <p class="wii-def-text"><span class="wii-def-highlight">ITSafe</span> adalah platform pelaporan kondisi area berbasis <em>crowdsourcing</em> sekaligus pemetaan spasial yang dikembangkan untuk mengidentifikasi area berpotensi rawan tindak asusila di lingkungan Kampus ITS Sukolilo — guna mendukung kebijakan peningkatan keamanan yang lebih tepat sasaran.</p>
+              <p class="wii-def-text"><span class="wii-def-highlight">ITSafe</span> adalah platform pelaporan kondisi area berbasis <em>crowdsourcing</em> sekaligus pemetaan spasial yang dikembangkan untuk mengidentifikasi area berpotensi rawan tindak asusila di lingkungan Kampus ITS Sukolilo, guna mendukung kebijakan peningkatan keamanan yang lebih tepat sasaran.</p>
             </div>
           </div>
 
@@ -1491,7 +1492,7 @@
             <div class="wii-privacy-icon"><i class="fas fa-lock"></i></div>
             <div class="wii-privacy-content">
               <strong>Jaminan Privasi Data</strong>
-              <p>Seluruh data pribadi — email dan foto sensitif — dijamin kerahasiaannya. Tidak akan dipublikasikan, tidak akan disalahgunakan. ITSafe murni platform penelitian pencegahan berbasis tata ruang.</p>
+              <p>Seluruh data pribadi termasuk email dan foto sensitif dijamin kerahasiaannya. Tidak akan dipublikasikan, tidak akan disalahgunakan. ITSafe murni platform penelitian pencegahan berbasis tata ruang.</p>
             </div>
           </div>
 
@@ -1504,120 +1505,7 @@
         </div>
 
         <div class="about-section reveal">
-          <h2 class="about-section-title"><span class="section-number">02</span> Tujuan &amp; Metode Penelitian</h2>
-
-          <!-- Tujuan Penelitian -->
-          <div class="research-block reveal">
-            <div class="research-block-header">
-              <div class="research-block-icon"><i class="fas fa-bullseye"></i></div>
-              <div>
-                <div class="research-block-title">Tujuan Penelitian</div>
-                <div class="research-block-sub">Berdasarkan Proposal Kemah Kerja Field Camp 2026</div>
-              </div>
-            </div>
-            <div class="research-goals-grid">
-              <div class="research-goal-item">
-                <div class="goal-number">01</div>
-                <div class="goal-text">Menganalisis <strong>kondisi fisik lokasi</strong> yang berkontribusi terhadap tingginya tingkat kerawanan tindak asusila di lingkungan ITS berdasarkan aspek pencahayaan, kepadatan aktivitas, keberadaan CCTV, keberadaan petugas keamanan, dan kondisi vegetasi.</div>
-              </div>
-              <div class="research-goal-item">
-                <div class="goal-number">02</div>
-                <div class="goal-text">Membangun <strong>sistem WebGIS pelaporan anonim</strong> berbasis web dan PostgreSQL yang memudahkan warga kampus ITS melaporkan lokasi-lokasi berpotensi rawan melalui website maupun QR-Code di titik-titik strategis kampus.</div>
-              </div>
-              <div class="research-goal-item">
-                <div class="goal-number">03</div>
-                <div class="goal-text">Menghasilkan <strong>pemetaan berbasis WebGIS</strong> berupa Peta Sebaran Titik Lokasi Rawan, Peta Heatmap Kerawanan, dan Peta Zonasi Tingkat Risiko untuk mengidentifikasi dan memvisualisasikan zona rawan di lingkungan kampus ITS.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Metode Penelitian -->
-          <div class="research-block reveal" style="margin-top:1.5rem;">
-            <div class="research-block-header">
-              <div class="research-block-icon" style="background:linear-gradient(135deg,var(--accent-blue),#A7C4BC)"><i class="fas fa-diagram-project"></i></div>
-              <div>
-                <div class="research-block-title">Tahapan Metode Penelitian</div>
-                <div class="research-block-sub">5 tahap sistematis dari persiapan hingga penyajian data</div>
-              </div>
-            </div>
-            <div class="method-timeline">
-              <div class="method-step">
-                <div class="method-step-badge" style="background:linear-gradient(135deg,#F28482,#F5CAC3)">A</div>
-                <div class="method-step-body">
-                  <div class="method-step-title">Tahap Persiapan &amp; Survei Pendahuluan</div>
-                  <ul class="method-step-bullets">
-                    <li>Identifikasi masalah area rawan di kampus ITS</li>
-                    <li>Studi literatur regulasi (Permendikbudristek No. 55/2024 &amp; KUHP Pasal 281–283)</li>
-                    <li>Penentuan kebutuhan data primer &amp; sekunder</li>
-                    <li>Survei pendahuluan ke Satgas PPK ITS</li>
-                  </ul>
-                </div>
-              </div>
-              <div class="method-step">
-                <div class="method-step-badge" style="background:linear-gradient(135deg,#84A59D,#A7C4BC)">B</div>
-                <div class="method-step-body">
-                  <div class="method-step-title">Tahap Akuisisi Data</div>
-                  <ul class="method-step-bullets">
-                    <li>Kuesioner persepsi keamanan warga kampus</li>
-                    <li>Koordinat GPS titik lokasi via survei lapangan</li>
-                    <li>Data pelaporan form ITSafe (waktu, pencahayaan, CCTV, skor)</li>
-                    <li>Data sekunder: peta kampus, citra satelit, data civitas ITS</li>
-                  </ul>
-                </div>
-              </div>
-              <div class="method-step">
-                <div class="method-step-badge" style="background:linear-gradient(135deg,#F6BD60,#F5E0D5)">C</div>
-                <div class="method-step-body">
-                  <div class="method-step-title">Tahap Pengolahan Data</div>
-                  <ul class="method-step-bullets">
-                    <li>Pengembangan website ITSafe (HTML/CSS/JS + Laravel + PostgreSQL)</li>
-                    <li>Pengolahan koordinat lokasi menjadi data spasial titik</li>
-                    <li>Pembuatan Peta Persebaran Titik Lokasi Rawan</li>
-                    <li>Pembuatan Heatmap KDE &amp; Peta Kelayakan Fasilitas (5 parameter)</li>
-                  </ul>
-                </div>
-              </div>
-              <div class="method-step">
-                <div class="method-step-badge" style="background:linear-gradient(135deg,#D56A6A,#F28482)">D</div>
-                <div class="method-step-body">
-                  <div class="method-step-title">Tahap Analisis Data</div>
-                  <ul class="method-step-bullets">
-                    <li>Analisis pola sebaran lokasi rawan (distribusi spasial)</li>
-                    <li>Analisis tingkat kerawanan berdasarkan skor pelapor (hotspot)</li>
-                    <li>Analisis kelayakan fasilitas fisik area kampus</li>
-                    <li>Identifikasi zona prioritas intervensi kampus</li>
-                  </ul>
-                </div>
-              </div>
-              <div class="method-step">
-                <div class="method-step-badge" style="background:linear-gradient(135deg,#84A59D,#F6BD60)">E</div>
-                <div class="method-step-body">
-                  <div class="method-step-title">Tahap Penyajian Data</div>
-                  <ul class="method-step-bullets">
-                    <li>Sistem WebGIS ITSafe interaktif berbasis web</li>
-                    <li>Peta 1 – Sebaran Titik Lokasi Rawan</li>
-                    <li>Peta 2 – Heatmap Kerawanan dengan filter waktu</li>
-                    <li>Peta 3 – Kelayakan Fasilitas &amp; penyebaran QR-Code strategis</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Etika Penelitian -->
-          <div class="research-ethics-bar reveal" style="margin-top:1.5rem;">
-            <div class="ethics-header"><i class="fas fa-user-shield"></i> Etika Penelitian</div>
-            <div class="ethics-items">
-              <div class="ethics-item"><i class="fas fa-eye-slash"></i><span>Semua data pelapor bersifat <strong>anonim &amp; rahasia</strong> sepenuhnya</span></div>
-              <div class="ethics-item"><i class="fas fa-graduation-cap"></i><span>Data hanya digunakan untuk <strong>kepentingan penelitian akademik</strong></span></div>
-              <div class="ethics-item"><i class="fas fa-id-card-clip"></i><span><strong>Tidak ada identitas</strong> personal yang dipublikasikan</span></div>
-              <div class="ethics-item"><i class="fas fa-shield-halved"></i><span>Data laporan <strong>tidak akan disalahgunakan</strong> di luar kepentingan penelitian</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="about-section reveal">
-          <h2 class="about-section-title"><span class="section-number">03</span> Filosofi Logo</h2>
+          <h2 class="about-section-title"><span class="section-number">02</span> Filosofi Logo</h2>
           
           <!-- Main Logo Display -->
           <div class="logo-philosophy-hero reveal">
@@ -1788,7 +1676,7 @@
         </div>
 
         <div class="about-section reveal contact-support-section">
-          <h2 class="about-section-title"><span class="section-number">04</span> Kontak &amp; Dukungan</h2>
+          <h2 class="about-section-title"><span class="section-number">03</span> Kontak &amp; Dukungan</h2>
 
           <!-- Intro -->
           <p class="contact-intro-text">
@@ -2023,11 +1911,32 @@
       <div class="history-modal-header">
         <div class="history-modal-icon"><i class="fas fa-clock-rotate-left"></i></div>
         <h3 id="historyModalTitle">History Laporan Saya</h3>
-        <p>Cek kode laporan kamu dan status validasinya di bawah ini.</p>
+        <p>Masukkan email atau kode laporan untuk melihat riwayat dan status laporanmu.</p>
       </div>
 
-      <!-- Input kode laporan -->
-      <div class="history-search-row">
+      <!-- Tab pilihan metode pencarian -->
+      <div class="history-tab-row">
+        <button class="history-tab-btn active" id="tabByEmail" onclick="switchHistoryTab('email')">
+          <i class="fas fa-envelope"></i> Cari via Email
+        </button>
+        <button class="history-tab-btn" id="tabByCode" onclick="switchHistoryTab('code')">
+          <i class="fas fa-barcode"></i> Cari via Kode
+        </button>
+      </div>
+
+      <!-- Input via Email -->
+      <div id="historyEmailPanel" class="history-search-row">
+        <div class="history-input-wrap">
+          <i class="fas fa-envelope history-input-icon"></i>
+          <input type="email" id="historyEmailInput" placeholder="Masukkan email yang digunakan saat melapor" class="history-input" />
+        </div>
+        <button type="button" class="btn btn-primary" onclick="checkReportsByEmail()">
+          <i class="fas fa-magnifying-glass"></i> Cari Laporan
+        </button>
+      </div>
+
+      <!-- Input via Kode -->
+      <div id="historyCodePanel" class="history-search-row" style="display:none;">
         <div class="history-input-wrap">
           <i class="fas fa-barcode history-input-icon"></i>
           <input type="text" id="historyCodeInput" placeholder="Masukkan kode laporan (cth: RPT-2026-XXXXX)" class="history-input" />
@@ -2044,13 +1953,16 @@
       <div class="history-info-box">
         <i class="fas fa-circle-info"></i>
         <div>
-          <strong>Di mana saya bisa menemukan kode laporan?</strong>
-          <p>Kode laporan dikirim ke email yang kamu daftarkan saat mengisi form pengaduan. Kamu juga bisa menyimpannya dari popup konfirmasi setelah mengirim laporan.</p>
+          <strong>Tips menemukan laporan kamu</strong>
+          <p>Gunakan email yang sama seperti saat mengisi form. Kode laporan juga bisa ditemukan di email konfirmasi yang dikirimkan setelah laporan berhasil terkirim.</p>
         </div>
       </div>
 
-      <div class="its-modal-actions" style="margin-top:1.5rem;">
-        <button type="button" class="btn btn-outline" onclick="closeHistoryModal(); scrollToForm()">
+      <div class="its-modal-actions" style="margin-top:1.5rem; gap: 0.75rem; flex-wrap: wrap;">
+        <button type="button" class="btn btn-outline" onclick="closeHistoryModal()">
+          <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+        <button type="button" class="btn btn-ghost" onclick="closeHistoryModal(); scrollToForm()">
           <i class="fas fa-pen-to-square"></i> Buat Laporan Baru
         </button>
       </div>
