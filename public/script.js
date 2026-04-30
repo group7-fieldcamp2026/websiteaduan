@@ -2191,6 +2191,11 @@ window.addEventListener('resize', () => {
 
   /* â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   function boot() {
+    if (window._itsafeUiBootDone) {
+      updateProgress();
+      return;
+    }
+    window._itsafeUiBootDone = true;
     /* unified form interactions (level-card + pill-btn) */
     initFormInteractions();
     /* progress: listen to all form fields */
@@ -2211,5 +2216,11 @@ window.addEventListener('resize', () => {
 
   // Ensure boot is accessible if needed, but we typically call it from the master boot
   window.itsafeBootUI = boot;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
 
 })();
