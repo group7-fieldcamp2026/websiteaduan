@@ -4276,7 +4276,10 @@ main {
   -webkit-tap-highlight-color: transparent;
   transform: translateY(14px) scale(.98);
   opacity: 0;
-  animation: fabPopIn .45s cubic-bezier(.34, 1.56, .64, 1) .15s both;
+  will-change: transform, translate;
+  animation:
+    fabPopIn .45s cubic-bezier(.34, 1.56, .64, 1) .15s both,
+    fabFloat 3.2s ease-in-out 1.2s infinite;
 }
 .fab-report i { font-size: 1rem; }
 .fab-report .fab-text { white-space: nowrap; }
@@ -4292,6 +4295,18 @@ main {
 @keyframes fabPopIn {
   from { opacity: 0; transform: translateY(16px) scale(.96); }
   to   { opacity: 1; transform: translateY(0)  scale(1); }
+}
+@keyframes fabFloat {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fab-report {
+    animation: none;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    translate: 0 0;
+  }
 }
 @media (max-width: 420px) {
   .fab-report {
