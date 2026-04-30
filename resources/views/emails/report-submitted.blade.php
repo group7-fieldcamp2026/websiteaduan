@@ -100,11 +100,11 @@
             </div>
 
             <div class="info-section">
-                <span class="label">Skor Kenyamanan:</span> {{ $report->skor_nyaman }}/5
+                <span class="label">Skor Kenyamanan:</span> {{ $report->alasan_tidak_nyaman }}
             </div>
 
             <div class="info-section">
-                <span class="label">Skor Kerawanan:</span> {{ $report->skor_rawan }}/5
+                <span class="label">Skor Kerawanan:</span> {{ $report->situasi_mencurigakan }}
             </div>
 
             @if($report->kronologi)
@@ -146,8 +146,8 @@
             <li><strong>Kode Laporan:</strong> {{ $reportCode }}</li>
             <li><strong>Lokasi Kejadian:</strong> {{ $reportDetails->lokasi_kejadian }}</li>
             <li><strong>Deskripsi Lokasi:</strong> {{ $reportDetails->lokasi_deskripsi }}</li>
-            <li><strong>Skor Kenyamanan:</strong> {{ $reportDetails->skor_nyaman }}</li>
-            <li><strong>Skor Kerawanan:</strong> {{ $reportDetails->skor_rawan }}</li>
+            <li><strong>Skor Kenyamanan:</strong> {{ $reportDetails->alasan_tidak_nyaman }}</li>
+            <li><strong>Skor Kerawanan:</strong> {{ $reportDetails->situasi_mencurigakan }}</li>
         </ul>
         <p>Kami akan segera menindaklanjuti laporan Anda. Jika Anda memiliki pertanyaan lebih lanjut, silakan hubungi kami melalui email ini.</p>
         <p>Salam hangat,</p>
