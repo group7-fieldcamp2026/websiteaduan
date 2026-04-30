@@ -1721,28 +1721,28 @@
           <div class="stat-card">
             <div class="stat-icon red"><i class="fas fa-file-lines"></i></div>
             <div>
-              <div class="stat-num" id="dTotal">—</div>
+              <div class="stat-num" id="dTotal">0</div>
               <div class="stat-label">Total Laporan</div>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon amber"><i class="fas fa-clock"></i></div>
             <div>
-              <div class="stat-num" id="dPending">—</div>
+              <div class="stat-num" id="dPending">0</div>
               <div class="stat-label">Menunggu Verifikasi</div>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon green"><i class="fas fa-circle-check"></i></div>
             <div>
-              <div class="stat-num" id="dVerified">—</div>
+              <div class="stat-num" id="dVerified">0</div>
               <div class="stat-label">Terverifikasi</div>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon blue"><i class="fas fa-calendar-day"></i></div>
             <div>
-              <div class="stat-num" id="dBulan">—</div>
+              <div class="stat-num" id="dBulan">0</div>
               <div class="stat-label">Bulan Ini</div>
             </div>
           </div>
@@ -1840,7 +1840,7 @@
             </table>
           </div>
           <div class="pagination">
-            <span id="paginationInfo">—</span>
+            <span id="paginationInfo">Memuat data...</span>
             <div class="pagination-btns" id="paginationBtns"></div>
           </div>
         </div>
@@ -1935,10 +1935,10 @@
         <div class="detail-grid">
 
           <div class="detail-item"><label>ID Laporan</label>
-            <p id="dId" style="font-weight:600">—</p>
+            <p id="dId" style="font-weight:600">Belum dipilih</p>
           </div>
           <div class="detail-item"><label>Tanggal Masuk Sistem</label>
-            <p id="dTanggal">—</p>
+            <p id="dTanggal">Belum dipilih</p>
           </div>
 
           <!-- Identitas -->
@@ -1988,7 +1988,7 @@
               </div>
               <div id="reportPhotoEmpty">Belum ada foto yang dikirim.</div>
               <input type="file" id="dFoto" accept="image/*" onchange="previewReportPhoto(this)" />
-              <div class="photo-note">JPG/PNG/WEBP — maks 5 MB.</div>
+              <div class="photo-note">JPG/PNG/WEBP dengan ukuran maksimal 5 MB.</div>
             </div>
           </div>
           <div class="detail-item">
@@ -2700,8 +2700,8 @@
         `<tr>
       <td style="color:var(--text-muted)">#${r.id}</td>
       <td>${formatDate(r.createdAt)}</td>
-      <td><span class="badge ${sClass(parseInt(r.skorRawan, 10))}">${!isNaN(parseInt(r.skorRawan, 10)) ? sLabel(parseInt(r.skorRawan, 10)) : '—'}</span></td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.lokasi || '—'}</td>
+      <td><span class="badge ${sClass(parseInt(r.skorRawan, 10))}">${!isNaN(parseInt(r.skorRawan, 10)) ? sLabel(parseInt(r.skorRawan, 10)) : 'Tidak tersedia'}</span></td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.lokasi || 'Tidak tersedia'}</td>
       <td>${statusBadge(r.status)}</td>
     </tr>`
       ).join('') || '<tr><td colspan="5" class="empty-state"><i class="fas fa-inbox"></i><p>Belum ada laporan</p></td></tr>';
@@ -2740,22 +2740,22 @@
         `<tr>
       <td style="color:var(--text-muted);font-size:.75rem">#${r.id}</td>
       <td style="white-space:nowrap;font-size:.78rem">${formatDate(r.createdAt)}</td>
-      <td style="font-size:.78rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.email || '—'}</td>
-      <td style="font-size:.78rem">${r.peran || '—'}</td>
-      <td style="font-size:.78rem">${r.kelamin || '—'}</td>
-      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.lokasi || ''}">${r.lokasi || '—'}</td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.lokasiDeskripsi || ''}">${r.lokasiDeskripsi || '—'}</td>
-      <td style="font-size:.78rem">${r.skorRawan ?? '—'}</td>
-      <td style="font-size:.78rem">${r.pencahayaan || '—'}</td>
-      <td style="font-size:.78rem">${r.kepadatan || '—'}</td>
-      <td style="font-size:.78rem">${r.skorNyaman ?? '—'}</td>
-      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.alasanTidakNyaman || ''}">${r.alasanTidakNyaman || '—'}</td>
-      <td style="font-size:.78rem">${r.pernahHindari || '—'}</td>
-      <td style="font-size:.78rem">${r.orangLain || '—'}</td>
-      <td style="font-size:.78rem">${r.situasiMencurigakan || '—'}</td>
-      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.fungsiRuang || ''}">${r.fungsiRuang || '—'}</td>
-      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.kronologi || ''}">${r.kronologi || '—'}</td>
-      <td style="font-size:.78rem">${r.fotoPath && !r.fotoPath.startsWith('HIDDEN_') ? `<a class="photo-link" href="${getPhotoUrl(r.fotoPath)}" target="_blank" rel="noopener"><i class="fas fa-image"></i> Lihat</a>` : (r.fotoPath?.startsWith('HIDDEN_') ? '<span style="color:#D56A6A;font-weight:600;"><i class="fas fa-eye-slash"></i> Sembunyi</span>' : '—')}</td>
+      <td style="font-size:.78rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.email || 'Tidak tersedia'}</td>
+      <td style="font-size:.78rem">${r.peran || 'Tidak tersedia'}</td>
+      <td style="font-size:.78rem">${r.kelamin || 'Tidak tersedia'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.lokasi || ''}">${r.lokasi || 'Tidak tersedia'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.lokasiDeskripsi || ''}">${r.lokasiDeskripsi || 'Tidak tersedia'}</td>
+      <td style="font-size:.78rem">${r.skorRawan ?? 'Tidak tersedia'}</td>
+      <td style="font-size:.78rem">${r.pencahayaan || 'Tidak tersedia'}</td>
+      <td style="font-size:.78rem">${r.kepadatan || 'Tidak tersedia'}</td>
+      <td style="font-size:.78rem">${r.skorNyaman ?? 'Tidak tersedia'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.alasanTidakNyaman || ''}">${r.alasanTidakNyaman || 'Tidak tersedia'}</td>
+      <td style="font-size:.78rem">${r.pernahHindari || 'Tidak tersedia'}</td>
+      <td style="font-size:.78rem">${r.orangLain || 'Tidak tersedia'}</td>
+      <td style="font-size:.78rem">${r.situasiMencurigakan || 'Tidak tersedia'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.fungsiRuang || ''}">${r.fungsiRuang || 'Tidak tersedia'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem" title="${r.kronologi || ''}">${r.kronologi || 'Tidak tersedia'}</td>
+      <td style="font-size:.78rem">${r.fotoPath && !r.fotoPath.startsWith('HIDDEN_') ? `<a class="photo-link" href="${getPhotoUrl(r.fotoPath)}" target="_blank" rel="noopener"><i class="fas fa-image"></i> Lihat</a>` : (r.fotoPath?.startsWith('HIDDEN_') ? '<span style="color:#D56A6A;font-weight:600;"><i class="fas fa-eye-slash"></i> Sembunyi</span>' : 'Tidak ada')}</td>
       <td>${statusBadge(r.status)}</td>
       <td>
         <div class="action-btns">
@@ -2786,7 +2786,7 @@
       document.getElementById('modalMode').textContent = 'Edit';
       document.getElementById('dId').textContent = '#' + r.id;
       document.getElementById('dTanggal').textContent = formatDate(r.createdAt);
-      document.getElementById('dEmail').value = r.email || '—';
+      document.getElementById('dEmail').value = r.email || 'Tidak tersedia';
       setSelect('dPeran', r.peran);
       setSelect('dKelamin', r.kelamin);
       document.getElementById('dLokasi').value = r.lokasi || '';
@@ -3809,7 +3809,7 @@
 
     // ─── HELPERS ─────────────────────────────────────────────────
     function formatDate(d) {
-      if (!d) return '—';
+      if (!d) return 'Tidak tersedia';
       return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
     }
 

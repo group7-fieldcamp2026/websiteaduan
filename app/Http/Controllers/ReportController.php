@@ -463,7 +463,7 @@ class ReportController extends Controller
             'status'               => 'nullable|in:pending,in_review,resolved,verified,rejected',
         ]);
 
-        // Handle penolakan (data tidak valid) — kirim email & hapus
+        // Handle penolakan (data tidak valid), kirim email, lalu hapus
         if ($requestedStatus === 'rejected') {
             $readableStatus = 'Ditolak/Tidak Valid';
             $mailReport = clone $report;

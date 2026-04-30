@@ -515,7 +515,7 @@ function initPickerMap() {
   pickerMap = L.map('pickerMap', { 
     zoomControl: true,
     scrollWheelZoom: false,
-    tap: true,           // Always enable Leaflet tap — prevents raw touch bubbling to page
+    tap: true,           // Always enable Leaflet tap agar sentuhan tidak memantul ke halaman
     tapTolerance: 15     // Slightly generous for finger accuracy
   }).setView(ITS, ZOOM);
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
