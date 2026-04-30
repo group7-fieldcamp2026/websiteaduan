@@ -1801,8 +1801,6 @@ function showToast(msg, type = 'success') {
   t._t = setTimeout(() => { t.className = 'toast'; }, 3500);
 }
 
-let submitSuccessModalTimer = null;
-
 function openSubmitSuccessModal(opts = {}) {
   const modal = document.getElementById('submitSuccessModal');
   if (!modal) return;
@@ -1831,9 +1829,6 @@ function openSubmitSuccessModal(opts = {}) {
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
 
-  clearTimeout(submitSuccessModalTimer);
-  submitSuccessModalTimer = setTimeout(() => closeSubmitSuccessModal(), 6500);
-
   requestAnimationFrame(() => {
     const btn = modal.querySelector('.its-modal-actions .btn');
     if (btn && typeof btn.focus === 'function') btn.focus();
@@ -1845,8 +1840,90 @@ function closeSubmitSuccessModal() {
   if (!modal) return;
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden', 'true');
-  clearTimeout(submitSuccessModalTimer);
-  submitSuccessModalTimer = null;
+}
+
+function copyReportCode() {
+  const codeEl = document.getElementById('submitSuccessCode');
+  if (!codeEl) return;
+  const code = codeEl.textContent.trim();
+  if (!code || code === '—') return;
+  navigator.clipboard.writeText(code).then(() => {
+    showToast('Kode laporan berhasil disalin!', 'success');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = code;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Kode laporan berhasil disalin!', 'success');
+  });
+}
+
+function openHistoryModal() {
+  const modal = document.getElementById('historyLaporanModal');
+  if (!modal) return;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  const res = document.getElementById('historyResult');
+  const inp = document.getElementById('historyCodeInput');
+  if (res) res.style.display = 'none';
+  if (inp) inp.value = '';
+}
+
+function closeHistoryModal() {
+  const modal = document.getElementById('historyLaporanModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+async function checkReportStatus() {
+  const input = document.getElementById('historyCodeInput');
+  const result = document.getElementById('historyResult');
+  if (!input || !result) return;
+  const code = input.value.trim();
+  if (!code) { showToast('Masukkan kode laporan terlebih dahulu.', 'error'); return; }
+  result.style.display = 'block';
+  result.innerHTML = '<div class="history-loading"><i class="fas fa-spinner fa-spin"></i> Mengecek status...</div>';
+  try {
+    const res = await fetch(`${API_BASE}/reports/status/${encodeURIComponent(code)}`);
+    if (res.ok) {
+      const data = await res.json();
+      const statusMap = {
+        'pending':  { cls: 'status-pending',  icon: 'fa-hourglass-half',   label: 'Menunggu Verifikasi' },
+        'review':   { cls: 'status-review',   icon: 'fa-magnifying-glass', label: 'Sedang Ditinjau' },
+        'valid':    { cls: 'status-valid',    icon: 'fa-check-circle',     label: 'Valid – Tampil di Peta' },
+        'rejected': { cls: 'status-rejected', icon: 'fa-circle-xmark',    label: 'Ditolak' },
+      };
+      const s = statusMap[data.status] || { cls: 'status-pending', icon: 'fa-question-circle', label: data.status || 'Tidak diketahui' };
+      const note = data.status === 'valid' ? '✅ Laporan kamu sudah tampil di peta persebaran ITSafe!' :
+                   data.status === 'rejected' ? 'Laporan tidak memenuhi kriteria. Kamu bisa membuat laporan baru dengan data lebih lengkap.' :
+                   'Tim admin sedang memproses laporanmu. Cek email kamu untuk notifikasi terbaru.';
+      result.innerHTML = `
+        <div class="history-result-card ${s.cls}">
+          <div class="history-result-header">
+            <i class="fas ${s.icon}"></i>
+            <div>
+              <strong>Kode: ${esc(code)}</strong>
+              <span class="history-status-badge">${s.label}</span>
+            </div>
+          </div>
+          ${data.lokasi ? `<div class="history-result-detail"><i class="fas fa-map-pin"></i> ${esc(data.lokasi)}</div>` : ''}
+          ${data.createdAt ? `<div class="history-result-detail"><i class="fas fa-calendar"></i> Dilaporkan: ${new Date(data.createdAt).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
+          <p class="history-result-note">${note}</p>
+        </div>`;
+    } else {
+      result.innerHTML = '<div class="history-result-card status-rejected"><i class="fas fa-circle-xmark"></i> Kode laporan tidak ditemukan. Pastikan kode sudah benar.</div>';
+    }
+  } catch {
+    result.innerHTML = '<div class="history-result-card status-pending"><i class="fas fa-wifi"></i> Tidak dapat terhubung ke server. Coba beberapa saat lagi.</div>';
+  }
+}
+
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function initSubmitSuccessModal() {
@@ -1856,9 +1933,9 @@ function initSubmitSuccessModal() {
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     const modal = document.getElementById('submitSuccessModal');
-    if (!modal || !modal.classList.contains('open')) return;
-    e.preventDefault();
-    closeSubmitSuccessModal();
+    if (modal && modal.classList.contains('open')) { e.preventDefault(); closeSubmitSuccessModal(); return; }
+    const hmodal = document.getElementById('historyLaporanModal');
+    if (hmodal && hmodal.classList.contains('open')) { e.preventDefault(); closeHistoryModal(); }
   });
 }
 

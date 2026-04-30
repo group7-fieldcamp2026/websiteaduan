@@ -1152,60 +1152,192 @@
 
     <!-- ===== PAGE: TITIK PENGADUAN ===== -->
     <section id="titikpengaduan" class="page" style="position:relative;">
-      <div class="hero hero-sm" style="position:relative;z-index:1;">
+      <!-- Hero -->
+      <div class="hero hero-sm htfu-hero" style="position:relative;z-index:1;">
         <div class="hero-bg-shapes" style="z-index:0;">
           <div class="shape shape-1"></div>
           <div class="shape shape-2"></div>
         </div>
         <div class="hero-content" style="position:relative;z-index:2;">
-          <div class="hero-badge"><i class="fas fa-qrcode"></i> QR Code Pengaduan</div>
-          <h1>Titik <span class="gradient-text">Pengaduan Area Rawan</span></h1>
-          <p>Lokasi-lokasi strategis di kampus ITS yang telah dipasangi QR Code pengaduan. Scan untuk melaporkan kondisi
-            area secara langsung dan anonim.</p>
+          <div class="hero-badge htfu-badge"><i class="fas fa-compass"></i> How to Find Us</div>
+          <h1>Temukan <span class="gradient-text">ITSafe di Kampus!</span></h1>
+          <p>ITSafe tersebar di area-area strategis kampus ITS. Temukan poster kami, scan QR, atau akses langsung lewat website — laporkan kondisi area secara anonim & gratis kapan saja.</p>
+          <div class="htfu-hero-ctas">
+            <button class="btn btn-primary" onclick="scrollToSection('htfu-ways')"><i class="fas fa-route"></i> Cara Menemukan Kami</button>
+            <button class="btn btn-outline" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Lapor Sekarang</button>
+          </div>
         </div>
       </div>
 
       <div class="section-container">
-        <div class="qr-section">
-          <div class="section-header">
-            <h2><i class="fas fa-qrcode"></i> QR Code Pengaduan ITSafe</h2>
-            <p>QR Code ini dicetak dan ditempel di area-area kampus. Scan akan langsung membuka form pengaduan kondisi
-              area.</p>
+
+        <!-- ===== HOW TO FIND US: 3 CARA ===== -->
+        <div id="htfu-ways" class="htfu-ways-section reveal">
+          <div class="section-header htfu-section-header">
+            <div class="htfu-section-chip"><i class="fas fa-map-signs"></i> 3 Cara Temukan Kami</div>
+            <h2>How to Find <span class="gradient-text">ITSafe</span>?</h2>
+            <p>Tidak perlu daftar, tidak perlu login — ITSafe dirancang agar siapapun bisa lapor dalam hitungan detik.</p>
           </div>
-          <div class="qr-generator-card reveal">
-            <div class="qr-display">
-              <div class="qr-scan-hint"><i class="fas fa-mobile-screen-button"></i> Arahkan kamera ke QR untuk lapor
+
+          <div class="htfu-ways-grid">
+            <!-- Cara 1: Poster di Kampus -->
+            <div class="htfu-way-card htfu-way-primary reveal-scale" style="--i:0">
+              <div class="htfu-way-num">01</div>
+              <div class="htfu-way-icon-ring htfu-icon-pink">
+                <i class="fas fa-image"></i>
               </div>
-              <div class="qr-frame">
-                <div id="qrCodeContainer">
-                  <div class="qr-placeholder-inner">
-                    <i class="fas fa-qrcode"></i>
-                    <p>QR Code akan tampil di sini</p>
-                  </div>
-                </div>
-                <div class="qr-corner qr-tl"></div>
-                <div class="qr-corner qr-tr"></div>
-                <div class="qr-corner qr-bl"></div>
-                <div class="qr-corner qr-br"></div>
+              <h3>Temukan Poster di Kampus</h3>
+              <p>Kami telah menempel poster ITSafe di titik-titik strategis kampus ITS — toilet, koridor, parkiran, dan area rawan lainnya. Cukup scan QR yang ada di poster!</p>
+              <div class="htfu-way-steps">
+                <div class="htfu-step"><span class="htfu-step-dot"></span><span>Cari poster merah muda ITSafe</span></div>
+                <div class="htfu-step"><span class="htfu-step-dot"></span><span>Scan QR Code dengan kamera HP</span></div>
+                <div class="htfu-step"><span class="htfu-step-dot"></span><span>Isi form dan kirim laporan</span></div>
               </div>
-              <div class="qr-url-display" id="qrUrlDisplay">https://itsafe.geowebgis.id/</div>
+              <div class="htfu-way-badge"><i class="fas fa-thumbtack"></i> Di lokasi rawan kampus</div>
+            </div>
+
+            <!-- Cara 2: Website Langsung -->
+            <div class="htfu-way-card htfu-way-secondary reveal-scale" style="--i:1">
+              <div class="htfu-way-num">02</div>
+              <div class="htfu-way-icon-ring htfu-icon-teal">
+                <i class="fas fa-globe"></i>
+              </div>
+              <h3>Akses Website Langsung</h3>
+              <p>Kunjungi <strong>itsafe.geowebgis.id</strong> langsung dari browser HP atau laptop kamu. Tidak perlu instal aplikasi apapun!</p>
+              <div class="htfu-way-steps">
+                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-teal"></span><span>Buka browser (Chrome/Safari)</span></div>
+                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-teal"></span><span>Ketik: itsafe.geowebgis.id</span></div>
+                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-teal"></span><span>Klik "Buat Laporan"</span></div>
+              </div>
+              <a href="https://itsafe.geowebgis.id/" target="_blank" class="htfu-way-cta btn btn-outline">
+                <i class="fas fa-arrow-up-right-from-square"></i> Buka Website
+              </a>
+            </div>
+
+            <!-- Cara 3: Scan QR dari Poster -->
+            <div class="htfu-way-card htfu-way-tertiary reveal-scale" style="--i:2">
+              <div class="htfu-way-num">03</div>
+              <div class="htfu-way-icon-ring htfu-icon-gold">
+                <i class="fas fa-share-nodes"></i>
+              </div>
+              <h3>Sebarkan ke Teman</h3>
+              <p>Satu laporan bermakna besar. Semakin banyak warga ITS melapor, semakin akurat peta kerawanan kampus kita.</p>
+              <div class="htfu-way-steps">
+                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-gold"></span><span>Bagikan link ke grup angkatan</span></div>
+                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-gold"></span><span>Ajak teman yang merasa tidak aman</span></div>
+                <div class="htfu-step"><span class="htfu-step-dot htfu-dot-gold"></span><span>Bersama buat kampus lebih aman</span></div>
+              </div>
+              <div class="htfu-way-badge htfu-badge-gold"><i class="fas fa-users"></i> Gerakan kolektif warga ITS</div>
             </div>
           </div>
         </div>
 
-        <div class="section-header" style="margin-top:3rem">
-          <h2><i class="fas fa-map-pin"></i> Lokasi Titik Pengaduan Terpasang</h2>
-          <p>Titik-titik berikut adalah lokasi rawan yang telah atau akan dipasangi stiker QR pengaduan ITSafe.</p>
-        </div>
-        <div class="location-toolbar">
-          <div class="location-hint">Link Google Maps tersedia di tiap lokasi.</div>
-          <div class="location-filter">
-            <button class="loc-filter-btn active" data-filter="all" onclick="filterLocations(this)">Semua</button>
-            <button class="loc-filter-btn" data-filter="terpasang" onclick="filterLocations(this)">Terpasang</button>
-            <button class="loc-filter-btn" data-filter="rencana" onclick="filterLocations(this)">Rencana</button>
+        <!-- ===== POSTER SHOWCASE ===== -->
+        <div class="htfu-poster-section reveal">
+          <div class="htfu-poster-label">
+            <div class="htfu-section-chip htfu-chip-pink"><i class="fas fa-image"></i> Poster Resmi ITSafe</div>
+          </div>
+
+          <div class="htfu-poster-showcase">
+            <!-- Kiri: info -->
+            <div class="htfu-poster-info">
+              <h2>Kenali Poster <span class="gradient-text">ITSafe</span> di Kampus</h2>
+              <p class="htfu-poster-tagline">Poster berwarna merah muda &amp; putih ini adalah tanda bahwa area tersebut dalam pantauan komunitas ITSafe.</p>
+
+              <div class="htfu-poster-features">
+                <div class="htfu-poster-feature">
+                  <div class="htfu-pf-icon"><i class="fas fa-eye-slash"></i></div>
+                  <div>
+                    <strong>100% Anonim</strong>
+                    <p>Identitas pelapor tidak pernah dipublikasikan. Lapor dengan aman.</p>
+                  </div>
+                </div>
+                <div class="htfu-poster-feature">
+                  <div class="htfu-pf-icon"><i class="fas fa-bolt"></i></div>
+                  <div>
+                    <strong>Lapor dalam 2 Menit</strong>
+                    <p>Form singkat, langsung ke sistem — tidak perlu buat akun.</p>
+                  </div>
+                </div>
+                <div class="htfu-poster-feature">
+                  <div class="htfu-pf-icon"><i class="fas fa-map-location-dot"></i></div>
+                  <div>
+                    <strong>Tampil di Peta Kampus</strong>
+                    <p>Laporan tervalidasi langsung tampil di peta interaktif ITSafe.</p>
+                  </div>
+                </div>
+                <div class="htfu-poster-feature">
+                  <div class="htfu-pf-icon"><i class="fas fa-shield-halved"></i></div>
+                  <div>
+                    <strong>Dikelola Bersama Satgas PPK</strong>
+                    <p>Data diteruskan ke tim Satgas PPK ITS untuk tindakan nyata.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="htfu-poster-ctas">
+                <button class="btn btn-primary" onclick="scrollToForm()">
+                  <i class="fas fa-pen-to-square"></i> Lapor Sekarang
+                </button>
+                <button class="btn btn-outline" onclick="navigateTo('peta')">
+                  <i class="fas fa-map"></i> Lihat Peta
+                </button>
+              </div>
+            </div>
+
+            <!-- Kanan: Poster image -->
+            <div class="htfu-poster-visual">
+              <div class="htfu-poster-frame">
+                <div class="htfu-poster-glow"></div>
+                <img src="assets/POSTER.png" alt="Poster Resmi ITSafe – Laporkan Sekarang" class="htfu-poster-img" loading="lazy"
+                  onerror="this.closest('.htfu-poster-frame').classList.add('htfu-poster-fallback')" />
+                <div class="htfu-poster-badge-overlay">
+                  <i class="fas fa-certificate"></i> Poster Resmi ITSafe 2026
+                </div>
+              </div>
+              <div class="htfu-poster-note">
+                <i class="fas fa-thumbtack"></i>
+                Poster ini terpasang di titik-titik strategis Kampus ITS Sukolilo
+              </div>
+            </div>
           </div>
         </div>
-        <div class="location-grid" id="locationGrid"></div>
+
+        <!-- ===== LOKASI TITIK PENGADUAN ===== -->
+        <div class="htfu-locations-section">
+          <div class="section-header" style="margin-top:3rem">
+            <h2><i class="fas fa-map-pin"></i> Lokasi Titik Pengaduan Terpasang</h2>
+            <p>Titik-titik berikut adalah lokasi rawan yang telah atau akan dipasangi stiker QR pengaduan ITSafe.</p>
+          </div>
+          <div class="location-toolbar">
+            <div class="location-hint">Link Google Maps tersedia di tiap lokasi.</div>
+            <div class="location-filter">
+              <button class="loc-filter-btn active" data-filter="all" onclick="filterLocations(this)">Semua</button>
+              <button class="loc-filter-btn" data-filter="terpasang" onclick="filterLocations(this)">Terpasang</button>
+              <button class="loc-filter-btn" data-filter="rencana" onclick="filterLocations(this)">Rencana</button>
+            </div>
+          </div>
+          <div class="location-grid" id="locationGrid"></div>
+        </div>
+
+        <!-- ===== CTA BOTTOM ===== -->
+        <div class="htfu-bottom-cta reveal">
+          <div class="htfu-bottom-cta-inner">
+            <div class="htfu-bottom-icon"><i class="fas fa-bullhorn"></i></div>
+            <div class="htfu-bottom-text">
+              <h3>Setiap Laporan, Kampus Lebih Aman</h3>
+              <p>Bersama, ciptakan ITS yang aman dan nyaman untuk semua. Laporkan kondisi area yang tidak aman — anonim, cepat, berdampak nyata.</p>
+            </div>
+            <div class="htfu-bottom-actions">
+              <button class="btn btn-primary" onclick="scrollToForm()">
+                <i class="fas fa-pen-to-square"></i> Buat Laporan
+              </button>
+              <a href="https://www.instagram.com/siapsetujuh" target="_blank" class="btn btn-outline">
+                <i class="fab fa-instagram"></i> Follow @siapsetujuh
+              </a>
+            </div>
+          </div>
+        </div>
 
         <div id="stickerPrintArea" class="sticker-print-area" style="display:none">
           <div class="sticker-sheet">
@@ -1803,31 +1935,123 @@
   <!-- Submit Success Modal -->
   <div class="its-modal" id="submitSuccessModal" aria-hidden="true">
     <div class="its-modal-backdrop" onclick="closeSubmitSuccessModal()"></div>
-    <div class="its-modal-card" role="dialog" aria-modal="true" aria-labelledby="submitSuccessTitle"
+    <div class="its-modal-card its-modal-card-v2" role="dialog" aria-modal="true" aria-labelledby="submitSuccessTitle"
       aria-describedby="submitSuccessDesc">
       <button type="button" class="its-modal-close" onclick="closeSubmitSuccessModal()" aria-label="Tutup">
         <i class="fas fa-xmark"></i>
       </button>
 
-      <div class="its-modal-icon" aria-hidden="true">
+      <!-- Confetti dots (CSS animated) -->
+      <div class="modal-confetti" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <div class="its-modal-icon its-modal-icon-v2" aria-hidden="true">
         <i class="fas fa-circle-check"></i>
       </div>
-      <h3 id="submitSuccessTitle">Terima kasih!</h3>
-      <p id="submitSuccessDesc">Pengaduan kamu sudah kami terima.</p>
+      <h3 id="submitSuccessTitle" class="its-modal-title-v2">Laporan Terkirim! 🎉</h3>
+      <p id="submitSuccessDesc" class="its-modal-desc-v2">Pengaduan kamu sudah kami terima dan sedang menunggu verifikasi admin.</p>
 
-      <div id="submitSuccessCodeWrap" class="its-modal-code" style="display:none;">
-        <i class="fas fa-hashtag"></i>
-        <span>Kode:</span>
-        <span id="submitSuccessCode">—</span>
+      <!-- Kode Laporan -->
+      <div id="submitSuccessCodeWrap" class="its-modal-code its-modal-code-v2" style="display:none;">
+        <div class="code-label-row">
+          <i class="fas fa-barcode"></i>
+          <span>Kode Laporan Kamu</span>
+        </div>
+        <div class="code-value-row">
+          <span id="submitSuccessCode" class="code-value-big">—</span>
+          <button type="button" class="code-copy-btn" onclick="copyReportCode()" title="Salin kode">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+        <p class="code-hint">Simpan kode ini untuk mengecek status validasi laporanmu.</p>
       </div>
+
+      <!-- Email notification box -->
+      <div class="modal-email-box" id="modalEmailBox">
+        <div class="email-box-icon"><i class="fas fa-envelope-open-text"></i></div>
+        <div class="email-box-content">
+          <strong>Cek Email Kamu Secara Berkala</strong>
+          <p>Tim ITSafe akan mengirim notifikasi ke emailmu saat statusnya berubah:</p>
+          <div class="email-status-flow">
+            <div class="email-status-step step-pending">
+              <i class="fas fa-hourglass-half"></i>
+              <span>Menunggu Verifikasi</span>
+            </div>
+            <div class="email-flow-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="email-status-step step-review">
+              <i class="fas fa-magnifying-glass"></i>
+              <span>Sedang Ditinjau</span>
+            </div>
+            <div class="email-flow-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="email-status-step step-valid">
+              <i class="fas fa-check-circle"></i>
+              <span>Valid → Tampil di Peta</span>
+            </div>
+          </div>
+          <p class="email-reminder">Laporan yang <strong>tervalidasi</strong> akan langsung tampil di <strong>Peta Persebaran</strong> ITSafe.</p>
+        </div>
+      </div>
+
       <div id="submitSuccessNote" class="its-modal-note" style="display:none;">
-        Catatan: email admin belum terkirim, tapi laporan sudah tersimpan.
+        <i class="fas fa-triangle-exclamation"></i> Catatan: email konfirmasi belum terkirim, tapi laporan sudah tersimpan dengan aman.
       </div>
 
-      <div class="its-modal-actions">
-        <button type="button" class="btn btn-outline btn-sm" onclick="closeSubmitSuccessModal()">Tutup</button>
-        <button type="button" class="btn btn-primary btn-sm" onclick="closeSubmitSuccessModal(); navigateTo('peta')">
+      <!-- Actions -->
+      <div class="its-modal-actions its-modal-actions-v2">
+        <button type="button" class="btn btn-primary" onclick="closeSubmitSuccessModal(); scrollToForm()">
+          <i class="fas fa-pen-to-square"></i> Buat Laporan Lagi
+        </button>
+        <button type="button" class="btn btn-outline" onclick="closeSubmitSuccessModal(); openHistoryModal()">
+          <i class="fas fa-clock-rotate-left"></i> Lihat History Laporan
+        </button>
+        <button type="button" class="btn btn-ghost" onclick="closeSubmitSuccessModal(); navigateTo('peta')">
           <i class="fas fa-map"></i> Lihat Peta
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Laporan Modal -->
+  <div class="its-modal" id="historyLaporanModal" aria-hidden="true">
+    <div class="its-modal-backdrop" onclick="closeHistoryModal()"></div>
+    <div class="its-modal-card its-modal-card-history" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+      <button type="button" class="its-modal-close" onclick="closeHistoryModal()" aria-label="Tutup">
+        <i class="fas fa-xmark"></i>
+      </button>
+      <div class="history-modal-header">
+        <div class="history-modal-icon"><i class="fas fa-clock-rotate-left"></i></div>
+        <h3 id="historyModalTitle">History Laporan Saya</h3>
+        <p>Cek kode laporan kamu dan status validasinya di bawah ini.</p>
+      </div>
+
+      <!-- Input kode laporan -->
+      <div class="history-search-row">
+        <div class="history-input-wrap">
+          <i class="fas fa-barcode history-input-icon"></i>
+          <input type="text" id="historyCodeInput" placeholder="Masukkan kode laporan (cth: RPT-2026-XXXXX)" class="history-input" />
+        </div>
+        <button type="button" class="btn btn-primary" onclick="checkReportStatus()">
+          <i class="fas fa-magnifying-glass"></i> Cek Status
+        </button>
+      </div>
+
+      <!-- Result area -->
+      <div id="historyResult" class="history-result" style="display:none;"></div>
+
+      <!-- Info box -->
+      <div class="history-info-box">
+        <i class="fas fa-circle-info"></i>
+        <div>
+          <strong>Di mana saya bisa menemukan kode laporan?</strong>
+          <p>Kode laporan dikirim ke email yang kamu daftarkan saat mengisi form pengaduan. Kamu juga bisa menyimpannya dari popup konfirmasi setelah mengirim laporan.</p>
+        </div>
+      </div>
+
+      <div class="its-modal-actions" style="margin-top:1.5rem;">
+        <button type="button" class="btn btn-outline" onclick="closeHistoryModal(); scrollToForm()">
+          <i class="fas fa-pen-to-square"></i> Buat Laporan Baru
         </button>
       </div>
     </div>
