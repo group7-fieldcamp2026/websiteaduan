@@ -1821,7 +1821,7 @@ function openSubmitSuccessModal(opts = {}) {
 
   if (codeWrap) {
     if (reportCode) {
-      codeWrap.style.display = 'inline-flex';
+      codeWrap.style.display = 'block';
       if (codeEl) codeEl.textContent = reportCode;
     } else {
       codeWrap.style.display = 'none';

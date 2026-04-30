@@ -9106,6 +9106,13 @@ body {
   font-weight: 800;
   color: var(--primary-dk);
   letter-spacing: .12em;
+  display: inline-block;
+  padding: .35rem .85rem;
+  border-radius: 10px;
+  background: rgba(var(--primary-rgb), .12);
+  border: 1px solid rgba(var(--primary-rgb), .28);
+  box-shadow: 0 10px 22px rgba(var(--primary-rgb), .12);
+  white-space: nowrap;
 }
 .code-copy-btn {
   background: rgba(var(--primary-rgb),.12);
@@ -9116,12 +9123,17 @@ body {
   color: var(--primary-dk);
   font-size: .85rem;
   transition: background .2s, transform .15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .code-copy-btn:hover { background: rgba(var(--primary-rgb),.22); transform: scale(1.05); }
 .code-hint {
-  font-size: .78rem;
+  font-size: .72rem;
   color: var(--text-muted);
   margin-top: .5rem;
+  letter-spacing: normal;
+  font-weight: 500;
 }
 
 /* Responsive tweaks for success modal on small screens */
@@ -9144,7 +9156,8 @@ body {
     font-size: 1.15rem;
     letter-spacing: .06em;
     max-width: 100%;
-    overflow-wrap: anywhere;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .code-copy-btn {
     width: 100%;
