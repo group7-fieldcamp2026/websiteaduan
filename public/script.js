@@ -1888,6 +1888,29 @@ function esc(str) {
   return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+// iOS-friendly body scroll lock (prevents "mantul" / background scroll bleed under fixed overlays)
+let _itsafeScrollLockDepth = 0;
+let _itsafeScrollLockY = 0;
+
+function itsafeLockBodyScroll() {
+  _itsafeScrollLockDepth += 1;
+  if (_itsafeScrollLockDepth !== 1) return;
+
+  _itsafeScrollLockY = window.scrollY || document.documentElement.scrollTop || 0;
+  document.body.classList.add('itsafe-scroll-locked');
+  document.body.style.top = `-${_itsafeScrollLockY}px`;
+}
+
+function itsafeUnlockBodyScroll() {
+  if (_itsafeScrollLockDepth <= 0) return;
+  _itsafeScrollLockDepth -= 1;
+  if (_itsafeScrollLockDepth !== 0) return;
+
+  document.body.classList.remove('itsafe-scroll-locked');
+  document.body.style.top = '';
+  window.scrollTo(0, _itsafeScrollLockY);
+}
+
 function showToast(msg, type = 'success') {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -1923,6 +1946,7 @@ function openSubmitSuccessModal(opts = {}) {
 
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
+  itsafeLockBodyScroll();
 
   requestAnimationFrame(() => {
     const btn = modal.querySelector('.its-modal-actions .btn');
@@ -1935,6 +1959,7 @@ function closeSubmitSuccessModal() {
   if (!modal) return;
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden', 'true');
+  itsafeUnlockBodyScroll();
 }
 
 function copyReportCode() {
@@ -1960,6 +1985,7 @@ function openHistoryModal() {
   if (!modal) return;
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
+  itsafeLockBodyScroll();
   // Reset to email tab
   switchHistoryTab('email');
   const res = document.getElementById('historyResult');
@@ -2099,6 +2125,7 @@ function closeHistoryModal() {
   if (!modal) return;
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden', 'true');
+  itsafeUnlockBodyScroll();
 }
 
 async function checkReportStatus() {

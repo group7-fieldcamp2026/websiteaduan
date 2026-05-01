@@ -43,6 +43,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Reduce iOS "rubber band" bounce (supported on modern Safari/iOS) */
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -52,9 +54,20 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
+  /* Reduce iOS "rubber band" bounce (supported on modern Safari/iOS) */
+  overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
   overflow-wrap: break-word;
   word-wrap: break-word;
+}
+
+/* Lock background scroll (iOS-friendly) */
+body.itsafe-scroll-locked {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  overflow: hidden;
 }
 
 * {
@@ -9092,6 +9105,7 @@ body {
   max-height: 90vh;
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -9323,6 +9337,7 @@ body {
   max-height: 90vh;
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 .history-modal-header {
@@ -9595,6 +9610,17 @@ body {
   padding: .75rem 0;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
+}
+
+/* iOS scroll performance: avoid heavy blur on fixed navbar */
+@supports (-webkit-touch-callout: none) {
+  .navbar {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(var(--bg-rgb), .98);
+    transform: translateZ(0);
+    will-change: transform;
+  }
 }
 .htfu-step {
   display: flex;
