@@ -91,6 +91,81 @@ const DEFAULT_LOCATIONS = [
 ];
 let LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
 
+// ============================================================
+// MOBILE SCROLL UX HELPERS
+// ============================================================
+function attachTwoFingerHint(el) {
+  if (!el) return;
+  if (el.dataset.twoFingerHint === '1') return;
+  el.dataset.twoFingerHint = '1';
+
+  const show = () => {
+    if (el.classList.contains('map-drag-enabled')) return;
+    el.classList.add('two-finger-hint');
+  };
+  const hide = () => el.classList.remove('two-finger-hint');
+
+  // Passive listeners so page scroll stays smooth.
+  el.addEventListener('touchstart', (e) => {
+    if (e.touches && e.touches.length === 1) show();
+    else hide();
+  }, { passive: true });
+  el.addEventListener('touchmove', (e) => {
+    if (e.touches && e.touches.length === 1) show();
+    else hide();
+  }, { passive: true });
+  el.addEventListener('touchend', hide, { passive: true });
+  el.addEventListener('touchcancel', hide, { passive: true });
+}
+
+function addMobileDragToggleControl(map, containerEl) {
+  if (!map || !containerEl) return;
+  if (typeof L === 'undefined' || !L.control || !L.DomUtil || !L.DomEvent) return;
+  if (containerEl.dataset.dragToggleCtrl === '1') return;
+  containerEl.dataset.dragToggleCtrl = '1';
+
+  const ctrl = L.control({ position: 'topright' });
+  ctrl.onAdd = () => {
+    const wrapper = L.DomUtil.create('div', 'leaflet-bar itsafe-drag-toggle');
+    const btn = L.DomUtil.create('a', 'itsafe-drag-toggle-btn', wrapper);
+    btn.href = '#';
+    btn.innerHTML = '<i class="fas fa-hand-pointer"></i>';
+    btn.setAttribute('role', 'button');
+    btn.setAttribute('aria-pressed', 'false');
+
+    // Prevent the control from triggering map/page interactions.
+    L.DomEvent.disableClickPropagation(wrapper);
+    L.DomEvent.disableScrollPropagation(wrapper);
+
+    const update = () => {
+      const enabled = !!(map.dragging && map.dragging.enabled && map.dragging.enabled());
+      containerEl.classList.toggle('map-drag-enabled', enabled);
+      btn.classList.toggle('active', enabled);
+      wrapper.classList.toggle('active', enabled);
+      btn.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+      btn.title = enabled ? 'Matikan geser peta (biar bisa scroll)' : 'Aktifkan geser peta';
+      btn.setAttribute('aria-label', enabled ? 'Matikan geser peta' : 'Aktifkan geser peta');
+
+      if (enabled) containerEl.classList.remove('two-finger-hint');
+    };
+
+    L.DomEvent.on(btn, 'click', (e) => {
+      L.DomEvent.preventDefault(e);
+      if (map.dragging && map.dragging.enabled && map.dragging.enabled()) {
+        map.dragging.disable();
+      } else if (map.dragging) {
+        map.dragging.enable();
+      }
+      update();
+    });
+
+    // Initial sync after map is ready.
+    setTimeout(update, 0);
+    return wrapper;
+  };
+  ctrl.addTo(map);
+}
+
 
 
 // ============================================================
@@ -512,10 +587,13 @@ function initPickerMap() {
   const container = document.getElementById('pickerMap');
   if (!container) return;
 
+  const isMobile = (typeof L !== 'undefined' && L.Browser && L.Browser.mobile);
   pickerMap = L.map('pickerMap', { 
     zoomControl: true,
     scrollWheelZoom: false,
-    tap: true,           // Always enable Leaflet tap to prevent raw touch bubbling to page
+    // Mobile: allow 1-finger page scroll, 2-finger map gestures (pinch to zoom/pan)
+    dragging: !isMobile,
+    tap: !isMobile,
     tapTolerance: 15     // Slightly generous for finger accuracy
   }).setView(ITS, ZOOM);
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
@@ -524,9 +602,10 @@ function initPickerMap() {
   renderFixedLocations(fixedLocationLayerPicker);
   loadBoundaryLayer(pickerMap, 'picker');
 
-  // Prevent touch-scroll bubbling on mobile by locking touch-action on container
-  const mapEl = document.getElementById('pickerMap');
-  if (mapEl) mapEl.style.touchAction = 'none';
+  if (isMobile) {
+    attachTwoFingerHint(container);
+    addMobileDragToggleControl(pickerMap, container);
+  }
 
   pickerMap.on('click', e => {
     // Save scroll position before setPin (mobile browsers sometimes jump on DOM change)
@@ -590,14 +669,23 @@ function getLocation() {
 // ============================================================
 function initLeafletMap() {
   if (leafletMap) return;
+  const isMobile = (typeof L !== 'undefined' && L.Browser && L.Browser.mobile);
   leafletMap = L.map('leafletMap', {
     scrollWheelZoom: false,
-    tap: !L.Browser.mobile
+    // Mobile: allow 1-finger page scroll, keep 2-finger map gestures.
+    dragging: !isMobile,
+    tap: !isMobile
   }).setView(ITS, ZOOM);
   baseTile = L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(leafletMap);
   fixedLocationLayerMain = L.layerGroup().addTo(leafletMap);
   renderFixedLocations(fixedLocationLayerMain);
   loadBoundaryLayer(leafletMap, 'main');
+
+  if (isMobile) {
+    const mapEl = document.getElementById('leafletMap');
+    attachTwoFingerHint(mapEl);
+    addMobileDragToggleControl(leafletMap, mapEl);
+  }
 }
 
 function renderLeafletMap() {

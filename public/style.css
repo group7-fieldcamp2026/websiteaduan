@@ -2113,6 +2113,58 @@ main {
   display: block;
 }
 
+/* Mobile scroll-friendly Leaflet hint (shown only when JS adds .two-finger-hint) */
+.two-finger-hint {
+  position: relative;
+}
+.two-finger-hint::after {
+  content: '1 jari: scroll • 2 jari: peta';
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  z-index: 900;
+  padding: .35rem .6rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .01em;
+  color: rgba(255,255,255,.96);
+  background: rgba(43, 36, 34, .72);
+  border: 1px solid rgba(255,255,255,.22);
+  backdrop-filter: blur(10px) saturate(140%);
+  box-shadow: 0 10px 28px rgba(0,0,0,.18);
+  pointer-events: none;
+  max-width: calc(100% - 24px);
+  text-align: center;
+}
+[data-theme="dark"] .two-finger-hint::after {
+  background: rgba(15, 18, 31, .72);
+  border-color: rgba(255,255,255,.14);
+}
+
+/* Leaflet mobile: toggle 1-finger drag mode */
+.itsafe-drag-toggle a.itsafe-drag-toggle-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 15px;
+}
+.itsafe-drag-toggle a.itsafe-drag-toggle-btn i {
+  pointer-events: none;
+}
+.itsafe-drag-toggle a.itsafe-drag-toggle-btn.active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dk)) !important;
+  color: #fff !important;
+  border-bottom-color: rgba(255,255,255,.18) !important;
+}
+@media (max-width: 420px) {
+  .two-finger-hint::after {
+    font-size: .7rem;
+    padding: .32rem .55rem;
+  }
+}
+
 /* â”€â”€ Picker map di form â”€â”€ */
 .picker-map-shell {
   border-radius: 12px;
