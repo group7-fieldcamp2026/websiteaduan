@@ -591,6 +591,7 @@ function initPickerMap() {
   pickerMap = L.map('pickerMap', { 
     zoomControl: true,
     scrollWheelZoom: false,
+    keyboard: false,
     // Mobile: allow 1-finger page scroll, 2-finger map gestures (pinch to zoom/pan)
     dragging: !isMobile,
     tap: !isMobile,
@@ -672,6 +673,7 @@ function initLeafletMap() {
   const isMobile = (typeof L !== 'undefined' && L.Browser && L.Browser.mobile);
   leafletMap = L.map('leafletMap', {
     scrollWheelZoom: false,
+    keyboard: false,
     // Mobile: allow 1-finger page scroll, keep 2-finger map gestures.
     dragging: !isMobile,
     tap: !isMobile

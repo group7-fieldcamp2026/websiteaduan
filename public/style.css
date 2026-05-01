@@ -39,10 +39,17 @@
   --primary-rgb: 242, 132, 130;
   --accent-rgb: 246, 189, 96;
   --sage-rgb: 132, 165, 157;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --navbar-h: 72px;
+  --navbar-h-mobile: 62px;
 }
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--navbar-h) + var(--safe-top));
   /* Reduce iOS "rubber band" bounce (supported on modern Safari/iOS) */
   overscroll-behavior-y: none;
 }
@@ -53,12 +60,20 @@ body {
   color: var(--text);
   line-height: 1.6;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   /* Reduce iOS "rubber band" bounce (supported on modern Safari/iOS) */
   overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
   overflow-wrap: break-word;
   word-wrap: break-word;
+}
+
+@media (max-width: 820px) {
+  html {
+    scroll-padding-top: calc(var(--navbar-h-mobile) + var(--safe-top));
+  }
 }
 
 /* Lock background scroll (iOS-friendly) */
@@ -113,7 +128,7 @@ body.itsafe-scroll-locked {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: .5rem 2.5rem;
+  padding: calc(.5rem + var(--safe-top)) calc(2.5rem + var(--safe-right)) .5rem calc(2.5rem + var(--safe-left));
   min-height: 72px;
   background: rgba(var(--bg-rgb), .94);
   backdrop-filter: blur(24px) saturate(180%);
@@ -392,7 +407,7 @@ body.itsafe-scroll-locked {
 
 @media (max-width: 480px) {
   .navbar {
-    padding: .5rem 1rem;
+    padding: calc(.5rem + var(--safe-top)) calc(1rem + var(--safe-right)) .5rem calc(1rem + var(--safe-left));
     min-height: 68px;
   }
 
@@ -7893,7 +7908,7 @@ body {
 /* Mobile layout polish for navbar + cinematic hero */
 @media (max-width: 820px) {
   .navbar {
-    padding: .55rem 1rem;
+    padding: calc(.55rem + var(--safe-top)) calc(1rem + var(--safe-right)) .55rem calc(1rem + var(--safe-left));
     min-height: 68px;
     gap: .75rem;
   }
@@ -8105,7 +8120,7 @@ body {
 
 @media (max-width: 480px) {
   .navbar {
-    padding: .5rem .85rem;
+    padding: calc(.5rem + var(--safe-top)) calc(.85rem + var(--safe-right)) .5rem calc(.85rem + var(--safe-left));
   }
 
   .brand-icon {
@@ -8246,7 +8261,7 @@ body {
    ========================================================= */
 @media (max-width: 820px) {
   .navbar {
-    padding: .45rem .85rem !important;
+    padding: calc(.45rem + var(--safe-top)) calc(.85rem + var(--safe-right)) .45rem calc(.85rem + var(--safe-left)) !important;
     min-height: 62px !important;
     gap: .5rem !important;
   }
@@ -8301,7 +8316,7 @@ body {
 
 @media (max-width: 400px) {
   .navbar {
-    padding: .4rem .65rem !important;
+    padding: calc(.4rem + var(--safe-top)) calc(.65rem + var(--safe-right)) .4rem calc(.65rem + var(--safe-left)) !important;
     gap: .35rem !important;
   }
 
@@ -8332,7 +8347,7 @@ body {
 /* main padding-top harus sesuai tinggi navbar */
 @media (max-width: 820px) {
   main {
-    padding-top: 62px !important;
+    padding-top: calc(62px + var(--safe-top)) !important;
   }
 }
 
@@ -9620,6 +9635,14 @@ body {
     background: rgba(var(--bg-rgb), .98);
     transform: translateZ(0);
     will-change: transform;
+  }
+
+  /* iOS Safari: allow 1-finger page scroll over Leaflet maps (drag disabled by default) */
+  .leaflet-container:not(.map-drag-enabled) {
+    touch-action: pan-y pinch-zoom !important;
+  }
+  .leaflet-container.map-drag-enabled {
+    touch-action: none !important;
   }
 }
 .htfu-step {
