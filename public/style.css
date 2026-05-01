@@ -2172,6 +2172,14 @@ main {
 }
 
 /* Leaflet mobile: toggle 1-finger drag mode */
+.leaflet-container:not(.map-drag-enabled) {
+  touch-action: pan-y pinch-zoom !important;
+}
+
+.leaflet-container.map-drag-enabled {
+  touch-action: none !important;
+}
+
 .itsafe-drag-toggle a.itsafe-drag-toggle-btn {
   display: flex !important;
   align-items: center !important;

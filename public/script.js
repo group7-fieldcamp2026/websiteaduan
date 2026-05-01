@@ -94,6 +94,30 @@ let LOCATIONS = DEFAULT_LOCATIONS.map(l => ({ ...l }));
 // ============================================================
 // MOBILE SCROLL UX HELPERS
 // ============================================================
+function itsafeIsMobileLike() {
+  try {
+    if (typeof L !== 'undefined' && L.Browser && typeof L.Browser.mobile === 'boolean') {
+      if (L.Browser.mobile) return true;
+    }
+  } catch { /* ignore */ }
+
+  try {
+    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+      if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return true;
+      if (window.matchMedia('(pointer: coarse)').matches) return true;
+    }
+  } catch { /* ignore */ }
+
+  try {
+    if (typeof navigator !== 'undefined' && typeof navigator.maxTouchPoints === 'number') {
+      // Treat touch-enabled smaller viewports as "mobile-like" for map UX.
+      if (navigator.maxTouchPoints > 0 && (window.innerWidth || 0) <= 1024) return true;
+    }
+  } catch { /* ignore */ }
+
+  return false;
+}
+
 function attachTwoFingerHint(el) {
   if (!el) return;
   if (el.dataset.twoFingerHint === '1') return;
@@ -151,11 +175,9 @@ function addMobileDragToggleControl(map, containerEl) {
 
     L.DomEvent.on(btn, 'click', (e) => {
       L.DomEvent.preventDefault(e);
-      if (map.dragging && map.dragging.enabled && map.dragging.enabled()) {
-        map.dragging.disable();
-      } else if (map.dragging) {
-        map.dragging.enable();
-      }
+      const enable = !(map.dragging && map.dragging.enabled && map.dragging.enabled());
+      if (map.dragging) enable ? map.dragging.enable() : map.dragging.disable();
+      if (map.touchZoom) enable ? map.touchZoom.enable() : map.touchZoom.disable();
       update();
     });
 
@@ -587,14 +609,15 @@ function initPickerMap() {
   const container = document.getElementById('pickerMap');
   if (!container) return;
 
-  const isMobile = (typeof L !== 'undefined' && L.Browser && L.Browser.mobile);
+  const isMobile = itsafeIsMobileLike();
   pickerMap = L.map('pickerMap', { 
     zoomControl: true,
     scrollWheelZoom: false,
     keyboard: false,
-    // Mobile: allow 1-finger page scroll, 2-finger map gestures (pinch to zoom/pan)
+    // Mobile: keep page scroll smooth; enable map gestures via the toggle button.
     dragging: !isMobile,
     tap: !isMobile,
+    touchZoom: !isMobile,
     tapTolerance: 15     // Slightly generous for finger accuracy
   }).setView(ITS, ZOOM);
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
@@ -670,13 +693,14 @@ function getLocation() {
 // ============================================================
 function initLeafletMap() {
   if (leafletMap) return;
-  const isMobile = (typeof L !== 'undefined' && L.Browser && L.Browser.mobile);
+  const isMobile = itsafeIsMobileLike();
   leafletMap = L.map('leafletMap', {
     scrollWheelZoom: false,
     keyboard: false,
-    // Mobile: allow 1-finger page scroll, keep 2-finger map gestures.
+    // Mobile: keep page scroll smooth; enable map gestures via the toggle button.
     dragging: !isMobile,
-    tap: !isMobile
+    tap: !isMobile,
+    touchZoom: !isMobile
   }).setView(ITS, ZOOM);
   baseTile = L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(leafletMap);
   fixedLocationLayerMain = L.layerGroup().addTo(leafletMap);
@@ -1912,6 +1936,35 @@ function itsafeUnlockBodyScroll() {
   document.body.style.top = '';
   window.scrollTo(0, _itsafeScrollLockY);
 }
+
+function itsafeEnsureBodyScrollUnlocked() {
+  try {
+    const anyOpenModal = document.querySelector('.its-modal.open');
+    if (anyOpenModal) return;
+
+    _itsafeScrollLockDepth = 0;
+    document.body.classList.remove('itsafe-scroll-locked');
+    document.body.style.top = '';
+  } catch { /* ignore */ }
+}
+
+(function initItsafeScrollUnlockSafety() {
+  if (window._itsafeScrollUnlockSafety) return;
+  window._itsafeScrollUnlockSafety = true;
+
+  const run = () => itsafeEnsureBodyScrollUnlocked();
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  } else {
+    run();
+  }
+
+  // If the page is restored from bfcache, clean up any stale scroll-lock state.
+  window.addEventListener('pageshow', (e) => {
+    if (e && e.persisted) run();
+  });
+})();
 
 function showToast(msg, type = 'success') {
   const t = document.getElementById('toast');
