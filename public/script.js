@@ -85,13 +85,13 @@ const MAP_MODE_META = {
   },
   heatmap: {
     label: 'Heatmap Kerawanan',
-    shortLabel: 'Skor Kerawanan',
+    shortLabel: 'Tingkat Kerawanan',
     icon: 'fa-fire-flame-curved',
     color: '#EF4444',
     shape: 'flame',
-    note: 'Intensitas heatmap dan pin mengikuti skor kerawanan pelapor.',
-    popupTitle: 'Skor kerawanan',
-    popupDesc: 'Output ini menonjolkan tingkat rawan berdasarkan skor yang diberikan pelapor.'
+    note: 'Intensitas heatmap dan pin mengikuti tingkat kerawanan pelapor.',
+    popupTitle: 'Tingkat kerawanan',
+    popupDesc: 'Output ini menonjolkan tingkat rawan berdasarkan penilaian pelapor.'
   },
   fasilitas: {
     label: 'Kelayakan Fasilitas',
@@ -855,9 +855,9 @@ function createReportMarker(r) {
 function getLayerModeNote() {
   if (CONDITION_LAYER_VISUALS[activeLayer]) return CONDITION_LAYER_VISUALS[activeLayer].desc;
   const mode = getActivePetaMode();
-  if (activeLayer === 'rawan-tinggi') return 'Filter aktif: hanya laporan dengan skor rawan tinggi.';
-  if (activeLayer === 'rawan-sedang') return 'Filter aktif: hanya laporan dengan skor rawan sedang.';
-  if (activeLayer === 'rawan-rendah') return 'Filter aktif: hanya laporan dengan skor rawan rendah.';
+  if (activeLayer === 'rawan-tinggi') return 'Filter aktif: hanya laporan dengan tingkat rawan tinggi.';
+  if (activeLayer === 'rawan-sedang') return 'Filter aktif: hanya laporan dengan tingkat rawan sedang.';
+  if (activeLayer === 'rawan-rendah') return 'Filter aktif: hanya laporan dengan tingkat rawan rendah.';
   if (activeLayer === 'layak') return 'Filter aktif: hanya area dengan fasilitas layak.';
   if (activeLayer === 'cukup-layak') return 'Filter aktif: hanya area dengan fasilitas cukup layak.';
   if (activeLayer === 'kurang-layak') return 'Filter aktif: hanya area dengan fasilitas kurang layak.';
@@ -892,7 +892,7 @@ function updateMapOutputUI() {
   const layerPanelTitle = document.getElementById('layerPanelTitle');
   if (layerPanelTitle) {
     const titleText = mode === 'heatmap'
-      ? 'Layer Skor Kerawanan'
+      ? 'Layer Tingkat Kerawanan'
       : (mode === 'fasilitas' ? 'Layer Kelayakan Fasilitas' : 'Layer Berdasarkan Kondisi');
     layerPanelTitle.innerHTML = `<i class="fas fa-layer-group"></i> ${titleText}`;
   }
@@ -911,9 +911,9 @@ function updateLegendSymbols(mode, display) {
   let html = '';
   if (mode === 'heatmap') {
     html = `
-      <div class="legend-item"><span class="legend-marker legend-marker-flame" style="--case-color:#EF4444"><i class="fas fa-fire-flame-curved"></i></span> Skor rawan tinggi</div>
-      <div class="legend-item"><span class="legend-marker legend-marker-triangle" style="--case-color:#F59E0B"><i class="fas fa-triangle-exclamation"></i></span> Skor rawan sedang</div>
-      <div class="legend-item"><span class="legend-marker legend-marker-circle" style="--case-color:#10B981"><i class="fas fa-shield-halved"></i></span> Skor rawan rendah</div>`;
+      <div class="legend-item"><span class="legend-marker legend-marker-flame" style="--case-color:#EF4444"><i class="fas fa-fire-flame-curved"></i></span> Rawan tinggi</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-triangle" style="--case-color:#F59E0B"><i class="fas fa-triangle-exclamation"></i></span> Rawan sedang</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-circle" style="--case-color:#10B981"><i class="fas fa-shield-halved"></i></span> Rawan rendah</div>`;
   } else if (mode === 'fasilitas') {
     html = `
       <div class="legend-item"><span class="legend-marker legend-marker-hex" style="--case-color:#10B981"><i class="fas fa-check"></i></span> Fasilitas layak</div>
@@ -1269,8 +1269,8 @@ function getPopupOutputSummary(r) {
     return {
       icon: risk.icon,
       color: risk.color,
-      title: `${risk.label} - skor ${r.skorRawan ?? 'tidak tersedia'}/3`,
-      desc: 'Titik ini memberi bobot pada heatmap; makin tinggi skornya, makin kuat intensitas panasnya.'
+      title: risk.label,
+      desc: 'Titik ini memberi bobot pada heatmap; makin tinggi tingkat rawannya, makin kuat intensitas panasnya.'
     };
   }
 
@@ -1279,7 +1279,7 @@ function getPopupOutputSummary(r) {
     return {
       icon: getFacilityVisual(r).icon,
       color: getFacilityVisual(r).color,
-      title: `${kel.status} - skor fasilitas ${kel.score}/15`,
+      title: `Fasilitas ${kel.status}`,
       desc: kel.alasan.length
         ? `Faktor pembatas: ${kel.alasan.join(', ')}.`
         : 'Kondisi fisik utama terbaca relatif memadai dari laporan ini.'
@@ -1537,7 +1537,7 @@ function switchPetaTab(tab) {
   // Update judul & deskripsi panel
   const titles = {
     sebaran: { title: 'Peta 1: Sebaran Titik Lokasi Rawan', desc: 'Menampilkan sebaran titik lokasi area rawan berdasarkan jumlah laporan masuk dari warga kampus ITS.' },
-    heatmap: { title: 'Peta 2: Heatmap Kerawanan', desc: 'Menampilkan konsentrasi area rawan berdasarkan skor kerawanan yang diberikan oleh pelapor.' },
+    heatmap: { title: 'Peta 2: Heatmap Kerawanan', desc: 'Menampilkan konsentrasi area rawan berdasarkan tingkat kerawanan yang diberikan oleh pelapor.' },
     fasilitas: { title: 'Peta 3: Kelayakan Fasilitas', desc: 'Menampilkan penilaian kondisi fisik area berdasarkan parameter pencahayaan, CCTV, kepadatan, petugas keamanan, dan vegetasi.' },
   };
 
