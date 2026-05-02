@@ -6101,58 +6101,13 @@ main {
   margin-bottom: .65rem;
 }
 
-.popup-top-levels {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .45rem;
-  padding: .65rem .75rem .55rem;
+.popup-output-top {
+  padding: .75rem .75rem 0;
   background: rgba(255, 255, 255, .74);
-  border-bottom: 1px solid rgba(15, 23, 42, .06);
 }
 
-.popup-top-level-card {
-  --level-color: #D56A6A;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: .45rem;
-  min-width: 0;
-  padding: .52rem .55rem;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--level-color) 10%, white);
-  border: 1px solid color-mix(in srgb, var(--level-color) 24%, transparent);
-}
-
-.popup-top-level-icon {
-  width: 25px;
-  height: 25px;
-  border-radius: 9px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  background: var(--level-color);
-  box-shadow: 0 6px 14px color-mix(in srgb, var(--level-color) 25%, transparent);
-  flex-shrink: 0;
-}
-
-.popup-top-level-label {
-  display: block;
-  color: #7c8798;
-  font-size: 8.5px;
-  font-weight: 900;
-  letter-spacing: .06em;
-  line-height: 1.15;
-  text-transform: uppercase;
-}
-
-.popup-top-level-value {
-  display: block;
-  color: #1f2937;
-  font-size: 10.8px;
-  line-height: 1.2;
-  margin-top: 2px;
-  overflow-wrap: anywhere;
+.popup-output-top .popup-output-card {
+  margin-bottom: .65rem;
 }
 
 .popup-output-icon {
@@ -6335,22 +6290,8 @@ main {
   border-color: color-mix(in srgb, var(--output-color) 34%, rgba(200, 210, 255, .08));
 }
 
-[data-theme="dark"] .popup-top-levels {
+[data-theme="dark"] .popup-output-top {
   background: rgba(18, 23, 49, .9);
-  border-bottom-color: rgba(200, 210, 255, .08);
-}
-
-[data-theme="dark"] .popup-top-level-card {
-  background: color-mix(in srgb, var(--level-color) 14%, rgba(17, 22, 48, .94));
-  border-color: color-mix(in srgb, var(--level-color) 34%, rgba(200, 210, 255, .08));
-}
-
-[data-theme="dark"] .popup-top-level-label {
-  color: #8d94b2;
-}
-
-[data-theme="dark"] .popup-top-level-value {
-  color: #e2e4f0;
 }
 
 [data-theme="dark"] .popup-output-card strong {

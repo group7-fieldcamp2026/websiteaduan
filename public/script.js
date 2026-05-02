@@ -1295,22 +1295,13 @@ function getPopupOutputSummary(r) {
   };
 }
 
-function buildPopupLevelCard(label, visual) {
-  return `<div class="popup-top-level-card" style="--level-color:${visual.color}">
-    <span class="popup-top-level-icon"><i class="fas ${visual.icon}"></i></span>
+function buildPopupOutputCard(summary) {
+  return `<div class="popup-output-card" style="--output-color:${summary.color}">
+    <span class="popup-output-icon"><i class="fas ${summary.icon}"></i></span>
     <span>
-      <span class="popup-top-level-label">${esc(label)}</span>
-      <strong class="popup-top-level-value">${esc(visual.label)}</strong>
+      <strong>${esc(summary.title)}</strong>
+      <small>${esc(summary.desc)}</small>
     </span>
-  </div>`;
-}
-
-function buildPopupTopLevels(r) {
-  const risk = getRiskVisual(r.skorRawan);
-  const facility = getFacilityVisual(r);
-  return `<div class="popup-top-levels">
-    ${buildPopupLevelCard('Tingkat Rawan', risk)}
-    ${buildPopupLevelCard('Tingkat Fasilitas', facility)}
   </div>`;
 }
 
@@ -1331,14 +1322,9 @@ function buildPopup(r) {
     ? `<div class="popup-desc">${esc(r.lokasiDeskripsi)}</div>`
     : '';
 
-  let bodyHtml = `<div class="popup-body">
-    <div class="popup-output-card" style="--output-color:${summary.color}">
-      <span class="popup-output-icon"><i class="fas ${summary.icon}"></i></span>
-      <span>
-        <strong>${esc(summary.title)}</strong>
-        <small>${esc(summary.desc)}</small>
-      </span>
-    </div>`;
+  const summaryHtml = `<div class="popup-output-top">${buildPopupOutputCard(summary)}</div>`;
+
+  let bodyHtml = `<div class="popup-body">`;
 
   if (mode === 'sebaran') {
     bodyHtml += `<div class="popup-status-badge badge-info"><i class="fas fa-circle-check"></i> Laporan Valid</div>`;
@@ -1400,7 +1386,7 @@ function buildPopup(r) {
 
   return `<div class="popup-card">
     ${headerHtml}
-    ${buildPopupTopLevels(r)}
+    ${summaryHtml}
     ${descHtml}
     ${bodyHtml}
     ${fotoHtml}
