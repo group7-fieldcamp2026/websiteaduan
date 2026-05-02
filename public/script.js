@@ -188,7 +188,6 @@ function attachTwoFingerHint(el) {
   el.dataset.twoFingerHint = '1';
 
   const show = () => {
-    if (el.classList.contains('map-drag-enabled')) return;
     el.classList.add('two-finger-hint');
   };
   const hide = () => el.classList.remove('two-finger-hint');
@@ -205,54 +204,6 @@ function attachTwoFingerHint(el) {
   el.addEventListener('touchend', hide, { passive: true });
   el.addEventListener('touchcancel', hide, { passive: true });
 }
-
-function addMobileDragToggleControl(map, containerEl) {
-  if (!map || !containerEl) return;
-  if (typeof L === 'undefined' || !L.control || !L.DomUtil || !L.DomEvent) return;
-  if (containerEl.dataset.dragToggleCtrl === '1') return;
-  containerEl.dataset.dragToggleCtrl = '1';
-
-  const ctrl = L.control({ position: 'topright' });
-  ctrl.onAdd = () => {
-    const wrapper = L.DomUtil.create('div', 'leaflet-bar itsafe-drag-toggle');
-    const btn = L.DomUtil.create('a', 'itsafe-drag-toggle-btn', wrapper);
-    btn.href = '#';
-    btn.innerHTML = '<i class="fas fa-hand-pointer"></i>';
-    btn.setAttribute('role', 'button');
-    btn.setAttribute('aria-pressed', 'false');
-
-    // Prevent the control from triggering map/page interactions.
-    L.DomEvent.disableClickPropagation(wrapper);
-    L.DomEvent.disableScrollPropagation(wrapper);
-
-    const update = () => {
-      const enabled = !!(map.dragging && map.dragging.enabled && map.dragging.enabled());
-      containerEl.classList.toggle('map-drag-enabled', enabled);
-      btn.classList.toggle('active', enabled);
-      wrapper.classList.toggle('active', enabled);
-      btn.setAttribute('aria-pressed', enabled ? 'true' : 'false');
-      btn.title = enabled ? 'Matikan geser peta (biar bisa scroll)' : 'Aktifkan geser peta';
-      btn.setAttribute('aria-label', enabled ? 'Matikan geser peta' : 'Aktifkan geser peta');
-
-      if (enabled) containerEl.classList.remove('two-finger-hint');
-    };
-
-    L.DomEvent.on(btn, 'click', (e) => {
-      L.DomEvent.preventDefault(e);
-      const enable = !(map.dragging && map.dragging.enabled && map.dragging.enabled());
-      if (map.dragging) enable ? map.dragging.enable() : map.dragging.disable();
-      if (map.touchZoom) enable ? map.touchZoom.enable() : map.touchZoom.disable();
-      update();
-    });
-
-    // Initial sync after map is ready.
-    setTimeout(update, 0);
-    return wrapper;
-  };
-  ctrl.addTo(map);
-}
-
-
 
 // ============================================================
 // INIT
@@ -695,10 +646,10 @@ function initPickerMap() {
     zoomControl: true,
     scrollWheelZoom: false,
     keyboard: false,
-    // Mobile: keep page scroll smooth; enable map gestures via the toggle button.
+    // Mobile: one finger scrolls the page, two fingers can zoom the map.
     dragging: !isMobile,
-    tap: !isMobile,
-    touchZoom: !isMobile,
+    tap: true,
+    touchZoom: true,
     tapTolerance: 15     // Slightly generous for finger accuracy
   }).setView(ITS, ZOOM);
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
@@ -709,7 +660,6 @@ function initPickerMap() {
 
   if (isMobile) {
     attachTwoFingerHint(container);
-    addMobileDragToggleControl(pickerMap, container);
   }
 
   pickerMap.on('click', e => {
@@ -778,10 +728,10 @@ function initLeafletMap() {
   leafletMap = L.map('leafletMap', {
     scrollWheelZoom: false,
     keyboard: false,
-    // Mobile: keep page scroll smooth; enable map gestures via the toggle button.
+    // Mobile: one finger scrolls the page, two fingers can zoom the map.
     dragging: !isMobile,
-    tap: !isMobile,
-    touchZoom: !isMobile
+    tap: true,
+    touchZoom: true
   }).setView(ITS, ZOOM);
   baseTile = L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(leafletMap);
   fixedLocationLayerMain = L.layerGroup().addTo(leafletMap);
@@ -791,7 +741,6 @@ function initLeafletMap() {
   if (isMobile) {
     const mapEl = document.getElementById('leafletMap');
     attachTwoFingerHint(mapEl);
-    addMobileDragToggleControl(leafletMap, mapEl);
   }
 }
 
@@ -807,9 +756,70 @@ function getRiskVisual(score) {
     return { label: 'Rawan Tinggi', icon: 'fa-fire-flame-curved', color: '#EF4444', shape: 'flame' };
   }
   if (s === 2) {
-    return { label: 'Rawan Sedang', icon: 'fa-triangle-exclamation', color: '#F59E0B', shape: 'triangle' };
+    return { label: 'Rawan Sedang', icon: 'fa-temperature-half', color: '#F59E0B', shape: 'triangle' };
   }
   return { label: 'Rawan Rendah', icon: 'fa-shield-halved', color: '#10B981', shape: 'circle' };
+}
+
+function addUniqueReason(reasons, text) {
+  if (text && !reasons.includes(text)) reasons.push(text);
+}
+
+function shortenReasonText(text, max = 72) {
+  const clean = String(text || '').trim().replace(/\s+/g, ' ');
+  return clean.length > max ? `${clean.slice(0, max - 1).trim()}...` : clean;
+}
+
+function formatReasonList(reasons) {
+  const picked = reasons.filter(Boolean).slice(0, 4);
+  if (picked.length <= 1) return picked[0] || '';
+  if (picked.length === 2) return `${picked[0]} dan ${picked[1]}`;
+  return `${picked.slice(0, -1).join(', ')}, dan ${picked[picked.length - 1]}`;
+}
+
+function isAffirmativeReportValue(value) {
+  const text = String(value || '').trim().toLowerCase();
+  if (!text || text.includes('tidak')) return false;
+  return text === 'ya' || text.includes('pernah') || text.includes('ada');
+}
+
+function getRiskReasonParts(r) {
+  const reasons = [];
+  if (r.pencahayaan === 'Gelap') addUniqueReason(reasons, 'area sangat gelap');
+  else if (r.pencahayaan === 'Remang-remang') addUniqueReason(reasons, 'pencahayaan remang-remang');
+
+  if (isSepi(r.kepadatan)) addUniqueReason(reasons, 'area sepi');
+  if (r.cctv === 'Tidak ada') addUniqueReason(reasons, 'tidak ada pengawasan CCTV');
+  else if (r.cctv === 'Tidak tahu') addUniqueReason(reasons, 'kondisi CCTV tidak diketahui');
+  if (isMinimPetugas(r.petugas)) addUniqueReason(reasons, 'minim petugas keamanan');
+  if ((r.waktu || '').toLowerCase().includes('malam')) addUniqueReason(reasons, 'terjadi pada waktu malam');
+  if (isAffirmativeReportValue(r.pernahHindari)) addUniqueReason(reasons, 'pernah dihindari pelapor');
+  if (isAffirmativeReportValue(r.orangLain)) addUniqueReason(reasons, 'orang lain juga merasa tidak nyaman');
+  if (isAffirmativeReportValue(r.situasiMencurigakan)) addUniqueReason(reasons, 'ada situasi mencurigakan');
+  if (r.alasanTidakNyaman) addUniqueReason(reasons, `alasan pelapor: ${shortenReasonText(r.alasanTidakNyaman)}`);
+
+  return reasons;
+}
+
+function getRiskExplanation(r) {
+  const risk = getRiskVisual(r.skorRawan);
+  const reasonText = formatReasonList(getRiskReasonParts(r));
+
+  if (risk.label === 'Rawan Tinggi') {
+    return reasonText
+      ? `Faktor pemicu: ${reasonText}.`
+      : 'Pelapor menilai area ini rawan tinggi, sehingga titik ini menjadi prioritas pada heatmap.';
+  }
+
+  if (risk.label === 'Rawan Sedang') {
+    return reasonText
+      ? `Ada indikasi kerawanan: ${reasonText}.`
+      : 'Ada catatan kerawanan dari pelapor, tetapi intensitasnya belum setinggi titik prioritas.';
+  }
+
+  return reasonText
+    ? `Tetap dipantau karena ada catatan: ${reasonText}.`
+    : 'Laporan ini tetap dipetakan sebagai bagian dari pemantauan area kampus.';
 }
 
 function getFacilityVisual(r) {
@@ -818,7 +828,7 @@ function getFacilityVisual(r) {
     return { label: 'Fasilitas Layak', icon: 'fa-check', color: '#10B981', shape: 'hex', kel };
   }
   if (kel.status === 'Cukup Layak') {
-    return { label: 'Fasilitas Cukup Layak', icon: 'fa-triangle-exclamation', color: '#F59E0B', shape: 'hex', kel };
+    return { label: 'Fasilitas Cukup Layak', icon: 'fa-scale-balanced', color: '#F59E0B', shape: 'hex', kel };
   }
   return { label: 'Fasilitas Kurang Layak', icon: 'fa-xmark', color: '#EF4444', shape: 'hex', kel };
 }
@@ -912,12 +922,12 @@ function updateLegendSymbols(mode, display) {
   if (mode === 'heatmap') {
     html = `
       <div class="legend-item"><span class="legend-marker legend-marker-flame" style="--case-color:#EF4444"><i class="fas fa-fire-flame-curved"></i></span> Rawan tinggi</div>
-      <div class="legend-item"><span class="legend-marker legend-marker-triangle" style="--case-color:#F59E0B"><i class="fas fa-triangle-exclamation"></i></span> Rawan sedang</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-triangle" style="--case-color:#F59E0B"><i class="fas fa-temperature-half"></i></span> Rawan sedang</div>
       <div class="legend-item"><span class="legend-marker legend-marker-circle" style="--case-color:#10B981"><i class="fas fa-shield-halved"></i></span> Rawan rendah</div>`;
   } else if (mode === 'fasilitas') {
     html = `
       <div class="legend-item"><span class="legend-marker legend-marker-hex" style="--case-color:#10B981"><i class="fas fa-check"></i></span> Fasilitas layak</div>
-      <div class="legend-item"><span class="legend-marker legend-marker-hex" style="--case-color:#F59E0B"><i class="fas fa-triangle-exclamation"></i></span> Cukup layak</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-hex" style="--case-color:#F59E0B"><i class="fas fa-scale-balanced"></i></span> Cukup layak</div>
       <div class="legend-item"><span class="legend-marker legend-marker-hex" style="--case-color:#EF4444"><i class="fas fa-xmark"></i></span> Kurang layak</div>`;
   } else {
     html = `
@@ -1195,19 +1205,10 @@ function mapGeoJSONCoords(gj, fn) {
 }
 
 function getNyamanLabel(val) {
-  if (val === 1) return '<div class="popup-status-badge badge-danger"><i class="fas fa-exclamation-circle"></i> Tidak Nyaman Saat Sendiri</div>';
-  if (val === 2) return '<div class="popup-status-badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Kurang Nyaman Saat Sendiri</div>';
-  if (val === 3) return '<div class="popup-status-badge badge-safe"><i class="fas fa-check-circle"></i> Nyaman Saat Sendiri</div>';
+  if (val === 1) return '<div class="popup-status-badge badge-danger"><i class="fas fa-face-frown"></i> Tidak Nyaman Saat Sendiri</div>';
+  if (val === 2) return '<div class="popup-status-badge badge-warning"><i class="fas fa-face-meh"></i> Kurang Nyaman Saat Sendiri</div>';
+  if (val === 3) return '<div class="popup-status-badge badge-safe"><i class="fas fa-face-smile"></i> Nyaman Saat Sendiri</div>';
   return '';
-}
-
-function getRawanLabel(val) {
-  const n = parseInt(val, 10);
-  if (isNaN(n)) return '-';
-  if (n >= 3) return '<div class="popup-status-badge badge-danger"><i class="fas fa-exclamation-circle"></i> Rawan Tinggi</div>';
-  if (n === 2) return '<div class="popup-status-badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Rawan Sedang</div>';
-  if (n <= 1) return '<div class="popup-status-badge badge-safe"><i class="fas fa-shield-halved"></i> Rawan Rendah</div>';
-  return '-';
 }
 
 function getScoreHtml(val, type) {
@@ -1270,7 +1271,7 @@ function getPopupOutputSummary(r) {
       icon: risk.icon,
       color: risk.color,
       title: risk.label,
-      desc: 'Titik ini memberi bobot pada heatmap; makin tinggi tingkat rawannya, makin kuat intensitas panasnya.'
+      desc: getRiskExplanation(r)
     };
   }
 
@@ -1292,6 +1293,25 @@ function getPopupOutputSummary(r) {
     title: 'Laporan tervalidasi',
     desc: 'Ditampilkan sebagai titik lokasi umum karena laporan sudah diverifikasi valid.'
   };
+}
+
+function buildPopupLevelCard(label, visual) {
+  return `<div class="popup-top-level-card" style="--level-color:${visual.color}">
+    <span class="popup-top-level-icon"><i class="fas ${visual.icon}"></i></span>
+    <span>
+      <span class="popup-top-level-label">${esc(label)}</span>
+      <strong class="popup-top-level-value">${esc(visual.label)}</strong>
+    </span>
+  </div>`;
+}
+
+function buildPopupTopLevels(r) {
+  const risk = getRiskVisual(r.skorRawan);
+  const facility = getFacilityVisual(r);
+  return `<div class="popup-top-levels">
+    ${buildPopupLevelCard('Tingkat Rawan', risk)}
+    ${buildPopupLevelCard('Tingkat Fasilitas', facility)}
+  </div>`;
 }
 
 function buildPopup(r) {
@@ -1320,14 +1340,7 @@ function buildPopup(r) {
       </span>
     </div>`;
 
-  if (mode === 'heatmap') {
-    bodyHtml += getRawanLabel(r.skorRawan);
-  } else if (mode === 'fasilitas') {
-    const kel = calcKelayakan(r);
-    const badgeClass = kel.status === 'Layak' ? 'badge-safe' : (kel.status === 'Cukup Layak' ? 'badge-warning' : 'badge-danger');
-    const badgeIcon = kel.status === 'Layak' ? 'fa-check-circle' : (kel.status === 'Cukup Layak' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle');
-    bodyHtml += `<div class="popup-status-badge ${badgeClass}"><i class="fas ${badgeIcon}"></i> ${kel.status}</div>`;
-  } else {
+  if (mode === 'sebaran') {
     bodyHtml += `<div class="popup-status-badge badge-info"><i class="fas fa-circle-check"></i> Laporan Valid</div>`;
     bodyHtml += getNyamanLabel(r.skorNyaman);
   }
@@ -1387,6 +1400,7 @@ function buildPopup(r) {
 
   return `<div class="popup-card">
     ${headerHtml}
+    ${buildPopupTopLevels(r)}
     ${descHtml}
     ${bodyHtml}
     ${fotoHtml}
