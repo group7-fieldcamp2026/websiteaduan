@@ -824,25 +824,25 @@
     #adminMap .leaflet-popup-content-wrapper {
       border-radius: 12px !important;
       box-shadow: 0 8px 28px rgba(0, 0, 0, .25) !important;
-      max-width: 220px !important;
-      width: 220px !important;
+      max-width: 360px !important;
+      width: 360px !important;
       transform: none !important;
-      max-height: 220px !important;
+      max-height: 480px !important;
       overflow: hidden !important;
       padding: 0 !important;
-      background: #F5CAC3 !important;
+      background: #fff7f4 !important;
       border: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     #adminMap .leaflet-popup-content {
       margin: 0 !important;
-      max-width: 190px !important;
+      max-width: 336px !important;
       font-size: 12px !important;
       line-height: 1.45 !important;
       transform: none !important;
-      max-height: 200px !important;
+      max-height: 456px !important;
       overflow-y: auto !important;
-      padding: 12px 12px 12px 18px !important;
+      padding: 0 !important;
       display: block !important;
     }
 
@@ -896,14 +896,15 @@
 
     @media (max-width: 640px) {
       #adminMap .leaflet-popup-content-wrapper {
-        max-width: 220px !important;
-        max-height: 280px !important;
+        max-width: 300px !important;
+        width: 300px !important;
+        max-height: 420px !important;
       }
 
       #adminMap .leaflet-popup-content {
-        max-width: 200px !important;
+        max-width: 276px !important;
         font-size: 12px !important;
-        max-height: 260px !important;
+        max-height: 396px !important;
       }
     }
 
@@ -1517,6 +1518,243 @@
       font-size: 0.8rem;
     }
 
+    .report-marker-wrap {
+      background: transparent;
+      border: none;
+    }
+
+    .report-marker {
+      width: 34px;
+      height: 34px;
+      border-width: 3px;
+      position: relative;
+      box-shadow:
+        0 10px 22px rgba(213, 106, 106, .28),
+        0 2px 8px rgba(0, 0, 0, .32),
+        inset 0 1px 0 rgba(255, 255, 255, .38);
+    }
+
+    .report-marker::after {
+      content: '';
+      position: absolute;
+      inset: -7px;
+      border: 2px solid rgba(213, 106, 106, .34);
+      border-radius: inherit;
+      opacity: .65;
+      animation: adminMarkerPulse 2.4s ease-out infinite;
+    }
+
+    @keyframes adminMarkerPulse {
+      0% { transform: scale(.82); opacity: .65; }
+      70%, 100% { transform: scale(1.35); opacity: 0; }
+    }
+
+    .report-marker i {
+      position: relative;
+      z-index: 1;
+      font-size: .95rem;
+    }
+
+    .report-marker-circle { border-radius: 50%; }
+    .report-marker-flame {
+      border-radius: 56% 44% 60% 40% / 58% 46% 54% 42%;
+      transform: rotate(-8deg);
+    }
+    .report-marker-flame i { transform: rotate(8deg); }
+    .report-marker-triangle {
+      border-radius: 11px 11px 14px 14px;
+      clip-path: polygon(50% 3%, 96% 88%, 4% 88%);
+    }
+    .report-marker-hex {
+      border-radius: 10px;
+      clip-path: polygon(25% 4%, 75% 4%, 98% 50%, 75% 96%, 25% 96%, 2% 50%);
+    }
+
+    .admin-map-popup {
+      --admin-popup-accent: #D56A6A;
+      font-family: var(--font-body);
+      color: #1F2937;
+      min-width: 300px;
+    }
+
+    .admin-popup-head {
+      padding: 14px 16px 11px;
+      border-bottom: 1px solid rgba(0, 0, 0, .07);
+      position: relative;
+      background: linear-gradient(135deg, rgba(255,255,255,.94), rgba(245,202,195,.38));
+    }
+
+    .admin-popup-head::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--admin-popup-accent), #F6BD60, #84A59D);
+      border-radius: 12px 12px 0 0;
+    }
+
+    .admin-popup-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      color: var(--admin-popup-accent);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .admin-popup-title {
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.3;
+      padding-right: 22px;
+    }
+
+    .admin-popup-sub {
+      color: #64748B;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .admin-popup-desc {
+      padding: 10px 16px 10px 28px;
+      background: rgba(242, 132, 130, .07);
+      border-bottom: 1px solid rgba(0, 0, 0, .05);
+      color: #5F544F;
+      font-style: italic;
+      line-height: 1.45;
+      position: relative;
+    }
+
+    .admin-popup-desc::before {
+      content: '\201C';
+      position: absolute;
+      top: 1px;
+      left: 9px;
+      font-family: Georgia, serif;
+      font-size: 28px;
+      color: rgba(213, 106, 106, .35);
+    }
+
+    .admin-popup-body {
+      padding: 12px 16px 14px;
+    }
+
+    .admin-popup-section {
+      margin-top: 11px;
+    }
+
+    .admin-popup-section:first-child {
+      margin-top: 0;
+    }
+
+    .admin-popup-section-title {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      color: #D56A6A;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+    }
+
+    .admin-popup-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .admin-popup-row {
+      border: 1px solid rgba(47, 42, 38, .08);
+      border-radius: 9px;
+      padding: 6px 7px;
+      background: rgba(255, 255, 255, .68);
+      min-width: 0;
+    }
+
+    .admin-popup-row.full {
+      grid-column: 1 / -1;
+    }
+
+    .admin-popup-label {
+      display: block;
+      color: #8A7E78;
+      font-size: 9.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 2px;
+    }
+
+    .admin-popup-value {
+      display: block;
+      color: #1F2937;
+      font-size: 11.5px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .admin-popup-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .admin-popup-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 10.5px;
+      font-weight: 900;
+      border: 1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.74);
+    }
+
+    .admin-popup-foto {
+      margin-top: 11px;
+      text-align: center;
+    }
+
+    .admin-popup-foto img {
+      max-width: 100%;
+      max-height: 150px;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 4px 14px rgba(0,0,0,.15);
+    }
+
+    .admin-popup-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(0,0,0,.08);
+    }
+
+    .admin-popup-btn {
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 7px 8px;
+      cursor: pointer;
+    }
+
+    .admin-popup-btn.warn { background: #F59E0B; }
+    .admin-popup-btn.ok { background: #10B981; }
+    .admin-popup-btn.danger { background: #EF4444; }
+
     /* Responsive Markers for Mobile (Admin) */
     @media (max-width: 640px) {
       .faculty-pin {
@@ -1535,6 +1773,24 @@
 
       .case-dot i {
         font-size: 0.5rem !important;
+      }
+
+      .report-marker {
+        width: 28px !important;
+        height: 28px !important;
+      }
+
+      .report-marker i {
+        font-size: .78rem !important;
+      }
+
+      .admin-map-popup {
+        min-width: 260px;
+      }
+
+      .admin-popup-grid,
+      .admin-popup-actions {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -1582,6 +1838,34 @@
     [data-theme="dark"] .topbar-badge { background: rgba(16,185,129,.15); color: #34D399; }
     [data-theme="dark"] ::-webkit-scrollbar-track { background: var(--bg2); }
     [data-theme="dark"] .leaflet-container { filter: brightness(0.85) saturate(0.9); }
+    [data-theme="dark"] #adminMap .leaflet-popup-content-wrapper {
+      background: rgba(17, 22, 48, .97) !important;
+      border-color: rgba(255, 255, 255, .12);
+    }
+    [data-theme="dark"] #adminMap .leaflet-popup-content {
+      scrollbar-color: #F2A6B3 rgba(255,255,255,.07);
+    }
+    [data-theme="dark"] .admin-map-popup { color: var(--text); }
+    [data-theme="dark"] .admin-popup-head {
+      background: linear-gradient(135deg, rgba(24, 30, 58, .96), rgba(88, 49, 68, .56));
+      border-bottom-color: rgba(255, 255, 255, .08);
+    }
+    [data-theme="dark"] .admin-popup-title,
+    [data-theme="dark"] .admin-popup-value { color: var(--text); }
+    [data-theme="dark"] .admin-popup-sub,
+    [data-theme="dark"] .admin-popup-label { color: var(--text-muted); }
+    [data-theme="dark"] .admin-popup-desc {
+      background: rgba(242, 132, 130, .08);
+      color: var(--text-soft);
+      border-bottom-color: rgba(255, 255, 255, .07);
+    }
+    [data-theme="dark"] .admin-popup-row {
+      background: rgba(255, 255, 255, .045);
+      border-color: rgba(255, 255, 255, .08);
+    }
+    [data-theme="dark"] .admin-popup-actions {
+      border-top-color: rgba(255, 255, 255, .08);
+    }
 
     /* Theme toggle button */
     .admin-theme-toggle {
@@ -3438,7 +3722,17 @@
       }).addTo(adminMap);
 
       adminReportLayer = L.layerGroup().addTo(adminMap);
-      adminHeatLayer = L.heatLayer([], { radius: 25, blur: 20, maxZoom: 17 });
+      adminHeatLayer = L.heatLayer([], {
+        radius: 38,
+        blur: 24,
+        maxZoom: 18,
+        gradient: {
+          0.12: '#84A59D',
+          0.38: '#F6BD60',
+          0.68: '#F97316',
+          1.0: '#EF4444'
+        }
+      });
       adminClusterLayer = L.markerClusterGroup({
         spiderfyOnMaxZoom: true, showCoverageOnHover: false, zoomToBoundsOnClick: true,
         disableClusteringAtZoom: 18,
@@ -3640,6 +3934,239 @@
       }
     }
 
+    function adminEsc(value) {
+      return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function getAdminRawanLevel(score) {
+      const s = parseInt(score, 10);
+      if (isNaN(s)) return { label: 'Tidak tersedia', color: '#6B7280', icon: 'fa-circle-question', shape: 'circle' };
+      if (s >= 3) return { label: 'Rawan Tinggi', color: '#EF4444', icon: 'fa-fire-flame-curved', shape: 'flame' };
+      if (s === 2) return { label: 'Rawan Sedang', color: '#F59E0B', icon: 'fa-triangle-exclamation', shape: 'triangle' };
+      return { label: 'Rawan Rendah', color: '#10B981', icon: 'fa-shield-halved', shape: 'circle' };
+    }
+
+    function getAdminNyamanLabel(score) {
+      const s = parseInt(score, 10);
+      if (isNaN(s)) return { label: 'Kenyamanan tidak tersedia', color: '#6B7280', icon: 'fa-circle-question' };
+      if (s >= 3) return { label: 'Nyaman Saat Sendiri', color: '#10B981', icon: 'fa-face-smile' };
+      if (s === 2) return { label: 'Kurang Nyaman Saat Sendiri', color: '#F59E0B', icon: 'fa-face-meh' };
+      return { label: 'Tidak Nyaman Saat Sendiri', color: '#EF4444', icon: 'fa-face-frown' };
+    }
+
+    function calcAdminKelayakan(r) {
+      let score = 0;
+      const alasan = [];
+
+      if (r.pencahayaan === 'Terang') score += 3;
+      else if (r.pencahayaan === 'Remang-remang') { score += 2; alasan.push('Pencahayaan kurang memadai'); }
+      else { score += 1; alasan.push('Area sangat gelap'); }
+
+      if (r.kepadatan === 'Ramai') score += 3;
+      else if (r.kepadatan === 'Cukup ramai') score += 2;
+      else { score += 1; alasan.push('Area sepi'); }
+
+      if (r.cctv === 'Ada dan terlihat jelas') score += 3;
+      else if (r.cctv === 'Ada tapi tidak yakin aktif') { score += 2; alasan.push('CCTV belum pasti aktif'); }
+      else { score += 1; alasan.push('Tidak ada pengawasan CCTV'); }
+
+      if (r.petugas === 'Sering ada') score += 3;
+      else if (r.petugas === 'Kadang ada' || r.petugas === 'Jarang ada') { score += 2; alasan.push('Jarang ada petugas keamanan'); }
+      else { score += 1; alasan.push('Tidak pernah ada petugas keamanan'); }
+
+      if ((r.vegetasi || '').includes('Terbuka')) score += 3;
+      else if ((r.vegetasi || '').includes('Tertutup') || (r.vegetasi || '').includes('Ruang tertutup')) {
+        score += 1;
+        alasan.push('Area tertutup / kurang akses pandang');
+      } else {
+        score += 2;
+      }
+
+      let status = 'Layak';
+      if (score < 10) status = 'Kurang Layak';
+      else if (score <= 13) status = 'Cukup Layak';
+
+      const visual = status === 'Layak'
+        ? { color: '#10B981', icon: 'fa-check', label: 'Fasilitas Layak' }
+        : (status === 'Cukup Layak'
+          ? { color: '#F59E0B', icon: 'fa-triangle-exclamation', label: 'Fasilitas Cukup Layak' }
+          : { color: '#EF4444', icon: 'fa-xmark', label: 'Fasilitas Kurang Layak' });
+
+      return { status, alasan, ...visual };
+    }
+
+    function getAdminHeatIntensity(r) {
+      const s = parseInt(r?.skorRawan, 10);
+      if (!isNaN(s) && s >= 3) return 1;
+      if (s === 2) return 0.65;
+      if (s === 1) return 0.35;
+      return 0.5;
+    }
+
+    function getAdminReportVisual() {
+      return {
+        label: 'Laporan Tervalidasi',
+        icon: 'fa-location-dot',
+        color: '#D56A6A',
+        shape: 'circle',
+      };
+    }
+
+    function createAdminReportIcon(visual) {
+      const cfg = visual || getAdminReportVisual();
+      return L.divIcon({
+        className: `case-dot-wrap report-marker-wrap report-marker-wrap-${cfg.shape || 'circle'}`,
+        html: `<div class="case-dot report-marker report-marker-${cfg.shape || 'circle'}" style="--case-color:${cfg.color}">
+          <i class="fas ${cfg.icon || 'fa-location-dot'}"></i>
+        </div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
+        popupAnchor: [0, -17],
+      });
+    }
+
+    function adminPopupBadge(visual) {
+      return `<span class="admin-popup-badge" style="color:${visual.color};border-color:${visual.color}33;background:${visual.color}12">
+        <i class="fas ${visual.icon}"></i> ${adminEsc(visual.label)}
+      </span>`;
+    }
+
+    function adminPopupRow(label, value, full = false) {
+      const text = value === null || value === undefined || value === '' ? '-' : value;
+      return `<div class="admin-popup-row${full ? ' full' : ''}">
+        <span class="admin-popup-label">${adminEsc(label)}</span>
+        <span class="admin-popup-value">${adminEsc(text)}</span>
+      </div>`;
+    }
+
+    function adminPopupRowHtml(label, html, full = false) {
+      return `<div class="admin-popup-row${full ? ' full' : ''}">
+        <span class="admin-popup-label">${adminEsc(label)}</span>
+        <span class="admin-popup-value">${html || '-'}</span>
+      </div>`;
+    }
+
+    function adminColoredValue(value, color = '#1F2937') {
+      return `<span style="color:${color};font-weight:800">${adminEsc(value || '-')}</span>`;
+    }
+
+    function getAdminConditionColor(value, type) {
+      if (type === 'pencahayaan') {
+        if (value === 'Terang') return '#10B981';
+        if (value === 'Gelap') return '#EF4444';
+        return '#F59E0B';
+      }
+      if (type === 'kepadatan') {
+        if (value === 'Ramai') return '#10B981';
+        if (value === 'Sepi' || value === 'Sangat sepi') return '#EF4444';
+        return '#F59E0B';
+      }
+      if (type === 'cctv') {
+        if ((value || '').includes('jelas')) return '#10B981';
+        if ((value || '').includes('Tidak ada') || (value || '').includes('Tidak tahu')) return '#EF4444';
+        return '#F59E0B';
+      }
+      if (type === 'petugas') {
+        if (value === 'Sering ada') return '#10B981';
+        if (value === 'Jarang ada' || value === 'Tidak pernah ada') return '#EF4444';
+        return '#F59E0B';
+      }
+      return '#6B7280';
+    }
+
+    function buildAdminReportPopup(r) {
+      const visual = getAdminReportVisual(r);
+      const rawan = getAdminRawanLevel(r.skorRawan);
+      const nyaman = getAdminNyamanLabel(r.skorNyaman);
+      const kelayakan = calcAdminKelayakan(r);
+      const status = STATUS_LABELS[normalizeStatus(r.status)] || normalizeStatus(r.status);
+      const fotoPath = r.fotoPath || '';
+      const isHidden = typeof fotoPath === 'string' && fotoPath.startsWith('HIDDEN_');
+      const displayFotoPath = isHidden ? fotoPath.replace(/^HIDDEN_/, '') : fotoPath;
+      const fotoUrl = displayFotoPath ? getPhotoUrl(displayFotoPath) : '';
+
+      const fotoHtml = fotoPath ? `
+        <div class="admin-popup-foto">
+          <img src="${fotoUrl}" style="${isHidden ? 'opacity:.45;filter:grayscale(100%);' : ''}" alt="Foto laporan" onerror="this.style.display='none'"/>
+          <div style="font-size:10.5px;color:#6B7280;margin-top:5px">${isHidden ? 'Foto disembunyikan dari publik' : 'Foto tampil untuk publik'}</div>
+        </div>
+      ` : `<div class="admin-popup-row full"><span class="admin-popup-label">Foto</span><span class="admin-popup-value">Tidak ada foto dilampirkan</span></div>`;
+
+      const fotoButton = fotoPath
+        ? `<button onclick="toggleFotoHide(${r.id}, '${isHidden ? 'unhide' : 'hide'}')" class="admin-popup-btn ${isHidden ? 'ok' : 'warn'}">
+            ${isHidden ? '<i class="fas fa-eye"></i> Tampilkan Foto' : '<i class="fas fa-eye-slash"></i> Sembunyikan Foto'}
+          </button>`
+        : '<button class="admin-popup-btn warn" disabled style="opacity:.55;cursor:not-allowed"><i class="fas fa-image"></i> Tidak Ada Foto</button>';
+
+      return `
+        <div class="admin-map-popup" style="--admin-popup-accent:${visual.color}">
+          <div class="admin-popup-head">
+            <div class="admin-popup-kicker"><i class="fas ${visual.icon}"></i> Peta Admin - Laporan Lengkap</div>
+            <div class="admin-popup-title">${adminEsc(r.lokasi || 'Lokasi tidak diketahui')}</div>
+            <div class="admin-popup-sub">#${adminEsc(r.id)} ${r.reportCode ? `- ${adminEsc(r.reportCode)}` : ''} | ${adminEsc(formatDate(r.createdAt))}</div>
+          </div>
+          ${r.lokasiDeskripsi ? `<div class="admin-popup-desc">${adminEsc(r.lokasiDeskripsi)}</div>` : ''}
+          <div class="admin-popup-body">
+            <div class="admin-popup-badge-row">
+              ${adminPopupBadge(rawan)}
+              ${adminPopupBadge(nyaman)}
+              ${adminPopupBadge(kelayakan)}
+            </div>
+
+            <div class="admin-popup-section">
+              <div class="admin-popup-section-title"><i class="fas fa-user"></i> Data Pelapor</div>
+              <div class="admin-popup-grid">
+                ${adminPopupRow('Email ITS', r.email, true)}
+                ${adminPopupRow('Kontak', r.kontak || 'Tidak diisi')}
+                ${adminPopupRow('Peran', r.peran)}
+                ${adminPopupRow('Jenis Kelamin', r.kelamin || 'Tidak diisi')}
+                ${adminPopupRow('Status', status)}
+              </div>
+            </div>
+
+            <div class="admin-popup-section">
+              <div class="admin-popup-section-title"><i class="fas fa-map-location-dot"></i> Lokasi & Waktu</div>
+              <div class="admin-popup-grid">
+                ${adminPopupRow('Koordinat', `${Number(r.lat).toFixed(5)}, ${Number(r.lng).toFixed(5)}`, true)}
+                ${adminPopupRow('Waktu Rawan', r.waktu)}
+                ${adminPopupRow('Hari Rawan', r.hariRawan === 'Keduanya sama' ? 'Hari Kerja dan Libur' : (r.hariRawan || 'Tidak diisi'))}
+                ${adminPopupRow('Fungsi Ruang', r.fungsiRuang || 'Tidak diisi', true)}
+              </div>
+            </div>
+
+            <div class="admin-popup-section">
+              <div class="admin-popup-section-title"><i class="fas fa-building-shield"></i> Kondisi Fisik</div>
+              <div class="admin-popup-grid">
+                ${adminPopupRowHtml('Pencahayaan', adminColoredValue(r.pencahayaan, getAdminConditionColor(r.pencahayaan, 'pencahayaan')))}
+                ${adminPopupRowHtml('Kepadatan', adminColoredValue(r.kepadatan, getAdminConditionColor(r.kepadatan, 'kepadatan')))}
+                ${adminPopupRowHtml('CCTV', adminColoredValue(r.cctv, getAdminConditionColor(r.cctv, 'cctv')))}
+                ${adminPopupRowHtml('Petugas', adminColoredValue(r.petugas, getAdminConditionColor(r.petugas, 'petugas')))}
+                ${adminPopupRow('Vegetasi/Keterbukaan', r.vegetasi || 'Tidak diisi', true)}
+                ${adminPopupRow('Catatan Kelayakan', kelayakan.alasan.length ? kelayakan.alasan.join(', ') : 'Tidak ada faktor pembatas utama', true)}
+              </div>
+            </div>
+
+            <div class="admin-popup-section">
+              <div class="admin-popup-section-title"><i class="fas fa-clipboard-list"></i> Pengalaman & Catatan</div>
+              <div class="admin-popup-grid">
+                ${adminPopupRow('Alasan Tidak Nyaman', r.alasanTidakNyaman || 'Tidak diisi', true)}
+                ${adminPopupRow('Pernah Hindari', r.pernahHindari || 'Tidak diisi')}
+                ${adminPopupRow('Orang Lain Tidak Nyaman', r.orangLain || 'Tidak diisi')}
+                ${adminPopupRow('Situasi Mencurigakan', r.situasiMencurigakan || 'Tidak diisi', true)}
+                ${adminPopupRow('Kronologi/Keterangan', r.kronologi || 'Tidak diisi', true)}
+              </div>
+            </div>
+
+            ${fotoHtml}
+            <div class="admin-popup-actions">
+              ${fotoButton}
+              <button onclick="deleteReportMap(${r.id})" class="admin-popup-btn danger"><i class="fas fa-trash"></i> Hapus Laporan</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderAdminMap() {
       if (!adminMap) return;
       if (adminReportLayer) { adminReportLayer.clearLayers(); adminMap.removeLayer(adminReportLayer); }
@@ -3647,104 +4174,25 @@
       if (adminClusterLayer) { adminClusterLayer.clearLayers(); adminMap.removeLayer(adminClusterLayer); }
       if (adminLocLayer) { adminLocLayer.clearLayers(); }
 
-      const isRawanTinggi = (score) => { const s = parseInt(score, 10); return !isNaN(s) && s >= 4; };
-      const isRawanSedang = (score) => { const s = parseInt(score, 10); return s === 3; };
-      const getRawanLabel = (s) =>
-        isRawanTinggi(s) ? `<div style="background:rgba(239,68,68,0.1);color:#EF4444;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;display:inline-block"><i class="fas fa-triangle-exclamation"></i> Rawan Tinggi</div>` :
-          (isRawanSedang(s) ? `<div style="background:rgba(245,158,11,0.1);color:#F59E0B;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;display:inline-block"><i class="fas fa-circle-exclamation"></i> Rawan Sedang</div>` :
-            `<div style="background:rgba(16,185,129,0.1);color:#10B981;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;display:inline-block"><i class="fas fa-shield-halved"></i> Rawan Rendah</div>`);
-
       const heatData = [];
 
-      // Plot laporan
       reports.forEach(r => {
-        if (!r.lat || !r.lng) return;
+        const lat = Number(r.lat);
+        const lng = Number(r.lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
         if (visAdminHeatmap) {
-          let intensity = 0.5;
-          if (isRawanTinggi(r.skorRawan)) intensity = 1.0;
-          else if (isRawanSedang(r.skorRawan)) intensity = 0.7;
-          heatData.push([r.lat, r.lng, intensity]);
+          heatData.push([lat, lng, getAdminHeatIntensity(r)]);
           return;
         }
 
-        const fotoUrl = r.fotoPath ? getPhotoUrl(r.fotoPath) : null;
-        const isHidden = r.fotoPath && r.fotoPath.startsWith('HIDDEN_');
-        const fotoHtml = fotoUrl ? `
-      <div style="margin-top:8px;text-align:center;">
-        <img src="${fotoUrl}" style="max-width:100%;max-height:140px;border-radius:4px;object-fit:cover;${isHidden ? 'opacity:0.4; filter: grayscale(100%);' : ''}" onerror="this.style.display='none'"/>
-        <div style="margin-top:5px;display:flex;gap:5px;justify-content:center">
-          <button onclick="toggleFotoHide(${r.id}, '${isHidden ? 'unhide' : 'hide'}')" style="background:${isHidden ? '#10B981' : '#F59E0B'};color:white;border:none;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:0.75rem;width:100%">
-            ${isHidden ? '<i class="fas fa-eye"></i> Tampilkan Foto' : '<i class="fas fa-eye-slash"></i> Sembunyikan Foto'}
-          </button>
-        </div>
-      </div>
-    ` : `<div style="font-size:0.7rem;color:#888;text-align:center;margin-top:5px;padding:10px;background:#f5f5f5;border-radius:4px">Tidak ada foto dilampirkan</div>`;
-
-        const getScoreAdmin = (val, type) => {
-          const scores = {
-            pencahayaan: { 'Terang': '#10B981', 'Remang-remang': '#F59E0B', 'Gelap': '#EF4444' },
-            kepadatan: { 'Ramai': '#10B981', 'Cukup ramai': '#F59E0B', 'Sepi': '#EF4444', 'Sangat sepi': '#EF4444' },
-            cctv: { 'Ada dan terlihat jelas': '#10B981', 'Ada tapi tidak yakin aktif': '#F59E0B', 'Tidak ada': '#EF4444', 'Tidak tahu': '#9CA3AF' },
-            petugas: { 'Sering ada': '#10B981', 'Kadang ada': '#F59E0B', 'Jarang ada': '#EF4444', 'Tidak pernah ada': '#EF4444' },
-            vegetasi: { 'Terbuka, tidak terhalang': '#10B981', 'Ada semak/pohon yang menghalangi pandangan': '#F59E0B', 'Sudut tersembunyi / gang buntu': '#EF4444', 'Ruang tertutup': '#EF4444' }
-          };
-          const color = scores[type]?.[val] || '#6B7280';
-          return `<span style="color:${color};font-weight:600">${val || '-'}</span>`;
-        };
-
-        const bodyHtml = `
-      <div style="font-family:'DM Sans',sans-serif;min-width:160px;max-width:220px;font-size:12px;line-height:1.4;transform:none">
-        <div style="border-bottom:1px solid #e5e5e5;padding-bottom:6px;margin-bottom:6px">
-          <strong style="color:#D56A6A;font-size:0.85rem">${r.lokasi || 'Tidak diketahui'}</strong>
-          <div style="font-size:0.7rem;color:#888;margin-top:2px">#${r.id} | ${r.peran || '-'}</div>
-        </div>
-        
-        <div style="margin-bottom:6px">
-          <div style="font-size:0.7rem;color:#6B7280;margin-bottom:2px">Email Pelapor</div>
-          <div style="font-size:0.75rem;color:#374151;font-weight:500">${r.email || '-'}</div>
-        </div>
-
-        <div style="text-align:center;margin-bottom:8px;">${getRawanLabel(r.skorRawan)}</div>
-        
-        <div style="margin-bottom:6px">
-          <div style="font-size:0.7rem;color:#6B7280;margin-bottom:2px">Deskripsi Lokasi</div>
-          <div style="font-size:0.75rem;color:#374151;font-style:italic">"${r.lokasiDeskripsi || '-'}"</div>
-        </div>
-        
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;font-size:0.75rem">
-          <div><span style="color:#6B7280">Pencahayaan:</span><br>${getScoreAdmin(r.pencahayaan, 'pencahayaan')}</div>
-          <div><span style="color:#6B7280">Kepadatan:</span><br>${getScoreAdmin(r.kepadatan, 'kepadatan')}</div>
-          <div><span style="color:#6B7280">CCTV:</span><br>${getScoreAdmin(r.cctv, 'cctv')}</div>
-          <div><span style="color:#6B7280">Petugas:</span><br>${getScoreAdmin(r.petugas, 'petugas')}</div>
-          <div style="grid-column:span 2"><span style="color:#6B7280">Keterbukaan:</span><br>${getScoreAdmin(r.vegetasi, 'vegetasi')}</div>
-          <div style="grid-column:span 2"><span style="color:#6B7280">Waktu Rawan:</span><br>${r.waktu || '-'} (${r.hariRawan || '-'})</div>
-        </div>
-
-        <div style="font-size:0.7rem;color:#6B7280;margin-bottom:4px">Koordinat: ${r.lat?.toFixed(5) || '-'}, ${r.lng?.toFixed(5) || '-'}</div>
-        
-        ${fotoHtml}
-        <div style="margin-top:10px;text-align:center;border-top:1px solid #e5e5e5;padding-top:8px;">
-          <button onclick="deleteReportMap(${r.id})" style="background:#EF4444;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:0.7rem;width:100%;font-weight:600">
-            <i class="fas fa-trash"></i> Hapus
-          </button>
-        </div>
-      </div>
-    `;
-
-        const markerColor = isRawanTinggi(r.skorRawan) ? '#EF4444' : (isRawanSedang(r.skorRawan) ? '#F59E0B' : '#10B981');
-
-        const caseIcon = L.divIcon({
-          className: 'case-dot-wrap',
-          html: `<div class="case-dot" style="--case-color:${markerColor}">
-               <i class="fas fa-exclamation"></i>
-             </div>`,
-          iconSize: [22, 22],
-          iconAnchor: [11, 11],
-          popupAnchor: [0, -11]
+        const reportForPopup = Object.assign({}, r, { lat, lng });
+        const marker = L.marker([lat, lng], {
+          icon: createAdminReportIcon(getAdminReportVisual(reportForPopup))
+        }).bindPopup(buildAdminReportPopup(reportForPopup), {
+          maxWidth: 360,
+          className: 'admin-leaflet-popup'
         });
-
-        const marker = L.marker([r.lat, r.lng], { icon: caseIcon }).bindPopup(bodyHtml);
 
         if (visAdminPoint) {
           marker.addTo(adminReportLayer);
