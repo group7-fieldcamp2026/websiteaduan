@@ -6195,6 +6195,74 @@ main {
   font-weight: 800;
 }
 
+.popup-subjective-panel {
+  display: grid;
+  gap: .48rem;
+  margin-bottom: .72rem;
+}
+
+.popup-subjective-title {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  color: #D56A6A;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.popup-subjective-row {
+  --subjective-color: #D56A6A;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: .55rem;
+  min-width: 0;
+  padding: .55rem .62rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--subjective-color) 8%, white);
+  border: 1px solid color-mix(in srgb, var(--subjective-color) 18%, transparent);
+}
+
+.popup-subjective-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: var(--subjective-color);
+  box-shadow: 0 5px 12px color-mix(in srgb, var(--subjective-color) 22%, transparent);
+}
+
+.popup-subjective-text {
+  min-width: 0;
+}
+
+.popup-subjective-text span {
+  display: block;
+  color: #7c8798;
+  font-size: 9.5px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.popup-subjective-text strong {
+  display: block;
+  color: #1f2937;
+  font-size: 11.5px;
+  line-height: 1.25;
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+.popup-subjective-arrow {
+  color: color-mix(in srgb, var(--subjective-color) 45%, #94a3b8);
+  font-size: 10px;
+}
+
 .popup-meta-grid {
   display: flex;
   flex-direction: column;
@@ -6305,6 +6373,19 @@ main {
 [data-theme="dark"] .popup-condition-chip {
   background: color-mix(in srgb, var(--chip-color) 14%, rgba(17, 22, 48, .94));
   border-color: color-mix(in srgb, var(--chip-color) 32%, rgba(200, 210, 255, .08));
+}
+
+[data-theme="dark"] .popup-subjective-row {
+  background: color-mix(in srgb, var(--subjective-color) 12%, rgba(17, 22, 48, .94));
+  border-color: color-mix(in srgb, var(--subjective-color) 28%, rgba(200, 210, 255, .08));
+}
+
+[data-theme="dark"] .popup-subjective-text span {
+  color: #8d94b2;
+}
+
+[data-theme="dark"] .popup-subjective-text strong {
+  color: #e2e4f0;
 }
 
 [data-theme="dark"] .popup-faculty {

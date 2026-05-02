@@ -89,9 +89,9 @@ const MAP_MODE_META = {
     icon: 'fa-fire-flame-curved',
     color: '#EF4444',
     shape: 'flame',
-    note: 'Intensitas heatmap dan pin mengikuti tingkat kerawanan pelapor.',
+    note: 'Intensitas heatmap mengikuti gabungan kenyamanan saat sendiri dan tingkat kerawanan area.',
     popupTitle: 'Tingkat kerawanan',
-    popupDesc: 'Output ini menonjolkan tingkat rawan berdasarkan penilaian pelapor.'
+    popupDesc: 'Output ini menonjolkan tingkat rawan dari penilaian subjektif pelapor.'
   },
   fasilitas: {
     label: 'Kelayakan Fasilitas',
@@ -750,17 +750,6 @@ function getActivePetaMode() {
   return 'sebaran';
 }
 
-function getRiskVisual(score) {
-  const s = parseInt(score, 10);
-  if (!isNaN(s) && s >= 3) {
-    return { label: 'Rawan Tinggi', icon: 'fa-fire-flame-curved', color: '#EF4444', shape: 'flame' };
-  }
-  if (s === 2) {
-    return { label: 'Rawan Sedang', icon: 'fa-temperature-half', color: '#F59E0B', shape: 'triangle' };
-  }
-  return { label: 'Rawan Rendah', icon: 'fa-shield-halved', color: '#10B981', shape: 'circle' };
-}
-
 function addUniqueReason(reasons, text) {
   if (text && !reasons.includes(text)) reasons.push(text);
 }
@@ -783,43 +772,99 @@ function isAffirmativeReportValue(value) {
   return text === 'ya' || text.includes('pernah') || text.includes('ada');
 }
 
+function getAreaRiskAssessment(score) {
+  const s = parseInt(score, 10);
+  if (isNaN(s)) return { label: 'Tidak tersedia', weight: null, icon: 'fa-circle-question', color: '#94A3B8' };
+  if (s >= 3) return { label: 'Tinggi', weight: 3, icon: 'fa-fire-flame-curved', color: '#EF4444' };
+  if (s === 2) return { label: 'Sedang', weight: 2, icon: 'fa-temperature-half', color: '#F59E0B' };
+  return { label: 'Rendah', weight: 1, icon: 'fa-shield-halved', color: '#10B981' };
+}
+
+function getComfortAssessment(score) {
+  const s = parseInt(score, 10);
+  if (isNaN(s)) return { label: 'Tidak tersedia', weight: null, icon: 'fa-circle-question', color: '#94A3B8' };
+  if (s === 1) return { label: 'Tidak Nyaman', weight: 3, icon: 'fa-face-frown', color: '#EF4444' };
+  if (s === 2) return { label: 'Kurang Nyaman', weight: 2, icon: 'fa-face-meh', color: '#F59E0B' };
+  return { label: 'Nyaman', weight: 1, icon: 'fa-face-smile', color: '#10B981' };
+}
+
+function getCombinedRiskScore(reportOrScore, comfortScore) {
+  const report = (reportOrScore && typeof reportOrScore === 'object')
+    ? reportOrScore
+    : { skorRawan: reportOrScore, skorNyaman: comfortScore };
+  const area = getAreaRiskAssessment(report.skorRawan);
+  const comfort = getComfortAssessment(report.skorNyaman);
+  const weights = [area.weight, comfort.weight].filter(v => typeof v === 'number' && !isNaN(v));
+  if (!weights.length) return null;
+  if (weights.length === 1) return weights[0] * 2;
+  return weights.reduce((sum, value) => sum + value, 0);
+}
+
+function getRiskVisual(reportOrScore, comfortScore) {
+  const combined = getCombinedRiskScore(reportOrScore, comfortScore);
+  if (combined === null) {
+    return { label: 'Rawan Tidak Tersedia', icon: 'fa-circle-question', color: '#94A3B8', shape: 'circle', combinedScore: null };
+  }
+  if (combined >= 5) {
+    return { label: 'Rawan Tinggi', icon: 'fa-fire-flame-curved', color: '#EF4444', shape: 'flame', combinedScore: combined };
+  }
+  if (combined >= 3) {
+    return { label: 'Rawan Sedang', icon: 'fa-temperature-half', color: '#F59E0B', shape: 'triangle', combinedScore: combined };
+  }
+  return { label: 'Rawan Rendah', icon: 'fa-shield-halved', color: '#10B981', shape: 'circle', combinedScore: combined };
+}
+
+function describeAvoidance(value) {
+  if (!value) return '';
+  return value === 'Pernah' ? 'pelapor pernah menghindari area ini' : 'pelapor tidak pernah menghindari area ini';
+}
+
+function describeOtherPeople(value) {
+  if (!value) return '';
+  if (value === 'Ya') return 'ada orang lain yang juga tidak nyaman';
+  if (value === 'Tidak') return 'belum ada orang lain yang diketahui tidak nyaman';
+  return 'pelapor tidak tahu apakah orang lain juga tidak nyaman';
+}
+
+function describeSuspiciousSituation(value) {
+  if (!value) return '';
+  return value === 'Pernah' ? 'pelapor pernah melihat situasi mencurigakan' : 'pelapor tidak pernah melihat situasi mencurigakan';
+}
+
 function getRiskReasonParts(r) {
   const reasons = [];
-  if (r.pencahayaan === 'Gelap') addUniqueReason(reasons, 'area sangat gelap');
-  else if (r.pencahayaan === 'Remang-remang') addUniqueReason(reasons, 'pencahayaan remang-remang');
+  const comfort = getComfortAssessment(r.skorNyaman);
+  const area = getAreaRiskAssessment(r.skorRawan);
 
-  if (isSepi(r.kepadatan)) addUniqueReason(reasons, 'area sepi');
-  if (r.cctv === 'Tidak ada') addUniqueReason(reasons, 'tidak ada pengawasan CCTV');
-  else if (r.cctv === 'Tidak tahu') addUniqueReason(reasons, 'kondisi CCTV tidak diketahui');
-  if (isMinimPetugas(r.petugas)) addUniqueReason(reasons, 'minim petugas keamanan');
-  if ((r.waktu || '').toLowerCase().includes('malam')) addUniqueReason(reasons, 'terjadi pada waktu malam');
-  if (isAffirmativeReportValue(r.pernahHindari)) addUniqueReason(reasons, 'pernah dihindari pelapor');
-  if (isAffirmativeReportValue(r.orangLain)) addUniqueReason(reasons, 'orang lain juga merasa tidak nyaman');
-  if (isAffirmativeReportValue(r.situasiMencurigakan)) addUniqueReason(reasons, 'ada situasi mencurigakan');
+  if (comfort.weight !== null) addUniqueReason(reasons, `kenyamanan saat sendiri: ${comfort.label.toLowerCase()}`);
+  if (area.weight !== null) addUniqueReason(reasons, `tingkat kerawanan area: ${area.label.toLowerCase()}`);
   if (r.alasanTidakNyaman) addUniqueReason(reasons, `alasan pelapor: ${shortenReasonText(r.alasanTidakNyaman)}`);
+  addUniqueReason(reasons, describeAvoidance(r.pernahHindari));
+  addUniqueReason(reasons, describeOtherPeople(r.orangLain));
+  addUniqueReason(reasons, describeSuspiciousSituation(r.situasiMencurigakan));
 
   return reasons;
 }
 
 function getRiskExplanation(r) {
-  const risk = getRiskVisual(r.skorRawan);
+  const risk = getRiskVisual(r);
   const reasonText = formatReasonList(getRiskReasonParts(r));
 
   if (risk.label === 'Rawan Tinggi') {
     return reasonText
-      ? `Faktor pemicu: ${reasonText}.`
-      : 'Pelapor menilai area ini rawan tinggi, sehingga titik ini menjadi prioritas pada heatmap.';
+      ? `Masuk kategori tinggi dari gabungan penilaian subjektif: ${reasonText}.`
+      : 'Masuk kategori tinggi dari gabungan kenyamanan saat sendiri dan tingkat kerawanan area.';
   }
 
   if (risk.label === 'Rawan Sedang') {
     return reasonText
-      ? `Ada indikasi kerawanan: ${reasonText}.`
-      : 'Ada catatan kerawanan dari pelapor, tetapi intensitasnya belum setinggi titik prioritas.';
+      ? `Masuk kategori sedang dari gabungan penilaian subjektif: ${reasonText}.`
+      : 'Masuk kategori sedang dari gabungan kenyamanan saat sendiri dan tingkat kerawanan area.';
   }
 
   return reasonText
-    ? `Tetap dipantau karena ada catatan: ${reasonText}.`
-    : 'Laporan ini tetap dipetakan sebagai bagian dari pemantauan area kampus.';
+    ? `Masuk kategori rendah dari gabungan penilaian subjektif: ${reasonText}.`
+    : 'Masuk kategori rendah dari gabungan kenyamanan saat sendiri dan tingkat kerawanan area.';
 }
 
 function getFacilityVisual(r) {
@@ -837,7 +882,7 @@ function getReportVisual(r) {
   if (CONDITION_LAYER_VISUALS[activeLayer]) return CONDITION_LAYER_VISUALS[activeLayer];
 
   const mode = getActivePetaMode();
-  if (mode === 'heatmap') return getRiskVisual(r.skorRawan);
+  if (mode === 'heatmap') return getRiskVisual(r);
   if (mode === 'fasilitas') return getFacilityVisual(r);
 
   return {
@@ -849,11 +894,11 @@ function getReportVisual(r) {
 }
 
 function getHeatIntensity(r) {
-  const s = parseInt(r?.skorRawan, 10);
-  if (!isNaN(s) && s >= 3) return 1;
-  if (s === 2) return 0.65;
-  if (s === 1) return 0.35;
-  return 0.5;
+  const combined = getCombinedRiskScore(r);
+  if (combined === null) return 0.5;
+  if (combined >= 5) return 1;
+  if (combined >= 3) return 0.65;
+  return 0.35;
 }
 
 function createReportMarker(r) {
@@ -1252,6 +1297,35 @@ function getConditionChips(r) {
   </div>`;
 }
 
+function buildSubjectiveChoiceRow(label, value, icon, color = '#D56A6A') {
+  return `<div class="popup-subjective-row" style="--subjective-color:${color}">
+    <span class="popup-subjective-icon"><i class="fas ${icon}"></i></span>
+    <span class="popup-subjective-text">
+      <span>${esc(label)}</span>
+      <strong>${esc(value || 'Tidak diisi')}</strong>
+    </span>
+    <i class="fas fa-chevron-right popup-subjective-arrow"></i>
+  </div>`;
+}
+
+function buildSubjectiveChoices(r) {
+  const comfort = getComfortAssessment(r.skorNyaman);
+  const area = getAreaRiskAssessment(r.skorRawan);
+  const rows = [
+    buildSubjectiveChoiceRow('Kenyamanan Saat Sendiri', comfort.label, comfort.icon, comfort.color),
+    buildSubjectiveChoiceRow('Tingkat Kerawanan Area', area.label, area.icon, area.color),
+    buildSubjectiveChoiceRow('Alasan Tidak Nyaman', r.alasanTidakNyaman || 'Tidak diisi', 'fa-comment-dots', '#D56A6A'),
+    buildSubjectiveChoiceRow('Pernah Menghindari Area Ini?', r.pernahHindari || 'Tidak diisi', 'fa-route', '#8B5CF6'),
+    buildSubjectiveChoiceRow('Tahu Orang Lain Tidak Nyaman?', r.orangLain || 'Tidak diisi', 'fa-users', '#3B82F6'),
+    buildSubjectiveChoiceRow('Pernah Lihat Situasi Mencurigakan?', r.situasiMencurigakan || 'Tidak diisi', 'fa-eye', '#F97316'),
+  ];
+
+  return `<div class="popup-subjective-panel">
+    <div class="popup-subjective-title"><i class="fas fa-clipboard-check"></i> Penilaian Subjektif</div>
+    ${rows.join('')}
+  </div>`;
+}
+
 function getPopupOutputSummary(r) {
   const mode = getActivePetaMode();
   const layerVisual = CONDITION_LAYER_VISUALS[activeLayer];
@@ -1266,7 +1340,7 @@ function getPopupOutputSummary(r) {
   }
 
   if (mode === 'heatmap') {
-    const risk = getRiskVisual(r.skorRawan);
+    const risk = getRiskVisual(r);
     return {
       icon: risk.icon,
       color: risk.color,
@@ -1325,6 +1399,10 @@ function buildPopup(r) {
   const summaryHtml = `<div class="popup-output-top">${buildPopupOutputCard(summary)}</div>`;
 
   let bodyHtml = `<div class="popup-body">`;
+
+  if (mode === 'heatmap') {
+    bodyHtml += buildSubjectiveChoices(r);
+  }
 
   if (mode === 'sebaran') {
     bodyHtml += `<div class="popup-status-badge badge-info"><i class="fas fa-circle-check"></i> Laporan Valid</div>`;
@@ -1687,9 +1765,9 @@ function updateLayerCounts() {
   set('cnt-semua', reports.length);
   set('cnt-semua-2', reports.length);
   set('cnt-semua-3', reports.length);
-  set('cnt-tinggi', reports.filter(r => isRawanTinggi(r.skorRawan)).length);
-  set('cnt-sedang', reports.filter(r => isRawanSedang(r.skorRawan)).length);
-  set('cnt-rendah', reports.filter(r => isRawanRendah(r.skorRawan)).length);
+  set('cnt-tinggi', reports.filter(r => isRawanTinggi(r)).length);
+  set('cnt-sedang', reports.filter(r => isRawanSedang(r)).length);
+  set('cnt-rendah', reports.filter(r => isRawanRendah(r)).length);
   set('cnt-gelap', reports.filter(r => r.pencahayaan === 'Gelap').length);
   set('cnt-sepi', reports.filter(r => isSepi(r.kepadatan)).length);
   set('cnt-nocctv', reports.filter(r => r.cctv === 'Tidak ada').length);
@@ -1744,13 +1822,13 @@ function updateHeatmapAnalysis(data, filterWaktu, filterBulan) {
   if (filterBulan) period.push(`bulan ${getMonthName(filterBulan)}`);
   const suffix = period.length ? ` (filter ${period.join(', ')})` : '';
 
-  const scores = data.map(r => r.skorRawan).filter(v => typeof v === 'number' && !isNaN(v));
+  const scores = data.map(r => getCombinedRiskScore(r)).filter(v => typeof v === 'number' && !isNaN(v));
   const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : null;
 
   let avgLabel = '';
   if (avg !== null) {
-    if (avg >= 3.6) avgLabel = 'Tinggi';
-    else if (avg >= 2.1) avgLabel = 'Sedang';
+    if (avg >= 5) avgLabel = 'Tinggi';
+    else if (avg >= 3) avgLabel = 'Sedang';
     else avgLabel = 'Rendah';
   }
 
@@ -1872,7 +1950,7 @@ function loadDemoData() {
       kepadatan: kepadatanOpts[Math.floor(Math.random() * kepadatanOpts.length)],
       cctv: cctvOpts[Math.floor(Math.random() * cctvOpts.length)],
       petugas: petugasOpts[Math.floor(Math.random() * petugasOpts.length)],
-      skorRawan: Math.floor(Math.random() * 5) + 1,
+      skorRawan: Math.floor(Math.random() * 3) + 1,
       skorNyaman: Math.floor(Math.random() * 3) + 1,
       createdAt: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
       lokasiDeskripsi: 'Ini adalah data demo tersebar secara acak.',
@@ -1995,23 +2073,22 @@ function filterLocations(btn) {
 // HELPERS
 // ============================================================
 function getRiskColor(score) {
-  const s = parseInt(score, 10);
-  return RISK_COLORS[s] || '#A78BFA';
+  return getRiskVisual(score).color;
 }
 
-function isRawanTinggi(score) {
-  const s = parseInt(score, 10);
-  return !isNaN(s) && s >= 3;
+function isRawanTinggi(reportOrScore, comfortScore) {
+  const combined = getCombinedRiskScore(reportOrScore, comfortScore);
+  return combined !== null && combined >= 5;
 }
 
-function isRawanSedang(score) {
-  const s = parseInt(score, 10);
-  return s === 2;
+function isRawanSedang(reportOrScore, comfortScore) {
+  const combined = getCombinedRiskScore(reportOrScore, comfortScore);
+  return combined !== null && combined >= 3 && combined <= 4;
 }
 
-function isRawanRendah(score) {
-  const s = parseInt(score, 10);
-  return !isNaN(s) && s <= 1;
+function isRawanRendah(reportOrScore, comfortScore) {
+  const combined = getCombinedRiskScore(reportOrScore, comfortScore);
+  return combined !== null && combined <= 2;
 }
 
 function isSepi(val) {
@@ -2025,11 +2102,11 @@ function isMinimPetugas(val) {
 function matchesLayer(r, layer) {
   switch (layer) {
     case 'rawan-tinggi':
-      return isRawanTinggi(r.skorRawan);
+      return isRawanTinggi(r);
     case 'rawan-sedang':
-      return isRawanSedang(r.skorRawan);
+      return isRawanSedang(r);
     case 'rawan-rendah':
-      return isRawanRendah(r.skorRawan);
+      return isRawanRendah(r);
     case 'gelap':
       return r.pencahayaan === 'Gelap';
     case 'sepi':
