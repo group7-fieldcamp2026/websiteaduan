@@ -1916,6 +1916,19 @@
                   style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .8rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:transparent; color:var(--text); font-weight:600; cursor:pointer;"><i
                     class="fas fa-share-nodes"></i> Cluster</button>
               </div>
+
+              <div class="panel-title"
+                style="font-size: .85rem; font-weight: 700; color: var(--text-muted); margin-bottom: .75rem; letter-spacing: 1px; margin-top: 1.5rem;">
+                <i class="fas fa-file-export"></i> EXPORT DATA
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+                <button class="bm-btn" onclick="exportAdminReportsCSV()" title="Unduh semua data laporan dalam CSV"
+                  style="display:inline-flex; align-items:center; gap:.35rem; padding:.45rem .9rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(16,185,129,.12); color:#047857; font-weight:700; cursor:pointer;"><i
+                    class="fas fa-file-csv"></i> Export CSV</button>
+                <button class="bm-btn" onclick="exportAdminReportsGeoJSON()" title="Unduh laporan berkoordinat sebagai GeoJSON"
+                  style="display:inline-flex; align-items:center; gap:.35rem; padding:.45rem .9rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(59,130,246,.12); color:#1D4ED8; font-weight:700; cursor:pointer;"><i
+                    class="fas fa-code-branch"></i> Export GeoJSON</button>
+              </div>
             </div>
           </div>
           <div id="adminMap"></div>
@@ -2411,6 +2424,40 @@
       return status;
     }
 
+    function mapAdminReport(r) {
+      return {
+        id: r.id,
+        reportCode: r.report_code || '',
+        createdAt: r.created_at,
+        updatedAt: r.updated_at || '',
+        email: r.email_its || '',
+        peran: r.peran_kampus,
+        kelamin: r.jenis_kelamin,
+        lokasi: r.lokasi_kejadian,
+        lokasiDeskripsi: r.lokasi_deskripsi,
+        lat: r.latitude ? parseFloat(r.latitude) : null,
+        lng: r.longitude ? parseFloat(r.longitude) : null,
+        pencahayaan: r.pencahayaan,
+        kepadatan: r.kepadatan,
+        cctv: r.cctv,
+        petugas: r.petugas_keamanan,
+        vegetasi: r.vegetasi,
+        waktu: r.waktu_rawan,
+        hariRawan: r.hari_rawan,
+        skorNyaman: r.skor_nyaman ? parseInt(r.skor_nyaman, 10) : null,
+        skorRawan: r.skor_rawan ? parseInt(r.skor_rawan, 10) : null,
+        alasanTidakNyaman: r.alasan_tidak_nyaman,
+        pernahHindari: r.pernah_hindari,
+        orangLain: r.orang_lain,
+        situasiMencurigakan: r.situasi_mencurigakan,
+        fungsiRuang: r.fungsi_ruang,
+        kronologi: r.kronologi || '',
+        kontak: r.kontak_pelapor || '',
+        fotoPath: r.foto_path || null,
+        status: normalizeStatus(r.status),
+      };
+    }
+
     // ─── LOGIN ───────────────────────────────────────────────────
     function doLogin() {
       const u = document.getElementById('loginUser').value.trim();
@@ -2495,35 +2542,7 @@
         const res = await fetch(ADMIN_REPORTS_ENDPOINT);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        reports = data.map(r => ({
-          id: r.id,
-          createdAt: r.created_at,
-          email: r.email_its || '',
-          peran: r.peran_kampus,
-          kelamin: r.jenis_kelamin,
-          lokasi: r.lokasi_kejadian,
-          lokasiDeskripsi: r.lokasi_deskripsi,
-          lat: r.latitude ? parseFloat(r.latitude) : null,
-          lng: r.longitude ? parseFloat(r.longitude) : null,
-          pencahayaan: r.pencahayaan,
-          kepadatan: r.kepadatan,
-          cctv: r.cctv,
-          petugas: r.petugas_keamanan,
-          vegetasi: r.vegetasi,
-          waktu: r.waktu_rawan,
-          hariRawan: r.hari_rawan,
-          skorNyaman: r.skor_nyaman ? parseInt(r.skor_nyaman, 10) : null,
-          skorRawan: r.skor_rawan ? parseInt(r.skor_rawan, 10) : null,
-          alasanTidakNyaman: r.alasan_tidak_nyaman,
-          pernahHindari: r.pernah_hindari,
-          orangLain: r.orang_lain,
-          situasiMencurigakan: r.situasi_mencurigakan,
-          fungsiRuang: r.fungsi_ruang,
-          kronologi: r.kronologi || '',
-          kontak: r.kontak_pelapor || '',
-          fotoPath: r.foto_path || null,
-          status: normalizeStatus(r.status),
-        }));
+        reports = data.map(mapAdminReport);
       } catch (e) {
         reports = [];
         console.error('Gagal memuat laporan admin:', e);
@@ -3248,11 +3267,7 @@
               const res = await fetch(ADMIN_REPORTS_ENDPOINT);
               if (res.ok) {
                 const data = await res.json();
-                reports = data.map(r => ({
-                  id: r.id,
-                  lat: r.latitude ? parseFloat(r.latitude) : null,
-                  lng: r.longitude ? parseFloat(r.longitude) : null
-                }));
+                reports = data.map(mapAdminReport);
               }
             } catch (e) {
               console.error('Failed to load reports:', e);
@@ -3307,11 +3322,7 @@
           const res = await fetch(ADMIN_REPORTS_ENDPOINT);
           if (res.ok) {
             const data = await res.json();
-            reports = data.map(r => ({
-              id: r.id,
-              lat: r.latitude ? parseFloat(r.latitude) : null,
-              lng: r.longitude ? parseFloat(r.longitude) : null
-            }));
+            reports = data.map(mapAdminReport);
           }
         } catch (e) {
           console.error('Failed to fetch reports:', e);
@@ -3808,6 +3819,144 @@
     }
 
     // ─── HELPERS ─────────────────────────────────────────────────
+    // ===== EXPORT LAPORAN ADMIN =====
+    function isValidReportCoordinate(r) {
+      const lat = Number(r?.lat);
+      const lng = Number(r?.lng);
+      return Number.isFinite(lat) && Number.isFinite(lng)
+        && lat >= -90 && lat <= 90
+        && lng >= -180 && lng <= 180;
+    }
+
+    function exportNumber(value, decimals = 7) {
+      const n = Number(value);
+      return Number.isFinite(n) ? Number(n.toFixed(decimals)) : '';
+    }
+
+    function getRawanExportLabel(score) {
+      const s = parseInt(score, 10);
+      if (isNaN(s)) return '';
+      if (s >= 4) return 'Sangat Rawan';
+      if (s === 3) return 'Cukup Rawan';
+      return 'Rendah/Aman';
+    }
+
+    function getAdminReportExportRecord(r) {
+      const status = normalizeStatus(r.status);
+      const fotoPath = r.fotoPath || '';
+      const fotoHidden = typeof fotoPath === 'string' && fotoPath.startsWith('HIDDEN_');
+
+      return {
+        id_laporan: r.id ?? '',
+        report_code: r.reportCode || '',
+        created_at: r.createdAt || '',
+        updated_at: r.updatedAt || '',
+        email_its: r.email || '',
+        kontak_pelapor: r.kontak || '',
+        peran_kampus: r.peran || '',
+        jenis_kelamin: r.kelamin || '',
+        lokasi_kejadian: r.lokasi || '',
+        lokasi_deskripsi: r.lokasiDeskripsi || '',
+        longitude: exportNumber(r.lng),
+        latitude: exportNumber(r.lat),
+        spatial_reference: 'EPSG:4326',
+        pencahayaan: r.pencahayaan || '',
+        kepadatan: r.kepadatan || '',
+        cctv: r.cctv || '',
+        petugas_keamanan: r.petugas || '',
+        vegetasi: r.vegetasi || '',
+        waktu_rawan: r.waktu || '',
+        hari_rawan: r.hariRawan || '',
+        skor_nyaman: r.skorNyaman ?? '',
+        skor_rawan: r.skorRawan ?? '',
+        tingkat_rawan: getRawanExportLabel(r.skorRawan),
+        alasan_tidak_nyaman: r.alasanTidakNyaman || '',
+        pernah_hindari: r.pernahHindari || '',
+        orang_lain: r.orangLain || '',
+        situasi_mencurigakan: r.situasiMencurigakan || '',
+        fungsi_ruang: r.fungsiRuang || '',
+        kronologi: r.kronologi || '',
+        foto_path: fotoPath,
+        foto_url: fotoPath && !fotoHidden ? getPhotoUrl(fotoPath) : '',
+        foto_disembunyikan: fotoHidden ? 'ya' : 'tidak',
+        status: status,
+        status_label: STATUS_LABELS[status] || status || '',
+      };
+    }
+
+    function csvCell(value) {
+      if (value === null || value === undefined) return '';
+      if (typeof value === 'number') return String(value);
+      const text = String(value);
+      const safeText = /^[=+@]/.test(text) || /^-\D/.test(text) ? `'${text}` : text;
+      return /[",\r\n]/.test(safeText)
+        ? `"${safeText.replace(/"/g, '""')}"`
+        : safeText;
+    }
+
+    function downloadTextFile(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function exportTimestamp() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
+    }
+
+    function exportAdminReportsCSV() {
+      if (!reports.length) {
+        showToast('Belum ada data laporan untuk diexport.', 'error');
+        return;
+      }
+
+      const rows = reports.map(getAdminReportExportRecord);
+      const headers = Object.keys(rows[0]);
+      const csv = [
+        headers.join(','),
+        ...rows.map(row => headers.map(key => csvCell(row[key])).join(','))
+      ].join('\r\n');
+      const noCoordCount = reports.filter(r => !isValidReportCoordinate(r)).length;
+
+      downloadTextFile(`\uFEFF${csv}`, `itsafe_laporan_pengaduan_${exportTimestamp()}.csv`, 'text/csv;charset=utf-8');
+      showToast(`CSV diunduh (${rows.length} laporan${noCoordCount ? `, ${noCoordCount} tanpa koordinat` : ''}).`, 'success');
+    }
+
+    function exportAdminReportsGeoJSON() {
+      const points = reports.filter(isValidReportCoordinate);
+      if (!points.length) {
+        showToast('Tidak ada laporan dengan koordinat valid untuk GeoJSON.', 'error');
+        return;
+      }
+
+      const geojson = {
+        type: 'FeatureCollection',
+        name: 'itsafe_laporan_pengaduan',
+        generated_at: new Date().toISOString(),
+        features: points.map(r => ({
+          type: 'Feature',
+          id: r.reportCode || r.id,
+          geometry: {
+            type: 'Point',
+            coordinates: [exportNumber(r.lng), exportNumber(r.lat)]
+          },
+          properties: getAdminReportExportRecord(r)
+        }))
+      };
+      const skipped = reports.length - points.length;
+
+      downloadTextFile(JSON.stringify(geojson, null, 2), `itsafe_laporan_pengaduan_${exportTimestamp()}.geojson`, 'application/geo+json;charset=utf-8');
+      showToast(`GeoJSON diunduh (${points.length} fitur${skipped ? `, ${skipped} tanpa koordinat dilewati` : ''}).`, 'success');
+    }
+
     function formatDate(d) {
       if (!d) return 'Tidak tersedia';
       return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
