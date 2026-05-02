@@ -13,8 +13,8 @@ let reports = [];   // diisi dari API
 let realtimeTimer = null;
 let isRealtimeRefreshing = false;
 let activeLayer = 'semua';
-let visHeatmap = true;
-let visPoint = false;
+let visHeatmap = false;
+let visPoint = true;
 let visCluster = false;
 let visFixedPinMain = true;
 let visJurusanMain = true;
@@ -70,6 +70,70 @@ const RISK_COLORS = {
   1: '#10B981', // Hijau (Rawan Rendah)
   2: '#F59E0B', // Kuning (Rawan Sedang)
   3: '#EF4444', // Merah (Rawan Tinggi)
+};
+
+const MAP_MODE_META = {
+  sebaran: {
+    label: 'Sebaran Titik Lokasi Rawan',
+    shortLabel: 'Sebaran Laporan',
+    icon: 'fa-location-dot',
+    color: '#D56A6A',
+    shape: 'circle',
+    note: 'Pin umum untuk semua laporan yang sudah tervalidasi.',
+    popupTitle: 'Laporan tervalidasi',
+    popupDesc: 'Output ini menunjukkan posisi laporan valid secara titik, tanpa pembobotan tambahan.'
+  },
+  heatmap: {
+    label: 'Heatmap Kerawanan',
+    shortLabel: 'Skor Kerawanan',
+    icon: 'fa-fire-flame-curved',
+    color: '#EF4444',
+    shape: 'flame',
+    note: 'Intensitas heatmap dan pin mengikuti skor kerawanan pelapor.',
+    popupTitle: 'Skor kerawanan',
+    popupDesc: 'Output ini menonjolkan tingkat rawan berdasarkan skor yang diberikan pelapor.'
+  },
+  fasilitas: {
+    label: 'Kelayakan Fasilitas',
+    shortLabel: 'Kelayakan Fasilitas',
+    icon: 'fa-building-shield',
+    color: '#0EA5E9',
+    shape: 'hex',
+    note: 'Pin bangunan/perisai mengikuti hasil pembobotan kondisi fisik area.',
+    popupTitle: 'Pembobotan fasilitas',
+    popupDesc: 'Output ini membaca pencahayaan, kepadatan, CCTV, petugas, dan vegetasi.'
+  }
+};
+
+const CONDITION_LAYER_VISUALS = {
+  gelap: {
+    label: 'Area Gelap',
+    icon: 'fa-moon',
+    color: '#374151',
+    shape: 'diamond',
+    desc: 'Ditampilkan karena laporan menyebut pencahayaan area gelap.'
+  },
+  sepi: {
+    label: 'Area Sepi',
+    icon: 'fa-person-walking',
+    color: '#3B82F6',
+    shape: 'square',
+    desc: 'Ditampilkan karena kepadatan area sepi atau sangat sepi.'
+  },
+  nocctv: {
+    label: 'Tanpa CCTV',
+    icon: 'fa-video-slash',
+    color: '#7C3AED',
+    shape: 'notch',
+    desc: 'Ditampilkan karena tidak ada CCTV pada area laporan.'
+  },
+  'minim-petugas': {
+    label: 'Minim Petugas',
+    icon: 'fa-user-shield',
+    color: '#EA580C',
+    shape: 'shield',
+    desc: 'Ditampilkan karena petugas keamanan jarang atau tidak pernah ada.'
+  }
 };
 
 let locationFacultyMap = {};
@@ -598,6 +662,23 @@ function createCaseIcon(color) {
   });
 }
 
+function createReportIcon(visual) {
+  const cfg = visual || MAP_MODE_META.sebaran;
+  const shape = cfg.shape || 'circle';
+  const icon = cfg.icon || 'fa-location-dot';
+  const color = cfg.color || '#D56A6A';
+
+  return L.divIcon({
+    className: `case-dot-wrap report-marker-wrap report-marker-wrap-${shape}`,
+    html: `<div class="case-dot report-marker report-marker-${shape}" style="--case-color:${color};--case-glow:${color}">
+             <i class="fas ${icon}"></i>
+           </div>`,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+    popupAnchor: [0, -17],
+  });
+}
+
 // ============================================================
 // PICKER MAP (mini Leaflet di form)
 // ============================================================
@@ -714,8 +795,146 @@ function initLeafletMap() {
   }
 }
 
+function getActivePetaMode() {
+  if (document.getElementById('tab-fasilitas')?.classList.contains('active')) return 'fasilitas';
+  if (document.getElementById('tab-heatmap')?.classList.contains('active')) return 'heatmap';
+  return 'sebaran';
+}
+
+function getRiskVisual(score) {
+  const s = parseInt(score, 10);
+  if (!isNaN(s) && s >= 3) {
+    return { label: 'Rawan Tinggi', icon: 'fa-fire-flame-curved', color: '#EF4444', shape: 'flame' };
+  }
+  if (s === 2) {
+    return { label: 'Rawan Sedang', icon: 'fa-triangle-exclamation', color: '#F59E0B', shape: 'triangle' };
+  }
+  return { label: 'Rawan Rendah', icon: 'fa-shield-halved', color: '#10B981', shape: 'circle' };
+}
+
+function getFacilityVisual(r) {
+  const kel = calcKelayakan(r);
+  if (kel.status === 'Layak') {
+    return { label: 'Fasilitas Layak', icon: 'fa-check', color: '#10B981', shape: 'hex', kel };
+  }
+  if (kel.status === 'Cukup Layak') {
+    return { label: 'Fasilitas Cukup Layak', icon: 'fa-triangle-exclamation', color: '#F59E0B', shape: 'hex', kel };
+  }
+  return { label: 'Fasilitas Kurang Layak', icon: 'fa-xmark', color: '#EF4444', shape: 'hex', kel };
+}
+
+function getReportVisual(r) {
+  if (CONDITION_LAYER_VISUALS[activeLayer]) return CONDITION_LAYER_VISUALS[activeLayer];
+
+  const mode = getActivePetaMode();
+  if (mode === 'heatmap') return getRiskVisual(r.skorRawan);
+  if (mode === 'fasilitas') return getFacilityVisual(r);
+
+  return {
+    label: MAP_MODE_META.sebaran.shortLabel,
+    icon: MAP_MODE_META.sebaran.icon,
+    color: MAP_MODE_META.sebaran.color,
+    shape: MAP_MODE_META.sebaran.shape
+  };
+}
+
+function getHeatIntensity(r) {
+  const s = parseInt(r?.skorRawan, 10);
+  if (!isNaN(s) && s >= 3) return 1;
+  if (s === 2) return 0.65;
+  if (s === 1) return 0.35;
+  return 0.5;
+}
+
+function createReportMarker(r) {
+  return L.marker([r.lat, r.lng], {
+    icon: createReportIcon(getReportVisual(r))
+  }).bindPopup(buildPopup(r));
+}
+
+function getLayerModeNote() {
+  if (CONDITION_LAYER_VISUALS[activeLayer]) return CONDITION_LAYER_VISUALS[activeLayer].desc;
+  const mode = getActivePetaMode();
+  if (activeLayer === 'rawan-tinggi') return 'Filter aktif: hanya laporan dengan skor rawan tinggi.';
+  if (activeLayer === 'rawan-sedang') return 'Filter aktif: hanya laporan dengan skor rawan sedang.';
+  if (activeLayer === 'rawan-rendah') return 'Filter aktif: hanya laporan dengan skor rawan rendah.';
+  if (activeLayer === 'layak') return 'Filter aktif: hanya area dengan fasilitas layak.';
+  if (activeLayer === 'cukup-layak') return 'Filter aktif: hanya area dengan fasilitas cukup layak.';
+  if (activeLayer === 'kurang-layak') return 'Filter aktif: hanya area dengan fasilitas kurang layak.';
+  return MAP_MODE_META[mode]?.note || '';
+}
+
+function updateMapOutputUI() {
+  const mode = getActivePetaMode();
+  const meta = MAP_MODE_META[mode] || MAP_MODE_META.sebaran;
+  const layerVisual = CONDITION_LAYER_VISUALS[activeLayer];
+  const display = layerVisual || meta;
+  const layerLabel = getLayerLabel(activeLayer);
+
+  const activeName = document.getElementById('activeLayerName');
+  if (activeName) activeName.textContent = layerLabel;
+
+  const activeLayerBox = document.getElementById('mapActiveLayer');
+  if (activeLayerBox) {
+    const icon = activeLayerBox.querySelector('i');
+    if (icon) icon.className = `fas ${display.icon || meta.icon}`;
+  }
+
+  const note = document.getElementById('mapOutputNote');
+  const noteIcon = document.getElementById('mapOutputIcon');
+  const noteTitle = document.getElementById('mapOutputTitle');
+  const noteDesc = document.getElementById('mapOutputDesc');
+  if (note) note.style.setProperty('--output-color', display.color || meta.color);
+  if (noteIcon) noteIcon.innerHTML = `<i class="fas ${display.icon || meta.icon}"></i>`;
+  if (noteTitle) noteTitle.textContent = layerVisual ? `${meta.label}: ${layerVisual.label}` : meta.label;
+  if (noteDesc) noteDesc.textContent = getLayerModeNote();
+
+  const layerPanelTitle = document.getElementById('layerPanelTitle');
+  if (layerPanelTitle) {
+    const titleText = mode === 'heatmap'
+      ? 'Layer Skor Kerawanan'
+      : (mode === 'fasilitas' ? 'Layer Kelayakan Fasilitas' : 'Layer Berdasarkan Kondisi');
+    layerPanelTitle.innerHTML = `<i class="fas fa-layer-group"></i> ${titleText}`;
+  }
+
+  updateLegendSymbols(mode, display);
+}
+
+function updateLegendSymbols(mode, display) {
+  const title = document.getElementById('legendSymbolTitle');
+  const list = document.getElementById('legendSymbolList');
+  if (!list) return;
+
+  const modeMeta = MAP_MODE_META[mode] || MAP_MODE_META.sebaran;
+  if (title) title.textContent = `Simbol ${modeMeta.shortLabel}`;
+
+  let html = '';
+  if (mode === 'heatmap') {
+    html = `
+      <div class="legend-item"><span class="legend-marker legend-marker-flame" style="--case-color:#EF4444"><i class="fas fa-fire-flame-curved"></i></span> Skor rawan tinggi</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-triangle" style="--case-color:#F59E0B"><i class="fas fa-triangle-exclamation"></i></span> Skor rawan sedang</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-circle" style="--case-color:#10B981"><i class="fas fa-shield-halved"></i></span> Skor rawan rendah</div>`;
+  } else if (mode === 'fasilitas') {
+    html = `
+      <div class="legend-item"><span class="legend-marker legend-marker-hex" style="--case-color:#10B981"><i class="fas fa-check"></i></span> Fasilitas layak</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-hex" style="--case-color:#F59E0B"><i class="fas fa-triangle-exclamation"></i></span> Cukup layak</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-hex" style="--case-color:#EF4444"><i class="fas fa-xmark"></i></span> Kurang layak</div>`;
+  } else {
+    html = `
+      <div class="legend-item"><span class="legend-marker legend-marker-circle" style="--case-color:#D56A6A"><i class="fas fa-location-dot"></i></span> Semua laporan tervalidasi</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-diamond" style="--case-color:#374151"><i class="fas fa-moon"></i></span> Layer area gelap</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-square" style="--case-color:#3B82F6"><i class="fas fa-person-walking"></i></span> Layer area sepi</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-notch" style="--case-color:#7C3AED"><i class="fas fa-video-slash"></i></span> Layer tanpa CCTV</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-shield" style="--case-color:#EA580C"><i class="fas fa-user-shield"></i></span> Layer minim petugas</div>`;
+  }
+
+  html += '<div class="legend-item"><span class="legend-line"></span> Batas Kampus ITS</div>';
+  list.innerHTML = html;
+}
+
 function renderLeafletMap() {
   if (!leafletMap) return;
+  updateMapOutputUI();
   renderFixedLocations(fixedLocationLayerMain);
 
   if (heatLayer) { leafletMap.removeLayer(heatLayer); heatLayer = null; }
@@ -747,79 +966,30 @@ function renderLeafletMap() {
 
   if (visHeatmap && L.heatLayer) {
     heatLayer = L.heatLayer(
-      data.map(r => [r.lat, r.lng, 1]),
-      { radius: 35, blur: 22, maxZoom: 18, gradient: { 0.1: '#84A59D', 0.4: '#F6BD60', 0.7: '#F5CAC3', 1.0: '#F28482' } }
+      data.map(r => [r.lat, r.lng, getHeatIntensity(r)]),
+      {
+        radius: 38,
+        blur: 24,
+        maxZoom: 18,
+        gradient: { 0.12: '#84A59D', 0.38: '#F6BD60', 0.68: '#F97316', 1.0: '#EF4444' }
+      }
     ).addTo(leafletMap);
   }
 
   if (visPoint) {
     pointLayer = L.layerGroup();
     data.forEach(r => {
-      const color = getRiskColor(r.skorRawan);
-      L.marker([r.lat, r.lng], {
-        icon: createCaseIcon(color)
-      }).bindPopup(buildPopup(r)).addTo(pointLayer);
+      createReportMarker(r).addTo(pointLayer);
     });
     leafletMap.addLayer(pointLayer);
   }
 
   if (visCluster && L.markerClusterGroup) {
     clusterLayer = L.markerClusterGroup({ chunkedLoading: true });
-
-    // PETA 3 Logic: Kelayakan Fasilitas
-    const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
-
     data.forEach(r => {
-      let color = getRiskColor(r.skorRawan);
-      let popupHtml = buildPopup(r);
-
-      if (isPeta3) {
-        const kel = calcKelayakan(r);
-        if (kel.status === 'Layak') color = '#10B981'; // Green
-        else if (kel.status === 'Cukup Layak') color = '#F59E0B'; // Orange
-        else color = '#EF4444'; // Red
-
-        let badgeClass = kel.status === 'Layak' ? 'badge-safe' : (kel.status === 'Cukup Layak' ? 'badge-warning' : 'badge-danger');
-        let badgeIcon = kel.status === 'Layak' ? 'fa-check-circle' : (kel.status === 'Cukup Layak' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle');
-        let alasanHtml = kel.alasan.length ? `<div style="margin-top:6px;font-size:10.5px;color:#94a3b8;line-height:1.4">Penyebab: ${kel.alasan.join(', ')}</div>` : '';
-        let kelHtml = `<div style="padding:8px 16px 10px;border-top:1px solid rgba(0,0,0,.06)"><div class="popup-status-badge ${badgeClass}"><i class="fas ${badgeIcon}"></i> ${kel.status}</div>${alasanHtml}</div>`;
-        popupHtml = popupHtml.replace('</div>\n  </div>', kelHtml + '</div>\n  </div>');
-      }
-
-      L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
-        .bindPopup(popupHtml)
-        .addTo(clusterLayer);
+      createReportMarker(r).addTo(clusterLayer);
     });
     leafletMap.addLayer(clusterLayer);
-  }
-
-  if (visPoint && !visCluster) {
-    // Apply Peta 3 Logic to points too if visCluster is false but visPoint is true
-    const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
-    if (!pointLayer) pointLayer = L.layerGroup().addTo(leafletMap);
-    pointLayer.clearLayers();
-
-    data.forEach(r => {
-      let color = getRiskColor(r.skorRawan);
-      let popupHtml = buildPopup(r);
-
-      if (isPeta3) {
-        const kel = calcKelayakan(r);
-        if (kel.status === 'Layak') color = '#10B981';
-        else if (kel.status === 'Cukup Layak') color = '#F59E0B';
-        else color = '#EF4444';
-
-        let badgeClass = kel.status === 'Layak' ? 'badge-safe' : (kel.status === 'Cukup Layak' ? 'badge-warning' : 'badge-danger');
-        let badgeIcon = kel.status === 'Layak' ? 'fa-check-circle' : (kel.status === 'Cukup Layak' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle');
-        let alasanHtml = kel.alasan.length ? `<div style="margin-top:6px;font-size:10.5px;color:#94a3b8;line-height:1.4">Penyebab: ${kel.alasan.join(', ')}</div>` : '';
-        let kelHtml = `<div style="padding:8px 16px 10px;border-top:1px solid rgba(0,0,0,.06)"><div class="popup-status-badge ${badgeClass}"><i class="fas ${badgeIcon}"></i> ${kel.status}</div>${alasanHtml}</div>`;
-        popupHtml = popupHtml.replace('</div>\n  </div>', kelHtml + '</div>\n  </div>');
-      }
-
-      L.marker([r.lat, r.lng], { icon: createCaseIcon(color) })
-        .bindPopup(popupHtml)
-        .addTo(pointLayer);
-    });
   }
 }
 
@@ -1032,9 +1202,11 @@ function getNyamanLabel(val) {
 }
 
 function getRawanLabel(val) {
-  if (val >= 4 || val === 3) return '<div class="popup-status-badge badge-danger"><i class="fas fa-exclamation-circle"></i> Rawan Tinggi</div>';
-  if (val === 2) return '<div class="popup-status-badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Rawan Sedang</div>';
-  if (val <= 1) return '<div class="popup-status-badge badge-safe"><i class="fas fa-shield-halved"></i> Rawan Rendah</div>';
+  const n = parseInt(val, 10);
+  if (isNaN(n)) return '-';
+  if (n >= 3) return '<div class="popup-status-badge badge-danger"><i class="fas fa-exclamation-circle"></i> Rawan Tinggi</div>';
+  if (n === 2) return '<div class="popup-status-badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Rawan Sedang</div>';
+  if (n <= 1) return '<div class="popup-status-badge badge-safe"><i class="fas fa-shield-halved"></i> Rawan Rendah</div>';
   return '-';
 }
 
@@ -1066,31 +1238,101 @@ function getScoreHtml(val, type) {
   return `<span class="popup-meta-value" style="color:${color}">${val}</span>`;
 }
 
+function getConditionChips(r) {
+  const chips = [];
+  if (r.pencahayaan === 'Gelap') chips.push(CONDITION_LAYER_VISUALS.gelap);
+  if (isSepi(r.kepadatan)) chips.push(CONDITION_LAYER_VISUALS.sepi);
+  if (r.cctv === 'Tidak ada') chips.push(CONDITION_LAYER_VISUALS.nocctv);
+  if (isMinimPetugas(r.petugas)) chips.push(CONDITION_LAYER_VISUALS['minim-petugas']);
+
+  if (!chips.length) return '';
+  return `<div class="popup-condition-chips">
+    ${chips.map(chip => `<span class="popup-condition-chip" style="--chip-color:${chip.color}"><i class="fas ${chip.icon}"></i> ${chip.label}</span>`).join('')}
+  </div>`;
+}
+
+function getPopupOutputSummary(r) {
+  const mode = getActivePetaMode();
+  const layerVisual = CONDITION_LAYER_VISUALS[activeLayer];
+
+  if (layerVisual) {
+    return {
+      icon: layerVisual.icon,
+      color: layerVisual.color,
+      title: layerVisual.label,
+      desc: layerVisual.desc
+    };
+  }
+
+  if (mode === 'heatmap') {
+    const risk = getRiskVisual(r.skorRawan);
+    return {
+      icon: risk.icon,
+      color: risk.color,
+      title: `${risk.label} - skor ${r.skorRawan ?? 'tidak tersedia'}/3`,
+      desc: 'Titik ini memberi bobot pada heatmap; makin tinggi skornya, makin kuat intensitas panasnya.'
+    };
+  }
+
+  if (mode === 'fasilitas') {
+    const kel = calcKelayakan(r);
+    return {
+      icon: getFacilityVisual(r).icon,
+      color: getFacilityVisual(r).color,
+      title: `${kel.status} - skor fasilitas ${kel.score}/15`,
+      desc: kel.alasan.length
+        ? `Faktor pembatas: ${kel.alasan.join(', ')}.`
+        : 'Kondisi fisik utama terbaca relatif memadai dari laporan ini.'
+    };
+  }
+
+  return {
+    icon: MAP_MODE_META.sebaran.icon,
+    color: MAP_MODE_META.sebaran.color,
+    title: 'Laporan tervalidasi',
+    desc: 'Ditampilkan sebagai titik lokasi umum karena laporan sudah diverifikasi valid.'
+  };
+}
+
 function buildPopup(r) {
   const faculty = r.fakultas || getFacultyFromLocationName(r.lokasi);
-  const isPeta2 = document.getElementById('tab-heatmap') && document.getElementById('tab-heatmap').classList.contains('active');
+  const mode = getActivePetaMode();
+  const visual = getReportVisual(r);
+  const summary = getPopupOutputSummary(r);
 
-  // Header
-  let headerHtml = `<div class="popup-header">
+  let headerHtml = `<div class="popup-header popup-header-${mode}" style="--popup-accent:${visual.color || summary.color}">
+    <div class="popup-output-kicker"><i class="fas ${visual.icon || summary.icon}"></i> ${esc(visual.label || MAP_MODE_META[mode].shortLabel)}</div>
     <div class="popup-loc-name">${esc(r.lokasi)}</div>
     <div class="popup-faculty">${esc(faculty)}</div>
     <div class="popup-coords">${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</div>
   </div>`;
 
-  // Description quote
   let descHtml = r.lokasiDeskripsi
     ? `<div class="popup-desc">${esc(r.lokasiDeskripsi)}</div>`
     : '';
 
-  // Body
-  let bodyHtml = '<div class="popup-body">';
+  let bodyHtml = `<div class="popup-body">
+    <div class="popup-output-card" style="--output-color:${summary.color}">
+      <span class="popup-output-icon"><i class="fas ${summary.icon}"></i></span>
+      <span>
+        <strong>${esc(summary.title)}</strong>
+        <small>${esc(summary.desc)}</small>
+      </span>
+    </div>`;
 
-  const isPeta3 = document.getElementById('tab-fasilitas') && document.getElementById('tab-fasilitas').classList.contains('active');
-  if (isPeta2) {
+  if (mode === 'heatmap') {
     bodyHtml += getRawanLabel(r.skorRawan);
-  } else if (!isPeta3) {
+  } else if (mode === 'fasilitas') {
+    const kel = calcKelayakan(r);
+    const badgeClass = kel.status === 'Layak' ? 'badge-safe' : (kel.status === 'Cukup Layak' ? 'badge-warning' : 'badge-danger');
+    const badgeIcon = kel.status === 'Layak' ? 'fa-check-circle' : (kel.status === 'Cukup Layak' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle');
+    bodyHtml += `<div class="popup-status-badge ${badgeClass}"><i class="fas ${badgeIcon}"></i> ${kel.status}</div>`;
+  } else {
+    bodyHtml += `<div class="popup-status-badge badge-info"><i class="fas fa-circle-check"></i> Laporan Valid</div>`;
     bodyHtml += getNyamanLabel(r.skorNyaman);
   }
+
+  bodyHtml += getConditionChips(r);
 
   bodyHtml += `<div class="popup-meta-grid">
     <div class="popup-meta-row">
@@ -1299,51 +1541,65 @@ function switchPetaTab(tab) {
     fasilitas: { title: 'Peta 3: Kelayakan Fasilitas', desc: 'Menampilkan penilaian kondisi fisik area berdasarkan parameter pencahayaan, CCTV, kepadatan, petugas keamanan, dan vegetasi.' },
   };
 
+  const showLayerGroup = (groupClass, defaultLayer) => {
+    document.querySelectorAll('.layer-card').forEach(l => {
+      l.style.display = 'none';
+      l.classList.remove('active');
+      const input = l.querySelector('input');
+      if (input) input.checked = false;
+    });
+    document.querySelectorAll(groupClass).forEach(l => l.style.display = 'flex');
+    activeLayer = defaultLayer;
+    const selected = document.querySelector(`${groupClass}[data-layer="${defaultLayer}"]`);
+    if (selected) {
+      selected.classList.add('active');
+      const input = selected.querySelector('input');
+      if (input) input.checked = true;
+    }
+  };
+
+  const setVisToggleState = (type, checked) => {
+    const el = document.getElementById('tog-' + type);
+    if (!el) return;
+    el.classList.toggle('active', checked);
+    const input = el.querySelector('input');
+    if (input) input.checked = checked;
+  };
+
   // Update tampilan layer sesuai tab
   if (tab === 'sebaran') {
     // Titik + Cluster aktif, heatmap off
     visHeatmap = false;
     visPoint = true;
     visCluster = false;
-    document.querySelector('#tog-heatmap input').checked = false;
-    document.querySelector('#tog-point input').checked = true;
-    document.querySelector('#tog-cluster input').checked = false;
+    setVisToggleState('heatmap', false);
+    setVisToggleState('point', true);
+    setVisToggleState('cluster', false);
 
-    // Tampilkan tombol layer Peta 1
-    document.querySelectorAll('.layer-card').forEach(l => l.style.display = 'none');
-    document.querySelectorAll('.layer-p1').forEach(l => l.style.display = 'flex');
-    activeLayer = 'semua';
-    document.querySelector('.layer-p1[data-layer="semua"] input').checked = true;
+    showLayerGroup('.layer-p1', 'semua');
   } else if (tab === 'heatmap') {
     // Heatmap aktif, titik off
     visHeatmap = true;
     visPoint = false;
     visCluster = false;
-    document.querySelector('#tog-heatmap input').checked = true;
-    document.querySelector('#tog-point input').checked = false;
-    document.querySelector('#tog-cluster input').checked = false;
+    setVisToggleState('heatmap', true);
+    setVisToggleState('point', false);
+    setVisToggleState('cluster', false);
 
-    // Tampilkan tombol layer Peta 2
-    document.querySelectorAll('.layer-card').forEach(l => l.style.display = 'none');
-    document.querySelectorAll('.layer-p2').forEach(l => l.style.display = 'flex');
-    activeLayer = 'semua-2';
-    document.querySelector('.layer-p2[data-layer="semua-2"] input').checked = true;
+    showLayerGroup('.layer-p2', 'semua-2');
   } else if (tab === 'fasilitas') {
     // Titik aktif dengan simbologi kondisi fisik
     visHeatmap = false;
     visPoint = true;
     visCluster = false;
-    document.querySelector('#tog-heatmap input').checked = false;
-    document.querySelector('#tog-point input').checked = true;
-    document.querySelector('#tog-cluster input').checked = false;
+    setVisToggleState('heatmap', false);
+    setVisToggleState('point', true);
+    setVisToggleState('cluster', false);
 
-    // Tampilkan tombol layer Peta 3
-    document.querySelectorAll('.layer-card').forEach(l => l.style.display = 'none');
-    document.querySelectorAll('.layer-p3').forEach(l => l.style.display = 'flex');
-    activeLayer = 'semua-3';
-    document.querySelector('.layer-p3[data-layer="semua-3"] input').checked = true;
+    showLayerGroup('.layer-p3', 'semua-3');
   }
 
+  updateMapOutputUI();
   renderLeafletMap();
 }
 
