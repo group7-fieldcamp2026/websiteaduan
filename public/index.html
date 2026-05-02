@@ -177,6 +177,7 @@
       </li>
       <li><a href="#peta" class="nav-link" data-page="peta"><i class="fas fa-map-location-dot"></i><span>Peta
             Persebaran</span></a></li>
+      <li><a href="#panduan" class="nav-link" data-page="panduan"><i class="fas fa-book-open"></i><span>Panduan</span></a></li>
       <li><a href="#titikpengaduan" class="nav-link" data-page="titikpengaduan"><i
             class="fas fa-location-crosshairs"></i><span>Titik Pengaduan</span></a></li>
       <li><a href="#tentang" class="nav-link" data-page="tentang"><i
@@ -733,6 +734,15 @@
             </div>
           </form>
         </div>
+        <div class="form-help-cta reveal">
+          <div class="form-help-cta-text">
+            <i class="fas fa-circle-question"></i>
+            <span>Mengalami kesulitan dalam mengisi laporan?</span>
+          </div>
+          <button type="button" class="btn btn-outline" onclick="navigateTo('panduan')">
+            <i class="fas fa-book-open"></i> Buka Panduan
+          </button>
+        </div>
       </div>
 
       <!-- Info: data hanya untuk admin -->
@@ -1101,52 +1111,116 @@
           </div>
         </div>
 
-        <!-- Tips & Info Cards -->
-        <div class="kiat-section-label reveal">
-          <i class="fas fa-bullhorn"></i> Tips Pengaduan
+      </div>
+    </section>
+
+    <!-- ===== PAGE: PANDUAN ===== -->
+    <section id="panduan" class="page panduan-page" style="position:relative; overflow:hidden;">
+      <div class="hero hero-sm panduan-hero" style="position:relative;z-index:1;">
+        <div class="hero-bg-shapes" style="z-index:0;">
+          <div class="shape shape-1"></div>
+          <div class="shape shape-2"></div>
+          <div class="shape shape-3"></div>
         </div>
-        <div class="qgis-info reveal">
-          <div class="info-card">
-            <i class="fas fa-map-location-dot"></i>
-            <strong>Detail Lokasi Akurat</strong>
-            <p>Gunakan deskripsi spesifik seperti "Lantai 2 sisi barat" atau "Dekat lampu taman nomor 5" untuk
-              mempercepat tim teknis mengidentifikasi area.</p>
+        <div class="hero-content panduan-hero-content">
+          <div class="hero-badge panduan-badge"><i class="fas fa-book-open"></i> Panduan Pengisian</div>
+          <h1>Panduan Mengirim <span class="gradient-text">Laporan ITSafe</span></h1>
+          <p>Ikuti alur singkat ini agar laporanmu lebih jelas, aman, dan mudah diverifikasi oleh admin sebelum masuk ke peta.</p>
+          <div class="panduan-hero-actions">
+            <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Mulai Lapor</button>
+            <button class="btn btn-outline" onclick="scrollToSection('panduan-video')"><i class="fas fa-circle-play"></i> Tonton Video</button>
           </div>
-          <div class="info-card">
-            <i class="fas fa-camera-retro"></i>
-            <strong>Lampirkan Bukti Foto</strong>
-            <p>Foto kondisi fisik (penerangan minim, semak liar, atau CCTV rusak) sangat membantu kami mengusulkan
-              perbaikan infrastruktur kampus.</p>
+        </div>
+      </div>
+
+      <div class="section-container panduan-container">
+        <div class="panduan-video-shell reveal" id="panduan-video">
+          <div class="panduan-video-copy">
+            <div class="kiat-section-label"><i class="fas fa-circle-play"></i> Video Tutorial</div>
+            <h2>Lihat contoh pengisian dari awal sampai laporan terkirim</h2>
+            <p>Video ini membantu kamu memahami urutan pengisian, mulai dari memilih lokasi, menjelaskan kondisi area, sampai mengirim laporan dengan aman.</p>
           </div>
-          <div class="info-card">
-            <i class="fas fa-clock-rotate-left"></i>
-            <strong>Kejadian &amp; Estimasi Jam</strong>
-            <p>Informasikan waktu kejadian atau jam-jam saat Anda merasa area tersebut paling berisiko agar kami dapat
-              menyesuaikan jadwal patroli keamanan.</p>
+          <div class="panduan-video-card">
+            <iframe
+              src="https://www.youtube.com/embed/N6-1Zq_KXIE"
+              title="Video Tutorial Pengisian ITSafe"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen></iframe>
           </div>
         </div>
 
-        <div class="kiat-section-label reveal" style="margin-top:2.5rem">
-          <i class="fas fa-user-shield"></i> Tips Pencegahan
+        <div class="panduan-flow reveal">
+          <div class="kiat-section-label"><i class="fas fa-list-check"></i> Alur Kirim Laporan</div>
+          <div class="panduan-steps">
+            <div class="panduan-step-card">
+              <span class="panduan-step-num">01</span>
+              <i class="fas fa-user-shield"></i>
+              <h3>Isi Identitas Aman</h3>
+              <p>Gunakan email ITS dan kontak aktif. Data ini membantu admin menghubungi jika ada klarifikasi, tetapi tidak dipublikasikan di peta.</p>
+            </div>
+            <div class="panduan-step-card">
+              <span class="panduan-step-num">02</span>
+              <i class="fas fa-map-location-dot"></i>
+              <h3>Pilih Lokasi Tepat</h3>
+              <p>Pilih titik pada peta atau gunakan lokasi terdekat. Tambahkan patokan seperti gedung, lantai, sisi koridor, atau area parkir.</p>
+            </div>
+            <div class="panduan-step-card">
+              <span class="panduan-step-num">03</span>
+              <i class="fas fa-clipboard-check"></i>
+              <h3>Nilai Kondisi Area</h3>
+              <p>Jawab pencahayaan, kepadatan, CCTV, petugas, dan penilaian subjektif sesuai kondisi yang kamu rasakan di lokasi tersebut.</p>
+            </div>
+            <div class="panduan-step-card">
+              <span class="panduan-step-num">04</span>
+              <i class="fas fa-paper-plane"></i>
+              <h3>Kirim &amp; Pantau</h3>
+              <p>Periksa lagi isian penting sebelum kirim. Setelah terkirim, laporan akan menunggu verifikasi admin sebelum tampil pada peta publik.</p>
+            </div>
+          </div>
         </div>
-        <div class="qgis-info reveal">
-          <div class="info-card">
-            <i class="fas fa-route"></i>
-            <strong>Cek Peta Kerawanan</strong>
-            <p>Gunakan peta ITSafe untuk memilih rute yang lebih terang dan ramai saat berjalan sendirian di lingkungan
-              Institut Teknologi Sepuluh Nopember.</p>
+
+        <div class="panduan-kiat-block reveal">
+          <div class="kiat-section-label"><i class="fas fa-lightbulb"></i> Kiat Agar Laporan Kuat</div>
+          <div class="qgis-info panduan-kiat-grid">
+            <div class="info-card">
+              <i class="fas fa-location-crosshairs"></i>
+              <strong>Jelaskan Lokasi Secara Spesifik</strong>
+              <p>Tulis patokan yang mudah dicari, misalnya "dekat tangga sisi barat", "belakang gedung", atau "parkiran motor dekat pohon besar".</p>
+            </div>
+            <div class="info-card">
+              <i class="fas fa-clock"></i>
+              <strong>Sebutkan Waktu Rawan</strong>
+              <p>Pilih jam atau kondisi waktu yang paling menggambarkan kejadian, seperti malam hari, jam pulang kegiatan, atau saat area sepi.</p>
+            </div>
+            <div class="info-card">
+              <i class="fas fa-camera-retro"></i>
+              <strong>Foto Boleh, Tapi Tetap Aman</strong>
+              <p>Lampirkan foto kondisi fisik bila memungkinkan. Hindari menampilkan wajah orang lain, identitas pribadi, atau hal sensitif.</p>
+            </div>
+            <div class="info-card">
+              <i class="fas fa-comment-dots"></i>
+              <strong>Ceritakan Dampaknya</strong>
+              <p>Jelaskan apakah kamu menghindari area tersebut, merasa tidak nyaman saat sendiri, atau pernah melihat situasi mencurigakan.</p>
+            </div>
+            <div class="info-card">
+              <i class="fas fa-building-shield"></i>
+              <strong>Isi Kondisi Fisik Jujur</strong>
+              <p>Jawaban tentang lampu, CCTV, petugas, dan kepadatan akan membantu membedakan heatmap kerawanan dari kelayakan fasilitas.</p>
+            </div>
+            <div class="info-card">
+              <i class="fas fa-shield-heart"></i>
+              <strong>Laporkan Tanpa Takut</strong>
+              <p>Gunakan bahasa yang jelas dan seperlunya. Tujuan laporan adalah membantu pemetaan area rawan dan perbaikan lingkungan kampus.</p>
+            </div>
           </div>
-          <div class="info-card">
-            <i class="fas fa-phone-volume"></i>
-            <strong>Simpan Kontak PPK</strong>
-            <p>Segera simpan nomor Hotline Satgas PPK ITS (0811-3333-6000) pada kontak cepat ponsel Anda untuk keadaan
-              mendesak di dalam kampus.</p>
-          </div>
-          <div class="info-card">
-            <i class="fas fa-handshake-angle"></i>
-            <strong>Saling Melindungi</strong>
-            <p>Jika melihat tindakan mencurigakan atau orang asing tanpa identitas di area sepi, segera buat pengaduan
-              melalui titik ITSafe terdekat.</p>
+        </div>
+
+        <div class="panduan-note reveal">
+          <i class="fas fa-lock"></i>
+          <div>
+            <strong>Privasi tetap dijaga.</strong>
+            <p>Informasi pelapor dan foto sensitif tidak ditampilkan di peta publik. Admin hanya menggunakan data untuk verifikasi dan pemetaan area rawan.</p>
           </div>
         </div>
       </div>
