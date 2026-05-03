@@ -7026,6 +7026,12 @@ html.perf-lite.is-scrolling #particleCanvas {
   opacity: .18 !important;
 }
 
+html.perf-lite.effects-suspended #globalBgCanvas,
+html.perf-lite.effects-suspended #particleCanvas {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
 html.perf-lite.is-scrolling .shape,
 html.perf-lite.is-scrolling .hc2-aura,
 html.perf-lite.is-scrolling .hc2-orbit,
@@ -7034,8 +7040,24 @@ html.perf-lite.is-scrolling .hc2-maskot,
 html.perf-lite.is-scrolling .hc2-mobile-mascot .hc2-maskot,
 html.perf-lite.is-scrolling .brand-icon,
 html.perf-lite.is-scrolling .hero-badge,
-html.perf-lite.is-scrolling .hero-badge * {
+html.perf-lite.is-scrolling .hero-badge *,
+html.perf-lite.effects-suspended .shape,
+html.perf-lite.effects-suspended .hc2-aura,
+html.perf-lite.effects-suspended .hc2-orbit,
+html.perf-lite.effects-suspended .hc2-chip,
+html.perf-lite.effects-suspended .hc2-maskot,
+html.perf-lite.effects-suspended .hc2-mobile-mascot .hc2-maskot,
+html.perf-lite.effects-suspended .brand-icon,
+html.perf-lite.effects-suspended .hero-badge,
+html.perf-lite.effects-suspended .hero-badge * {
   animation-play-state: paused !important;
+}
+
+html.perf-lite.effects-suspended .shape,
+html.perf-lite.effects-suspended .hc2-aura,
+html.perf-lite.effects-suspended .hc2-orbit,
+html.perf-lite.effects-suspended .hc2-chip {
+  opacity: 0 !important;
 }
 
 @media (max-width: 820px) {
@@ -11013,6 +11035,19 @@ html.perf-lite.is-scrolling .hc2-orbit-3 .hc2-chip,
 html.perf-lite.is-scrolling .hc2-orbit-front .hc2-orbit-spin,
 html.perf-lite.is-scrolling .hc2-orbit-back .hc2-orbit-spin,
 html.perf-lite.is-scrolling .hc2-maskot,
-html.perf-lite.is-scrolling .hc2-mobile-mascot .hc2-maskot {
+html.perf-lite.is-scrolling .hc2-mobile-mascot .hc2-maskot,
+html.perf-lite.effects-suspended .hc2-orbit-1 .hc2-chip,
+html.perf-lite.effects-suspended .hc2-orbit-2 .hc2-chip,
+html.perf-lite.effects-suspended .hc2-orbit-3 .hc2-chip,
+html.perf-lite.effects-suspended .hc2-orbit-front .hc2-orbit-spin,
+html.perf-lite.effects-suspended .hc2-orbit-back .hc2-orbit-spin,
+html.perf-lite.effects-suspended .hc2-maskot,
+html.perf-lite.effects-suspended .hc2-mobile-mascot .hc2-maskot {
   animation-play-state: paused !important;
+}
+
+html.perf-lite.effects-suspended .hc2-orbit-1 .hc2-chip,
+html.perf-lite.effects-suspended .hc2-orbit-2 .hc2-chip,
+html.perf-lite.effects-suspended .hc2-orbit-3 .hc2-chip {
+  opacity: 0 !important;
 }

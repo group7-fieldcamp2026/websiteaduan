@@ -7,7 +7,7 @@
   <title>ITSafe x Satgas PPK ITS</title>
   <script>
     (function () {
-      const rawVersion = '1.3.2';
+      const rawVersion = '1.3.3';
       const version = rawVersion;
       window.ITSAFE_ASSET_VERSION = version;
       try {
@@ -164,8 +164,16 @@
 
       html.perf-lite.is-scrolling .hc2-mobile-mascot .hc2-orbit,
       html.perf-lite.is-scrolling .hc2-mobile-mascot .hc2-chip,
-      html.perf-lite.is-scrolling .hc2-mobile-mascot .hc2-maskot {
+      html.perf-lite.is-scrolling .hc2-mobile-mascot .hc2-maskot,
+      html.perf-lite.effects-suspended .hc2-mobile-mascot .hc2-orbit,
+      html.perf-lite.effects-suspended .hc2-mobile-mascot .hc2-chip,
+      html.perf-lite.effects-suspended .hc2-mobile-mascot .hc2-maskot {
         animation-play-state: paused !important;
+      }
+
+      html.perf-lite.effects-suspended .hc2-mobile-mascot .hc2-orbit,
+      html.perf-lite.effects-suspended .hc2-mobile-mascot .hc2-chip {
+        opacity: 0 !important;
       }
     }
     @media (min-width: 821px) {
@@ -2155,21 +2163,30 @@
       document.documentElement.classList.toggle('perf-lite', ITS_PERF.lite);
       let perfPauseUntil = 0;
       let perfScrollTimer = null;
+      let effectsSuspended = false;
+
+      function setEffectsSuspended(active) {
+        effectsSuspended = !!active;
+        document.documentElement.classList.toggle('effects-suspended', effectsSuspended);
+        document.documentElement.classList.toggle('is-scrolling', effectsSuspended);
+      }
 
       function markPerfInteraction() {
         if (!ITS_PERF.lite) return;
-        perfPauseUntil = performance.now() + 220;
-        document.documentElement.classList.add('is-scrolling');
+        perfPauseUntil = performance.now() + 520;
+        setEffectsSuspended(true);
         clearTimeout(perfScrollTimer);
         perfScrollTimer = setTimeout(() => {
-          document.documentElement.classList.remove('is-scrolling');
-        }, 180);
+          setEffectsSuspended(false);
+        }, 460);
       }
 
       if (ITS_PERF.lite) {
         window.addEventListener('scroll', markPerfInteraction, { passive: true });
         window.addEventListener('touchstart', markPerfInteraction, { passive: true });
         window.addEventListener('touchmove', markPerfInteraction, { passive: true });
+        window.addEventListener('touchend', markPerfInteraction, { passive: true });
+        window.addEventListener('touchcancel', markPerfInteraction, { passive: true });
       }
 
       /* ─── 1. Floating Particle Canvas ─── */
@@ -2199,11 +2216,20 @@
           alpha: (ITS_PERF.lite ? .16 : .25) + Math.random() * (ITS_PERF.lite ? .24 : .45)
         }));
 
+        function queueDraw(delay = 0) {
+          if (delay > 0) setTimeout(() => requestAnimationFrame(draw), delay);
+          else requestAnimationFrame(draw);
+        }
+
         function draw(now) {
-          requestAnimationFrame(draw);
-          if (document.hidden) return;
-          if (ITS_PERF.lite && now < perfPauseUntil) return;
-          if (now - lastDraw < 1000 / targetFps) return;
+          if (document.hidden || effectsSuspended || (ITS_PERF.lite && now < perfPauseUntil)) {
+            queueDraw(ITS_PERF.lite ? 260 : 120);
+            return;
+          }
+          if (now - lastDraw < 1000 / targetFps) {
+            queueDraw(ITS_PERF.lite ? 80 : 16);
+            return;
+          }
           lastDraw = now;
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           pts.forEach((p, idx) => {
@@ -2237,8 +2263,9 @@
             ctx.fill();
             ctx.globalAlpha = 1;
           });
+          queueDraw();
         }
-        requestAnimationFrame(draw);
+        queueDraw();
       }
 
       /* ─── 2. Scroll Reveal (IntersectionObserver) ─── */
@@ -2387,11 +2414,20 @@
         }
 
         let frame = 0;
+        function queueAnimate(delay = 0) {
+          if (delay > 0) setTimeout(() => requestAnimationFrame(animate), delay);
+          else requestAnimationFrame(animate);
+        }
+
         function animate(now) {
-          requestAnimationFrame(animate);
-          if (document.hidden) return;
-          if (ITS_PERF.lite && now < perfPauseUntil) return;
-          if (now - lastDraw < 1000 / targetFps) return;
+          if (document.hidden || effectsSuspended || (ITS_PERF.lite && now < perfPauseUntil)) {
+            queueAnimate(ITS_PERF.lite ? 300 : 120);
+            return;
+          }
+          if (now - lastDraw < 1000 / targetFps) {
+            queueAnimate(ITS_PERF.lite ? 100 : 16);
+            return;
+          }
           lastDraw = now;
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           frame++;
@@ -2405,8 +2441,9 @@
             }
             drawBubble(b);
           });
+          queueAnimate();
         }
-        requestAnimationFrame(animate);
+        queueAnimate();
       }
 
       /* ─── 7. Canvas particles for About/Tentang hero ─── */
