@@ -1103,9 +1103,17 @@ main {
 
 /* ===== FORM â€” 2-COLUMN REDESIGN ===== */
 
-/* Progress bar above form */
+/* Form opening helper + progress */
+.form-start-panel {
+  display: grid;
+  grid-template-columns: minmax(330px, .92fr) minmax(300px, 1.08fr);
+  align-items: center;
+  gap: 1rem;
+  margin: 1.35rem 0 1.75rem;
+}
+
 .form-progress-wrap {
-  margin-bottom: 1.75rem;
+  min-width: 0;
 }
 
 .form-progress-label {
@@ -1150,44 +1158,67 @@ main {
 .form-help-cta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 1.15rem;
-  padding: 1rem 1.15rem;
-  border-radius: 16px;
-  border: 1px solid rgba(var(--sage-rgb), .24);
-  background: linear-gradient(135deg, rgba(var(--sage-rgb), .09), rgba(var(--primary-rgb), .06));
+  gap: .85rem;
+  min-width: 0;
+  padding: .85rem;
+  border-radius: 18px;
+  border: 1px solid rgba(var(--primary-rgb), .2);
+  background:
+    linear-gradient(135deg, rgba(var(--primary-rgb), .12), rgba(var(--sage-rgb), .08)),
+    rgba(255, 255, 255, .18);
+  box-shadow: 0 14px 34px rgba(18, 24, 50, .06);
 }
 
-.form-help-cta-text {
-  display: flex;
-  align-items: center;
-  gap: .65rem;
-  color: var(--text);
-  font-weight: 800;
-}
-
-.form-help-cta-text i {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
+.form-help-cta-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   color: #fff;
-  background: linear-gradient(135deg, var(--accent-blue), var(--sage));
-  box-shadow: 0 8px 18px rgba(var(--sage-rgb), .2);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dk));
+  box-shadow: 0 10px 24px rgba(var(--primary-rgb), .28);
+}
+
+.form-help-cta-copy {
+  display: grid;
+  gap: .15rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.form-help-cta-copy strong {
+  color: var(--text);
+  font-weight: 800;
+  font-size: .92rem;
+  line-height: 1.2;
+}
+
+.form-help-cta-copy span {
+  color: var(--text-muted);
+  font-size: .78rem;
+  line-height: 1.4;
 }
 
 .form-help-cta .btn {
   flex-shrink: 0;
+  padding-inline: .9rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .form-start-panel {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
   .form-help-cta {
     align-items: stretch;
     flex-direction: column;
+    gap: .75rem;
   }
 
   .form-help-cta .btn {
@@ -5564,8 +5595,15 @@ main {
 }
 
 [data-theme="dark"] .form-help-cta {
-  background: rgba(200, 210, 255, .04);
-  border-color: rgba(200, 210, 255, .1);
+  background:
+    linear-gradient(135deg, rgba(212, 135, 154, .14), rgba(147, 184, 162, .08)),
+    rgba(200, 210, 255, .04);
+  border-color: rgba(245, 202, 195, .16);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, .18);
+}
+
+[data-theme="dark"] .form-help-cta-copy span {
+  color: rgba(224, 224, 236, .68);
 }
 
 /* Submit glow */
