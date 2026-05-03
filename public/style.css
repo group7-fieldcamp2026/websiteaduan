@@ -11051,3 +11051,61 @@ html.perf-lite.effects-suspended .hc2-orbit-2 .hc2-chip,
 html.perf-lite.effects-suspended .hc2-orbit-3 .hc2-chip {
   opacity: 0 !important;
 }
+
+/* Home decorative layers must never capture touch/scroll gestures. */
+#globalBgCanvas,
+#particleCanvas,
+.hero-bg-shapes,
+.hero-bg-shapes *,
+.shape,
+.hc2-aura,
+.hc2-shadow,
+.hc2-right,
+.hc2-right *,
+.hc2-mobile-mascot,
+.hc2-mobile-mascot *,
+.hc2-orbit-stage,
+.hc2-orbit,
+.hc2-orbit *,
+.hc2-chip,
+.hc2-chip *,
+.hc2-chip-face,
+.hc2-maskot,
+.hero-badge,
+.hero-badge *,
+.hc2-h1,
+.hc2-h1 *,
+.hc2-line-a,
+.hc2-line-b,
+.hc2-quote,
+.hc2-desc,
+.hc2-stats,
+.hc2-stats *,
+.collab-badge,
+.collab-badge * {
+  pointer-events: none !important;
+  touch-action: pan-y !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
+.hero-actions,
+.hero-actions *,
+.report-fab,
+.report-fab *,
+.nav-links,
+.nav-links *,
+.theme-toggle,
+.hamburger {
+  pointer-events: auto !important;
+}
+
+.hero-actions .btn,
+.report-fab,
+.nav-link,
+.nav-admin-link,
+.theme-toggle,
+.hamburger {
+  touch-action: manipulation !important;
+}
