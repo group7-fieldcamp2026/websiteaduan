@@ -185,6 +185,51 @@ function itsafeIsMobileLike() {
   return false;
 }
 
+function itsafeIsIOSLike() {
+  try {
+    const ua = navigator.userAgent || '';
+    const platform = navigator.platform || '';
+    return /iPad|iPhone|iPod/.test(ua)
+      || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  } catch {
+    return false;
+  }
+}
+
+function itsafeReleaseIOSScrollState() {
+  if (!itsafeIsIOSLike()) return;
+  document.documentElement.classList.add('ios-scroll-rescue');
+  document.documentElement.style.overflowY = 'auto';
+  document.body.style.overflowY = 'auto';
+  if (!document.querySelector('.its-modal.open')) {
+    document.body.classList.remove('itsafe-scroll-locked');
+    document.body.style.position = '';
+    document.body.style.top = '';
+  }
+}
+
+function attachIOSMapScrollGuard(el) {
+  if (!el || !itsafeIsIOSLike()) return;
+  if (el.dataset.iosScrollGuard === '1') return;
+  el.dataset.iosScrollGuard = '1';
+
+  const allowPageScroll = (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    // Let iOS handle the native page scroll before Leaflet can capture it.
+    e.stopImmediatePropagation();
+    itsafeReleaseIOSScrollState();
+  };
+
+  el.addEventListener('touchstart', allowPageScroll, { capture: true, passive: true });
+  el.addEventListener('touchmove', allowPageScroll, { capture: true, passive: true });
+  el.addEventListener('touchend', (e) => {
+    if (e.touches && e.touches.length > 0) return;
+    if (!e.changedTouches || e.changedTouches.length !== 1) return;
+    e.stopImmediatePropagation();
+    itsafeReleaseIOSScrollState();
+  }, { capture: true, passive: true });
+}
+
 function attachTwoFingerHint(el) {
   if (!el) return;
   if (el.dataset.twoFingerHint === '1') return;
@@ -214,6 +259,7 @@ function attachTwoFingerHint(el) {
 function itsafeInit() {
   if (window._itsInitDone) return;
   window._itsInitDone = true;
+  itsafeReleaseIOSScrollState();
 
   // Navigation & Form
   initNav();
@@ -738,6 +784,7 @@ function initPickerMap() {
 
   if (isMobile) {
     attachTwoFingerHint(container);
+    attachIOSMapScrollGuard(container);
   }
 
   pickerMap.on('click', e => {
@@ -823,6 +870,7 @@ function initLeafletMap() {
   if (isMobile) {
     const mapEl = document.getElementById('leafletMap');
     attachTwoFingerHint(mapEl);
+    attachIOSMapScrollGuard(mapEl);
   }
 }
 
@@ -2299,6 +2347,9 @@ function itsafeEnsureBodyScrollUnlocked() {
   window.addEventListener('pageshow', (e) => {
     if (e && e.persisted) run();
   });
+
+  window.addEventListener('orientationchange', () => setTimeout(run, 250), { passive: true });
+  document.addEventListener('touchstart', () => itsafeReleaseIOSScrollState(), { passive: true });
 })();
 
 function showToast(msg, type = 'success') {
