@@ -1105,15 +1105,18 @@ main {
 
 /* Form opening helper + progress */
 .form-start-panel {
-  display: grid;
-  grid-template-columns: minmax(330px, .92fr) minmax(300px, 1.08fr);
-  align-items: center;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
-  margin: 1.35rem 0 1.75rem;
+  margin: 1.35rem 0 1.9rem;
 }
 
 .form-progress-wrap {
   min-width: 0;
+  padding: .95rem 1rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(var(--primary-rgb), .14);
+  background: rgba(255, 255, 255, .12);
 }
 
 .form-progress-label {
@@ -1156,17 +1159,18 @@ main {
 }
 
 .form-help-cta {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: .85rem;
   min-width: 0;
-  padding: .85rem;
-  border-radius: 18px;
+  padding: .9rem 1rem;
+  border-radius: 16px;
   border: 1px solid rgba(var(--primary-rgb), .2);
   background:
-    linear-gradient(135deg, rgba(var(--primary-rgb), .12), rgba(var(--sage-rgb), .08)),
-    rgba(255, 255, 255, .18);
-  box-shadow: 0 14px 34px rgba(18, 24, 50, .06);
+    linear-gradient(135deg, rgba(var(--primary-rgb), .10), rgba(var(--sage-rgb), .07)),
+    rgba(255, 255, 255, .14);
+  box-shadow: 0 10px 24px rgba(18, 24, 50, .045);
 }
 
 .form-help-cta-icon {
@@ -1208,21 +1212,31 @@ main {
   white-space: nowrap;
 }
 
-@media (max-width: 860px) {
-  .form-start-panel {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 640px) {
+  .form-start-panel {
+    gap: 1.15rem;
+    margin-bottom: 1.65rem;
+  }
+
   .form-help-cta {
-    align-items: stretch;
-    flex-direction: column;
-    gap: .75rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: .75rem .8rem;
+    padding: .9rem;
+  }
+
+  .form-help-cta-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 13px;
   }
 
   .form-help-cta .btn {
+    grid-column: 1 / -1;
     width: 100%;
+  }
+
+  .form-progress-wrap {
+    padding: .9rem;
   }
 }
 
@@ -5582,6 +5596,11 @@ main {
 }
 
 /* Progress bar */
+[data-theme="dark"] .form-progress-wrap {
+  background: rgba(200, 210, 255, .035);
+  border-color: rgba(200, 210, 255, .1);
+}
+
 [data-theme="dark"] .form-progress-track {
   background: rgba(212, 135, 154, .08);
 }
