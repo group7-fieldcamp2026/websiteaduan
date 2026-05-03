@@ -268,6 +268,54 @@ function attachIOSNavbarScrollProxy() {
   }, { capture: true, passive: true });
 }
 
+function attachIOSHomeScrollProxy() {
+  if (!itsafeIsIOSLike()) return;
+  const hero = document.querySelector('#home .hero-cinema2');
+  if (!hero || hero.dataset.iosHomeScrollProxy === '1') return;
+  hero.dataset.iosHomeScrollProxy = '1';
+
+  let startX = 0;
+  let startY = 0;
+  let lastY = 0;
+  let dragging = false;
+
+  const isNativeInteractive = target => !!target.closest?.(
+    'input, textarea, select, option, iframe, video, .leaflet-container, .its-modal, .history-modal'
+  );
+
+  hero.addEventListener('touchstart', (e) => {
+    if (!e.touches || e.touches.length !== 1 || isNativeInteractive(e.target)) return;
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    lastY = t.clientY;
+    dragging = false;
+    itsafeReleaseIOSScrollState();
+  }, { capture: true, passive: true });
+
+  hero.addEventListener('touchmove', (e) => {
+    if (!e.touches || e.touches.length !== 1 || isNativeInteractive(e.target)) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+    const step = lastY - t.clientY;
+    const isVerticalSwipe = Math.abs(dy) > 6 && Math.abs(dy) > Math.abs(dx);
+    if (isVerticalSwipe) {
+      dragging = true;
+      window.scrollBy(0, step);
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    lastY = t.clientY;
+  }, { capture: true, passive: false });
+
+  hero.addEventListener('touchend', (e) => {
+    if (!dragging) return;
+    e.stopPropagation();
+    dragging = false;
+  }, { capture: true, passive: true });
+}
+
 function attachTwoFingerHint(el) {
   if (!el) return;
   if (el.dataset.twoFingerHint === '1') return;
@@ -299,6 +347,7 @@ function itsafeInit() {
   window._itsInitDone = true;
   itsafeReleaseIOSScrollState();
   attachIOSNavbarScrollProxy();
+  attachIOSHomeScrollProxy();
 
   // Navigation & Form
   initNav();

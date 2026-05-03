@@ -11109,3 +11109,14 @@ html.perf-lite.effects-suspended .hc2-orbit-3 .hc2-chip {
 .hamburger {
   touch-action: manipulation !important;
 }
+
+@media (max-width: 820px) {
+  #home,
+  #home.page.active,
+  #home .hero-cinema2,
+  #home .hc2-left {
+    overflow: visible !important;
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
