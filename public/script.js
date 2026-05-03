@@ -263,34 +263,39 @@ async function fetchReports() {
     const res = await fetch(`${API_BASE}/reports`);
     const data = await res.json();
     // Sesuaikan field dari API ke format lokal
-    reports = data.map(r => ({
-      id: r.id,
-      createdAt: r.created_at,
-      kelamin: r.jenis_kelamin,
-      peran: r.peran_kampus,
-      pencahayaan: r.pencahayaan,
-      kepadatan: r.kepadatan,
-      cctv: r.cctv,
-      petugas: r.petugas_keamanan,
-      vegetasi: r.vegetasi,
-      waktu: r.waktu_rawan,
-      hariRawan: r.hari_rawan,
-      skorNyaman: r.skor_nyaman ? parseInt(r.skor_nyaman, 10) : null,
-      skorRawan: r.skor_rawan ? parseInt(r.skor_rawan, 10) : null,
-      alasanTidakNyaman: r.alasan_tidak_nyaman,
-      pernahHindari: r.pernah_hindari,
-      orangLain: r.orang_lain,
-      situasiMencurigakan: r.situasi_mencurigakan,
-      fungsiRuang: r.fungsi_ruang,
-      lokasi: r.lokasi_kejadian,
-      lokasiDeskripsi: r.lokasi_deskripsi,
-      kronologi: r.kronologi,
-      lat: r.latitude ? parseFloat(r.latitude) : null,
-      lng: r.longitude ? parseFloat(r.longitude) : null,
-      fotoPath: r.foto_path,
-      status: r.status,
-      fakultas: getFacultyFromLocationName(r.lokasi_kejadian),
-    }));
+    reports = data.map(r => {
+      const lat = r.latitude ? parseFloat(r.latitude) : null;
+      const lng = r.longitude ? parseFloat(r.longitude) : null;
+      const lokasi = resolveReportLocationName(r.lokasi_kejadian, lat, lng);
+      return {
+        id: r.id,
+        createdAt: r.created_at,
+        kelamin: r.jenis_kelamin,
+        peran: r.peran_kampus,
+        pencahayaan: r.pencahayaan,
+        kepadatan: r.kepadatan,
+        cctv: r.cctv,
+        petugas: r.petugas_keamanan,
+        vegetasi: r.vegetasi,
+        waktu: r.waktu_rawan,
+        hariRawan: r.hari_rawan,
+        skorNyaman: r.skor_nyaman ? parseInt(r.skor_nyaman, 10) : null,
+        skorRawan: r.skor_rawan ? parseInt(r.skor_rawan, 10) : null,
+        alasanTidakNyaman: r.alasan_tidak_nyaman,
+        pernahHindari: r.pernah_hindari,
+        orangLain: r.orang_lain,
+        situasiMencurigakan: r.situasi_mencurigakan,
+        fungsiRuang: r.fungsi_ruang,
+        lokasi,
+        lokasiDeskripsi: r.lokasi_deskripsi,
+        kronologi: r.kronologi,
+        lat,
+        lng,
+        fotoPath: r.foto_path,
+        status: r.status,
+        fakultas: getFacultyFromLocationName(lokasi),
+      };
+    });
     updateLayerCounts();
     if (leafletMap) renderLeafletMap();
     renderLaporanChart();
@@ -483,12 +488,13 @@ async function handleSubmit(e) {
   const kelaminVal = document.getElementById('jenisKelamin').value.trim();
   const skorNyamanVal = parseInt(document.getElementById('skorNyaman').value, 10);
   const skorRawanVal = parseInt(document.getElementById('skorRawan').value, 10);
+  const resolvedLokasi = resolveReportLocationName(lokasiVal, lat, lng);
 
   const payload = {
     email_its: document.getElementById('emailIts').value.trim(),
     peran_kampus: document.getElementById('peranKampus').value,
     jenis_kelamin: kelaminVal || null,
-    lokasi_kejadian: lokasiVal,
+    lokasi_kejadian: resolvedLokasi,
     lokasi_deskripsi: document.getElementById('lokasiDeskripsi').value.trim() || null,
     latitude: isNaN(lat) ? null : lat,
     longitude: isNaN(lng) ? null : lng,
@@ -560,13 +566,6 @@ function handleLocationPreset() {
   }
 }
 
-function setLokasiToLainnya() {
-  const sel = document.getElementById('lokasiInsiden');
-  if (!sel) return;
-  const opt = Array.from(sel.options).find(o => /Lainnya/i.test(o.textContent || o.value));
-  if (opt) sel.value = opt.value;
-}
-
 function buildLocationFacultyMap() {
   locationFacultyMap = {};
   document.querySelectorAll('#lokasiInsiden option').forEach(opt => {
@@ -587,6 +586,63 @@ function getFacultyColor(faculty) {
 
 function getFacultyFromLocationName(name) {
   return locationFacultyMap[name] || 'Lainnya';
+}
+
+function getPresetLocationOptions() {
+  const sel = document.getElementById('lokasiInsiden');
+  if (!sel) return [];
+  return Array.from(sel.options)
+    .map(opt => {
+      const lat = parseFloat(opt.dataset?.lat);
+      const lng = parseFloat(opt.dataset?.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return {
+        opt,
+        name: opt.value || opt.textContent.trim(),
+        faculty: getFacultyFromOption(opt),
+        lat,
+        lng,
+      };
+    })
+    .filter(Boolean);
+}
+
+function distanceMeters(lat1, lng1, lat2, lng2) {
+  const toRad = deg => deg * Math.PI / 180;
+  const earthRadius = 6371000;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function getNearestPresetLocation(lat, lng) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return getPresetLocationOptions()
+    .map(item => ({ ...item, distance: distanceMeters(lat, lng, item.lat, item.lng) }))
+    .sort((a, b) => a.distance - b.distance)[0] || null;
+}
+
+function assignNearestLocationFromPin(lat, lng) {
+  const sel = document.getElementById('lokasiInsiden');
+  const nearest = getNearestPresetLocation(lat, lng);
+  if (!sel || !nearest) return null;
+  sel.value = nearest.name;
+  return nearest;
+}
+
+function resolveReportLocationName(currentValue, lat, lng) {
+  if (!/Lainnya/i.test(currentValue || '')) return currentValue;
+  const nearest = getNearestPresetLocation(lat, lng);
+  return nearest?.name || currentValue;
+}
+
+function getReportAreaName(report) {
+  const rawName = report?.lokasi || report?.lokasi_kejadian || '';
+  const lat = parseFloat(report?.lat ?? report?.latitude);
+  const lng = parseFloat(report?.lng ?? report?.longitude);
+  return String(resolveReportLocationName(rawName, lat, lng) || '').trim();
 }
 
 function createFacultyIcon(color) {
@@ -683,9 +739,12 @@ function setPin(lat, lng, opts = {}) {
     showToast('Pin berada di luar batas area ITS. Silakan pilih lokasi di dalam boundary.', 'error');
     return;
   }
+  const nearest = fromPreset ? null : assignNearestLocationFromPin(lat, lng);
   document.getElementById('lat').value = lat.toFixed(6);
   document.getElementById('lng').value = lng.toFixed(6);
-  document.getElementById('locStatus').textContent = `Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  document.getElementById('locStatus').textContent = nearest
+    ? `Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)} | Area terdekat: ${nearest.name}`
+    : `Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
   if (pickerMarker) pickerMarker.remove();
   pickerMarker = L.marker([lat, lng], {
     icon: L.divIcon({
@@ -698,8 +757,8 @@ function setPin(lat, lng, opts = {}) {
   }).addTo(pickerMap);
   pickerMap.setView([lat, lng], Math.max(pickerMap.getZoom(), 16), { animate: false });
 
-  if (!fromPreset) {
-    setLokasiToLainnya();
+  if (!fromPreset && nearest) {
+    showToast(`Area otomatis dipilih: ${nearest.name}`, 'success');
   }
 }
 
@@ -1784,7 +1843,7 @@ function updateTopAreas(data) {
   const rows = Array.isArray(data) ? data : reports;
   const counts = {};
   rows.forEach(r => {
-    const key = (r.lokasi || '').trim();
+    const key = getReportAreaName(r);
     if (!key) return;
     counts[key] = (counts[key] || 0) + 1;
   });
@@ -1807,7 +1866,7 @@ function updateHeatmapAnalysis(data, filterWaktu, filterBulan) {
   if (!data || data.length === 0) { el.textContent = 'Belum ada data untuk analisis heatmap.'; return; }
   const counts = {};
   data.forEach(r => {
-    const key = (r.lokasi || '').trim();
+    const key = getReportAreaName(r);
     if (!key) return;
     counts[key] = (counts[key] || 0) + 1;
   });
