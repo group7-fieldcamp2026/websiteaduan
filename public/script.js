@@ -230,6 +230,44 @@ function attachIOSMapScrollGuard(el) {
   }, { capture: true, passive: true });
 }
 
+function attachIOSNavbarScrollProxy() {
+  if (!itsafeIsIOSLike()) return;
+  const nav = document.getElementById('navbar');
+  if (!nav || nav.dataset.iosScrollProxy === '1') return;
+  nav.dataset.iosScrollProxy = '1';
+
+  let startY = 0;
+  let lastY = 0;
+  let dragging = false;
+
+  nav.addEventListener('touchstart', (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    startY = e.touches[0].clientY;
+    lastY = startY;
+    dragging = false;
+  }, { passive: true });
+
+  nav.addEventListener('touchmove', (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    const y = e.touches[0].clientY;
+    const total = startY - y;
+    const step = lastY - y;
+    if (Math.abs(total) > 8) {
+      dragging = true;
+      window.scrollBy(0, step);
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    lastY = y;
+  }, { passive: false });
+
+  nav.addEventListener('touchend', (e) => {
+    if (!dragging) return;
+    e.stopPropagation();
+    dragging = false;
+  }, { capture: true, passive: true });
+}
+
 function attachTwoFingerHint(el) {
   if (!el) return;
   if (el.dataset.twoFingerHint === '1') return;
@@ -260,6 +298,7 @@ function itsafeInit() {
   if (window._itsInitDone) return;
   window._itsInitDone = true;
   itsafeReleaseIOSScrollState();
+  attachIOSNavbarScrollProxy();
 
   // Navigation & Form
   initNav();
@@ -275,7 +314,7 @@ function itsafeInit() {
   startRealtimeSync();  // sinkronisasi realtime (polling)
 
   generateQR();
-  initPickerMap();
+  schedulePickerMapInit();
 
   // Exposed Globals
   window.navigateTo = navigateTo;
@@ -609,6 +648,7 @@ function handleLocationPreset() {
   const lat = opt?.dataset?.lat;
   const lng = opt?.dataset?.lng;
   if (lat && lng) {
+    if (!pickerMap) initPickerMap();
     setPin(parseFloat(lat), parseFloat(lng), { fromPreset: true });
   } else if (opt && isOtherLocationValue(opt.value || opt.textContent)) {
     clearPin();
@@ -757,6 +797,27 @@ function createReportIcon(visual) {
 // ============================================================
 // PICKER MAP (mini Leaflet di form)
 // ============================================================
+function schedulePickerMapInit() {
+  const formSection = document.getElementById('formSection');
+  const pickerEl = document.getElementById('pickerMap');
+  if (!formSection || !pickerEl) return;
+
+  const start = () => initPickerMap();
+  formSection.addEventListener('focusin', start, { once: true, passive: true });
+  formSection.addEventListener('pointerdown', start, { once: true, passive: true });
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      io.disconnect();
+      start();
+    }, { rootMargin: '420px 0px' });
+    io.observe(formSection);
+  } else {
+    setTimeout(start, 1200);
+  }
+}
+
 function initPickerMap() {
   if (pickerMap) {
     setTimeout(() => pickerMap.invalidateSize(), 300);
@@ -803,6 +864,8 @@ function initPickerMap() {
 }
 
 function setPin(lat, lng, opts = {}) {
+  if (!pickerMap) initPickerMap();
+  if (!pickerMap) return;
   const fromPreset = opts.fromPreset === true;
   if (!fromPreset && !isPointInBoundary(lat, lng)) {
     showToast('Pin berada di luar batas area ITS. Silakan pilih lokasi di dalam boundary.', 'error');
@@ -841,6 +904,7 @@ function clearPin() {
 
 function getLocation() {
   if (!navigator.geolocation) { showToast('Geolokasi tidak didukung browser ini.', 'error'); return; }
+  if (!pickerMap) initPickerMap();
   document.getElementById('locStatus').textContent = 'Mendapatkan lokasi...';
   navigator.geolocation.getCurrentPosition(
     pos => setPin(pos.coords.latitude, pos.coords.longitude, { fromPreset: false }),
