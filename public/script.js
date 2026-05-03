@@ -54,6 +54,8 @@ const BASEMAPS = {
 const ITS = [-7.2756, 112.7951];
 const ZOOM = 15;
 const QR_URL = 'https://itsafe.geowebgis.id/';
+const OTHER_LOCATION_LABEL = 'Sekitar Kampus';
+const NEARBY_LOCATION_RADIUS_METERS = 50;
 
 const FACULTY_COLORS = {
   'FSAD': '#4E79A7', // blue
@@ -64,6 +66,7 @@ const FACULTY_COLORS = {
   'FKK': '#B07AA1', // purple
   'FTEIC': '#20B2AA', // cyan
   'FTK': '#BAB0AC', // gray
+  'Lainnya': '#D4879A',
 };
 
 const RISK_COLORS = {
@@ -480,8 +483,8 @@ async function handleSubmit(e) {
   const lng = parseFloat(document.getElementById('lng').value);
   const lokasiSelect = document.getElementById('lokasiInsiden');
   const lokasiVal = lokasiSelect.value;
-  if (/Lainnya/i.test(lokasiVal) && (isNaN(lat) || isNaN(lng))) {
-    showToast('Pin lokasi wajib diisi jika memilih Lainnya.', 'error');
+  if (isOtherLocationValue(lokasiVal) && (isNaN(lat) || isNaN(lng))) {
+    showToast('Pin lokasi wajib diisi jika memilih Sekitar Kampus.', 'error');
     return;
   }
 
@@ -561,7 +564,7 @@ function handleLocationPreset() {
   const lng = opt?.dataset?.lng;
   if (lat && lng) {
     setPin(parseFloat(lat), parseFloat(lng), { fromPreset: true });
-  } else if (opt && /Lainnya/i.test(opt.value)) {
+  } else if (opt && isOtherLocationValue(opt.value || opt.textContent)) {
     clearPin();
   }
 }
@@ -586,6 +589,26 @@ function getFacultyColor(faculty) {
 
 function getFacultyFromLocationName(name) {
   return locationFacultyMap[name] || 'Lainnya';
+}
+
+function isOtherLocationValue(value) {
+  return /Lainnya|Sekitar Kampus/i.test(value || '');
+}
+
+function getOtherLocationOptionValue() {
+  const sel = document.getElementById('lokasiInsiden');
+  if (!sel) return OTHER_LOCATION_LABEL;
+  const opt = Array.from(sel.options).find(option => isOtherLocationValue(option.value || option.textContent));
+  return opt?.value || OTHER_LOCATION_LABEL;
+}
+
+function setLocationSelectValue(value) {
+  const sel = document.getElementById('lokasiInsiden');
+  if (!sel || !value) return false;
+  const match = Array.from(sel.options).find(opt => opt.value === value || opt.textContent.trim() === value);
+  if (!match) return false;
+  sel.value = match.value;
+  return true;
 }
 
 function getPresetLocationOptions() {
@@ -624,18 +647,17 @@ function getNearestPresetLocation(lat, lng) {
     .sort((a, b) => a.distance - b.distance)[0] || null;
 }
 
-function assignNearestLocationFromPin(lat, lng) {
-  const sel = document.getElementById('lokasiInsiden');
+function getNearbyPresetLocation(lat, lng) {
   const nearest = getNearestPresetLocation(lat, lng);
-  if (!sel || !nearest) return null;
-  sel.value = nearest.name;
+  if (!nearest || nearest.distance > NEARBY_LOCATION_RADIUS_METERS) return null;
   return nearest;
 }
 
 function resolveReportLocationName(currentValue, lat, lng) {
-  if (!/Lainnya/i.test(currentValue || '')) return currentValue;
-  const nearest = getNearestPresetLocation(lat, lng);
-  return nearest?.name || currentValue;
+  if (isOtherLocationValue(currentValue)) {
+    return getNearbyPresetLocation(lat, lng)?.name || OTHER_LOCATION_LABEL;
+  }
+  return currentValue;
 }
 
 function getReportAreaName(report) {
@@ -739,12 +761,16 @@ function setPin(lat, lng, opts = {}) {
     showToast('Pin berada di luar batas area ITS. Silakan pilih lokasi di dalam boundary.', 'error');
     return;
   }
-  const nearest = fromPreset ? null : assignNearestLocationFromPin(lat, lng);
+  const nearby = fromPreset ? null : getNearbyPresetLocation(lat, lng);
+  if (!fromPreset) {
+    setLocationSelectValue(nearby?.name || getOtherLocationOptionValue());
+  }
   document.getElementById('lat').value = lat.toFixed(6);
   document.getElementById('lng').value = lng.toFixed(6);
-  document.getElementById('locStatus').textContent = nearest
-    ? `Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)} | Area terdekat: ${nearest.name}`
-    : `Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  const areaStatus = nearby
+    ? ` | Area radius ${NEARBY_LOCATION_RADIUS_METERS} m: ${nearby.name} (${Math.round(nearby.distance)} m)`
+    : (!fromPreset ? ` | Area: ${OTHER_LOCATION_LABEL}` : '');
+  document.getElementById('locStatus').textContent = `Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)}${areaStatus}`;
   if (pickerMarker) pickerMarker.remove();
   pickerMarker = L.marker([lat, lng], {
     icon: L.divIcon({
@@ -757,9 +783,6 @@ function setPin(lat, lng, opts = {}) {
   }).addTo(pickerMap);
   pickerMap.setView([lat, lng], Math.max(pickerMap.getZoom(), 16), { animate: false });
 
-  if (!fromPreset && nearest) {
-    showToast(`Area otomatis dipilih: ${nearest.name}`, 'success');
-  }
 }
 
 function clearPin() {
