@@ -201,12 +201,6 @@ function itsafeReleaseIOSScrollState() {
   document.documentElement.classList.add('ios-scroll-rescue');
   document.documentElement.style.overflowY = 'auto';
   document.body.style.overflowY = 'auto';
-  // Pastikan hero tidak memblokir scroll
-  const hero = document.querySelector('#home .hero-cinema2');
-  if (hero) {
-    hero.style.touchAction = 'pan-y';
-    hero.style.overflow = 'visible';
-  }
   if (!document.querySelector('.its-modal.open')) {
     document.body.classList.remove('itsafe-scroll-locked');
     document.body.style.position = '';
@@ -242,44 +236,36 @@ function attachIOSNavbarScrollProxy() {
   if (!nav || nav.dataset.iosScrollProxy === '1') return;
   nav.dataset.iosScrollProxy = '1';
 
-  // Navbar: biarkan iOS handle scroll native, cukup release scroll lock jika terkunci
+  let startY = 0;
+  let lastY = 0;
+  let dragging = false;
+
   nav.addEventListener('touchstart', (e) => {
     if (!e.touches || e.touches.length !== 1) return;
-    itsafeReleaseIOSScrollState();
+    startY = e.touches[0].clientY;
+    lastY = startY;
+    dragging = false;
   }, { passive: true });
 
   nav.addEventListener('touchmove', (e) => {
-    // passive: true — biarkan iOS scroll halaman secara native tanpa intervensi JS
-    itsafeReleaseIOSScrollState();
-  }, { passive: true });
-}
+    if (!e.touches || e.touches.length !== 1) return;
+    const y = e.touches[0].clientY;
+    const total = startY - y;
+    const step = lastY - y;
+    if (Math.abs(total) > 8) {
+      dragging = true;
+      window.scrollBy(0, step);
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    lastY = y;
+  }, { passive: false });
 
-function attachIOSHomeScrollProxy() {
-  if (!itsafeIsIOSLike()) return;
-  const hero = document.querySelector('#home .hero-cinema2');
-  if (!hero || hero.dataset.iosHomeScrollProxy === '1') return;
-  hero.dataset.iosHomeScrollProxy = '1';
-
-  // Pastikan hero tidak memblokir scroll native iOS
-  hero.style.touchAction = 'pan-y';
-  hero.style.webkitOverflowScrolling = 'touch';
-
-  const isNativeInteractive = target => !!target.closest?.(
-    'input, textarea, select, option, iframe, video, .leaflet-container, .its-modal, .history-modal'
-  );
-
-  // Cukup release scroll lock saat touch dimulai — biarkan iOS handle scroll secara native
-  // TIDAK menggunakan e.preventDefault() atau window.scrollBy() manual karena konflik dengan iOS momentum
-  hero.addEventListener('touchstart', (e) => {
-    if (!e.touches || e.touches.length !== 1 || isNativeInteractive(e.target)) return;
-    itsafeReleaseIOSScrollState();
-  }, { capture: false, passive: true });
-
-  // touchmove: passive:true saja — JANGAN preventDefault, biarkan iOS scroll berjalan native
-  hero.addEventListener('touchmove', (e) => {
-    if (!e.touches || e.touches.length !== 1 || isNativeInteractive(e.target)) return;
-    itsafeReleaseIOSScrollState();
-  }, { capture: false, passive: true });
+  nav.addEventListener('touchend', (e) => {
+    if (!dragging) return;
+    e.stopPropagation();
+    dragging = false;
+  }, { capture: true, passive: true });
 }
 
 function attachTwoFingerHint(el) {
@@ -313,7 +299,6 @@ function itsafeInit() {
   window._itsInitDone = true;
   itsafeReleaseIOSScrollState();
   attachIOSNavbarScrollProxy();
-  attachIOSHomeScrollProxy();
 
   // Navigation & Form
   initNav();
@@ -348,27 +333,6 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', itsafeInit);
 } else {
   itsafeInit();
-}
-
-// iOS: Segera set touch-action pada hero saat halaman load agar scroll langsung berfungsi
-if (itsafeIsIOSLike()) {
-  const applyIOSHeroFix = () => {
-    const hero = document.querySelector('#home .hero-cinema2');
-    if (hero) {
-      hero.style.touchAction = 'pan-y';
-      hero.style.webkitOverflowScrolling = 'touch';
-      hero.style.overflow = 'visible';
-      hero.style.maxHeight = 'none';
-    }
-    // Pastikan body/html bisa scroll
-    document.documentElement.style.overflowY = 'auto';
-    document.body.style.overflowY = 'auto';
-  };
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyIOSHeroFix, { once: true });
-  } else {
-    applyIOSHeroFix();
-  }
 }
 
 document.addEventListener('visibilitychange', () => {
