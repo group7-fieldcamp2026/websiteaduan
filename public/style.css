@@ -6961,17 +6961,14 @@ body {
   transition: background-color .4s ease, color .4s ease;
 }
 
-/* Mobile/iOS performance mode: keep effects, but make them lighter during scroll. */
+/* Mobile/iOS performance mode: keep identity, remove scroll-heavy effects. */
 html.perf-lite {
   scroll-behavior: auto !important;
 }
 
-html.perf-lite #globalBgCanvas {
-  opacity: .55 !important;
-}
-
+html.perf-lite #globalBgCanvas,
 html.perf-lite #particleCanvas {
-  opacity: .34 !important;
+  display: none !important;
 }
 
 html.perf-lite body,
@@ -6987,7 +6984,9 @@ html.perf-lite .reveal,
 html.perf-lite .reveal-left,
 html.perf-lite .reveal-right,
 html.perf-lite .reveal-scale {
-  transition-duration: .42s !important;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
 }
 
 html.perf-lite .shape,
@@ -6996,7 +6995,13 @@ html.perf-lite .hc2-orbit,
 html.perf-lite .hc2-chip,
 html.perf-lite .modal-confetti,
 html.perf-lite .logo-hero-glow {
-  animation-duration: 18s !important;
+  animation: none !important;
+}
+
+html.perf-lite .hc2-aura,
+html.perf-lite .hc2-orbit,
+html.perf-lite .hc2-chip {
+  display: none !important;
 }
 
 html.perf-lite .hc2-maskot,
@@ -7008,56 +7013,14 @@ html.perf-lite .hc2-quote,
 html.perf-lite .hc2-desc,
 html.perf-lite .collab-badge,
 html.perf-lite .hc2-stat {
-  animation-duration: 9s !important;
-}
-
-html.perf-lite .hero-badge * {
-  animation-duration: 5s !important;
+  animation: none !important;
+  transform: none !important;
 }
 
 html.perf-lite .navbar,
 html.perf-lite .nav-links {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-}
-
-html.perf-lite.is-scrolling #globalBgCanvas,
-html.perf-lite.is-scrolling #particleCanvas {
-  opacity: .18 !important;
-}
-
-html.perf-lite.effects-suspended #globalBgCanvas,
-html.perf-lite.effects-suspended #particleCanvas {
-  opacity: 0 !important;
-  visibility: hidden !important;
-}
-
-html.perf-lite.is-scrolling .shape,
-html.perf-lite.is-scrolling .hc2-aura,
-html.perf-lite.is-scrolling .hc2-orbit,
-html.perf-lite.is-scrolling .hc2-chip,
-html.perf-lite.is-scrolling .hc2-maskot,
-html.perf-lite.is-scrolling .hc2-mobile-mascot .hc2-maskot,
-html.perf-lite.is-scrolling .brand-icon,
-html.perf-lite.is-scrolling .hero-badge,
-html.perf-lite.is-scrolling .hero-badge *,
-html.perf-lite.effects-suspended .shape,
-html.perf-lite.effects-suspended .hc2-aura,
-html.perf-lite.effects-suspended .hc2-orbit,
-html.perf-lite.effects-suspended .hc2-chip,
-html.perf-lite.effects-suspended .hc2-maskot,
-html.perf-lite.effects-suspended .hc2-mobile-mascot .hc2-maskot,
-html.perf-lite.effects-suspended .brand-icon,
-html.perf-lite.effects-suspended .hero-badge,
-html.perf-lite.effects-suspended .hero-badge * {
-  animation-play-state: paused !important;
-}
-
-html.perf-lite.effects-suspended .shape,
-html.perf-lite.effects-suspended .hc2-aura,
-html.perf-lite.effects-suspended .hc2-orbit,
-html.perf-lite.effects-suspended .hc2-chip {
-  opacity: 0 !important;
 }
 
 @media (max-width: 820px) {
@@ -7078,6 +7041,8 @@ html.perf-lite.effects-suspended .hc2-chip {
 
   html.perf-lite .hc2-mobile-mascot .hc2-maskot {
     width: min(260px, 76vw) !important;
+    animation: none !important;
+    transform: none !important;
     filter: drop-shadow(0 8px 18px rgba(212, 135, 154, .28)) !important;
   }
 }
@@ -11008,115 +10973,3 @@ body {
 .history-status-badge.status-pending { background: rgba(246,189,96,.12); color: #A87A10; }
 .history-status-badge.status-review { background: rgba(132,165,157,.12); color: #4A8078; }
 .history-status-badge.status-rejected { background: rgba(239,68,68,.1); color: #EF4444; }
-
-/* Final mobile/iOS effect tuning override */
-html.perf-lite .hc2-orbit-1 .hc2-chip,
-html.perf-lite .hc2-orbit-front .hc2-orbit-spin,
-html.perf-lite .hc2-orbit-back .hc2-orbit-spin {
-  animation-duration: 18s !important;
-}
-
-html.perf-lite .hc2-orbit-2 .hc2-chip {
-  animation-duration: 24s !important;
-}
-
-html.perf-lite .hc2-orbit-3 .hc2-chip {
-  animation-duration: 21s !important;
-}
-
-html.perf-lite .hc2-maskot,
-html.perf-lite .hc2-mobile-mascot .hc2-maskot {
-  animation-duration: 9s !important;
-}
-
-html.perf-lite.is-scrolling .hc2-orbit-1 .hc2-chip,
-html.perf-lite.is-scrolling .hc2-orbit-2 .hc2-chip,
-html.perf-lite.is-scrolling .hc2-orbit-3 .hc2-chip,
-html.perf-lite.is-scrolling .hc2-orbit-front .hc2-orbit-spin,
-html.perf-lite.is-scrolling .hc2-orbit-back .hc2-orbit-spin,
-html.perf-lite.is-scrolling .hc2-maskot,
-html.perf-lite.is-scrolling .hc2-mobile-mascot .hc2-maskot,
-html.perf-lite.effects-suspended .hc2-orbit-1 .hc2-chip,
-html.perf-lite.effects-suspended .hc2-orbit-2 .hc2-chip,
-html.perf-lite.effects-suspended .hc2-orbit-3 .hc2-chip,
-html.perf-lite.effects-suspended .hc2-orbit-front .hc2-orbit-spin,
-html.perf-lite.effects-suspended .hc2-orbit-back .hc2-orbit-spin,
-html.perf-lite.effects-suspended .hc2-maskot,
-html.perf-lite.effects-suspended .hc2-mobile-mascot .hc2-maskot {
-  animation-play-state: paused !important;
-}
-
-html.perf-lite.effects-suspended .hc2-orbit-1 .hc2-chip,
-html.perf-lite.effects-suspended .hc2-orbit-2 .hc2-chip,
-html.perf-lite.effects-suspended .hc2-orbit-3 .hc2-chip {
-  opacity: 0 !important;
-}
-
-/* Home decorative layers must never capture touch/scroll gestures. */
-#globalBgCanvas,
-#particleCanvas,
-.hero-bg-shapes,
-.hero-bg-shapes *,
-.shape,
-.hc2-aura,
-.hc2-shadow,
-.hc2-right,
-.hc2-right *,
-.hc2-mobile-mascot,
-.hc2-mobile-mascot *,
-.hc2-orbit-stage,
-.hc2-orbit,
-.hc2-orbit *,
-.hc2-chip,
-.hc2-chip *,
-.hc2-chip-face,
-.hc2-maskot,
-.hero-badge,
-.hero-badge *,
-.hc2-h1,
-.hc2-h1 *,
-.hc2-line-a,
-.hc2-line-b,
-.hc2-quote,
-.hc2-desc,
-.hc2-stats,
-.hc2-stats *,
-.collab-badge,
-.collab-badge * {
-  pointer-events: none !important;
-  touch-action: pan-y !important;
-  -webkit-user-select: none !important;
-  user-select: none !important;
-  -webkit-user-drag: none !important;
-}
-
-.hero-actions,
-.hero-actions *,
-.report-fab,
-.report-fab *,
-.nav-links,
-.nav-links *,
-.theme-toggle,
-.hamburger {
-  pointer-events: auto !important;
-}
-
-.hero-actions .btn,
-.report-fab,
-.nav-link,
-.nav-admin-link,
-.theme-toggle,
-.hamburger {
-  touch-action: manipulation !important;
-}
-
-@media (max-width: 820px) {
-  #home,
-  #home.page.active,
-  #home .hero-cinema2,
-  #home .hc2-left {
-    overflow: visible !important;
-    touch-action: pan-y !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-}
