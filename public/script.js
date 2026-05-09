@@ -654,7 +654,7 @@ function handleLocationPreset() {
   const lng = opt?.dataset?.lng;
   if (lat && lng) {
     if (!pickerMap) initPickerMap();
-    setPin(parseFloat(lat), parseFloat(lng), { fromPreset: true });
+    setPin(parseFloat(lat), parseFloat(lng), { fromPreset: true, center: true });
   } else if (opt && isOtherLocationValue(opt.value || opt.textContent)) {
     clearPin();
   }
