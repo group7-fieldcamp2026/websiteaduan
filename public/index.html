@@ -401,9 +401,18 @@
                       <option>Perempuan</option>
                     </select>
                   </div>
-                  <!-- LOKASI -->
+                  <!-- Leaflet mini picker -->
                   <div class="form-group full-width">
-                    <label>Nama Area / Lokasi yang Dilaporkan <span class="req">*</span></label>
+                    <label>PILIH LOKASI YANG DILAPORKAN</label>
+                    <span class="form-hint" style="margin-top:.25rem;">PILIH LANGSUNG DARI PETA</span>
+                    <label style="margin-top:.5rem;">Pin Lokasi di Peta <span class="label-opt">wajib jika pilih Sekitar Kampus lalu klik peta untuk
+                        pin</span></label>
+                    <div id="pickerMapContainer" class="picker-map-shell">
+                      <div id="pickerMap" class="picker-map-canvas"></div>
+                    </div>
+                  </div>
+                  <div class="form-group full-width">
+                    <label>Atau Pilih Cepat Area yang Dilaporkan <span class="req">*</span></label>
                     <select id="lokasiInsiden" required>
                       <option value="">-- Pilih Fakultas/Departemen --</option>
                       <optgroup label="FSAD">
@@ -466,14 +475,6 @@
                       <option>Sekitar Kampus (Pilih langsung di MAP)</option>
                     </select>
                     <span class="form-hint">Jika klik pin berada dalam radius 50 meter dari pin jurusan, lokasi otomatis mengikuti pin terdekat. Di luar radius itu, analisis masuk sebagai Sekitar Kampus.</span>
-                  </div>
-                  <!-- Leaflet mini picker -->
-                  <div class="form-group full-width">
-                    <label>Pin Lokasi di Peta <span class="label-opt">wajib jika pilih Sekitar Kampus lalu klik peta untuk
-                        pin</span></label>
-                    <div id="pickerMapContainer" class="picker-map-shell">
-                      <div id="pickerMap" class="picker-map-canvas"></div>
-                    </div>
                   </div>
                   <div class="form-group full-width" style="margin-top: .5rem; margin-bottom: 0.5rem;">
                     <div class="vis-toggles">
