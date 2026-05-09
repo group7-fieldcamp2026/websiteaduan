@@ -867,6 +867,7 @@ function setPin(lat, lng, opts = {}) {
   if (!pickerMap) initPickerMap();
   if (!pickerMap) return;
   const fromPreset = opts.fromPreset === true;
+  const shouldCenter = opts.center === true;
   if (!fromPreset && !isPointInBoundary(lat, lng)) {
     showToast('Pin berada di luar batas area ITS. Silakan pilih lokasi di dalam boundary.', 'error');
     return;
@@ -891,7 +892,9 @@ function setPin(lat, lng, opts = {}) {
       iconAnchor: [10, 10]
     })
   }).addTo(pickerMap);
-  pickerMap.setView([lat, lng], Math.max(pickerMap.getZoom(), 16), { animate: false });
+  if (shouldCenter) {
+    pickerMap.setView([lat, lng], Math.max(pickerMap.getZoom(), 16), { animate: false });
+  }
 
 }
 
@@ -907,7 +910,7 @@ function getLocation() {
   if (!pickerMap) initPickerMap();
   document.getElementById('locStatus').textContent = 'Mendapatkan lokasi...';
   navigator.geolocation.getCurrentPosition(
-    pos => setPin(pos.coords.latitude, pos.coords.longitude, { fromPreset: false }),
+    pos => setPin(pos.coords.latitude, pos.coords.longitude, { fromPreset: false, center: true }),
     () => { showToast('Gagal mendapatkan lokasi.', 'error'); document.getElementById('locStatus').textContent = ''; }
   );
 }
@@ -1705,6 +1708,7 @@ function renderFixedLocations(layer) {
   const isPicker = (layer === fixedLocationLayerPicker);
   const showJurusan = isPicker ? visJurusanForm : visJurusanMain;
   const showFixed = isPicker ? visFixedPinForm : visFixedPinMain;
+  const popupOptions = isPicker ? { autoPan: false, keepInView: false } : undefined;
 
   // Pin Jurusan/Fakultas
   if (showJurusan) {
@@ -1726,7 +1730,7 @@ function renderFixedLocations(layer) {
         const color = getFacultyColor(faculty);
 
         L.marker([parseFloat(lat), parseFloat(lng)], { icon: createFacultyIcon(color) })
-          .bindPopup(`<div class="popup-card"><div class="popup-header"><div class="popup-loc-name">${esc(locName)}</div><div class="popup-faculty">${esc(faculty)}</div></div></div>`)
+          .bindPopup(`<div class="popup-card"><div class="popup-header"><div class="popup-loc-name">${esc(locName)}</div><div class="popup-faculty">${esc(faculty)}</div></div></div>`, popupOptions)
           .addTo(layer);
       });
     }
@@ -1762,7 +1766,7 @@ function renderFixedLocations(layer) {
         fillColor: markerColor,
         fillOpacity: 0.85,
         weight: 2
-      }).bindPopup(`<div class="popup-card"><div class="popup-header"><div class="popup-loc-name">${esc(loc.name || 'Titik Pengaduan')}</div></div><div class="popup-body"><div class="popup-status-badge ${badgeCls}"><i class="fas ${badgeIcon}"></i> ${status}</div></div></div>`).addTo(layer);
+      }).bindPopup(`<div class="popup-card"><div class="popup-header"><div class="popup-loc-name">${esc(loc.name || 'Titik Pengaduan')}</div></div><div class="popup-body"><div class="popup-status-badge ${badgeCls}"><i class="fas ${badgeIcon}"></i> ${status}</div></div></div>`, popupOptions).addTo(layer);
     });
   }
 }
