@@ -50,11 +50,6 @@ const BASEMAPS = {
   dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: 'Â© <a href="https://carto.com">CARTO</a>', opt: { subdomains: 'abcd' } },
   topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: 'Â© <a href="https://opentopomap.org">OpenTopoMap</a>', opt: {} },
 };
-const PICKER_TILE_FALLBACKS = [
-  BASEMAPS.osm,
-  { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', attr: 'Â© <a href="https://carto.com">CARTO</a>', opt: { subdomains: 'abcd' } },
-  BASEMAPS.satellite,
-];
 
 const ITS = [-7.2756, 112.7951];
 const ZOOM = 15;
@@ -392,7 +387,6 @@ async function fetchReports() {
     updateLayerCounts();
     if (leafletMap) renderLeafletMap();
     renderLaporanChart();
-    updateStatsFromLoadedReports();
   } catch (e) {
     console.error('Gagal ambil data laporan:', e);
   }
@@ -403,77 +397,12 @@ async function fetchStats() {
   try {
     const res = await fetch(`${API_BASE}/reports/stats`);
     const data = await res.json();
-    const fallbackStats = getReportStatsFallback();
-    let total = Number(data.total || 0);
-    let bulanIni = Number(data.bulan_ini || 0);
-    let terverifikasi = Number(data.terverifikasi || 0);
-    if (!total) {
-      const adminStats = await fetchAdminStatsFallback();
-      total = adminStats.total || total;
-      bulanIni = adminStats.bulanIni || bulanIni;
-      terverifikasi = adminStats.terverifikasi || terverifikasi;
-    }
-    document.getElementById('totalLaporan').textContent = total || fallbackStats.total;
-    document.getElementById('bulanIni').textContent = bulanIni || fallbackStats.bulanIni;
-    document.getElementById('terverifikasi').textContent = terverifikasi || fallbackStats.terverifikasi;
+    document.getElementById('totalLaporan').textContent = data.total || 0;
+    document.getElementById('bulanIni').textContent = data.bulan_ini || 0;
+    document.getElementById('terverifikasi').textContent = data.terverifikasi || 0;
   } catch (e) {
     console.error('Gagal ambil statistik:', e);
-    const adminStats = await fetchAdminStatsFallback();
-    const fallbackStats = adminStats.total ? adminStats : getReportStatsFallback();
-    document.getElementById('totalLaporan').textContent = fallbackStats.total;
-    document.getElementById('bulanIni').textContent = fallbackStats.bulanIni;
-    document.getElementById('terverifikasi').textContent = fallbackStats.terverifikasi;
   }
-}
-
-async function fetchAdminStatsFallback() {
-  try {
-    const res = await fetch(`${API_BASE}/reports/admin`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (!Array.isArray(data)) return { total: 0, bulanIni: 0, terverifikasi: 0 };
-    const now = new Date();
-    return {
-      total: data.length,
-      bulanIni: data.filter(r => {
-        const d = r.created_at ? new Date(r.created_at) : null;
-        return d && !isNaN(d) && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      }).length,
-      terverifikasi: data.filter(r => {
-        const status = (r.status || '').toLowerCase();
-        return status === 'resolved' || status === 'verified' || status === 'valid' || status === 'terverifikasi';
-      }).length,
-    };
-  } catch (err) {
-    console.error('Gagal ambil fallback statistik admin:', err);
-    return { total: 0, bulanIni: 0, terverifikasi: 0 };
-  }
-}
-
-function getReportStatsFallback() {
-  const now = new Date();
-  return {
-    total: reports.length,
-    bulanIni: reports.filter(r => {
-      const d = r.createdAt ? new Date(r.createdAt) : null;
-      return d && !isNaN(d) && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    }).length,
-    terverifikasi: reports.filter(r => {
-      const status = (r.status || '').toLowerCase();
-      return status === 'resolved' || status === 'verified' || status === 'valid' || status === 'terverifikasi';
-    }).length,
-  };
-}
-
-function updateStatsFromLoadedReports() {
-  const totalEl = document.getElementById('totalLaporan');
-  const bulanEl = document.getElementById('bulanIni');
-  const verifiedEl = document.getElementById('terverifikasi');
-  if (!totalEl || !reports.length) return;
-  const fallbackStats = getReportStatsFallback();
-  if ((totalEl.textContent || '0').trim() === '0') totalEl.textContent = fallbackStats.total;
-  if (bulanEl && (bulanEl.textContent || '0').trim() === '0') bulanEl.textContent = fallbackStats.bulanIni;
-  if (verifiedEl && (verifiedEl.textContent || '0').trim() === '0') verifiedEl.textContent = fallbackStats.terverifikasi;
 }
 
 // Ambil lokasi titik pengaduan dari API
@@ -609,177 +538,6 @@ function scrollToForm() {
 function initForm() {
   document.getElementById('reportForm').addEventListener('submit', handleSubmit);
   document.getElementById('lokasiInsiden')?.addEventListener('change', handleLocationPreset);
-  initReportWizard();
-}
-
-let reportWizardStep = window.ITSAFE_REPORT_WIZARD_STEP || 0;
-
-function initReportWizard() {
-  const form = document.getElementById('reportForm');
-  if (!form || form.dataset.wizardReady === '1') return;
-  form.dataset.wizardReady = '1';
-
-  const prevBtn = document.getElementById('wizardPrevBtn');
-  const nextBtn = document.getElementById('wizardNextBtn');
-  if (prevBtn && !prevBtn.getAttribute('onclick')) prevBtn.addEventListener('click', itsafeWizardPrev);
-  if (nextBtn && !nextBtn.getAttribute('onclick')) nextBtn.addEventListener('click', itsafeWizardNext);
-
-  document.querySelectorAll('.wizard-step[data-step-target]').forEach(btn => {
-    if (btn.getAttribute('onclick')) return;
-    btn.addEventListener('click', () => {
-      const target = parseInt(btn.dataset.stepTarget, 10);
-      if (!Number.isFinite(target) || target === reportWizardStep) return;
-      if (target < reportWizardStep) {
-        showReportStep(target);
-        return;
-      }
-      showReportStep(target);
-    });
-  });
-
-  showReportStep(0, { scroll: false });
-}
-
-function itsafeWizardNext() {
-  showReportStep((window.ITSAFE_REPORT_WIZARD_STEP || reportWizardStep || 0) + 1);
-}
-
-function itsafeWizardPrev() {
-  showReportStep((window.ITSAFE_REPORT_WIZARD_STEP || reportWizardStep || 0) - 1);
-}
-
-function itsafeWizardGoto(step) {
-  showReportStep(step);
-}
-
-window.itsafeWizardNext = itsafeWizardNext;
-window.itsafeWizardPrev = itsafeWizardPrev;
-window.itsafeWizardGoto = itsafeWizardGoto;
-window.showReportStep = showReportStep;
-window.reloadPickerMap = reloadPickerMap;
-
-function showReportStep(step, opts = {}) {
-  const steps = Array.from(document.querySelectorAll('.report-step'));
-  if (!steps.length) return;
-  const maxStep = steps.length - 1;
-  reportWizardStep = Math.max(0, Math.min(step, maxStep));
-  window.ITSAFE_REPORT_WIZARD_STEP = reportWizardStep;
-
-  steps.forEach(el => {
-    const isActive = parseInt(el.dataset.step, 10) === reportWizardStep;
-    el.classList.toggle('active', isActive);
-    el.setAttribute('aria-hidden', isActive ? 'false' : 'true');
-  });
-
-  document.querySelectorAll('.wizard-step[data-step-target]').forEach(btn => {
-    const btnStep = parseInt(btn.dataset.stepTarget, 10);
-    btn.classList.toggle('active', btnStep === reportWizardStep);
-    btn.classList.toggle('done', btnStep < reportWizardStep);
-  });
-
-  const prevBtn = document.getElementById('wizardPrevBtn');
-  const nextBtn = document.getElementById('wizardNextBtn');
-  if (prevBtn) prevBtn.style.visibility = reportWizardStep === 0 ? 'hidden' : 'visible';
-  if (nextBtn) nextBtn.style.display = reportWizardStep === maxStep ? 'none' : 'inline-flex';
-
-  if (reportWizardStep === 0) {
-    ensurePickerMapReady();
-  }
-
-  if (opts.scroll !== false) {
-    document.querySelector('.form-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-}
-
-function ensurePickerMapReady() {
-  setTimeout(() => {
-    try {
-      initPickerMap();
-      if (pickerMap) {
-        pickerMap.invalidateSize();
-        setTimeout(() => pickerMap.invalidateSize(), 250);
-        setTimeout(() => pickerMap.invalidateSize(), 900);
-      }
-      setPickerMapFallback(!pickerMap);
-    } catch (err) {
-      console.error('Gagal memuat peta picker:', err);
-      setPickerMapFallback(true);
-    }
-  }, 80);
-}
-
-function setPickerMapFallback(show) {
-  const fallback = document.getElementById('pickerMapFallback');
-  if (fallback) fallback.style.display = show ? 'flex' : 'none';
-}
-
-function reloadPickerMap() {
-  try {
-    if (pickerMap) {
-      pickerMap.remove();
-      pickerMap = null;
-      pickerMarker = null;
-      fixedLocationLayerPicker = null;
-      boundaryLayerPicker = null;
-    }
-    initPickerMap({ force: true });
-    if (pickerMap) {
-      pickerMap.invalidateSize();
-      setTimeout(() => pickerMap.invalidateSize(), 250);
-      setPickerMapFallback(false);
-      return;
-    }
-    setPickerMapFallback(!pickerMap);
-  } catch (err) {
-    console.error('Gagal muat ulang peta:', err);
-    setPickerMapFallback(true);
-  }
-}
-
-function validateReportStep(step) {
-  const stepEl = document.querySelector(`.report-step[data-step="${step}"]`);
-  if (!stepEl) return true;
-  const fields = Array.from(stepEl.querySelectorAll('input, select, textarea'));
-  let firstInvalid = null;
-
-  fields.forEach(el => {
-    if (el.disabled || el.type === 'hidden') return;
-    const isRequired = el.required || el.hasAttribute('required');
-    let invalid = false;
-
-    if (isRequired) {
-      if (el.type === 'checkbox') invalid = !el.checked;
-      else if (el.type === 'file') invalid = !(el.files && el.files.length);
-      else invalid = !String(el.value || '').trim();
-    }
-
-    if (!invalid && el.type === 'email' && el.value.trim()) {
-      invalid = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
-    }
-
-    el.style.borderColor = invalid ? '#F28482' : '';
-    if (invalid && !firstInvalid) firstInvalid = el;
-  });
-
-  if (step === 0) {
-    const lat = parseFloat(document.getElementById('lat')?.value);
-    const lng = parseFloat(document.getElementById('lng')?.value);
-    const lokasiVal = document.getElementById('lokasiInsiden')?.value || '';
-    if (isOtherLocationValue(lokasiVal) && (isNaN(lat) || isNaN(lng))) {
-      showToast('Klik titik lokasi pada peta untuk pilihan Sekitar Kampus.', 'error');
-      document.getElementById('pickerMapContainer')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return false;
-    }
-  }
-
-  if (firstInvalid) {
-    showToast('Lengkapi bagian ini dulu sebelum lanjut.', 'error');
-    firstInvalid.focus({ preventScroll: true });
-    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return false;
-  }
-
-  return true;
 }
 
 async function handleSubmit(e) {
@@ -787,36 +545,24 @@ async function handleSubmit(e) {
   const required = [
     "emailIts",
     "peranKampus",
-    "jenisKelamin",
     "lokasiInsiden",
     "lokasiDeskripsi",
     "pencahayaan",
     "kepadatan",
     "cctv",
     "petugasKeamanan",
-    "vegetasi",
     "waktuInsiden",
     "skorNyaman",
     "skorRawan",
   ];
   let valid = true;
-  let firstInvalid = null;
   required.forEach(id => {
     const el = document.getElementById(id);
-    if (!el.value.trim()) {
-      el.style.borderColor = '#F28482';
-      valid = false;
-      if (!firstInvalid) firstInvalid = el;
-    }
+    if (!el.value.trim()) { el.style.borderColor = '#F28482'; valid = false; }
     else el.style.borderColor = '';
   });
-  if (!valid) {
-    const stepEl = firstInvalid?.closest('.report-step');
-    if (stepEl?.dataset?.step) showReportStep(parseInt(stepEl.dataset.step, 10));
-    showToast('Harap lengkapi semua field wajib.', 'error');
-    return;
-  }
   if (!document.getElementById('consent').checked) { showToast('Harap setujui pernyataan persetujuan.', 'error'); return; }
+  if (!valid) { showToast('Harap lengkapi semua field wajib.', 'error'); return; }
 
   const lat = parseFloat(document.getElementById('lat').value);
   const lng = parseFloat(document.getElementById('lng').value);
@@ -873,7 +619,6 @@ async function handleSubmit(e) {
     if (result.success) {
       e.target.reset();
       clearPin();
-      showReportStep(0);
       await fetchReports();
       await fetchStats();
 
@@ -1073,27 +818,16 @@ function schedulePickerMapInit() {
   }
 }
 
-function initPickerMap(opts = {}) {
+function initPickerMap() {
   if (pickerMap) {
     setTimeout(() => pickerMap.invalidateSize(), 300);
     return;
   }
   const container = document.getElementById('pickerMap');
   if (!container) return;
-  const rect = container.getBoundingClientRect();
-  if (!opts.force && (rect.width < 80 || rect.height < 80)) {
-    setTimeout(() => initPickerMap({ force: true }), 160);
-    return;
-  }
-  if (typeof L === 'undefined' || !L.map) {
-    loadLeafletRuntimeFallback();
-    setPickerMapFallback(true);
-    return;
-  }
 
   const isMobile = itsafeIsMobileLike();
-  try {
-    pickerMap = L.map('pickerMap', { 
+  pickerMap = L.map('pickerMap', { 
     zoomControl: true,
     scrollWheelZoom: false,
     keyboard: false,
@@ -1103,13 +837,7 @@ function initPickerMap(opts = {}) {
     touchZoom: true,
     tapTolerance: 15     // Slightly generous for finger accuracy
   }).setView(ITS, ZOOM);
-  } catch (err) {
-    console.error('Gagal inisialisasi peta picker:', err);
-    setPickerMapFallback(true);
-    return;
-  }
-  addPickerTileLayer();
-  setPickerMapFallback(false);
+  L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
   
   fixedLocationLayerPicker = L.layerGroup().addTo(pickerMap);
   renderFixedLocations(fixedLocationLayerPicker);
@@ -1133,57 +861,6 @@ function initPickerMap(opts = {}) {
   // Multiple invalidateSize attempts to fix grey box browser quirks
   setTimeout(() => pickerMap.invalidateSize(), 500);
   setTimeout(() => pickerMap.invalidateSize(), 1500);
-}
-
-function loadLeafletRuntimeFallback() {
-  if (window._leafletRuntimeFallbackLoading || typeof L !== 'undefined') return;
-  window._leafletRuntimeFallbackLoading = true;
-  if (!document.querySelector('link[data-leaflet-fallback]')) {
-    const css = document.createElement('link');
-    css.rel = 'stylesheet';
-    css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    css.dataset.leafletFallback = 'true';
-    document.head.appendChild(css);
-  }
-  const script = document.createElement('script');
-  script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-  script.onload = () => {
-    window._leafletRuntimeFallbackLoading = false;
-    reloadPickerMap();
-  };
-  script.onerror = () => {
-    window._leafletRuntimeFallbackLoading = false;
-    setPickerMapFallback(true);
-  };
-  document.head.appendChild(script);
-}
-
-function addPickerTileLayer(index = 0) {
-  if (!pickerMap || typeof L === 'undefined') return;
-  const cfg = PICKER_TILE_FALLBACKS[index] || PICKER_TILE_FALLBACKS[0];
-  let loaded = 0;
-  let errors = 0;
-  const layer = L.tileLayer(cfg.url, { attribution: cfg.attr, ...(cfg.opt || {}) }).addTo(pickerMap);
-  layer.on('tileload', () => {
-    loaded++;
-    setPickerMapFallback(false);
-  });
-  layer.on('tileerror', () => {
-    errors++;
-    if (errors >= 3 && loaded === 0 && index < PICKER_TILE_FALLBACKS.length - 1) {
-      pickerMap.removeLayer(layer);
-      addPickerTileLayer(index + 1);
-    }
-  });
-  setTimeout(() => {
-    if (!pickerMap || !pickerMap.hasLayer(layer)) return;
-    if (loaded === 0 && index < PICKER_TILE_FALLBACKS.length - 1) {
-      pickerMap.removeLayer(layer);
-      addPickerTileLayer(index + 1);
-    } else if (loaded === 0) {
-      setPickerMapFallback(true);
-    }
-  }, 4500);
 }
 
 function setPin(lat, lng, opts = {}) {
@@ -3033,14 +2710,14 @@ window.addEventListener('resize', () => {
 
   /* â”€â”€ Progress bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   const REQUIRED_IDS = [
-    'emailIts', 'peranKampus', 'jenisKelamin', 'lokasiInsiden', 'lokasiDeskripsi',
-    'pencahayaan', 'kepadatan', 'cctv', 'petugasKeamanan', 'vegetasi', 'waktuInsiden',
-    'skorNyaman', 'skorRawan'
+    'emailIts', 'peranKampus', 'lokasiInsiden', 'lokasiDeskripsi',
+    'pencahayaan', 'kepadatan', 'cctv', 'petugasKeamanan', 'waktuInsiden',
+    'skorNyaman', 'skorRawan', 'kronologi'
   ];
   const OPTIONAL_IDS = [
-    'hariRawan', 'alasanTidakNyaman',
+    'jenisKelamin', 'vegetasi', 'hariRawan', 'alasanTidakNyaman',
     'pernahHindari', 'orangLain', 'situasiMencurigakan',
-    'kronologi', 'kontakPelapor', 'fotoLokasi'
+    'kontakPelapor', 'fotoLokasi'
   ];
   const ALL_IDS = [...REQUIRED_IDS, ...OPTIONAL_IDS];
 

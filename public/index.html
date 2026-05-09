@@ -7,7 +7,7 @@
   <title>ITSafe x Satgas PPK ITS</title>
   <script>
     (function () {
-      const rawVersion = '1.4.0';
+      const rawVersion = '1.3.6';
       const version = rawVersion;
       window.ITSAFE_ASSET_VERSION = version;
       try {
@@ -364,25 +364,10 @@
 
         <div class="form-card">
           <form id="reportForm" novalidate>
-            <div class="form-wizard" aria-label="Tahapan pengisian laporan">
-              <button type="button" class="wizard-step active" data-step-target="0" onclick="itsafeWizardGoto(0)">
-                <span>1</span> Identitas & Lokasi
-              </button>
-              <button type="button" class="wizard-step" data-step-target="1" onclick="itsafeWizardGoto(1)">
-                <span>2</span> Kondisi Fisik
-              </button>
-              <button type="button" class="wizard-step" data-step-target="2" onclick="itsafeWizardGoto(2)">
-                <span>3</span> Penilaian
-              </button>
-              <button type="button" class="wizard-step" data-step-target="3" onclick="itsafeWizardGoto(3)">
-                <span>4</span> Kirim
-              </button>
-            </div>
-
             <div class="form-two-col">
 
               <!-- ===== KOLOM KIRI: IDENTITAS + LOKASI + KONDISI FISIK ===== -->
-              <div class="form-col-panel col-lokasi animate-in report-step active" data-step="0">
+              <div class="form-col-panel col-lokasi animate-in">
                 <div class="col-panel-header">
                   <div class="col-panel-icon"><i class="fas fa-map-location-dot"></i></div>
                   <div>
@@ -417,44 +402,10 @@
                     </select>
                   </div>
                   <!-- LOKASI -->
-                  <div class="form-group full-width report-location-intro">
-                    <div class="location-step-title">
-                      <i class="fas fa-location-dot"></i>
-                      <span>Pilih Lokasi yang Dilaporkan</span>
-                    </div>
-                    <span class="form-hint">Tentukan titik kejadian di peta terlebih dahulu, lalu pastikan nama lokasi
-                      yang dilaporkan terisi sesuai area kejadian.</span>
-                  </div>
-                  <!-- Leaflet mini picker -->
-                  <div class="form-group full-width report-map-picker">
-                    <label>Pilih Pin di Peta <span class="label-opt">klik titik kejadian pada peta</span></label>
-                    <div id="pickerMapContainer" class="picker-map-shell">
-                      <div id="pickerMap" class="picker-map-canvas"></div>
-                      <div class="picker-map-fallback" id="pickerMapFallback" style="display:none;">
-                        <i class="fas fa-map-location-dot"></i>
-                        <span>Peta belum termuat. Lokasi tetap bisa dipilih dari daftar di bawah.</span>
-                        <button type="button" class="btn btn-outline btn-sm" onclick="reloadPickerMap()">
-                          <i class="fas fa-rotate-right"></i> Muat Ulang Peta
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="form-group full-width report-map-toggles" style="margin-top: .5rem; margin-bottom: 0.5rem;">
-                    <div class="vis-toggles">
-                      <label class="vis-toggle active" id="tog-fixedpin-form">
-                        <input type="checkbox" checked onchange="toggleVis('fixedpin-form', this)" />
-                        <i class="fas fa-qrcode"></i> Pin QR
-                      </label>
-                      <label class="vis-toggle active" id="tog-jurusan-form">
-                        <input type="checkbox" checked onchange="toggleVis('jurusan-form', this)" />
-                        <i class="fas fa-graduation-cap"></i> Jurusan
-                      </label>
-                    </div>
-                  </div>
-                  <div class="form-group full-width report-location-select">
-                    <label>Lokasi yang Dilaporkan <span class="req">*</span></label>
+                  <div class="form-group full-width">
+                    <label>Nama Area / Lokasi yang Dilaporkan <span class="req">*</span></label>
                     <select id="lokasiInsiden" required>
-                      <option value="">-- Pilih lokasi/area kejadian --</option>
+                      <option value="">-- Pilih Fakultas/Departemen --</option>
                       <optgroup label="FSAD">
                         <option data-lat="-7.284466" data-lng="112.794847">Fisika</option>
                         <option data-lat="-7.285240" data-lng="112.794721">Matematika</option>
@@ -514,9 +465,27 @@
                       </optgroup>
                       <option>Sekitar Kampus (Pilih langsung di MAP)</option>
                     </select>
-                    <span class="form-hint">Ini bukan jurusan pelapor. Pilih nama area kejadian. Jika titik peta berada
-                      dekat pin jurusan, sistem akan mengisi lokasi terdekat secara otomatis; di luar radius itu masuk
-                      sebagai Sekitar Kampus.</span>
+                    <span class="form-hint">Jika klik pin berada dalam radius 50 meter dari pin jurusan, lokasi otomatis mengikuti pin terdekat. Di luar radius itu, analisis masuk sebagai Sekitar Kampus.</span>
+                  </div>
+                  <!-- Leaflet mini picker -->
+                  <div class="form-group full-width">
+                    <label>Pin Lokasi di Peta <span class="label-opt">wajib jika pilih Sekitar Kampus lalu klik peta untuk
+                        pin</span></label>
+                    <div id="pickerMapContainer" class="picker-map-shell">
+                      <div id="pickerMap" class="picker-map-canvas"></div>
+                    </div>
+                  </div>
+                  <div class="form-group full-width" style="margin-top: .5rem; margin-bottom: 0.5rem;">
+                    <div class="vis-toggles">
+                      <label class="vis-toggle active" id="tog-fixedpin-form">
+                        <input type="checkbox" checked onchange="toggleVis('fixedpin-form', this)" />
+                        <i class="fas fa-qrcode"></i> Pin QR
+                      </label>
+                      <label class="vis-toggle active" id="tog-jurusan-form">
+                        <input type="checkbox" checked onchange="toggleVis('jurusan-form', this)" />
+                        <i class="fas fa-graduation-cap"></i> Jurusan
+                      </label>
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Latitude</label>
@@ -547,16 +516,16 @@
                       kevalidasian laporan. Format JPG/PNG/WEBP, maks 5 MB.</span>
                   </div>
                 </div><!-- /form-grid lokasi -->
-              </div><!-- /col-lokasi -->
 
                 <!-- Kondisi Fisik sub-header -->
-              <div class="form-col-panel col-kondisi animate-in report-step" data-step="1">
-                <div class="col-panel-header">
-                  <div class="col-panel-icon">
+                <div class="col-panel-header"
+                  style="margin-top:1.5rem;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid rgba(var(--ink-rgb),.08);">
+                  <div class="col-panel-icon"
+                    style="width:36px;height:36px;font-size:.9rem;background:linear-gradient(135deg,rgba(132,165,157,.15),rgba(246,189,96,.1));color:var(--accent-blue);border:1px solid rgba(132,165,157,.25);">
                     <i class="fas fa-eye"></i>
                   </div>
                   <div>
-                    <div class="col-panel-title">Kondisi Fisik Area</div>
+                    <div class="col-panel-title" style="font-size:.85rem;">Kondisi Fisik Area</div>
                     <div class="col-panel-desc">Gambaran fisik area yang kamu amati saat ini</div>
                   </div>
                 </div>
@@ -628,10 +597,10 @@
                     </select>
                   </div>
                 </div><!-- /form-grid kondisi -->
-              </div><!-- /col-kondisi -->
+              </div><!-- /col-lokasi -->
 
               <!-- ===== KOLOM KANAN: PENILAIAN SUBJEKTIF ===== -->
-              <div class="form-col-panel col-subjektif animate-in report-step" data-step="2">
+              <div class="form-col-panel col-subjektif animate-in">
                 <div class="col-panel-header">
                   <div class="col-panel-icon"><i class="fas fa-clipboard-check"></i></div>
                   <div>
@@ -795,7 +764,7 @@
 
             </div><!-- /form-two-col -->
 
-            <div class="form-footer-wrap report-step" data-step="3">
+            <div class="form-footer-wrap">
               <div class="form-footer">
                 <label class="checkbox-label">
                   <input type="checkbox" id="consent" required />
@@ -807,69 +776,9 @@
                 </button>
               </div>
             </div>
-            <div class="form-wizard-actions">
-              <button type="button" class="btn btn-outline" id="wizardPrevBtn" onclick="itsafeWizardPrev()">
-                <i class="fas fa-arrow-left"></i> Sebelumnya
-              </button>
-              <button type="button" class="btn btn-primary" id="wizardNextBtn" onclick="itsafeWizardNext()">
-                Berikutnya <i class="fas fa-arrow-right"></i>
-              </button>
-            </div>
           </form>
         </div>
       </div>
-
-      <script>
-        (function () {
-          function localWizardStep(step, opts) {
-            const steps = Array.from(document.querySelectorAll('.report-step'));
-            if (!steps.length) return;
-            const maxStep = steps.length - 1;
-            const activeStep = Math.max(0, Math.min(Number(step) || 0, maxStep));
-            window.ITSAFE_REPORT_WIZARD_STEP = activeStep;
-
-            steps.forEach(el => {
-              const isActive = parseInt(el.dataset.step, 10) === activeStep;
-              el.classList.toggle('active', isActive);
-              el.setAttribute('aria-hidden', isActive ? 'false' : 'true');
-            });
-
-            document.querySelectorAll('.wizard-step[data-step-target]').forEach(btn => {
-              const btnStep = parseInt(btn.dataset.stepTarget, 10);
-              btn.classList.toggle('active', btnStep === activeStep);
-              btn.classList.toggle('done', btnStep < activeStep);
-            });
-
-            const prevBtn = document.getElementById('wizardPrevBtn');
-            const nextBtn = document.getElementById('wizardNextBtn');
-            if (prevBtn) prevBtn.style.visibility = activeStep === 0 ? 'hidden' : 'visible';
-            if (nextBtn) nextBtn.style.display = activeStep === maxStep ? 'none' : 'inline-flex';
-
-            if (activeStep === 0 && typeof window.reloadPickerMap === 'function') {
-              setTimeout(() => window.reloadPickerMap(), 120);
-            }
-            if (!opts || opts.scroll !== false) {
-              document.querySelector('.form-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }
-
-          window.itsafeWizardGoto = window.itsafeWizardGoto || function (step) {
-            localWizardStep(step);
-          };
-          window.itsafeWizardNext = window.itsafeWizardNext || function () {
-            localWizardStep((window.ITSAFE_REPORT_WIZARD_STEP || 0) + 1);
-          };
-          window.itsafeWizardPrev = window.itsafeWizardPrev || function () {
-            localWizardStep((window.ITSAFE_REPORT_WIZARD_STEP || 0) - 1);
-          };
-
-          if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => localWizardStep(window.ITSAFE_REPORT_WIZARD_STEP || 0, { scroll: false }));
-          } else {
-            localWizardStep(window.ITSAFE_REPORT_WIZARD_STEP || 0, { scroll: false });
-          }
-        })();
-      </script>
 
       <!-- Info: data hanya untuk admin -->
       <div class="section-container">

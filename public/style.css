@@ -1158,96 +1158,6 @@ main {
   padding: 0;
 }
 
-.form-wizard {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: .65rem;
-  margin-bottom: 1rem;
-}
-
-.wizard-step {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .45rem;
-  min-height: 44px;
-  padding: .65rem .75rem;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--bg2);
-  color: var(--text-soft);
-  font: inherit;
-  font-size: .82rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease;
-}
-
-.wizard-step span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  background: rgba(var(--ink-rgb), .08);
-  color: var(--text-muted);
-  font-size: .72rem;
-  flex-shrink: 0;
-}
-
-.wizard-step.active {
-  color: var(--primary-dk);
-  border-color: rgba(var(--primary-rgb), .32);
-  background: rgba(var(--primary-rgb), .08);
-  box-shadow: 0 8px 22px rgba(var(--primary-rgb), .1);
-}
-
-.wizard-step.active span,
-.wizard-step.done span {
-  background: var(--primary);
-  color: #fff;
-}
-
-.wizard-step.done {
-  color: var(--text);
-  border-color: rgba(var(--sage-rgb), .28);
-}
-
-.report-step {
-  display: none !important;
-}
-
-.report-step.active {
-  display: block !important;
-  animation: wizardStepIn .28s ease both;
-}
-
-.form-wizard-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: .75rem;
-  margin-top: 1rem;
-}
-
-.form-wizard-actions .btn {
-  min-width: 145px;
-  justify-content: center;
-}
-
-@keyframes wizardStepIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .form-help-cta {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1332,7 +1242,7 @@ main {
 
 .form-two-col {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 1.25rem;
   align-items: start;
 }
@@ -1361,10 +1271,6 @@ main {
 
 .form-col-panel.col-lokasi::before {
   background: linear-gradient(90deg, var(--accent-blue), var(--accent));
-}
-
-.form-col-panel.col-kondisi::before {
-  background: linear-gradient(90deg, var(--accent), var(--accent-blue));
 }
 
 .form-col-panel.col-subjektif::before {
@@ -1403,12 +1309,6 @@ main {
   border: 1px solid rgba(132, 165, 157, .3);
 }
 
-.col-kondisi .col-panel-icon {
-  background: linear-gradient(135deg, rgba(246, 189, 96, .2), rgba(132, 165, 157, .14));
-  color: #a07513;
-  border: 1px solid rgba(246, 189, 96, .34);
-}
-
 .col-subjektif .col-panel-icon {
   background: linear-gradient(135deg, rgba(var(--primary-rgb), .15), rgba(var(--primary-rgb), .08));
   color: var(--primary-dk);
@@ -1443,37 +1343,6 @@ main {
 
 .form-group.full-width {
   grid-column: 1 / -1;
-}
-
-.report-location-intro {
-  gap: .45rem;
-  margin-top: .25rem;
-}
-
-.location-step-title {
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  color: var(--text);
-  font-size: .92rem;
-  font-weight: 800;
-  letter-spacing: .02em;
-  text-transform: uppercase;
-}
-
-.location-step-title i {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: rgba(var(--sage-rgb), .16);
-  color: var(--accent-blue);
-}
-
-.report-location-select select {
-  border-color: rgba(var(--primary-rgb), .24);
 }
 
 .form-group.col-span {
@@ -2394,7 +2263,6 @@ main {
 
 /* â”€â”€ Picker map di form â”€â”€ */
 .picker-map-shell {
-  position: relative;
   border-radius: 12px;
   overflow: hidden;
   border: 1.5px solid var(--border);
@@ -2406,91 +2274,6 @@ main {
   height: 280px;
   width: 100%;
   background: var(--bg2);
-}
-
-/* Minimal Leaflet layout fallback if CDN CSS is delayed/blocked. */
-.leaflet-container {
-  position: relative;
-  overflow: hidden;
-  outline: 0;
-}
-
-.leaflet-pane,
-.leaflet-tile,
-.leaflet-marker-icon,
-.leaflet-marker-shadow,
-.leaflet-tile-container,
-.leaflet-pane > svg,
-.leaflet-pane > canvas,
-.leaflet-zoom-box,
-.leaflet-image-layer,
-.leaflet-layer {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-
-.leaflet-tile,
-.leaflet-marker-icon,
-.leaflet-marker-shadow {
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-.leaflet-tile-pane { z-index: 200; }
-.leaflet-overlay-pane { z-index: 400; }
-.leaflet-shadow-pane { z-index: 500; }
-.leaflet-marker-pane { z-index: 600; }
-.leaflet-tooltip-pane { z-index: 650; }
-.leaflet-popup-pane { z-index: 700; }
-
-.leaflet-control-container .leaflet-top,
-.leaflet-control-container .leaflet-bottom {
-  position: absolute;
-  z-index: 1000;
-  pointer-events: none;
-}
-
-.leaflet-top { top: 0; }
-.leaflet-right { right: 0; }
-.leaflet-bottom { bottom: 0; }
-.leaflet-left { left: 0; }
-
-.leaflet-control {
-  position: relative;
-  z-index: 800;
-  pointer-events: auto;
-}
-
-.leaflet-control-zoom a {
-  display: block;
-  width: 26px;
-  height: 26px;
-  line-height: 26px;
-  text-align: center;
-  background: #fff;
-  color: #111827;
-  border-bottom: 1px solid #d1d5db;
-}
-
-.picker-map-fallback {
-  position: absolute;
-  inset: 0;
-  z-index: 500;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: .7rem;
-  padding: 1rem;
-  text-align: center;
-  color: var(--text-soft);
-  background: rgba(var(--bg-rgb), .92);
-}
-
-.picker-map-fallback i {
-  color: var(--primary);
-  font-size: 1.4rem;
 }
 
 /* â”€â”€ Basemap switcher buttons (Improved) â”€â”€ */
@@ -9677,16 +9460,6 @@ body {
    FORM PENGADUAN: 2-kolom â†’ 1-kolom di mobile
    ========================================================= */
 @media (max-width: 820px) {
-  .form-wizard {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .wizard-step {
-    justify-content: flex-start;
-    font-size: .76rem;
-    padding: .6rem;
-  }
-
   .form-two-col {
     grid-template-columns: 1fr !important;
     gap: 1rem !important;
@@ -9698,22 +9471,6 @@ body {
 
   .form-grid {
     grid-template-columns: 1fr !important;
-  }
-
-  .form-wizard-actions {
-    position: sticky;
-    bottom: .75rem;
-    z-index: 50;
-    padding: .65rem;
-    border-radius: 14px;
-    background: rgba(var(--bg-rgb), .9);
-    border: 1px solid var(--border);
-    backdrop-filter: blur(12px);
-  }
-
-  .form-wizard-actions .btn {
-    min-width: 0;
-    flex: 1;
   }
 }
 
