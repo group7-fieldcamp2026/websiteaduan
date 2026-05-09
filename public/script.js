@@ -538,6 +538,115 @@ function scrollToForm() {
 function initForm() {
   document.getElementById('reportForm').addEventListener('submit', handleSubmit);
   document.getElementById('lokasiInsiden')?.addEventListener('change', handleLocationPreset);
+  initReportWizard();
+}
+
+let reportWizardStep = 0;
+
+function initReportWizard() {
+  const form = document.getElementById('reportForm');
+  if (!form || form.dataset.wizardReady === '1') return;
+  form.dataset.wizardReady = '1';
+
+  document.getElementById('wizardPrevBtn')?.addEventListener('click', () => {
+    showReportStep(reportWizardStep - 1);
+  });
+
+  document.getElementById('wizardNextBtn')?.addEventListener('click', () => {
+    if (validateReportStep(reportWizardStep)) showReportStep(reportWizardStep + 1);
+  });
+
+  document.querySelectorAll('.wizard-step[data-step-target]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = parseInt(btn.dataset.stepTarget, 10);
+      if (!Number.isFinite(target) || target === reportWizardStep) return;
+      if (target < reportWizardStep) {
+        showReportStep(target);
+        return;
+      }
+      if (validateReportStep(reportWizardStep)) showReportStep(reportWizardStep + 1);
+    });
+  });
+
+  showReportStep(0, { scroll: false });
+}
+
+function showReportStep(step, opts = {}) {
+  const steps = Array.from(document.querySelectorAll('.report-step'));
+  if (!steps.length) return;
+  const maxStep = steps.length - 1;
+  reportWizardStep = Math.max(0, Math.min(step, maxStep));
+
+  steps.forEach(el => {
+    const isActive = parseInt(el.dataset.step, 10) === reportWizardStep;
+    el.classList.toggle('active', isActive);
+    el.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+  });
+
+  document.querySelectorAll('.wizard-step[data-step-target]').forEach(btn => {
+    const btnStep = parseInt(btn.dataset.stepTarget, 10);
+    btn.classList.toggle('active', btnStep === reportWizardStep);
+    btn.classList.toggle('done', btnStep < reportWizardStep);
+  });
+
+  const prevBtn = document.getElementById('wizardPrevBtn');
+  const nextBtn = document.getElementById('wizardNextBtn');
+  if (prevBtn) prevBtn.style.visibility = reportWizardStep === 0 ? 'hidden' : 'visible';
+  if (nextBtn) nextBtn.style.display = reportWizardStep === maxStep ? 'none' : 'inline-flex';
+
+  if (reportWizardStep === 0 && pickerMap) {
+    setTimeout(() => pickerMap.invalidateSize(), 80);
+  }
+
+  if (opts.scroll !== false) {
+    document.querySelector('.form-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function validateReportStep(step) {
+  const stepEl = document.querySelector(`.report-step[data-step="${step}"]`);
+  if (!stepEl) return true;
+  const fields = Array.from(stepEl.querySelectorAll('input, select, textarea'));
+  let firstInvalid = null;
+
+  fields.forEach(el => {
+    if (el.disabled || el.type === 'hidden') return;
+    const isRequired = el.required || el.hasAttribute('required');
+    let invalid = false;
+
+    if (isRequired) {
+      if (el.type === 'checkbox') invalid = !el.checked;
+      else if (el.type === 'file') invalid = !(el.files && el.files.length);
+      else invalid = !String(el.value || '').trim();
+    }
+
+    if (!invalid && el.type === 'email' && el.value.trim()) {
+      invalid = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+    }
+
+    el.style.borderColor = invalid ? '#F28482' : '';
+    if (invalid && !firstInvalid) firstInvalid = el;
+  });
+
+  if (step === 0) {
+    const lat = parseFloat(document.getElementById('lat')?.value);
+    const lng = parseFloat(document.getElementById('lng')?.value);
+    const lokasiVal = document.getElementById('lokasiInsiden')?.value || '';
+    if (isOtherLocationValue(lokasiVal) && (isNaN(lat) || isNaN(lng))) {
+      showToast('Klik titik lokasi pada peta untuk pilihan Sekitar Kampus.', 'error');
+      document.getElementById('pickerMapContainer')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
+  }
+
+  if (firstInvalid) {
+    showToast('Lengkapi bagian ini dulu sebelum lanjut.', 'error');
+    firstInvalid.focus({ preventScroll: true });
+    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return false;
+  }
+
+  return true;
 }
 
 async function handleSubmit(e) {
@@ -545,24 +654,36 @@ async function handleSubmit(e) {
   const required = [
     "emailIts",
     "peranKampus",
+    "jenisKelamin",
     "lokasiInsiden",
     "lokasiDeskripsi",
     "pencahayaan",
     "kepadatan",
     "cctv",
     "petugasKeamanan",
+    "vegetasi",
     "waktuInsiden",
     "skorNyaman",
     "skorRawan",
   ];
   let valid = true;
+  let firstInvalid = null;
   required.forEach(id => {
     const el = document.getElementById(id);
-    if (!el.value.trim()) { el.style.borderColor = '#F28482'; valid = false; }
+    if (!el.value.trim()) {
+      el.style.borderColor = '#F28482';
+      valid = false;
+      if (!firstInvalid) firstInvalid = el;
+    }
     else el.style.borderColor = '';
   });
   if (!document.getElementById('consent').checked) { showToast('Harap setujui pernyataan persetujuan.', 'error'); return; }
-  if (!valid) { showToast('Harap lengkapi semua field wajib.', 'error'); return; }
+  if (!valid) {
+    const stepEl = firstInvalid?.closest('.report-step');
+    if (stepEl?.dataset?.step) showReportStep(parseInt(stepEl.dataset.step, 10));
+    showToast('Harap lengkapi semua field wajib.', 'error');
+    return;
+  }
 
   const lat = parseFloat(document.getElementById('lat').value);
   const lng = parseFloat(document.getElementById('lng').value);
@@ -619,6 +740,7 @@ async function handleSubmit(e) {
     if (result.success) {
       e.target.reset();
       clearPin();
+      showReportStep(0);
       await fetchReports();
       await fetchStats();
 
@@ -2710,14 +2832,14 @@ window.addEventListener('resize', () => {
 
   /* â”€â”€ Progress bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   const REQUIRED_IDS = [
-    'emailIts', 'peranKampus', 'lokasiInsiden', 'lokasiDeskripsi',
-    'pencahayaan', 'kepadatan', 'cctv', 'petugasKeamanan', 'waktuInsiden',
-    'skorNyaman', 'skorRawan', 'kronologi'
+    'emailIts', 'peranKampus', 'jenisKelamin', 'lokasiInsiden', 'lokasiDeskripsi',
+    'pencahayaan', 'kepadatan', 'cctv', 'petugasKeamanan', 'vegetasi', 'waktuInsiden',
+    'skorNyaman', 'skorRawan'
   ];
   const OPTIONAL_IDS = [
-    'jenisKelamin', 'vegetasi', 'hariRawan', 'alasanTidakNyaman',
+    'hariRawan', 'alasanTidakNyaman',
     'pernahHindari', 'orangLain', 'situasiMencurigakan',
-    'kontakPelapor', 'fotoLokasi'
+    'kronologi', 'kontakPelapor', 'fotoLokasi'
   ];
   const ALL_IDS = [...REQUIRED_IDS, ...OPTIONAL_IDS];
 
