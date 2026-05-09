@@ -7,7 +7,7 @@
   <title>ITSafe x Satgas PPK ITS</title>
   <script>
     (function () {
-      const rawVersion = '1.3.8';
+      const rawVersion = '1.3.9';
       const version = rawVersion;
       window.ITSAFE_ASSET_VERSION = version;
       try {
@@ -430,6 +430,13 @@
                     <label>Pilih Pin di Peta <span class="label-opt">klik titik kejadian pada peta</span></label>
                     <div id="pickerMapContainer" class="picker-map-shell">
                       <div id="pickerMap" class="picker-map-canvas"></div>
+                      <div class="picker-map-fallback" id="pickerMapFallback" style="display:none;">
+                        <i class="fas fa-map-location-dot"></i>
+                        <span>Peta belum termuat. Lokasi tetap bisa dipilih dari daftar di bawah.</span>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="reloadPickerMap()">
+                          <i class="fas fa-rotate-right"></i> Muat Ulang Peta
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <div class="form-group full-width report-map-toggles" style="margin-top: .5rem; margin-bottom: 0.5rem;">

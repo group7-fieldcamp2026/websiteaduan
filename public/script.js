@@ -387,6 +387,7 @@ async function fetchReports() {
     updateLayerCounts();
     if (leafletMap) renderLeafletMap();
     renderLaporanChart();
+    updateStatsFromLoadedReports();
   } catch (e) {
     console.error('Gagal ambil data laporan:', e);
   }
@@ -397,12 +398,43 @@ async function fetchStats() {
   try {
     const res = await fetch(`${API_BASE}/reports/stats`);
     const data = await res.json();
-    document.getElementById('totalLaporan').textContent = data.total || 0;
-    document.getElementById('bulanIni').textContent = data.bulan_ini || 0;
-    document.getElementById('terverifikasi').textContent = data.terverifikasi || 0;
+    const fallbackStats = getReportStatsFallback();
+    const total = Number(data.total || 0);
+    const bulanIni = Number(data.bulan_ini || 0);
+    const terverifikasi = Number(data.terverifikasi || 0);
+    document.getElementById('totalLaporan').textContent = total || fallbackStats.total;
+    document.getElementById('bulanIni').textContent = bulanIni || fallbackStats.bulanIni;
+    document.getElementById('terverifikasi').textContent = terverifikasi || fallbackStats.terverifikasi;
   } catch (e) {
     console.error('Gagal ambil statistik:', e);
+    const fallbackStats = getReportStatsFallback();
+    document.getElementById('totalLaporan').textContent = fallbackStats.total;
+    document.getElementById('bulanIni').textContent = fallbackStats.bulanIni;
+    document.getElementById('terverifikasi').textContent = fallbackStats.terverifikasi;
   }
+}
+
+function getReportStatsFallback() {
+  const now = new Date();
+  return {
+    total: reports.length,
+    bulanIni: reports.filter(r => {
+      const d = r.createdAt ? new Date(r.createdAt) : null;
+      return d && !isNaN(d) && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).length,
+    terverifikasi: reports.filter(r => (r.status || '').toLowerCase() === 'valid' || (r.status || '').toLowerCase() === 'terverifikasi').length,
+  };
+}
+
+function updateStatsFromLoadedReports() {
+  const totalEl = document.getElementById('totalLaporan');
+  const bulanEl = document.getElementById('bulanIni');
+  const verifiedEl = document.getElementById('terverifikasi');
+  if (!totalEl || !reports.length) return;
+  const fallbackStats = getReportStatsFallback();
+  if ((totalEl.textContent || '0').trim() === '0') totalEl.textContent = fallbackStats.total;
+  if (bulanEl && (bulanEl.textContent || '0').trim() === '0') bulanEl.textContent = fallbackStats.bulanIni;
+  if (verifiedEl && (verifiedEl.textContent || '0').trim() === '0') verifiedEl.textContent = fallbackStats.terverifikasi;
 }
 
 // Ambil lokasi titik pengaduan dari API
@@ -553,7 +585,7 @@ function initReportWizard() {
   });
 
   document.getElementById('wizardNextBtn')?.addEventListener('click', () => {
-    if (validateReportStep(reportWizardStep)) showReportStep(reportWizardStep + 1);
+    showReportStep(reportWizardStep + 1);
   });
 
   document.querySelectorAll('.wizard-step[data-step-target]').forEach(btn => {
@@ -564,7 +596,7 @@ function initReportWizard() {
         showReportStep(target);
         return;
       }
-      if (validateReportStep(reportWizardStep)) showReportStep(reportWizardStep + 1);
+      showReportStep(target);
     });
   });
 
@@ -594,12 +626,50 @@ function showReportStep(step, opts = {}) {
   if (prevBtn) prevBtn.style.visibility = reportWizardStep === 0 ? 'hidden' : 'visible';
   if (nextBtn) nextBtn.style.display = reportWizardStep === maxStep ? 'none' : 'inline-flex';
 
-  if (reportWizardStep === 0 && pickerMap) {
-    setTimeout(() => pickerMap.invalidateSize(), 80);
+  if (reportWizardStep === 0) {
+    ensurePickerMapReady();
   }
 
   if (opts.scroll !== false) {
     document.querySelector('.form-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function ensurePickerMapReady() {
+  setTimeout(() => {
+    try {
+      initPickerMap();
+      if (pickerMap) {
+        pickerMap.invalidateSize();
+        setTimeout(() => pickerMap.invalidateSize(), 250);
+        setTimeout(() => pickerMap.invalidateSize(), 900);
+      }
+      setPickerMapFallback(!pickerMap);
+    } catch (err) {
+      console.error('Gagal memuat peta picker:', err);
+      setPickerMapFallback(true);
+    }
+  }, 80);
+}
+
+function setPickerMapFallback(show) {
+  const fallback = document.getElementById('pickerMapFallback');
+  if (fallback) fallback.style.display = show ? 'flex' : 'none';
+}
+
+function reloadPickerMap() {
+  try {
+    if (pickerMap) {
+      pickerMap.invalidateSize();
+      setPickerMapFallback(false);
+      return;
+    }
+    initPickerMap();
+    if (pickerMap) pickerMap.invalidateSize();
+    setPickerMapFallback(!pickerMap);
+  } catch (err) {
+    console.error('Gagal muat ulang peta:', err);
+    setPickerMapFallback(true);
   }
 }
 
@@ -677,13 +747,13 @@ async function handleSubmit(e) {
     }
     else el.style.borderColor = '';
   });
-  if (!document.getElementById('consent').checked) { showToast('Harap setujui pernyataan persetujuan.', 'error'); return; }
   if (!valid) {
     const stepEl = firstInvalid?.closest('.report-step');
     if (stepEl?.dataset?.step) showReportStep(parseInt(stepEl.dataset.step, 10));
     showToast('Harap lengkapi semua field wajib.', 'error');
     return;
   }
+  if (!document.getElementById('consent').checked) { showToast('Harap setujui pernyataan persetujuan.', 'error'); return; }
 
   const lat = parseFloat(document.getElementById('lat').value);
   const lng = parseFloat(document.getElementById('lng').value);
@@ -947,9 +1017,14 @@ function initPickerMap() {
   }
   const container = document.getElementById('pickerMap');
   if (!container) return;
+  if (typeof L === 'undefined' || !L.map) {
+    setPickerMapFallback(true);
+    return;
+  }
 
   const isMobile = itsafeIsMobileLike();
-  pickerMap = L.map('pickerMap', { 
+  try {
+    pickerMap = L.map('pickerMap', { 
     zoomControl: true,
     scrollWheelZoom: false,
     keyboard: false,
@@ -959,7 +1034,13 @@ function initPickerMap() {
     touchZoom: true,
     tapTolerance: 15     // Slightly generous for finger accuracy
   }).setView(ITS, ZOOM);
+  } catch (err) {
+    console.error('Gagal inisialisasi peta picker:', err);
+    setPickerMapFallback(true);
+    return;
+  }
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
+  setPickerMapFallback(false);
   
   fixedLocationLayerPicker = L.layerGroup().addTo(pickerMap);
   renderFixedLocations(fixedLocationLayerPicker);

@@ -2394,6 +2394,7 @@ main {
 
 /* â”€â”€ Picker map di form â”€â”€ */
 .picker-map-shell {
+  position: relative;
   border-radius: 12px;
   overflow: hidden;
   border: 1.5px solid var(--border);
@@ -2405,6 +2406,26 @@ main {
   height: 280px;
   width: 100%;
   background: var(--bg2);
+}
+
+.picker-map-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .7rem;
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-soft);
+  background: rgba(var(--bg-rgb), .92);
+}
+
+.picker-map-fallback i {
+  color: var(--primary);
+  font-size: 1.4rem;
 }
 
 /* â”€â”€ Basemap switcher buttons (Improved) â”€â”€ */
