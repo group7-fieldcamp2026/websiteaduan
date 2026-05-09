@@ -369,10 +369,10 @@
               <!-- ===== KOLOM KIRI: IDENTITAS + LOKASI + KONDISI FISIK ===== -->
               <div class="form-col-panel col-lokasi animate-in">
                 <div class="col-panel-header">
-                  <div class="col-panel-icon"><i class="fas fa-map-location-dot"></i></div>
+                  <div class="col-panel-icon"><i class="fas fa-id-card"></i></div>
                   <div>
-                    <div class="col-panel-title">Identitas dan Lokasi</div>
-                    <div class="col-panel-desc">Siapa kamu dan area mana yang ingin dilaporkan?</div>
+                    <div class="col-panel-title">Identitas</div>
+                    <div class="col-panel-desc">Data dasar pelapor untuk validasi laporan.</div>
                   </div>
                 </div>
 
@@ -401,15 +401,19 @@
                       <option>Perempuan</option>
                     </select>
                   </div>
+                </div><!-- /form-grid identitas -->
+
+                <div class="col-panel-header location-section-header">
+                  <div class="col-panel-icon"><i class="fas fa-map-location-dot"></i></div>
+                  <div>
+                    <div class="col-panel-title">Pilih Lokasi yang Dilaporkan</div>
+                    <div class="col-panel-desc">Tentukan titik kejadian paling akurat agar laporan bisa ditindaklanjuti dengan cepat.</div>
+                  </div>
+                </div>
+
+                <div class="form-grid location-section-grid">
                   <!-- Leaflet mini picker -->
                   <div class="form-group full-width location-picker-block">
-                    <div class="location-block-head">
-                      <div class="location-block-icon"><i class="fas fa-map-location-dot"></i></div>
-                      <div class="location-block-copy">
-                        <div class="location-block-title">PILIH LOKASI YANG DILAPORKAN</div>
-                        <p class="location-block-subtitle">Tentukan titik kejadian paling akurat agar laporan bisa ditindaklanjuti dengan cepat.</p>
-                      </div>
-                    </div>
                     <div class="location-notice location-notice-map">
                       <span class="loc-notice-num">1</span>
                       <i class="fas fa-map-marked-alt"></i>
