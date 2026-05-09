@@ -10240,7 +10240,11 @@ body {
   .hero-cinema2 .hero-bg-shapes::after {
     content: "" !important;
     position: absolute !important;
-    inset: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    bottom: auto !important;
+    height: 200% !important;
     pointer-events: none !important;
     background:
       radial-gradient(circle at 11% 70%, rgba(246,189,96,.16) 0, rgba(246,189,96,.16) 11px, transparent 24px),
@@ -10251,8 +10255,17 @@ body {
       radial-gradient(circle at 93% 50%, rgba(242,132,130,.16) 0, rgba(242,132,130,.16) 13px, transparent 26px),
       radial-gradient(circle at 91% 70%, rgba(132,165,157,.14) 0, rgba(132,165,157,.14) 9px, transparent 22px),
       radial-gradient(circle at 50% 86%, rgba(242,132,130,.14) 0, rgba(242,132,130,.14) 12px, transparent 26px);
+    background-size: 100% 50% !important;
+    background-repeat: repeat-y !important;
     filter: blur(.5px) !important;
     opacity: .95 !important;
+    animation: hc2MobileBubbleRise 18s linear infinite !important;
+    will-change: transform !important;
+  }
+
+  @keyframes hc2MobileBubbleRise {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(0, -50%, 0); }
   }
 
   [data-theme="dark"] .hc2-mobile-mascot .hc2-maskot,
