@@ -1037,6 +1037,39 @@
       border-color: var(--primary);
     }
 
+    .admin-location-hint {
+      display: block;
+      margin-top: .35rem;
+      font-size: .7rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+
+    .report-edit-map-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-bottom: .55rem;
+    }
+
+    .report-edit-map-actions .btn {
+      font-size: .75rem;
+      padding: .4rem .8rem;
+    }
+
+    #reportEditMapContainer {
+      height: 280px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg4);
+    }
+
+    #reportEditMap {
+      width: 100%;
+      height: 100%;
+    }
+
     .report-photo-box {
       background: var(--bg4);
       border: 1px dashed var(--border);
@@ -2269,7 +2302,29 @@
           <!-- Lokasi -->
           <div class="detail-item full">
             <label>Nama Area / Lokasi yang Dilaporkan *</label>
-            <input type="text" id="dLokasi" placeholder="Nama area / departemen" />
+            <select id="dLokasiSelect" onchange="handleReportLocationSelect(this)">
+              <option value="">-- Pilih Fakultas/Departemen --</option>
+            </select>
+            <input type="text" id="dLokasi" placeholder="Nama area / departemen"
+              style="margin-top:.55rem" />
+            <span class="admin-location-hint">Pilih area dari daftar untuk mengisi koordinat otomatis, atau klik peta
+              jika titik laporan perlu dikoreksi manual.</span>
+          </div>
+          <div class="detail-item full">
+            <label>Peta - Koreksi Titik Lokasi</label>
+            <div class="report-edit-map-actions">
+              <button type="button" class="btn btn-outline" onclick="focusReportEditMap()">
+                <i class="fas fa-location-crosshairs"></i> Fokus Titik
+              </button>
+              <button type="button" class="btn btn-outline" onclick="clearReportEditPin()">
+                <i class="fas fa-xmark"></i> Hapus Titik
+              </button>
+            </div>
+            <div id="reportEditMapContainer">
+              <div id="reportEditMap"></div>
+            </div>
+            <div id="reportEditMapStatus" class="admin-location-hint">Klik peta untuk mengganti latitude dan longitude.
+            </div>
           </div>
           <div class="detail-item full">
             <label>Deskripsi Lokasi dan Alasan Pelaporan *</label>
@@ -2770,6 +2825,7 @@
       ensureLocationIconOption('location-dot');
       document.getElementById('lIcon').value = 'location-dot';
       updateIconPreview('location-dot');
+      initReportLocationSelect();
       fetchReports();
       fetchLocations();
       startAutoRefresh();
@@ -3085,6 +3141,7 @@
     function openEdit(id) {
       const r = reports.find(x => x.id === id);
       if (!r) return;
+      initReportLocationSelect();
       editingId = id;
       document.getElementById('modalMode').textContent = 'Edit';
       document.getElementById('dId').textContent = '#' + r.id;
@@ -3093,6 +3150,7 @@
       setSelect('dPeran', r.peran);
       setSelect('dKelamin', r.kelamin);
       document.getElementById('dLokasi').value = r.lokasi || '';
+      syncReportLocationSelect(r.lokasi || '');
       document.getElementById('dLokasiDeskripsi').value = r.lokasiDeskripsi || '';
       document.getElementById('dLat').value = r.lat || '';
       document.getElementById('dLng').value = r.lng || '';
@@ -3120,11 +3178,211 @@
       }
       setSelect('dVerifikasi', r.status);
       openModal('detailModal');
+      setTimeout(() => {
+        initReportEditMap();
+        const lat = parseFloat(r.lat);
+        const lng = parseFloat(r.lng);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setReportEditPin(lat, lng, { pan: true, silent: true });
+        } else {
+          clearReportEditPin({ keepLocation: true, silent: true });
+          focusReportEditMap();
+        }
+      }, 120);
     }
 
     function setSelect(id, val) {
       const el = document.getElementById(id);
       for (let o of el.options) { if (o.value === val || o.text === val) { el.value = o.value; break; } }
+    }
+
+    const REPORT_OTHER_LOCATION_LABEL = 'Sekitar Kampus (Pilih langsung di MAP)';
+    let reportEditMap = null;
+    let reportEditMarker = null;
+
+    function initReportLocationSelect() {
+      const select = document.getElementById('dLokasiSelect');
+      const source = document.getElementById('lokasiInsidenAdminHidden');
+      if (!select || !source || select.dataset.ready === 'true') return;
+
+      select.innerHTML = '<option value="">-- Pilih Fakultas/Departemen --</option>';
+      Array.from(source.children).forEach(child => {
+        if (child.tagName === 'OPTGROUP') {
+          const group = document.createElement('optgroup');
+          group.label = child.label;
+          Array.from(child.children).forEach(opt => {
+            const cloned = document.createElement('option');
+            cloned.value = opt.textContent.trim();
+            cloned.textContent = opt.textContent.trim();
+            if (opt.dataset.lat) cloned.dataset.lat = opt.dataset.lat;
+            if (opt.dataset.lng) cloned.dataset.lng = opt.dataset.lng;
+            group.appendChild(cloned);
+          });
+          select.appendChild(group);
+        }
+      });
+
+      const other = document.createElement('option');
+      other.value = REPORT_OTHER_LOCATION_LABEL;
+      other.textContent = REPORT_OTHER_LOCATION_LABEL;
+      select.appendChild(other);
+      select.dataset.ready = 'true';
+    }
+
+    function getReportLocationOptions() {
+      initReportLocationSelect();
+      return Array.from(document.querySelectorAll('#dLokasiSelect option[data-lat][data-lng]'));
+    }
+
+    function syncReportLocationSelect(name) {
+      const select = document.getElementById('dLokasiSelect');
+      if (!select) return;
+      const normalized = String(name || '').trim().toLowerCase();
+      select.value = '';
+      if (!normalized) return;
+
+      const match = Array.from(select.options).find(opt => {
+        const text = opt.textContent.trim().toLowerCase();
+        return text === normalized || opt.value.trim().toLowerCase() === normalized;
+      });
+
+      if (match) {
+        select.value = match.value;
+      } else if (normalized.includes('sekitar kampus')) {
+        select.value = REPORT_OTHER_LOCATION_LABEL;
+      }
+    }
+
+    function handleReportLocationSelect(select) {
+      const opt = select?.selectedOptions?.[0];
+      if (!opt || !select.value) return;
+
+      document.getElementById('dLokasi').value = opt.textContent.trim();
+      const lat = parseFloat(opt.dataset.lat);
+      const lng = parseFloat(opt.dataset.lng);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        document.getElementById('dLat').value = lat.toFixed(6);
+        document.getElementById('dLng').value = lng.toFixed(6);
+        setReportEditPin(lat, lng, { pan: true, silent: true });
+        showToast('Lokasi dan koordinat laporan diperbarui dari daftar.', 'success');
+      } else {
+        updateReportEditMapStatus('Klik peta untuk menentukan titik lokasi Sekitar Kampus.');
+        focusReportEditMap();
+      }
+    }
+
+    function initReportEditMap() {
+      const el = document.getElementById('reportEditMap');
+      if (!el || typeof L === 'undefined') return;
+      if (reportEditMap) {
+        setTimeout(() => reportEditMap.invalidateSize(), 80);
+        return;
+      }
+
+      reportEditMap = L.map('reportEditMap', {
+        center: [-7.280012, 112.794984],
+        zoom: 15,
+        scrollWheelZoom: false,
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(reportEditMap);
+
+      reportEditMap.on('click', e => {
+        const nearest = findNearestReportLocation(e.latlng.lat, e.latlng.lng);
+        const select = document.getElementById('dLokasiSelect');
+        const lokasiInput = document.getElementById('dLokasi');
+        if (nearest) {
+          select.value = nearest.option.value;
+          lokasiInput.value = nearest.option.textContent.trim();
+        } else if (!lokasiInput.value.trim()) {
+          select.value = REPORT_OTHER_LOCATION_LABEL;
+          lokasiInput.value = REPORT_OTHER_LOCATION_LABEL;
+        }
+        setReportEditPin(e.latlng.lat, e.latlng.lng);
+      });
+
+      getReportLocationOptions().forEach(opt => {
+        const lat = parseFloat(opt.dataset.lat);
+        const lng = parseFloat(opt.dataset.lng);
+        if (isNaN(lat) || isNaN(lng)) return;
+        L.circleMarker([lat, lng], {
+          radius: 5,
+          color: '#84A59D',
+          fillColor: '#84A59D',
+          fillOpacity: .75,
+          weight: 1,
+        }).bindTooltip(opt.textContent.trim(), { direction: 'top' }).addTo(reportEditMap);
+      });
+
+      setTimeout(() => reportEditMap.invalidateSize(), 160);
+    }
+
+    function findNearestReportLocation(lat, lng) {
+      let nearest = null;
+      getReportLocationOptions().forEach(opt => {
+        const optLat = parseFloat(opt.dataset.lat);
+        const optLng = parseFloat(opt.dataset.lng);
+        if (isNaN(optLat) || isNaN(optLng)) return;
+        const distance = getDistanceFromLatLonInMeters(lat, lng, optLat, optLng);
+        if (!nearest || distance < nearest.distance) nearest = { option: opt, distance };
+      });
+      return nearest && nearest.distance <= 50 ? nearest : null;
+    }
+
+    function setReportEditPin(lat, lng, opts = {}) {
+      document.getElementById('dLat').value = Number(lat).toFixed(6);
+      document.getElementById('dLng').value = Number(lng).toFixed(6);
+      updateReportEditMapStatus(`Koordinat laporan: ${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}`);
+
+      initReportEditMap();
+      if (!reportEditMap) return;
+      const latlng = [Number(lat), Number(lng)];
+      if (reportEditMarker) {
+        reportEditMarker.setLatLng(latlng);
+      } else {
+        reportEditMarker = L.marker(latlng, { draggable: true }).addTo(reportEditMap);
+        reportEditMarker.on('dragend', e => {
+          const p = e.target.getLatLng();
+          setReportEditPin(p.lat, p.lng);
+        });
+      }
+      if (opts.pan) reportEditMap.setView(latlng, Math.max(reportEditMap.getZoom(), 17), { animate: false });
+      setTimeout(() => reportEditMap.invalidateSize(), 80);
+      if (!opts.silent) showToast('Koordinat laporan diperbarui.', 'success');
+    }
+
+    function focusReportEditMap() {
+      initReportEditMap();
+      if (!reportEditMap) return;
+      const lat = parseFloat(document.getElementById('dLat').value);
+      const lng = parseFloat(document.getElementById('dLng').value);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        reportEditMap.setView([lat, lng], Math.max(reportEditMap.getZoom(), 17), { animate: false });
+      } else {
+        reportEditMap.setView([-7.280012, 112.794984], 15, { animate: false });
+      }
+      setTimeout(() => reportEditMap.invalidateSize(), 80);
+    }
+
+    function clearReportEditPin(opts = {}) {
+      if (reportEditMarker && reportEditMap) {
+        reportEditMap.removeLayer(reportEditMarker);
+        reportEditMarker = null;
+      }
+      document.getElementById('dLat').value = '';
+      document.getElementById('dLng').value = '';
+      updateReportEditMapStatus('Klik peta untuk mengganti latitude dan longitude.');
+      if (!opts.keepLocation) {
+        document.getElementById('dLokasiSelect').value = '';
+      }
+      if (!opts.silent) showToast('Titik lokasi laporan dihapus.', 'success');
+    }
+
+    function updateReportEditMapStatus(text) {
+      const el = document.getElementById('reportEditMapStatus');
+      if (el) el.textContent = text;
     }
 
     async function saveReport() {
