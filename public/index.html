@@ -209,6 +209,26 @@
       [data-theme="dark"] .hero-cinema2 #particleCanvas {
         display: none !important;
       }
+      .hero-cinema2 .hero-bg-shapes {
+        z-index: 0 !important;
+      }
+      .hero-cinema2 .hero-bg-shapes::after {
+        content: "" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        pointer-events: none !important;
+        background:
+          radial-gradient(circle at 11% 70%, rgba(246,189,96,.16) 0, rgba(246,189,96,.16) 11px, transparent 24px),
+          radial-gradient(circle at 20% 18%, rgba(242,132,130,.13) 0, rgba(242,132,130,.13) 8px, transparent 20px),
+          radial-gradient(circle at 36% 12%, rgba(132,165,157,.15) 0, rgba(132,165,157,.15) 10px, transparent 23px),
+          radial-gradient(circle at 65% 32%, rgba(246,189,96,.12) 0, rgba(246,189,96,.12) 9px, transparent 22px),
+          radial-gradient(circle at 78% 63%, rgba(242,132,130,.16) 0, rgba(242,132,130,.16) 8px, transparent 19px),
+          radial-gradient(circle at 93% 50%, rgba(242,132,130,.16) 0, rgba(242,132,130,.16) 13px, transparent 26px),
+          radial-gradient(circle at 91% 70%, rgba(132,165,157,.14) 0, rgba(132,165,157,.14) 9px, transparent 22px),
+          radial-gradient(circle at 50% 86%, rgba(242,132,130,.14) 0, rgba(242,132,130,.14) 12px, transparent 26px);
+        filter: blur(.5px) !important;
+        opacity: .95 !important;
+      }
       [data-theme="dark"] .hc2-mobile-mascot .hc2-maskot {
         filter: drop-shadow(0 8px 18px rgba(212,135,154,0.3)) !important;
       }
