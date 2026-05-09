@@ -543,6 +543,218 @@ function scrollToForm() {
 function initForm() {
   document.getElementById('reportForm').addEventListener('submit', handleSubmit);
   document.getElementById('lokasiInsiden')?.addEventListener('change', handleLocationPreset);
+  initReportWizard();
+}
+
+function initReportWizard() {
+  const form = document.getElementById('reportForm');
+  if (!form || form.dataset.wizardInit === 'true') return;
+
+  const twoCol = form.querySelector('.form-two-col');
+  const leftPanel = twoCol?.querySelector('.col-lokasi');
+  const subjectivePanel = twoCol?.querySelector('.col-subjektif');
+  const footer = form.querySelector('.form-footer-wrap');
+  if (!twoCol || !leftPanel || !subjectivePanel || !footer) return;
+
+  const leftParts = Array.from(leftPanel.children);
+  const steps = [
+    {
+      key: 'identitas',
+      title: 'Identitas',
+      hint: 'Data dasar',
+      icon: 'fa-id-card',
+      elements: leftParts.slice(0, 2),
+    },
+    {
+      key: 'lokasi',
+      title: 'Lokasi',
+      hint: 'Titik & deskripsi',
+      icon: 'fa-map-location-dot',
+      elements: leftParts.slice(2, 4),
+    },
+    {
+      key: 'kondisi',
+      title: 'Kondisi Fisik',
+      hint: 'Situasi area',
+      icon: 'fa-eye',
+      elements: leftParts.slice(4, 6),
+    },
+    {
+      key: 'subjektif',
+      title: 'Penilaian',
+      hint: 'Rasa aman',
+      icon: 'fa-clipboard-check',
+      elements: [subjectivePanel],
+    },
+  ];
+
+  if (steps.some(step => step.elements.length === 0 || step.elements.some(el => !el))) return;
+
+  form.dataset.wizardInit = 'true';
+  form.classList.add('report-wizard-active');
+
+  steps.forEach((step, idx) => {
+    step.elements.forEach(el => {
+      el.classList.add('report-step-fragment');
+      el.dataset.reportStep = String(idx);
+    });
+  });
+
+  const stepper = document.createElement('div');
+  stepper.className = 'report-wizard-stepper';
+  stepper.setAttribute('aria-label', 'Tahapan pengisian laporan');
+  stepper.innerHTML = steps.map((step, idx) => `
+    <div class="report-step-pill" data-step-pill="${idx}">
+      <span class="report-step-index"><i class="fas ${step.icon}"></i></span>
+      <span class="report-step-copy">
+        <strong>${step.title}</strong>
+        <small>${step.hint}</small>
+      </span>
+    </div>
+  `).join('');
+  twoCol.before(stepper);
+
+  const nav = document.createElement('div');
+  nav.className = 'report-wizard-nav';
+  nav.innerHTML = `
+    <button type="button" class="btn btn-outline report-wizard-prev">
+      <i class="fas fa-arrow-left"></i> Kembali
+    </button>
+    <button type="button" class="btn btn-primary report-wizard-next">
+      Selanjutnya <i class="fas fa-arrow-right"></i>
+    </button>
+  `;
+  footer.before(nav);
+
+  const prevBtn = nav.querySelector('.report-wizard-prev');
+  const nextBtn = nav.querySelector('.report-wizard-next');
+  const pills = Array.from(stepper.querySelectorAll('.report-step-pill'));
+  let activeStep = 0;
+
+  function getStepRequiredFields(stepIndex) {
+    const fields = [];
+    steps[stepIndex].elements.forEach(el => {
+      fields.push(...Array.from(el.querySelectorAll('input[required], select[required], textarea[required]')));
+    });
+    return fields;
+  }
+
+  function clearFieldError(el) {
+    if (!el || !el.classList) return;
+    el.classList.remove('report-field-error');
+    const group = el.closest('.form-group');
+    if (group) group.classList.remove('report-step-error');
+  }
+
+  function markFieldError(el) {
+    if (!el || !el.classList) return;
+    el.classList.add('report-field-error');
+    const group = el.closest('.form-group');
+    if (group) group.classList.add('report-step-error');
+  }
+
+  function fieldHasValue(el) {
+    if (!el) return false;
+    if (el.type === 'checkbox') return el.checked;
+    if (el.type === 'file') return !!(el.files && el.files.length);
+    return !!(el.value && el.value.trim() !== '');
+  }
+
+  function focusField(el) {
+    if (!el) return;
+    const group = el.closest('.form-group');
+    const visibleTarget = group?.querySelector(
+      'input:not(.star-select):not([type="hidden"]), select:not(.star-select), textarea, .level-card, .pill-btn, button'
+    );
+    const target = visibleTarget || el;
+    if (target && typeof target.focus === 'function') {
+      try { target.focus({ preventScroll: true }); } catch (_) { target.focus(); }
+    }
+    group?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function validateStep(stepIndex) {
+    let firstInvalid = null;
+    getStepRequiredFields(stepIndex).forEach(el => {
+      clearFieldError(el);
+      const invalid = !fieldHasValue(el) || (typeof el.checkValidity === 'function' && !el.checkValidity());
+      if (invalid) {
+        markFieldError(el);
+        if (!firstInvalid) firstInvalid = el;
+      }
+    });
+
+    if (steps[stepIndex].key === 'lokasi') {
+      const lokasiVal = document.getElementById('lokasiInsiden')?.value || '';
+      const lat = parseFloat(document.getElementById('lat')?.value || '');
+      const lng = parseFloat(document.getElementById('lng')?.value || '');
+      if (isOtherLocationValue(lokasiVal) && (isNaN(lat) || isNaN(lng))) {
+        const lokasiEl = document.getElementById('lokasiInsiden');
+        markFieldError(lokasiEl);
+        if (!firstInvalid) firstInvalid = lokasiEl;
+        showToast('Pin lokasi wajib diisi jika memilih Sekitar Kampus.', 'error');
+      }
+    }
+
+    if (firstInvalid) {
+      focusField(firstInvalid);
+      if (!(steps[stepIndex].key === 'lokasi' && isOtherLocationValue(document.getElementById('lokasiInsiden')?.value || ''))) {
+        showToast('Lengkapi bagian ini dulu sebelum lanjut.', 'error');
+      }
+      return false;
+    }
+    return true;
+  }
+
+  function showStep(stepIndex, opts = {}) {
+    activeStep = Math.max(0, Math.min(stepIndex, steps.length - 1));
+    const leftActive = activeStep < steps.length - 1;
+
+    leftPanel.hidden = !leftActive;
+    subjectivePanel.hidden = activeStep !== steps.length - 1;
+
+    steps.forEach((step, idx) => {
+      step.elements.forEach(el => {
+        el.hidden = idx !== activeStep;
+        el.classList.toggle('is-report-step-active', idx === activeStep);
+      });
+    });
+
+    pills.forEach((pill, idx) => {
+      pill.classList.toggle('active', idx === activeStep);
+      pill.classList.toggle('done', idx < activeStep);
+    });
+
+    form.classList.toggle('is-final-step', activeStep === steps.length - 1);
+    prevBtn.disabled = activeStep === 0;
+    nextBtn.hidden = activeStep === steps.length - 1;
+
+    if (steps[activeStep].key === 'lokasi') {
+      setTimeout(() => {
+        initPickerMap();
+        if (pickerMap) pickerMap.invalidateSize();
+      }, 80);
+    }
+
+    if (opts.scroll !== false) {
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  prevBtn.addEventListener('click', () => showStep(activeStep - 1));
+  nextBtn.addEventListener('click', () => {
+    if (validateStep(activeStep)) showStep(activeStep + 1);
+  });
+
+  form.addEventListener('input', e => clearFieldError(e.target));
+  form.addEventListener('change', e => clearFieldError(e.target));
+
+  window.itsafeResetReportWizard = () => {
+    form.querySelectorAll('.report-field-error').forEach(el => el.classList.remove('report-field-error'));
+    form.querySelectorAll('.report-step-error').forEach(el => el.classList.remove('report-step-error'));
+    showStep(0, { scroll: false });
+  };
+  showStep(0, { scroll: false });
 }
 
 async function handleSubmit(e) {
@@ -624,6 +836,7 @@ async function handleSubmit(e) {
     if (result.success) {
       e.target.reset();
       clearPin();
+      if (typeof window.itsafeResetReportWizard === 'function') window.itsafeResetReportWizard();
       await fetchReports();
       await fetchStats();
 
