@@ -50,6 +50,11 @@ const BASEMAPS = {
   dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: 'Â© <a href="https://carto.com">CARTO</a>', opt: { subdomains: 'abcd' } },
   topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: 'Â© <a href="https://opentopomap.org">OpenTopoMap</a>', opt: {} },
 };
+const PICKER_TILE_FALLBACKS = [
+  BASEMAPS.osm,
+  { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', attr: 'Â© <a href="https://carto.com">CARTO</a>', opt: { subdomains: 'abcd' } },
+  BASEMAPS.satellite,
+];
 
 const ITS = [-7.2756, 112.7951];
 const ZOOM = 15;
@@ -399,18 +404,49 @@ async function fetchStats() {
     const res = await fetch(`${API_BASE}/reports/stats`);
     const data = await res.json();
     const fallbackStats = getReportStatsFallback();
-    const total = Number(data.total || 0);
-    const bulanIni = Number(data.bulan_ini || 0);
-    const terverifikasi = Number(data.terverifikasi || 0);
+    let total = Number(data.total || 0);
+    let bulanIni = Number(data.bulan_ini || 0);
+    let terverifikasi = Number(data.terverifikasi || 0);
+    if (!total) {
+      const adminStats = await fetchAdminStatsFallback();
+      total = adminStats.total || total;
+      bulanIni = adminStats.bulanIni || bulanIni;
+      terverifikasi = adminStats.terverifikasi || terverifikasi;
+    }
     document.getElementById('totalLaporan').textContent = total || fallbackStats.total;
     document.getElementById('bulanIni').textContent = bulanIni || fallbackStats.bulanIni;
     document.getElementById('terverifikasi').textContent = terverifikasi || fallbackStats.terverifikasi;
   } catch (e) {
     console.error('Gagal ambil statistik:', e);
-    const fallbackStats = getReportStatsFallback();
+    const adminStats = await fetchAdminStatsFallback();
+    const fallbackStats = adminStats.total ? adminStats : getReportStatsFallback();
     document.getElementById('totalLaporan').textContent = fallbackStats.total;
     document.getElementById('bulanIni').textContent = fallbackStats.bulanIni;
     document.getElementById('terverifikasi').textContent = fallbackStats.terverifikasi;
+  }
+}
+
+async function fetchAdminStatsFallback() {
+  try {
+    const res = await fetch(`${API_BASE}/reports/admin`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) return { total: 0, bulanIni: 0, terverifikasi: 0 };
+    const now = new Date();
+    return {
+      total: data.length,
+      bulanIni: data.filter(r => {
+        const d = r.created_at ? new Date(r.created_at) : null;
+        return d && !isNaN(d) && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }).length,
+      terverifikasi: data.filter(r => {
+        const status = (r.status || '').toLowerCase();
+        return status === 'resolved' || status === 'verified' || status === 'valid' || status === 'terverifikasi';
+      }).length,
+    };
+  } catch (err) {
+    console.error('Gagal ambil fallback statistik admin:', err);
+    return { total: 0, bulanIni: 0, terverifikasi: 0 };
   }
 }
 
@@ -422,7 +458,10 @@ function getReportStatsFallback() {
       const d = r.createdAt ? new Date(r.createdAt) : null;
       return d && !isNaN(d) && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     }).length,
-    terverifikasi: reports.filter(r => (r.status || '').toLowerCase() === 'valid' || (r.status || '').toLowerCase() === 'terverifikasi').length,
+    terverifikasi: reports.filter(r => {
+      const status = (r.status || '').toLowerCase();
+      return status === 'resolved' || status === 'verified' || status === 'valid' || status === 'terverifikasi';
+    }).length,
   };
 }
 
@@ -573,22 +612,20 @@ function initForm() {
   initReportWizard();
 }
 
-let reportWizardStep = 0;
+let reportWizardStep = window.ITSAFE_REPORT_WIZARD_STEP || 0;
 
 function initReportWizard() {
   const form = document.getElementById('reportForm');
   if (!form || form.dataset.wizardReady === '1') return;
   form.dataset.wizardReady = '1';
 
-  document.getElementById('wizardPrevBtn')?.addEventListener('click', () => {
-    showReportStep(reportWizardStep - 1);
-  });
-
-  document.getElementById('wizardNextBtn')?.addEventListener('click', () => {
-    showReportStep(reportWizardStep + 1);
-  });
+  const prevBtn = document.getElementById('wizardPrevBtn');
+  const nextBtn = document.getElementById('wizardNextBtn');
+  if (prevBtn && !prevBtn.getAttribute('onclick')) prevBtn.addEventListener('click', itsafeWizardPrev);
+  if (nextBtn && !nextBtn.getAttribute('onclick')) nextBtn.addEventListener('click', itsafeWizardNext);
 
   document.querySelectorAll('.wizard-step[data-step-target]').forEach(btn => {
+    if (btn.getAttribute('onclick')) return;
     btn.addEventListener('click', () => {
       const target = parseInt(btn.dataset.stepTarget, 10);
       if (!Number.isFinite(target) || target === reportWizardStep) return;
@@ -603,11 +640,30 @@ function initReportWizard() {
   showReportStep(0, { scroll: false });
 }
 
+function itsafeWizardNext() {
+  showReportStep((window.ITSAFE_REPORT_WIZARD_STEP || reportWizardStep || 0) + 1);
+}
+
+function itsafeWizardPrev() {
+  showReportStep((window.ITSAFE_REPORT_WIZARD_STEP || reportWizardStep || 0) - 1);
+}
+
+function itsafeWizardGoto(step) {
+  showReportStep(step);
+}
+
+window.itsafeWizardNext = itsafeWizardNext;
+window.itsafeWizardPrev = itsafeWizardPrev;
+window.itsafeWizardGoto = itsafeWizardGoto;
+window.showReportStep = showReportStep;
+window.reloadPickerMap = reloadPickerMap;
+
 function showReportStep(step, opts = {}) {
   const steps = Array.from(document.querySelectorAll('.report-step'));
   if (!steps.length) return;
   const maxStep = steps.length - 1;
   reportWizardStep = Math.max(0, Math.min(step, maxStep));
+  window.ITSAFE_REPORT_WIZARD_STEP = reportWizardStep;
 
   steps.forEach(el => {
     const isActive = parseInt(el.dataset.step, 10) === reportWizardStep;
@@ -660,12 +716,19 @@ function setPickerMapFallback(show) {
 function reloadPickerMap() {
   try {
     if (pickerMap) {
+      pickerMap.remove();
+      pickerMap = null;
+      pickerMarker = null;
+      fixedLocationLayerPicker = null;
+      boundaryLayerPicker = null;
+    }
+    initPickerMap({ force: true });
+    if (pickerMap) {
       pickerMap.invalidateSize();
+      setTimeout(() => pickerMap.invalidateSize(), 250);
       setPickerMapFallback(false);
       return;
     }
-    initPickerMap();
-    if (pickerMap) pickerMap.invalidateSize();
     setPickerMapFallback(!pickerMap);
   } catch (err) {
     console.error('Gagal muat ulang peta:', err);
@@ -1010,14 +1073,20 @@ function schedulePickerMapInit() {
   }
 }
 
-function initPickerMap() {
+function initPickerMap(opts = {}) {
   if (pickerMap) {
     setTimeout(() => pickerMap.invalidateSize(), 300);
     return;
   }
   const container = document.getElementById('pickerMap');
   if (!container) return;
+  const rect = container.getBoundingClientRect();
+  if (!opts.force && (rect.width < 80 || rect.height < 80)) {
+    setTimeout(() => initPickerMap({ force: true }), 160);
+    return;
+  }
   if (typeof L === 'undefined' || !L.map) {
+    loadLeafletRuntimeFallback();
     setPickerMapFallback(true);
     return;
   }
@@ -1039,7 +1108,7 @@ function initPickerMap() {
     setPickerMapFallback(true);
     return;
   }
-  L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
+  addPickerTileLayer();
   setPickerMapFallback(false);
   
   fixedLocationLayerPicker = L.layerGroup().addTo(pickerMap);
@@ -1064,6 +1133,57 @@ function initPickerMap() {
   // Multiple invalidateSize attempts to fix grey box browser quirks
   setTimeout(() => pickerMap.invalidateSize(), 500);
   setTimeout(() => pickerMap.invalidateSize(), 1500);
+}
+
+function loadLeafletRuntimeFallback() {
+  if (window._leafletRuntimeFallbackLoading || typeof L !== 'undefined') return;
+  window._leafletRuntimeFallbackLoading = true;
+  if (!document.querySelector('link[data-leaflet-fallback]')) {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    css.dataset.leafletFallback = 'true';
+    document.head.appendChild(css);
+  }
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  script.onload = () => {
+    window._leafletRuntimeFallbackLoading = false;
+    reloadPickerMap();
+  };
+  script.onerror = () => {
+    window._leafletRuntimeFallbackLoading = false;
+    setPickerMapFallback(true);
+  };
+  document.head.appendChild(script);
+}
+
+function addPickerTileLayer(index = 0) {
+  if (!pickerMap || typeof L === 'undefined') return;
+  const cfg = PICKER_TILE_FALLBACKS[index] || PICKER_TILE_FALLBACKS[0];
+  let loaded = 0;
+  let errors = 0;
+  const layer = L.tileLayer(cfg.url, { attribution: cfg.attr, ...(cfg.opt || {}) }).addTo(pickerMap);
+  layer.on('tileload', () => {
+    loaded++;
+    setPickerMapFallback(false);
+  });
+  layer.on('tileerror', () => {
+    errors++;
+    if (errors >= 3 && loaded === 0 && index < PICKER_TILE_FALLBACKS.length - 1) {
+      pickerMap.removeLayer(layer);
+      addPickerTileLayer(index + 1);
+    }
+  });
+  setTimeout(() => {
+    if (!pickerMap || !pickerMap.hasLayer(layer)) return;
+    if (loaded === 0 && index < PICKER_TILE_FALLBACKS.length - 1) {
+      pickerMap.removeLayer(layer);
+      addPickerTileLayer(index + 1);
+    } else if (loaded === 0) {
+      setPickerMapFallback(true);
+    }
+  }, 4500);
 }
 
 function setPin(lat, lng, opts = {}) {

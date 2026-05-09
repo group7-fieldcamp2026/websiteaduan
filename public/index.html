@@ -7,7 +7,7 @@
   <title>ITSafe x Satgas PPK ITS</title>
   <script>
     (function () {
-      const rawVersion = '1.3.9';
+      const rawVersion = '1.4.0';
       const version = rawVersion;
       window.ITSAFE_ASSET_VERSION = version;
       try {
@@ -365,16 +365,16 @@
         <div class="form-card">
           <form id="reportForm" novalidate>
             <div class="form-wizard" aria-label="Tahapan pengisian laporan">
-              <button type="button" class="wizard-step active" data-step-target="0">
+              <button type="button" class="wizard-step active" data-step-target="0" onclick="itsafeWizardGoto(0)">
                 <span>1</span> Identitas & Lokasi
               </button>
-              <button type="button" class="wizard-step" data-step-target="1">
+              <button type="button" class="wizard-step" data-step-target="1" onclick="itsafeWizardGoto(1)">
                 <span>2</span> Kondisi Fisik
               </button>
-              <button type="button" class="wizard-step" data-step-target="2">
+              <button type="button" class="wizard-step" data-step-target="2" onclick="itsafeWizardGoto(2)">
                 <span>3</span> Penilaian
               </button>
-              <button type="button" class="wizard-step" data-step-target="3">
+              <button type="button" class="wizard-step" data-step-target="3" onclick="itsafeWizardGoto(3)">
                 <span>4</span> Kirim
               </button>
             </div>
@@ -808,16 +808,68 @@
               </div>
             </div>
             <div class="form-wizard-actions">
-              <button type="button" class="btn btn-outline" id="wizardPrevBtn">
+              <button type="button" class="btn btn-outline" id="wizardPrevBtn" onclick="itsafeWizardPrev()">
                 <i class="fas fa-arrow-left"></i> Sebelumnya
               </button>
-              <button type="button" class="btn btn-primary" id="wizardNextBtn">
+              <button type="button" class="btn btn-primary" id="wizardNextBtn" onclick="itsafeWizardNext()">
                 Berikutnya <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </form>
         </div>
       </div>
+
+      <script>
+        (function () {
+          function localWizardStep(step, opts) {
+            const steps = Array.from(document.querySelectorAll('.report-step'));
+            if (!steps.length) return;
+            const maxStep = steps.length - 1;
+            const activeStep = Math.max(0, Math.min(Number(step) || 0, maxStep));
+            window.ITSAFE_REPORT_WIZARD_STEP = activeStep;
+
+            steps.forEach(el => {
+              const isActive = parseInt(el.dataset.step, 10) === activeStep;
+              el.classList.toggle('active', isActive);
+              el.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+            });
+
+            document.querySelectorAll('.wizard-step[data-step-target]').forEach(btn => {
+              const btnStep = parseInt(btn.dataset.stepTarget, 10);
+              btn.classList.toggle('active', btnStep === activeStep);
+              btn.classList.toggle('done', btnStep < activeStep);
+            });
+
+            const prevBtn = document.getElementById('wizardPrevBtn');
+            const nextBtn = document.getElementById('wizardNextBtn');
+            if (prevBtn) prevBtn.style.visibility = activeStep === 0 ? 'hidden' : 'visible';
+            if (nextBtn) nextBtn.style.display = activeStep === maxStep ? 'none' : 'inline-flex';
+
+            if (activeStep === 0 && typeof window.reloadPickerMap === 'function') {
+              setTimeout(() => window.reloadPickerMap(), 120);
+            }
+            if (!opts || opts.scroll !== false) {
+              document.querySelector('.form-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+
+          window.itsafeWizardGoto = window.itsafeWizardGoto || function (step) {
+            localWizardStep(step);
+          };
+          window.itsafeWizardNext = window.itsafeWizardNext || function () {
+            localWizardStep((window.ITSAFE_REPORT_WIZARD_STEP || 0) + 1);
+          };
+          window.itsafeWizardPrev = window.itsafeWizardPrev || function () {
+            localWizardStep((window.ITSAFE_REPORT_WIZARD_STEP || 0) - 1);
+          };
+
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => localWizardStep(window.ITSAFE_REPORT_WIZARD_STEP || 0, { scroll: false }));
+          } else {
+            localWizardStep(window.ITSAFE_REPORT_WIZARD_STEP || 0, { scroll: false });
+          }
+        })();
+      </script>
 
       <!-- Info: data hanya untuk admin -->
       <div class="section-container">

@@ -346,7 +346,7 @@ class ReportController extends Controller
             'foto_path', 'status', 'created_at'
         )->whereNotNull('latitude')
           ->whereNotNull('longitude')
-          ->where('status', 'resolved')
+          ->whereIn('status', ['resolved', 'verified'])
           ->get();
 
         return response()->json($reports);
@@ -414,8 +414,10 @@ class ReportController extends Controller
     public function stats()
     {
         $total = Report::count();
-        $bulanIni = Report::whereMonth('created_at', now()->month)->count();
-        $terverifikasi = Report::where('status', 'resolved')->count();
+        $bulanIni = Report::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+        $terverifikasi = Report::whereIn('status', ['resolved', 'verified'])->count();
 
         return response()->json([
             'total'        => $total,
