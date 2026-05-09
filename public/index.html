@@ -178,6 +178,41 @@
       .hero-badge { margin-bottom: 0 !important; }
       .hc2-h1 { margin-top: 0.4rem !important; }
 
+      .hc2-mobile-mascot .hc2-mobile-chip-safe,
+      .hc2-mobile-mascot .hc2-mobile-chip-anon,
+      .hc2-mobile-mascot .hc2-mobile-chip-time {
+        z-index: 20 !important;
+        animation: none !important;
+      }
+      .hc2-mobile-mascot .hc2-mobile-chip-time {
+        top: .85rem !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: auto !important;
+        transform: translateX(-50%) !important;
+      }
+      .hc2-mobile-mascot .hc2-mobile-chip-safe {
+        top: auto !important;
+        left: 1.75rem !important;
+        right: auto !important;
+        bottom: 3rem !important;
+        transform: none !important;
+      }
+      .hc2-mobile-mascot .hc2-mobile-chip-anon {
+        top: 56% !important;
+        left: auto !important;
+        right: .35rem !important;
+        bottom: auto !important;
+        transform: none !important;
+      }
+      [data-theme="dark"] .hero-cinema2 .shape,
+      [data-theme="dark"] .hero-cinema2 #particleCanvas {
+        display: none !important;
+      }
+      [data-theme="dark"] .hc2-mobile-mascot .hc2-maskot {
+        filter: drop-shadow(0 8px 18px rgba(212,135,154,0.3)) !important;
+      }
+
       html.perf-lite .hc2-mobile-mascot {
         height: 210px !important;
         margin: 0 auto -.75rem !important;
