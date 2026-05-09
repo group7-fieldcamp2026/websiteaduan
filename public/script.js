@@ -53,6 +53,11 @@ const BASEMAPS = {
 
 const ITS = [-7.2756, 112.7951];
 const ZOOM = 15;
+const PICKER_INITIAL_ZOOM = 14;
+const PICKER_INITIAL_BOUNDS = [
+  [-7.2872, 112.7887],
+  [-7.2708, 112.8024],
+];
 const QR_URL = 'https://itsafe.geowebgis.id/';
 const OTHER_LOCATION_LABEL = 'Sekitar Kampus';
 const NEARBY_LOCATION_RADIUS_METERS = 50;
@@ -836,11 +841,15 @@ function initPickerMap() {
     tap: true,
     touchZoom: true,
     tapTolerance: 15     // Slightly generous for finger accuracy
-  }).setView(ITS, ZOOM);
+  }).setView(ITS, PICKER_INITIAL_ZOOM);
+  pickerMap.on('dragstart zoomstart', () => {
+    if (!pickerMap.__suppressInitialFitFlag) pickerMap.__userAdjustedPickerView = true;
+  });
   L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(pickerMap);
   
   fixedLocationLayerPicker = L.layerGroup().addTo(pickerMap);
   renderFixedLocations(fixedLocationLayerPicker);
+  fitPickerInitialView({ force: true });
   loadBoundaryLayer(pickerMap, 'picker');
 
   if (isMobile) {
@@ -851,6 +860,7 @@ function initPickerMap() {
   pickerMap.on('click', e => {
     // Save scroll position before setPin (mobile browsers sometimes jump on DOM change)
     const savedScroll = window.scrollY || document.documentElement.scrollTop;
+    pickerMap.__userAdjustedPickerView = true;
     setPin(e.latlng.lat, e.latlng.lng, { fromPreset: false });
     // Restore instantly after any DOM/focus change triggered by setPin
     requestAnimationFrame(() => {
@@ -859,8 +869,54 @@ function initPickerMap() {
   });
 
   // Multiple invalidateSize attempts to fix grey box browser quirks
-  setTimeout(() => pickerMap.invalidateSize(), 500);
-  setTimeout(() => pickerMap.invalidateSize(), 1500);
+  setTimeout(() => {
+    pickerMap.invalidateSize();
+    fitPickerInitialView();
+  }, 500);
+  setTimeout(() => {
+    pickerMap.invalidateSize();
+    fitPickerInitialView();
+  }, 1500);
+}
+
+function getPickerOverviewBounds() {
+  if (typeof L === 'undefined') return null;
+  const bounds = L.latLngBounds(PICKER_INITIAL_BOUNDS);
+
+  if (boundaryLayerPicker?.getBounds) {
+    const boundaryBounds = boundaryLayerPicker.getBounds();
+    if (boundaryBounds?.isValid?.()) bounds.extend(boundaryBounds);
+  }
+
+  getPresetLocationOptions().forEach(item => {
+    bounds.extend([item.lat, item.lng]);
+  });
+
+  LOCATIONS.forEach(loc => {
+    const lat = parseFloat(loc.lat);
+    const lng = parseFloat(loc.lng);
+    if (Number.isFinite(lat) && Number.isFinite(lng)) bounds.extend([lat, lng]);
+  });
+
+  return bounds.isValid?.() ? bounds : null;
+}
+
+function fitPickerInitialView(opts = {}) {
+  if (!pickerMap) return false;
+  if (!opts.force && pickerMap.__userAdjustedPickerView) return false;
+  const bounds = getPickerOverviewBounds();
+  if (!bounds) return false;
+
+  pickerMap.__suppressInitialFitFlag = true;
+  pickerMap.fitBounds(bounds, {
+    padding: [18, 18],
+    maxZoom: PICKER_INITIAL_ZOOM,
+    animate: false,
+  });
+  setTimeout(() => {
+    if (pickerMap) pickerMap.__suppressInitialFitFlag = false;
+  }, 120);
+  return true;
 }
 
 function setPin(lat, lng, opts = {}) {
@@ -893,6 +949,7 @@ function setPin(lat, lng, opts = {}) {
     })
   }).addTo(pickerMap);
   if (shouldCenter) {
+    pickerMap.__userAdjustedPickerView = true;
     pickerMap.setView([lat, lng], Math.max(pickerMap.getZoom(), 16), { animate: false });
   }
 
@@ -1276,15 +1333,19 @@ async function loadBoundaryLayer(map, target) {
       style: { color: '#EF4444', weight: 3, fill: true, fillOpacity: 0.08, dashArray: '6 4' }
     }).addTo(map);
     layer.bringToFront();
+    if (target === 'main') boundaryLayerMain = layer;
+    if (target === 'picker') boundaryLayerPicker = layer;
     const bounds = layer.getBounds?.();
     if (bounds && bounds.isValid && bounds.isValid()) {
       if (!map.__boundaryFitted) {
-        map.fitBounds(bounds, { padding: [20, 20] });
-        map.__boundaryFitted = true;
+        if (target === 'picker') {
+          map.__boundaryFitted = fitPickerInitialView();
+        } else {
+          map.fitBounds(bounds, { padding: [20, 20] });
+          map.__boundaryFitted = true;
+        }
       }
     }
-    if (target === 'main') boundaryLayerMain = layer;
-    if (target === 'picker') boundaryLayerPicker = layer;
   } catch (e) {
     console.warn('[boundary] load failed', e);
   }
