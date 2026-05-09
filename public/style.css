@@ -7159,9 +7159,23 @@ html.perf-lite {
   scroll-behavior: auto !important;
 }
 
-html.perf-lite #globalBgCanvas,
 html.perf-lite #particleCanvas {
   display: none !important;
+}
+
+html.perf-lite #globalBgCanvas {
+  display: block !important;
+}
+
+@media (max-width: 820px) {
+  html.perf-lite #globalBgCanvas {
+    z-index: 0 !important;
+  }
+
+  html.perf-lite main {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 html.perf-lite body,

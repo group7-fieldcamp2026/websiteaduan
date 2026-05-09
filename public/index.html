@@ -2401,10 +2401,7 @@
       function initGlobalBubbles() {
         const canvas = document.getElementById('globalBgCanvas');
         if (!canvas) return;
-        if (ITS_PERF.lite) {
-          canvas.remove();
-          return;
-        }
+        const staticLite = ITS_PERF.lite;
         const ctx = canvas.getContext('2d');
 
         function resize() {
@@ -2412,7 +2409,6 @@
           canvas.height = window.innerHeight;
         }
         resize();
-        window.addEventListener('resize', resize);
 
         // Bubble palette: soft ITSafe theme colors
         const palette = [
@@ -2424,19 +2420,19 @@
           'rgba(247,237,226,',   // cream (subtle)
         ];
 
-        const N = 30;
+        const N = staticLite ? 24 : 30;
         const bubbles = Array.from({ length: N }, () => {
-          const r = 3 + Math.random() * 13;   // smaller: was 6–34
+          const r = staticLite ? 5 + Math.random() * 17 : 3 + Math.random() * 13;
           return {
-            x: Math.random() * window.innerWidth,
-            y: window.innerHeight + r + Math.random() * window.innerHeight,
+            x: Math.random() * canvas.width,
+            y: staticLite ? Math.random() * canvas.height : canvas.height + r + Math.random() * canvas.height,
             r,
             speed: 0.2 + Math.random() * 0.5,
             wobble: Math.random() * Math.PI * 2,
             wobbleSpeed: 0.008 + Math.random() * 0.015,
             wobbleAmp: 8 + Math.random() * 20,
             color: palette[Math.floor(Math.random() * palette.length)],
-            alpha: 0.04 + Math.random() * 0.09,
+            alpha: staticLite ? 0.08 + Math.random() * 0.11 : 0.04 + Math.random() * 0.09,
           };
         });
 
@@ -2456,6 +2452,26 @@
           ctx.lineWidth = 0.5;
           ctx.stroke();
         }
+
+        function drawStaticBubbles() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          bubbles.forEach(b => drawBubble(b));
+        }
+
+        if (staticLite) {
+          drawStaticBubbles();
+          window.addEventListener('resize', () => {
+            resize();
+            bubbles.forEach(b => {
+              b.x = Math.random() * canvas.width;
+              b.y = Math.random() * canvas.height;
+            });
+            drawStaticBubbles();
+          });
+          return;
+        }
+
+        window.addEventListener('resize', resize);
 
         let frame = 0;
         function animate() {
