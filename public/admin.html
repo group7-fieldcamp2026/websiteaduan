@@ -4619,10 +4619,10 @@
 
     function getExportConditionFlags(r) {
       return {
-        area_gelap: r.pencahayaan === 'Gelap' ? 1 : 0,
-        area_sepi: (r.kepadatan === 'Sepi' || r.kepadatan === 'Sangat sepi') ? 1 : 0,
-        tanpa_cctv: r.cctv === 'Tidak ada' ? 1 : 0,
-        minim_petugas: (r.petugas === 'Jarang ada' || r.petugas === 'Tidak pernah ada') ? 1 : 0,
+        area_gelap: r.pencahayaan === 'Gelap' ? 1 : null,
+        area_sepi: (r.kepadatan === 'Sepi' || r.kepadatan === 'Sangat sepi') ? 1 : null,
+        tanpa_cctv: r.cctv === 'Tidak ada' ? 1 : null,
+        minim_petugas: (r.petugas === 'Jarang ada' || r.petugas === 'Tidak pernah ada') ? 1 : null,
       };
     }
 
