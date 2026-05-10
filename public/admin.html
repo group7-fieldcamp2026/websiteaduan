@@ -3040,15 +3040,15 @@
       document.getElementById('dBulan').textContent = bulan;
 
       // Chart skor kerawanan
-      const sangatRawan = reports.filter(r => parseInt(r.skorRawan, 10) >= 4).length;
-      const rawan = reports.filter(r => parseInt(r.skorRawan, 10) === 3).length;
-      const kurangRawan = reports.filter(r => parseInt(r.skorRawan, 10) <= 2 && !isNaN(parseInt(r.skorRawan, 10))).length;
+      const sangatRawan = reports.filter(r => getAdminRiskTotalAssessment(r).angka === 3).length;
+      const rawan = reports.filter(r => getAdminRiskTotalAssessment(r).angka === 2).length;
+      const kurangRawan = reports.filter(r => getAdminRiskTotalAssessment(r).angka === 1).length;
 
       const maxS = Math.max(sangatRawan, rawan, kurangRawan, 1);
       document.getElementById('chartJenis').innerHTML = `
-    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Sangat Rawan</span><div class="chart-track"><div class="chart-fill" style="width:${(sangatRawan / maxS * 100).toFixed(0)}%;background:#D56A6A"></div></div><span class="chart-count">${sangatRawan}</span></div>
-    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Cukup Rawan</span><div class="chart-track"><div class="chart-fill" style="width:${(rawan / maxS * 100).toFixed(0)}%;background:#F6BD60"></div></div><span class="chart-count">${rawan}</span></div>
-    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Rendah / Aman</span><div class="chart-track"><div class="chart-fill" style="width:${(kurangRawan / maxS * 100).toFixed(0)}%;background:#84A59D"></div></div><span class="chart-count">${kurangRawan}</span></div>`;
+    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Rawan Tinggi</span><div class="chart-track"><div class="chart-fill" style="width:${(sangatRawan / maxS * 100).toFixed(0)}%;background:#D56A6A"></div></div><span class="chart-count">${sangatRawan}</span></div>
+    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Rawan Sedang</span><div class="chart-track"><div class="chart-fill" style="width:${(rawan / maxS * 100).toFixed(0)}%;background:#F6BD60"></div></div><span class="chart-count">${rawan}</span></div>
+    <div class="chart-bar-row"><span class="chart-label" style="width:110px">Rawan Rendah</span><div class="chart-track"><div class="chart-fill" style="width:${(kurangRawan / maxS * 100).toFixed(0)}%;background:#84A59D"></div></div><span class="chart-count">${kurangRawan}</span></div>`;
 
       // Chart kelamin
       const lk = reports.filter(r => r.kelamin === 'Laki-laki').length;
@@ -3061,15 +3061,18 @@
     <div class="chart-bar-row"><span class="chart-label" style="width:110px">Tidak sebutkan</span><div class="chart-track"><div class="chart-fill" style="width:${(tn / maxK * 100).toFixed(0)}%;background:#94A3B8"></div></div><span class="chart-count">${tn}</span></div>`;
 
       // Recent table
-      const sLabel = (s) => s >= 4 ? 'Sangat Rawan' : (s === 3 ? 'Cukup Rawan' : 'Rendah/Aman');
-      const sClass = (s) => s >= 4 ? 'fisik' : (s === 3 ? 'pending' : 'resolved');
+      const sLabel = (r) => getAdminRiskTotalAssessment(r).deskripsi;
+      const sClass = (r) => {
+        const level = getAdminRiskTotalAssessment(r).angka;
+        return level === 3 ? 'fisik' : (level === 2 ? 'pending' : 'resolved');
+      };
 
       const recent = [...reports].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
       document.getElementById('recentTable').innerHTML = recent.map(r =>
         `<tr>
       <td style="color:var(--text-muted)">#${r.id}</td>
       <td>${formatDate(r.createdAt)}</td>
-      <td><span class="badge ${sClass(parseInt(r.skorRawan, 10))}">${!isNaN(parseInt(r.skorRawan, 10)) ? sLabel(parseInt(r.skorRawan, 10)) : 'Tidak tersedia'}</span></td>
+      <td><span class="badge ${sClass(r)}">${sLabel(r)}</span></td>
       <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.lokasi || 'Tidak tersedia'}</td>
       <td>${statusBadge(r.status)}</td>
     </tr>`
@@ -4208,12 +4211,76 @@
       return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    function getAdminRawanLevel(score) {
+    function getAdminAreaRiskAssessment(score) {
       const s = parseInt(score, 10);
-      if (isNaN(s)) return { label: 'Tidak tersedia', color: '#6B7280', icon: 'fa-circle-question', shape: 'circle' };
-      if (s >= 3) return { label: 'Rawan Tinggi', color: '#EF4444', icon: 'fa-fire-flame-curved', shape: 'flame' };
-      if (s === 2) return { label: 'Rawan Sedang', color: '#F59E0B', icon: 'fa-triangle-exclamation', shape: 'triangle' };
-      return { label: 'Rawan Rendah', color: '#10B981', icon: 'fa-shield-halved', shape: 'circle' };
+      if (isNaN(s)) return { label: 'Tidak tersedia', weight: null };
+      if (s >= 3) return { label: 'Tinggi', weight: 3 };
+      if (s === 2) return { label: 'Sedang', weight: 2 };
+      return { label: 'Rendah', weight: 1 };
+    }
+
+    function getAdminComfortAssessment(score) {
+      const s = parseInt(score, 10);
+      if (isNaN(s)) return { label: 'Tidak tersedia', weight: null };
+      if (s === 1) return { label: 'Tidak Nyaman', weight: 3 };
+      if (s === 2) return { label: 'Kurang Nyaman', weight: 2 };
+      return { label: 'Nyaman', weight: 1 };
+    }
+
+    function getAdminRiskReasonAssessment(value) {
+      const text = String(value || '').trim();
+      return {
+        label: text || 'Tidak diisi',
+        weight: text.toLowerCase().includes('kombinasi') ? 2 : 1
+      };
+    }
+
+    function getAdminBinaryRiskAssessment(value) {
+      const text = String(value || '').trim().toLowerCase();
+      return {
+        label: value || 'Tidak diisi',
+        weight: (text === 'pernah' || text === 'ya') ? 2 : 1
+      };
+    }
+
+    function getAdminRiskBreakdown(r) {
+      const area = getAdminAreaRiskAssessment(r?.skorRawan);
+      const comfort = getAdminComfortAssessment(r?.skorNyaman);
+      const reason = getAdminRiskReasonAssessment(r?.alasanTidakNyaman);
+      const avoidance = getAdminBinaryRiskAssessment(r?.pernahHindari);
+      const others = getAdminBinaryRiskAssessment(r?.orangLain);
+      const suspicious = getAdminBinaryRiskAssessment(r?.situasiMencurigakan);
+      const components = {
+        bobot_skor_rawan_area: area.weight,
+        bobot_kenyamanan_sendiri: comfort.weight,
+        bobot_alasan_tidak_nyaman: reason.weight,
+        bobot_pernah_hindari: avoidance.weight,
+        bobot_orang_lain_tidak_nyaman: others.weight,
+        bobot_situasi_mencurigakan: suspicious.weight,
+      };
+      const total = Object.values(components)
+        .filter(v => typeof v === 'number' && !isNaN(v))
+        .reduce((sum, value) => sum + value, 0);
+      return { components, total };
+    }
+
+    function getAdminRiskTotalAssessment(r) {
+      const total = getAdminRiskBreakdown(r).total;
+      if (total >= 12) return { total, angka: 3, deskripsi: 'Rawan Tinggi', color: '#EF4444', icon: 'fa-fire-flame-curved', shape: 'flame' };
+      if (total >= 9) return { total, angka: 2, deskripsi: 'Rawan Sedang', color: '#F59E0B', icon: 'fa-triangle-exclamation', shape: 'triangle' };
+      return { total, angka: 1, deskripsi: 'Rawan Rendah', color: '#10B981', icon: 'fa-shield-halved', shape: 'circle' };
+    }
+
+    function getAdminRawanLevel(report) {
+      const risk = getAdminRiskTotalAssessment(report);
+      return {
+        label: risk.deskripsi,
+        color: risk.color,
+        icon: risk.icon,
+        shape: risk.shape,
+        total: risk.total,
+        angka: risk.angka
+      };
     }
 
     function getAdminNyamanLabel(score) {
@@ -4266,11 +4333,10 @@
     }
 
     function getAdminHeatIntensity(r) {
-      const s = parseInt(r?.skorRawan, 10);
-      if (!isNaN(s) && s >= 3) return 1;
-      if (s === 2) return 0.65;
-      if (s === 1) return 0.35;
-      return 0.5;
+      const score = getAdminRiskTotalAssessment(r).total;
+      if (score >= 12) return 1;
+      if (score >= 9) return 0.65;
+      return 0.35;
     }
 
     function getAdminReportVisual() {
@@ -4346,7 +4412,7 @@
 
     function buildAdminReportPopup(r) {
       const visual = getAdminReportVisual(r);
-      const rawan = getAdminRawanLevel(r.skorRawan);
+      const rawan = getAdminRawanLevel(r);
       const nyaman = getAdminNyamanLabel(r.skorNyaman);
       const kelayakan = calcAdminKelayakan(r);
       const status = STATUS_LABELS[normalizeStatus(r.status)] || normalizeStatus(r.status);
@@ -4551,20 +4617,77 @@
       return Number.isFinite(n) ? Number(n.toFixed(decimals)) : '';
     }
 
-    function getRawanExportLabel(score) {
-      const s = parseInt(score, 10);
-      if (isNaN(s)) return '';
-      if (s >= 4) return 'Sangat Rawan';
-      if (s === 3) return 'Cukup Rawan';
-      return 'Rendah/Aman';
+    function getExportConditionFlags(r) {
+      return {
+        area_gelap: r.pencahayaan === 'Gelap' ? 1 : 0,
+        area_sepi: (r.kepadatan === 'Sepi' || r.kepadatan === 'Sangat sepi') ? 1 : 0,
+        tanpa_cctv: r.cctv === 'Tidak ada' ? 1 : 0,
+        minim_petugas: (r.petugas === 'Jarang ada' || r.petugas === 'Tidak pernah ada') ? 1 : 0,
+      };
     }
 
-    function getAdminReportExportRecord(r) {
+    function getRawanTotalAssessment(r) {
+      const risk = getAdminRiskTotalAssessment(r);
+      return { total: risk.total, angka: risk.angka, deskripsi: risk.deskripsi };
+    }
+
+    function getFacilityScoreTotal(r) {
+      let score = 0;
+
+      if (r.pencahayaan === 'Terang') score += 3;
+      else if (r.pencahayaan === 'Remang-remang') score += 2;
+      else score += 1;
+
+      if (r.kepadatan === 'Ramai') score += 3;
+      else if (r.kepadatan === 'Cukup ramai') score += 2;
+      else score += 1;
+
+      if (r.cctv === 'Ada dan terlihat jelas') score += 3;
+      else if (r.cctv === 'Ada tapi tidak yakin aktif') score += 2;
+      else score += 1;
+
+      if (r.petugas === 'Sering ada') score += 3;
+      else if (r.petugas === 'Kadang ada' || r.petugas === 'Jarang ada') score += 2;
+      else score += 1;
+
+      if ((r.vegetasi || '').includes('Terbuka')) score += 3;
+      else if ((r.vegetasi || '').includes('Tertutup') || (r.vegetasi || '').includes('Ruang tertutup')) score += 1;
+      else score += 2;
+
+      return score;
+    }
+
+    function getFacilityExportAssessment(r) {
+      const total = getFacilityScoreTotal(r);
+      if (total >= 14) return { total, angka: 1, deskripsi: 'Layak' };
+      if (total >= 10) return { total, angka: 2, deskripsi: 'Kurang Layak' };
+      return { total, angka: 3, deskripsi: 'Tidak Layak' };
+    }
+
+    function getReportExportTime(r) {
+      const timestamp = Date.parse(r?.createdAt || '');
+      return Number.isFinite(timestamp) ? timestamp : Number.MAX_SAFE_INTEGER;
+    }
+
+    function getReportsForExport(sourceReports = reports) {
+      return [...sourceReports].sort((a, b) => {
+        const dateDiff = getReportExportTime(a) - getReportExportTime(b);
+        if (dateDiff !== 0) return dateDiff;
+        return Number(a?.id || 0) - Number(b?.id || 0);
+      });
+    }
+
+    function getAdminReportExportRecord(r, no) {
       const status = normalizeStatus(r.status);
       const fotoPath = r.fotoPath || '';
       const fotoHidden = typeof fotoPath === 'string' && fotoPath.startsWith('HIDDEN_');
+      const conditionFlags = getExportConditionFlags(r);
+      const riskBreakdown = getAdminRiskBreakdown(r);
+      const rawanTotal = getRawanTotalAssessment(r);
+      const facility = getFacilityExportAssessment(r);
 
       return {
+        no: no ?? '',
         id_laporan: r.id ?? '',
         report_code: r.reportCode || '',
         created_at: r.createdAt || '',
@@ -4583,11 +4706,27 @@
         cctv: r.cctv || '',
         petugas_keamanan: r.petugas || '',
         vegetasi: r.vegetasi || '',
+        area_gelap: conditionFlags.area_gelap,
+        area_sepi: conditionFlags.area_sepi,
+        tanpa_cctv: conditionFlags.tanpa_cctv,
+        minim_petugas: conditionFlags.minim_petugas,
+        bobot_skor_rawan_area: riskBreakdown.components.bobot_skor_rawan_area ?? '',
+        bobot_kenyamanan_sendiri: riskBreakdown.components.bobot_kenyamanan_sendiri ?? '',
+        bobot_alasan_tidak_nyaman: riskBreakdown.components.bobot_alasan_tidak_nyaman ?? '',
+        bobot_pernah_hindari: riskBreakdown.components.bobot_pernah_hindari ?? '',
+        bobot_orang_lain_tidak_nyaman: riskBreakdown.components.bobot_orang_lain_tidak_nyaman ?? '',
+        bobot_situasi_mencurigakan: riskBreakdown.components.bobot_situasi_mencurigakan ?? '',
+        total_bobot_rawan: rawanTotal.total,
+        tingkat_rawan_total_angka: rawanTotal.angka,
+        tingkat_rawan_total_deskripsi: rawanTotal.deskripsi,
+        total_bobot_kelayakan_fasilitas: facility.total,
+        tingkat_kelayakan_fasilitas_angka: facility.angka,
+        tingkat_kelayakan_fasilitas_deskripsi: facility.deskripsi,
         waktu_rawan: r.waktu || '',
         hari_rawan: r.hariRawan || '',
         skor_nyaman: r.skorNyaman ?? '',
         skor_rawan: r.skorRawan ?? '',
-        tingkat_rawan: getRawanExportLabel(r.skorRawan),
+        tingkat_rawan: rawanTotal.deskripsi,
         alasan_tidak_nyaman: r.alasanTidakNyaman || '',
         pernah_hindari: r.pernahHindari || '',
         orang_lain: r.orangLain || '',
@@ -4636,7 +4775,8 @@
         return;
       }
 
-      const rows = reports.map(getAdminReportExportRecord);
+      const sortedReports = getReportsForExport();
+      const rows = sortedReports.map((r, index) => getAdminReportExportRecord(r, index + 1));
       const headers = Object.keys(rows[0]);
       const csv = [
         headers.join(','),
@@ -4649,7 +4789,7 @@
     }
 
     function exportAdminReportsGeoJSON() {
-      const points = reports.filter(isValidReportCoordinate);
+      const points = getReportsForExport(reports.filter(isValidReportCoordinate));
       if (!points.length) {
         showToast('Tidak ada laporan dengan koordinat valid untuk GeoJSON.', 'error');
         return;
@@ -4659,14 +4799,14 @@
         type: 'FeatureCollection',
         name: 'itsafe_laporan_pengaduan',
         generated_at: new Date().toISOString(),
-        features: points.map(r => ({
+        features: points.map((r, index) => ({
           type: 'Feature',
           id: r.reportCode || r.id,
           geometry: {
             type: 'Point',
             coordinates: [exportNumber(r.lng), exportNumber(r.lat)]
           },
-          properties: getAdminReportExportRecord(r)
+          properties: getAdminReportExportRecord(r, index + 1)
         }))
       };
       const skipped = reports.length - points.length;

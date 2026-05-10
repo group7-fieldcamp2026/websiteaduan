@@ -97,9 +97,9 @@ const MAP_MODE_META = {
     icon: 'fa-fire-flame-curved',
     color: '#EF4444',
     shape: 'flame',
-    note: 'Intensitas heatmap mengikuti gabungan kenyamanan saat sendiri dan tingkat kerawanan area.',
+    note: 'Intensitas heatmap mengikuti total bobot penilaian subjektif pelapor.',
     popupTitle: 'Tingkat kerawanan',
-    popupDesc: 'Output ini menonjolkan tingkat rawan dari penilaian subjektif pelapor.'
+    popupDesc: 'Output ini menonjolkan tingkat rawan dari gabungan skor dan jawaban subjektif pelapor.'
   },
   fasilitas: {
     label: 'Kelayakan Fasilitas',
@@ -1255,16 +1255,56 @@ function getComfortAssessment(score) {
   return { label: 'Nyaman', weight: 1, icon: 'fa-face-smile', color: '#10B981' };
 }
 
-function getCombinedRiskScore(reportOrScore, comfortScore) {
+function getRiskReasonAssessment(value) {
+  const text = String(value || '').trim();
+  return {
+    label: text || 'Tidak diisi',
+    weight: text.toLowerCase().includes('kombinasi') ? 2 : 1
+  };
+}
+
+function getBinaryRiskAssessment(value) {
+  const text = String(value || '').trim().toLowerCase();
+  return {
+    label: value || 'Tidak diisi',
+    weight: (text === 'pernah' || text === 'ya') ? 2 : 1
+  };
+}
+
+function getRiskWeightBreakdown(reportOrScore, comfortScore) {
   const report = (reportOrScore && typeof reportOrScore === 'object')
     ? reportOrScore
     : { skorRawan: reportOrScore, skorNyaman: comfortScore };
+  const isFullReport = reportOrScore && typeof reportOrScore === 'object';
   const area = getAreaRiskAssessment(report.skorRawan);
   const comfort = getComfortAssessment(report.skorNyaman);
-  const weights = [area.weight, comfort.weight].filter(v => typeof v === 'number' && !isNaN(v));
-  if (!weights.length) return null;
-  if (weights.length === 1) return weights[0] * 2;
-  return weights.reduce((sum, value) => sum + value, 0);
+  const components = [
+    { key: 'skor_rawan', label: 'Tingkat kerawanan area', value: area.label, weight: area.weight },
+    { key: 'skor_nyaman', label: 'Kenyamanan saat sendiri', value: comfort.label, weight: comfort.weight },
+  ];
+
+  if (isFullReport) {
+    const reason = getRiskReasonAssessment(report.alasanTidakNyaman);
+    const avoidance = getBinaryRiskAssessment(report.pernahHindari);
+    const others = getBinaryRiskAssessment(report.orangLain);
+    const suspicious = getBinaryRiskAssessment(report.situasiMencurigakan);
+    components.push(
+      { key: 'alasan_tidak_nyaman', label: 'Alasan tidak nyaman', value: reason.label, weight: reason.weight },
+      { key: 'pernah_hindari', label: 'Pernah menghindari area', value: avoidance.label, weight: avoidance.weight },
+      { key: 'orang_lain', label: 'Orang lain tidak nyaman', value: others.label, weight: others.weight },
+      { key: 'situasi_mencurigakan', label: 'Situasi mencurigakan', value: suspicious.label, weight: suspicious.weight },
+    );
+  }
+
+  const weights = components.map(c => c.weight).filter(v => typeof v === 'number' && !isNaN(v));
+  return {
+    components,
+    total: weights.length ? weights.reduce((sum, value) => sum + value, 0) : null
+  };
+}
+
+function getCombinedRiskScore(reportOrScore, comfortScore) {
+  return getRiskWeightBreakdown(reportOrScore, comfortScore).total;
 }
 
 function getRiskVisual(reportOrScore, comfortScore) {
@@ -1272,10 +1312,10 @@ function getRiskVisual(reportOrScore, comfortScore) {
   if (combined === null) {
     return { label: 'Rawan Tidak Tersedia', icon: 'fa-circle-question', color: '#94A3B8', shape: 'circle', combinedScore: null };
   }
-  if (combined >= 5) {
+  if (combined >= 12) {
     return { label: 'Rawan Tinggi', icon: 'fa-fire-flame-curved', color: '#EF4444', shape: 'flame', combinedScore: combined };
   }
-  if (combined >= 3) {
+  if (combined >= 9) {
     return { label: 'Rawan Sedang', icon: 'fa-temperature-half', color: '#F59E0B', shape: 'triangle', combinedScore: combined };
   }
   return { label: 'Rawan Rendah', icon: 'fa-shield-halved', color: '#10B981', shape: 'circle', combinedScore: combined };
@@ -1316,22 +1356,23 @@ function getRiskReasonParts(r) {
 function getRiskExplanation(r) {
   const risk = getRiskVisual(r);
   const reasonText = formatReasonList(getRiskReasonParts(r));
+  const scoreText = risk.combinedScore !== null ? ` Total bobot laporan ini ${risk.combinedScore}.` : '';
 
   if (risk.label === 'Rawan Tinggi') {
     return reasonText
-      ? `Masuk kategori tinggi dari gabungan penilaian subjektif: ${reasonText}.`
-      : 'Masuk kategori tinggi dari gabungan kenyamanan saat sendiri dan tingkat kerawanan area.';
+      ? `Masuk kategori tinggi dari gabungan penilaian subjektif: ${reasonText}.${scoreText}`
+      : `Masuk kategori tinggi dari gabungan penilaian subjektif.${scoreText}`;
   }
 
   if (risk.label === 'Rawan Sedang') {
     return reasonText
-      ? `Masuk kategori sedang dari gabungan penilaian subjektif: ${reasonText}.`
-      : 'Masuk kategori sedang dari gabungan kenyamanan saat sendiri dan tingkat kerawanan area.';
+      ? `Masuk kategori sedang dari gabungan penilaian subjektif: ${reasonText}.${scoreText}`
+      : `Masuk kategori sedang dari gabungan penilaian subjektif.${scoreText}`;
   }
 
   return reasonText
-    ? `Masuk kategori rendah dari gabungan penilaian subjektif: ${reasonText}.`
-    : 'Masuk kategori rendah dari gabungan kenyamanan saat sendiri dan tingkat kerawanan area.';
+    ? `Masuk kategori rendah dari gabungan penilaian subjektif: ${reasonText}.${scoreText}`
+    : `Masuk kategori rendah dari gabungan penilaian subjektif.${scoreText}`;
 }
 
 function getFacilityVisual(r) {
@@ -1363,8 +1404,8 @@ function getReportVisual(r) {
 function getHeatIntensity(r) {
   const combined = getCombinedRiskScore(r);
   if (combined === null) return 0.5;
-  if (combined >= 5) return 1;
-  if (combined >= 3) return 0.65;
+  if (combined >= 12) return 1;
+  if (combined >= 9) return 0.65;
   return 0.35;
 }
 
@@ -2087,7 +2128,7 @@ function switchPetaTab(tab) {
   // Update judul & deskripsi panel
   const titles = {
     sebaran: { title: 'Peta 1: Sebaran Titik Lokasi Rawan', desc: 'Menampilkan sebaran titik lokasi area rawan berdasarkan jumlah laporan masuk dari warga kampus ITS.' },
-    heatmap: { title: 'Peta 2: Heatmap Kerawanan', desc: 'Menampilkan konsentrasi area rawan berdasarkan tingkat kerawanan yang diberikan oleh pelapor.' },
+    heatmap: { title: 'Peta 2: Heatmap Kerawanan', desc: 'Menampilkan konsentrasi area rawan berdasarkan total bobot penilaian subjektif pelapor.' },
     fasilitas: { title: 'Peta 3: Kelayakan Fasilitas', desc: 'Menampilkan penilaian kondisi fisik area berdasarkan parameter pencahayaan, CCTV, kepadatan, petugas keamanan, dan vegetasi.' },
   };
 
@@ -2299,8 +2340,8 @@ function updateHeatmapAnalysis(data, filterWaktu, filterBulan) {
 
   let avgLabel = '';
   if (avg !== null) {
-    if (avg >= 5) avgLabel = 'Tinggi';
-    else if (avg >= 3) avgLabel = 'Sedang';
+    if (avg >= 12) avgLabel = 'Tinggi';
+    else if (avg >= 9) avgLabel = 'Sedang';
     else avgLabel = 'Rendah';
   }
 
@@ -2550,17 +2591,17 @@ function getRiskColor(score) {
 
 function isRawanTinggi(reportOrScore, comfortScore) {
   const combined = getCombinedRiskScore(reportOrScore, comfortScore);
-  return combined !== null && combined >= 5;
+  return combined !== null && combined >= 12;
 }
 
 function isRawanSedang(reportOrScore, comfortScore) {
   const combined = getCombinedRiskScore(reportOrScore, comfortScore);
-  return combined !== null && combined >= 3 && combined <= 4;
+  return combined !== null && combined >= 9 && combined <= 11;
 }
 
 function isRawanRendah(reportOrScore, comfortScore) {
   const combined = getCombinedRiskScore(reportOrScore, comfortScore);
-  return combined !== null && combined <= 2;
+  return combined !== null && combined <= 8;
 }
 
 function isSepi(val) {
