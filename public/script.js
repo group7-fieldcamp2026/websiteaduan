@@ -1312,10 +1312,10 @@ function getRiskVisual(reportOrScore, comfortScore) {
   if (combined === null) {
     return { label: 'Rawan Tidak Tersedia', icon: 'fa-circle-question', color: '#94A3B8', shape: 'circle', combinedScore: null };
   }
-  if (combined >= 12) {
+  if (combined >= 11) {
     return { label: 'Rawan Tinggi', icon: 'fa-fire-flame-curved', color: '#EF4444', shape: 'flame', combinedScore: combined };
   }
-  if (combined >= 9) {
+  if (combined >= 8) {
     return { label: 'Rawan Sedang', icon: 'fa-temperature-half', color: '#F59E0B', shape: 'triangle', combinedScore: combined };
   }
   return { label: 'Rawan Rendah', icon: 'fa-shield-halved', color: '#10B981', shape: 'circle', combinedScore: combined };
@@ -1404,8 +1404,8 @@ function getReportVisual(r) {
 function getHeatIntensity(r) {
   const combined = getCombinedRiskScore(r);
   if (combined === null) return 0.5;
-  if (combined >= 12) return 1;
-  if (combined >= 9) return 0.65;
+  if (combined >= 11) return 1;
+  if (combined >= 8) return 0.65;
   return 0.35;
 }
 
@@ -2340,8 +2340,8 @@ function updateHeatmapAnalysis(data, filterWaktu, filterBulan) {
 
   let avgLabel = '';
   if (avg !== null) {
-    if (avg >= 12) avgLabel = 'Tinggi';
-    else if (avg >= 9) avgLabel = 'Sedang';
+    if (avg >= 11) avgLabel = 'Tinggi';
+    else if (avg >= 8) avgLabel = 'Sedang';
     else avgLabel = 'Rendah';
   }
 
@@ -2591,17 +2591,17 @@ function getRiskColor(score) {
 
 function isRawanTinggi(reportOrScore, comfortScore) {
   const combined = getCombinedRiskScore(reportOrScore, comfortScore);
-  return combined !== null && combined >= 12;
+  return combined !== null && combined >= 11;
 }
 
 function isRawanSedang(reportOrScore, comfortScore) {
   const combined = getCombinedRiskScore(reportOrScore, comfortScore);
-  return combined !== null && combined >= 9 && combined <= 11;
+  return combined !== null && combined >= 8 && combined <= 10;
 }
 
 function isRawanRendah(reportOrScore, comfortScore) {
   const combined = getCombinedRiskScore(reportOrScore, comfortScore);
-  return combined !== null && combined <= 8;
+  return combined !== null && combined <= 7;
 }
 
 function isSepi(val) {

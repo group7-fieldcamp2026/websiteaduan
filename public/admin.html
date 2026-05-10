@@ -4266,8 +4266,8 @@
 
     function getAdminRiskTotalAssessment(r) {
       const total = getAdminRiskBreakdown(r).total;
-      if (total >= 12) return { total, angka: 3, deskripsi: 'Rawan Tinggi', color: '#EF4444', icon: 'fa-fire-flame-curved', shape: 'flame' };
-      if (total >= 9) return { total, angka: 2, deskripsi: 'Rawan Sedang', color: '#F59E0B', icon: 'fa-triangle-exclamation', shape: 'triangle' };
+      if (total >= 11) return { total, angka: 3, deskripsi: 'Rawan Tinggi', color: '#EF4444', icon: 'fa-fire-flame-curved', shape: 'flame' };
+      if (total >= 8) return { total, angka: 2, deskripsi: 'Rawan Sedang', color: '#F59E0B', icon: 'fa-triangle-exclamation', shape: 'triangle' };
       return { total, angka: 1, deskripsi: 'Rawan Rendah', color: '#10B981', icon: 'fa-shield-halved', shape: 'circle' };
     }
 
@@ -4334,8 +4334,8 @@
 
     function getAdminHeatIntensity(r) {
       const score = getAdminRiskTotalAssessment(r).total;
-      if (score >= 12) return 1;
-      if (score >= 9) return 0.65;
+      if (score >= 11) return 1;
+      if (score >= 8) return 0.65;
       return 0.35;
     }
 
