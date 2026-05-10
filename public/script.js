@@ -1356,23 +1356,22 @@ function getRiskReasonParts(r) {
 function getRiskExplanation(r) {
   const risk = getRiskVisual(r);
   const reasonText = formatReasonList(getRiskReasonParts(r));
-  const scoreText = risk.combinedScore !== null ? ` Total bobot laporan ini ${risk.combinedScore}.` : '';
 
   if (risk.label === 'Rawan Tinggi') {
     return reasonText
-      ? `Masuk kategori tinggi dari gabungan penilaian subjektif: ${reasonText}.${scoreText}`
-      : `Masuk kategori tinggi dari gabungan penilaian subjektif.${scoreText}`;
+      ? `Masuk kategori tinggi dari gabungan penilaian subjektif: ${reasonText}.`
+      : 'Masuk kategori tinggi dari gabungan penilaian subjektif.';
   }
 
   if (risk.label === 'Rawan Sedang') {
     return reasonText
-      ? `Masuk kategori sedang dari gabungan penilaian subjektif: ${reasonText}.${scoreText}`
-      : `Masuk kategori sedang dari gabungan penilaian subjektif.${scoreText}`;
+      ? `Masuk kategori sedang dari gabungan penilaian subjektif: ${reasonText}.`
+      : 'Masuk kategori sedang dari gabungan penilaian subjektif.';
   }
 
   return reasonText
-    ? `Masuk kategori rendah dari gabungan penilaian subjektif: ${reasonText}.${scoreText}`
-    : `Masuk kategori rendah dari gabungan penilaian subjektif.${scoreText}`;
+    ? `Masuk kategori rendah dari gabungan penilaian subjektif: ${reasonText}.`
+    : 'Masuk kategori rendah dari gabungan penilaian subjektif.';
 }
 
 function getFacilityVisual(r) {
