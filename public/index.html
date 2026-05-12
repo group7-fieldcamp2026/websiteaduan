@@ -368,10 +368,15 @@
             </div>
           </div>
 
-          <div class="hero-actions">
-            <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Buat Laporan</button>
-            <button class="btn btn-outline" onclick="openHistoryModal()"><i class="fas fa-clock-rotate-left"></i> History Laporan</button>
-            <button class="btn btn-outline" onclick="navigateTo('peta')"><i class="fas fa-map"></i> Lihat Peta</button>
+          <div class="hero-actions hero-actions-split">
+            <div class="hero-action-primary-row">
+              <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Buat Laporan</button>
+            </div>
+            <div class="hero-action-secondary-row">
+              <button class="btn btn-outline" onclick="openHistoryModal()"><i class="fas fa-clock-rotate-left"></i> History Laporan</button>
+              <button class="btn btn-outline" onclick="openEditReportModal()"><i class="fas fa-file-pen"></i> Edit Laporan</button>
+              <button class="btn btn-outline" onclick="navigateTo('peta')"><i class="fas fa-map"></i> Lihat Peta</button>
+            </div>
           </div>
 
           <div class="hc2-stats">
@@ -493,6 +498,12 @@
                   <div class="form-group full-width">
                     <label>Email <span class="req">*</span></label>
                     <input type="email" id="emailIts" placeholder="nama@gmail.com" required />
+                    <div class="email-verify-row">
+                      <button type="button" class="btn btn-outline btn-sm email-verify-btn" id="verifyEmailBtn" onclick="verifyReportEmail()">
+                        <i class="fas fa-circle-check"></i> Verifikasi Email
+                      </button>
+                      <span id="emailVerifyStatus" class="email-verify-status">Email belum diverifikasi.</span>
+                    </div>
                     <span class="form-hint">Identitasmu tidak akan dipublikasikan. Namun, sangat disarankan menggunakan
                       email dengan nama asli guna memperkuat validitas laporan.</span>
                   </div>
@@ -2102,7 +2113,7 @@
             <i class="fas fa-copy"></i>
           </button>
         </div>
-        <p class="code-hint">Simpan atau salin kode ini.</p>
+        <p class="code-hint">Simpan kode ini. Jika ada data yang salah, kamu bisa mengedit laporan selama masih menunggu verifikasi.</p>
       </div>
 
       <!-- Email notification box -->
@@ -2140,6 +2151,9 @@
         </button>
         <button type="button" class="btn btn-outline" onclick="closeSubmitSuccessModal(); openHistoryModal()">
           <i class="fas fa-clock-rotate-left"></i> Lihat History Laporan
+        </button>
+        <button type="button" class="btn btn-outline" onclick="openReportEditFromSuccess()">
+          <i class="fas fa-pen-to-square"></i> Edit Laporan Ini
         </button>
         <button type="button" class="btn btn-ghost" onclick="closeSubmitSuccessModal(); navigateTo('peta')">
           <i class="fas fa-map"></i> Lihat Peta
@@ -2197,6 +2211,33 @@
             <i class="fas fa-magnifying-glass"></i> Cek Status
           </button>
         </div>
+      </div>
+
+      <!-- Panel Edit -->
+      <div id="historyPanelEdit" class="history-panel" style="display:none;">
+        <p class="history-panel-desc">Pilih salah satu cara. Edit hanya tersedia selama laporan masih menunggu verifikasi admin.</p>
+        <div class="history-edit-card">
+          <strong class="history-edit-title"><i class="fas fa-barcode"></i> Edit via Kode Laporan</strong>
+          <div class="history-input-wrap">
+            <i class="fas fa-barcode history-input-icon"></i>
+            <input type="text" id="editReportCodeInput" placeholder="Kode laporan, contoh: ITS-XXXXXXXX" class="history-input" />
+          </div>
+          <button type="button" class="btn btn-primary" onclick="startReportEditFromInputs()">
+            <i class="fas fa-pen-to-square"></i> Edit Pakai Kode
+          </button>
+        </div>
+        <div class="history-edit-separator"><span>atau</span></div>
+        <div class="history-edit-card">
+          <strong class="history-edit-title"><i class="fas fa-envelope"></i> Cari Laporan via Email</strong>
+          <div class="history-input-wrap">
+            <i class="fas fa-envelope history-input-icon"></i>
+            <input type="email" id="editReportEmailInput" placeholder="Email pelapor yang digunakan saat melapor" class="history-input" />
+          </div>
+          <button type="button" class="btn btn-outline" onclick="checkEditableReportsByEmail()">
+            <i class="fas fa-magnifying-glass"></i> Cari Laporan
+          </button>
+        </div>
+        <div id="editReportResult" class="history-result" style="display:none;"></div>
       </div>
 
       <!-- Result area -->

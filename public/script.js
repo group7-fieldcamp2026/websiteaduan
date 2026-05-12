@@ -38,6 +38,8 @@ let boundaryPolygons = null;
 let currentBm = 'osm';
 let editingReport = null;
 let currentHistoryEmail = '';
+let reportEmailVerified = false;
+let verifiedReportEmail = '';
 
 const BOUNDARY_SRC_CRS = 'EPSG:32749';
 const BOUNDARY_SRC_DEF = '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs';
@@ -328,6 +330,7 @@ function itsafeInit() {
   window.scrollToForm = scrollToForm;
   window.itsafeInit = itsafeInit;
   window.openHistoryModal = openHistoryModal;
+  window.openEditReportModal = openEditReportModal;
   window.closeHistoryModal = closeHistoryModal;
   window.switchHistoryTab = switchHistoryTab;
   window.checkReportsByEmail = checkReportsByEmail;
@@ -335,7 +338,11 @@ function itsafeInit() {
   window.closeHistoryDetail = closeHistoryDetail;
   window.checkReportStatus = checkReportStatus;
   window.startReportEdit = startReportEdit;
+  window.startReportEditFromInputs = startReportEditFromInputs;
+  window.checkEditableReportsByEmail = checkEditableReportsByEmail;
+  window.openReportEditFromSuccess = openReportEditFromSuccess;
   window.cancelReportEdit = cancelReportEdit;
+  window.verifyReportEmail = verifyReportEmail;
 }
 
 if (document.readyState === 'loading') {
@@ -560,7 +567,87 @@ function scrollToForm() {
 function initForm() {
   document.getElementById('reportForm').addEventListener('submit', handleSubmit);
   document.getElementById('lokasiInsiden')?.addEventListener('change', handleLocationPreset);
+  document.getElementById('emailIts')?.addEventListener('input', handleReportEmailInput);
+  updateReportEmailVerificationUi();
   initReportWizard();
+}
+
+function normalizeEmail(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+}
+
+function isReportEmailVerified() {
+  const email = normalizeEmail(document.getElementById('emailIts')?.value || '');
+  return !!email && reportEmailVerified && verifiedReportEmail === email;
+}
+
+function updateReportEmailVerificationUi() {
+  const email = normalizeEmail(document.getElementById('emailIts')?.value || '');
+  const status = document.getElementById('emailVerifyStatus');
+  const button = document.getElementById('verifyEmailBtn');
+  const verified = isReportEmailVerified();
+
+  if (status) {
+    status.classList.toggle('verified', verified);
+    status.classList.toggle('invalid', !!email && !verified);
+    status.textContent = verified
+      ? 'Email terverifikasi. Kamu bisa lanjut.'
+      : 'Email belum diverifikasi.';
+  }
+
+  if (button) {
+    button.classList.toggle('verified', verified);
+    button.innerHTML = verified
+      ? '<i class="fas fa-circle-check"></i> Terverifikasi'
+      : '<i class="fas fa-circle-check"></i> Verifikasi Email';
+  }
+}
+
+function handleReportEmailInput() {
+  const email = normalizeEmail(document.getElementById('emailIts')?.value || '');
+  if (email !== verifiedReportEmail) {
+    reportEmailVerified = false;
+  }
+  updateReportEmailVerificationUi();
+}
+
+function markReportEmailVerified(email) {
+  verifiedReportEmail = normalizeEmail(email);
+  reportEmailVerified = !!verifiedReportEmail;
+  updateReportEmailVerificationUi();
+}
+
+function resetReportEmailVerification() {
+  reportEmailVerified = false;
+  verifiedReportEmail = '';
+  updateReportEmailVerificationUi();
+}
+
+function verifyReportEmail() {
+  const input = document.getElementById('emailIts');
+  const email = normalizeEmail(input?.value || '');
+
+  if (!email) {
+    showToast('Isi email terlebih dahulu sebelum lanjut.', 'error');
+    input?.focus();
+    resetReportEmailVerification();
+    return false;
+  }
+
+  if (!isValidEmail(email)) {
+    showToast('Format email belum valid.', 'error');
+    input?.focus();
+    resetReportEmailVerification();
+    return false;
+  }
+
+  markReportEmailVerified(email);
+  showToast('Email berhasil diverifikasi.', 'success');
+  return true;
 }
 
 function initReportWizard() {
@@ -701,6 +788,14 @@ function initReportWizard() {
       }
     });
 
+    if (steps[stepIndex].key === 'identitas' && !isReportEmailVerified()) {
+      const emailEl = document.getElementById('emailIts');
+      markFieldError(emailEl);
+      focusField(emailEl);
+      showToast('Verifikasi email terlebih dahulu sebelum lanjut.', 'error');
+      return false;
+    }
+
     if (steps[stepIndex].key === 'lokasi') {
       const lokasiVal = document.getElementById('lokasiInsiden')?.value || '';
       const lat = parseFloat(document.getElementById('lat')?.value || '');
@@ -797,6 +892,11 @@ async function handleSubmit(e) {
   });
   if (!document.getElementById('consent').checked) { showToast('Harap setujui pernyataan persetujuan.', 'error'); return; }
   if (!valid) { showToast('Harap lengkapi semua field wajib.', 'error'); return; }
+  if (!isReportEmailVerified()) {
+    showToast('Verifikasi email terlebih dahulu sebelum mengirim laporan.', 'error');
+    document.getElementById('emailIts')?.focus();
+    return;
+  }
 
   const lat = parseFloat(document.getElementById('lat').value);
   const lng = parseFloat(document.getElementById('lng').value);
@@ -855,6 +955,7 @@ async function handleSubmit(e) {
     if (result.success) {
       e.target.reset();
       clearPin();
+      resetReportEmailVerification();
       syncReportChoiceButtons();
       exitReportEditMode({ resetForm: false });
       if (typeof window.itsafeResetReportWizard === 'function') window.itsafeResetReportWizard();
@@ -867,6 +968,7 @@ async function handleSubmit(e) {
       } else {
         openSubmitSuccessModal({
           reportCode: result.report_code,
+          reporterEmail: payload.email_its,
           mailSent: result.mail_sent !== false,
         });
 
@@ -951,6 +1053,7 @@ function exitReportEditMode(opts = {}) {
     const form = document.getElementById('reportForm');
     if (form) form.reset();
     clearPin();
+    resetReportEmailVerification();
     syncReportChoiceButtons();
     if (typeof window.itsafeResetReportWizard === 'function') window.itsafeResetReportWizard();
     if (typeof window.itsafeBootUI === 'function') window.itsafeBootUI();
@@ -989,6 +1092,7 @@ function fillReportFormForEdit(report, verificationEmail) {
   setReportFieldValue('situasiMencurigakan', report.situasi_mencurigakan);
   setReportFieldValue('kronologi', report.kronologi);
   setReportFieldValue('kontakPelapor', report.kontak_pelapor);
+  markReportEmailVerified(report.email_its);
 
   if (!setLocationSelectValue(report.lokasi_kejadian || '')) {
     setLocationSelectValue(getOtherLocationOptionValue());
@@ -1016,22 +1120,19 @@ function fillReportFormForEdit(report, verificationEmail) {
   if (typeof window.itsafeBootUI === 'function') window.itsafeBootUI();
 }
 
-async function startReportEdit(code) {
+async function startReportEdit(code, opts = {}) {
   const reportCode = String(code || '').trim();
   if (!reportCode) return;
 
-  let email = (currentHistoryEmail || document.getElementById('historyEmailInput')?.value || '').trim();
-  if (!email) {
+  let email = (opts.email || currentHistoryEmail || document.getElementById('historyEmailInput')?.value || '').trim();
+  if (!email && opts.prompt === true) {
     email = (window.prompt('Masukkan email pelapor untuk verifikasi edit laporan:') || '').trim();
-  }
-  if (!email) {
-    showToast('Email pelapor diperlukan untuk edit laporan.', 'error');
-    return;
   }
 
   try {
     showToast('Memuat laporan untuk diedit...', 'success');
-    const res = await fetch(`${API_BASE}/reports/edit/${encodeURIComponent(reportCode)}?email=${encodeURIComponent(email)}`);
+    const url = `${API_BASE}/reports/edit/${encodeURIComponent(reportCode)}${email ? `?email=${encodeURIComponent(email)}` : ''}`;
+    const res = await fetch(url);
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.success) {
       showToast(data.message || 'Laporan tidak bisa diedit.', 'error');
@@ -1049,6 +1150,19 @@ async function startReportEdit(code) {
     console.error(err);
     showToast('Tidak dapat memuat data laporan.', 'error');
   }
+}
+
+function startReportEditFromInputs() {
+  const codeInput = document.getElementById('editReportCodeInput');
+  const code = codeInput?.value.trim() || '';
+
+  if (!code) {
+    showToast('Masukkan kode laporan terlebih dahulu.', 'error');
+    codeInput?.focus();
+    return;
+  }
+
+  startReportEdit(code, { prompt: false });
 }
 
 function buildLocationFacultyMap() {
@@ -2865,6 +2979,10 @@ function esc(str) {
   return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function jsArg(str) {
+  return JSON.stringify(String(str || '')).replace(/</g, '\\u003c');
+}
+
 // Keep modal helpers from leaving the document in a fixed/locked state on mobile.
 let _itsafeScrollLockDepth = 0;
 
@@ -2929,7 +3047,11 @@ function openSubmitSuccessModal(opts = {}) {
   const noteEl = document.getElementById('submitSuccessNote');
 
   const reportCode = opts.reportCode ? String(opts.reportCode) : '';
+  const reporterEmail = opts.reporterEmail ? String(opts.reporterEmail) : '';
   const mailSent = opts.mailSent !== false;
+
+  modal.dataset.reportCode = reportCode;
+  modal.dataset.reporterEmail = reporterEmail;
 
   if (codeWrap) {
     if (reportCode) {
@@ -2963,6 +3085,23 @@ function closeSubmitSuccessModal() {
   itsafeUnlockBodyScroll();
 }
 
+function openReportEditFromSuccess() {
+  const modal = document.getElementById('submitSuccessModal');
+  const reportCode = modal?.dataset.reportCode || document.getElementById('submitSuccessCode')?.textContent?.trim() || '';
+  const reporterEmail = modal?.dataset.reporterEmail || '';
+
+  closeSubmitSuccessModal();
+  openEditReportModal({
+    code: reportCode && reportCode !== 'Tidak tersedia' ? reportCode : '',
+    email: reporterEmail,
+    focus: 'button',
+  });
+}
+
+function openEditReportModal(opts = {}) {
+  openHistoryModal('edit', opts);
+}
+
 function copyReportCode() {
   const codeEl = document.getElementById('submitSuccessCode');
   if (!codeEl) return;
@@ -2981,43 +3120,84 @@ function copyReportCode() {
   });
 }
 
-function openHistoryModal() {
+function openHistoryModal(defaultTab = 'email', opts = {}) {
   const modal = document.getElementById('historyLaporanModal');
   if (!modal) return;
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
   itsafeLockBodyScroll();
-  // Reset to email tab
-  switchHistoryTab('email');
+  const isEditMode = defaultTab === 'edit';
+  const title = document.getElementById('historyModalTitle');
+  const header = modal.querySelector('.history-modal-header');
+  const icon = modal.querySelector('.history-modal-icon i');
+  const tabs = modal.querySelector('.history-tab-row');
   const res = document.getElementById('historyResult');
   const inp = document.getElementById('historyEmailInput');
+  const codeInp = document.getElementById('historyCodeInput');
+  const editCodeInp = document.getElementById('editReportCodeInput');
+  const editEmailInp = document.getElementById('editReportEmailInput');
+  const editResult = document.getElementById('editReportResult');
   const detailWrap = document.getElementById('historyDetailWrap');
   currentHistoryEmail = '';
+  if (title) title.textContent = isEditMode ? 'Edit Laporan' : 'History Laporan Saya';
+  if (header) {
+    const desc = header.querySelector('p');
+    if (desc) {
+      desc.textContent = isEditMode
+        ? 'Edit laporan menggunakan kode laporan atau email pelapor.'
+        : 'Cari riwayat laporan menggunakan email atau kode laporan yang kamu miliki.';
+    }
+  }
+  if (icon) icon.className = isEditMode ? 'fas fa-file-pen' : 'fas fa-clock-rotate-left';
+  if (tabs) tabs.style.display = isEditMode ? 'none' : '';
   if (res) { res.style.display = 'none'; res.innerHTML = ''; }
   if (inp) inp.value = '';
+  if (codeInp) codeInp.value = '';
+  if (editCodeInp) editCodeInp.value = opts.code || '';
+  if (editEmailInp) editEmailInp.value = opts.email || '';
+  if (editResult) { editResult.style.display = 'none'; editResult.innerHTML = ''; }
   if (detailWrap) detailWrap.style.display = 'none';
+
+  switchHistoryTab(defaultTab);
+
+  requestAnimationFrame(() => {
+    if (defaultTab === 'edit') {
+      const target = opts.focus === 'button'
+        ? document.querySelector('#historyPanelEdit .btn')
+        : (opts.focus === 'email' ? editEmailInp : editCodeInp);
+      if (target && typeof target.focus === 'function') target.focus();
+    }
+  });
 }
 
 function switchHistoryTab(tab) {
   const tabEmail = document.getElementById('historyTabEmail');
   const tabCode = document.getElementById('historyTabCode');
+  const tabEdit = document.getElementById('historyTabEdit');
   const panelEmail = document.getElementById('historyPanelEmail');
   const panelCode = document.getElementById('historyPanelCode');
+  const panelEdit = document.getElementById('historyPanelEdit');
   const res = document.getElementById('historyResult');
+  const editResult = document.getElementById('editReportResult');
   const detailWrap = document.getElementById('historyDetailWrap');
   if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+  if (tab !== 'edit' && editResult) { editResult.style.display = 'none'; editResult.innerHTML = ''; }
   if (detailWrap) detailWrap.style.display = 'none';
+
+  if (tabEmail) tabEmail.classList.toggle('active', tab === 'email');
+  if (tabCode) tabCode.classList.toggle('active', tab === 'code');
+  if (tabEdit) tabEdit.classList.toggle('active', tab === 'edit');
+  if (panelEmail) panelEmail.style.display = tab === 'email' ? '' : 'none';
+  if (panelCode) panelCode.style.display = tab === 'code' ? '' : 'none';
+  if (panelEdit) panelEdit.style.display = tab === 'edit' ? '' : 'none';
+
   if (tab === 'email') {
-    if (tabEmail) tabEmail.classList.add('active');
-    if (tabCode) tabCode.classList.remove('active');
-    if (panelEmail) panelEmail.style.display = '';
-    if (panelCode) panelCode.style.display = 'none';
-  } else {
+    return;
+  }
+
+  if (tab === 'code') {
     currentHistoryEmail = '';
-    if (tabCode) tabCode.classList.add('active');
-    if (tabEmail) tabEmail.classList.remove('active');
-    if (panelCode) panelCode.style.display = '';
-    if (panelEmail) panelEmail.style.display = 'none';
+    return;
   }
 }
 
@@ -3068,6 +3248,64 @@ async function checkReportsByEmail() {
     } else {
       result.innerHTML = `<div class="history-result-card status-rejected"><i class="fas fa-circle-xmark"></i> Tidak dapat mengambil data. Pastikan email sudah benar atau coba beberapa saat lagi.</div>`;
     }
+  } catch {
+    result.innerHTML = '<div class="history-result-card status-pending"><i class="fas fa-wifi"></i> Tidak dapat terhubung ke server. Coba beberapa saat lagi.</div>';
+  }
+}
+
+async function checkEditableReportsByEmail() {
+  const input = document.getElementById('editReportEmailInput');
+  const result = document.getElementById('editReportResult');
+  if (!input || !result) return;
+
+  const email = input.value.trim();
+  if (!email) {
+    showToast('Masukkan email pelapor terlebih dahulu.', 'error');
+    input.focus();
+    return;
+  }
+  if (!isValidEmail(email)) {
+    showToast('Format email belum valid.', 'error');
+    input.focus();
+    return;
+  }
+  currentHistoryEmail = email;
+
+  result.style.display = 'block';
+  result.innerHTML = '<div class="history-loading"><i class="fas fa-spinner fa-spin"></i> Mencari laporan yang bisa diedit...</div>';
+
+  try {
+    const res = await fetch(`${API_BASE}/reports/by-email?email=${encodeURIComponent(email)}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.reports) {
+      result.innerHTML = '<div class="history-result-card status-rejected"><i class="fas fa-circle-xmark"></i> Email tidak ditemukan atau belum memiliki laporan.</div>';
+      return;
+    }
+
+    const editableReports = data.reports.filter(r => r.can_edit);
+    if (editableReports.length === 0) {
+      result.innerHTML = '<div class="history-result-card status-review"><i class="fas fa-circle-info"></i> Tidak ada laporan yang masih bisa diedit untuk email ini.</div>';
+      return;
+    }
+
+    let html = '<div class="history-email-list-header"><i class="fas fa-pen-to-square"></i> Pilih laporan yang ingin diedit</div>';
+    html += '<div class="history-email-list">';
+    editableReports.forEach(r => {
+      const tgl = r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Tanggal tidak diketahui';
+      html += `<button type="button" class="history-email-item history-edit-item" onclick="startReportEdit(${jsArg(r.report_code)}, { email: ${jsArg(email)}, prompt: false })">
+        <div class="history-email-item-left">
+          <span class="history-email-code"><i class="fas fa-barcode"></i> ${esc(r.report_code)}</span>
+          <span class="history-email-lokasi">${esc(r.lokasi || 'Lokasi tidak tersedia')}</span>
+          <span class="history-email-tgl"><i class="fas fa-calendar-alt"></i> ${tgl}</span>
+        </div>
+        <div class="history-email-item-right">
+          <span class="history-status-badge status-pending"><i class="fas fa-hourglass-half"></i> Bisa diedit</span>
+          <i class="fas fa-pen-to-square history-chevron"></i>
+        </div>
+      </button>`;
+    });
+    html += '</div>';
+    result.innerHTML = html;
   } catch {
     result.innerHTML = '<div class="history-result-card status-pending"><i class="fas fa-wifi"></i> Tidak dapat terhubung ke server. Coba beberapa saat lagi.</div>';
   }

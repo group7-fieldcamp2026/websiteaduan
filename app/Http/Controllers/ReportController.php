@@ -457,7 +457,7 @@ class ReportController extends Controller
     public function editByReporter(Request $request, string $code)
     {
         $email = trim((string) $request->query('email', ''));
-        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Email verifikasi tidak valid.',
@@ -472,7 +472,7 @@ class ReportController extends Controller
             ], 404);
         }
 
-        if (!$this->emailMatchesReport($report, $email)) {
+        if ($email !== '' && !$this->emailMatchesReport($report, $email)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Email tidak cocok dengan laporan ini.',
@@ -498,7 +498,7 @@ class ReportController extends Controller
     public function updateByReporter(Request $request, string $code)
     {
         $verificationEmail = trim((string) $request->input('verification_email', ''));
-        if ($verificationEmail === '' || !filter_var($verificationEmail, FILTER_VALIDATE_EMAIL)) {
+        if ($verificationEmail !== '' && !filter_var($verificationEmail, FILTER_VALIDATE_EMAIL)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Email verifikasi tidak valid.',
@@ -513,7 +513,7 @@ class ReportController extends Controller
             ], 404);
         }
 
-        if (!$this->emailMatchesReport($report, $verificationEmail)) {
+        if ($verificationEmail !== '' && !$this->emailMatchesReport($report, $verificationEmail)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Email tidak cocok dengan laporan ini.',
