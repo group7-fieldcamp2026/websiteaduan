@@ -150,6 +150,67 @@ const CONDITION_LAYER_VISUALS = {
 
 let locationFacultyMap = {};
 
+const LOGO_PHILOSOPHY_SLIDES = [
+  {
+    label: 'Identitas',
+    title: 'ITSafe',
+    img: 'assets/logo/ITSafe.png',
+    alt: 'Logo ITSafe',
+    glow: 'glow-itsafe',
+    desc: 'Platform pelaporan dan pemetaan area berpotensi rawan tindak asusila di lingkungan ITS. Dikembangkan sebagai alat analisis geospasial untuk mengidentifikasi kerawanan area berdasarkan perspektif civitas kampus.'
+  },
+  {
+    label: 'Perlindungan',
+    title: 'Perisai',
+    img: 'assets/logo/Shield.png',
+    alt: 'Perisai',
+    glow: 'glow-shield',
+    desc: 'Perisai melambangkan perlindungan dan rasa aman bagi seluruh civitas kampus. Elemen ini mencerminkan komitmen ITSafe dalam menjaga keamanan melalui sistem yang terstruktur dan terpercaya.'
+  },
+  {
+    label: 'Lokasi',
+    title: 'Pin Lokasi',
+    img: 'assets/logo/Pin.png',
+    alt: 'Pin Lokasi',
+    glow: 'glow-pin',
+    desc: 'Pin lokasi merepresentasikan pelaporan berbasis titik atau lokasi kejadian. Simbol ini menegaskan bahwa setiap laporan memiliki konteks spasial yang jelas untuk dianalisis.'
+  },
+  {
+    label: 'Geospasial',
+    title: 'Peta',
+    img: 'assets/logo/Map.png',
+    alt: 'Peta',
+    glow: 'glow-map',
+    desc: 'Elemen peta menggambarkan visualisasi wilayah dan persebaran area rawan. Hal ini menunjukkan fungsi ITSafe sebagai alat analisis berbasis geospasial untuk mendukung pengambilan keputusan.'
+  },
+  {
+    label: 'Empati',
+    title: 'Warna Pink',
+    img: 'assets/logo/Pink.png',
+    alt: 'Warna Pink',
+    glow: 'glow-pink',
+    desc: 'Warna pink mencerminkan empati, kepedulian, dan pendekatan humanis terhadap isu keamanan.'
+  },
+  {
+    label: 'Kepercayaan',
+    title: 'Warna Biru',
+    img: 'assets/logo/Biru.png',
+    alt: 'Warna Biru',
+    glow: 'glow-blue',
+    desc: 'Warna biru melambangkan kepercayaan, stabilitas, dan profesionalitas sistem.'
+  },
+  {
+    label: 'Kenyamanan',
+    title: 'Warna Cream',
+    img: 'assets/logo/Beige.png',
+    alt: 'Warna Cream',
+    glow: 'glow-cream',
+    desc: 'Warna beige memberikan kesan netral, seimbang, dan nyaman secara visual.'
+  }
+];
+
+let logoPhilosophyIndex = 0;
+
 // --- LOCATION DATA ------------------------------------------
 const DEFAULT_LOCATIONS = [
   { id: 1, name: 'Perpustakaan Pusat ITS', desc: 'Area parkir dan lobi utama perpustakaan, zona keluar-masuk yang minim pengawasan.', status: 'terpasang', count: 3, icon: 'fa-book-open', lat: -7.2748, lng: 112.7944, gmaps: 'https://maps.google.com/?q=-7.2748,112.7944' },
@@ -300,6 +361,91 @@ function attachTwoFingerHint(el) {
   el.addEventListener('touchcancel', hide, { passive: true });
 }
 
+function initLogoPhilosophyCarousel() {
+  const carousel = document.getElementById('logoPhilosophyCarousel');
+  const card = document.getElementById('logoCarouselCard');
+  const dots = document.getElementById('logoCarouselDots');
+  if (!carousel || !card) return;
+  if (carousel.dataset.carouselReady === '1') return;
+  carousel.dataset.carouselReady = '1';
+
+  if (dots) {
+    dots.innerHTML = LOGO_PHILOSOPHY_SLIDES.map((slide, index) => `
+      <button type="button" class="logo-carousel-dot" onclick="goLogoPhilosophy(${index})" aria-label="Tampilkan ${slide.title}" title="${slide.title}"></button>
+    `).join('');
+  }
+
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('.logo-carousel-btn, .logo-carousel-dot')) return;
+    const rect = card.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    moveLogoPhilosophy(clickX >= rect.width / 2 ? 1 : -1);
+  });
+
+  card.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      moveLogoPhilosophy(-1);
+    }
+    if (e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      moveLogoPhilosophy(1);
+    }
+  });
+
+  showLogoPhilosophySlide(logoPhilosophyIndex);
+}
+
+function showLogoPhilosophySlide(index) {
+  const total = LOGO_PHILOSOPHY_SLIDES.length;
+  const normalizedIndex = ((index % total) + total) % total;
+  const slide = LOGO_PHILOSOPHY_SLIDES[normalizedIndex];
+  logoPhilosophyIndex = normalizedIndex;
+
+  const card = document.getElementById('logoCarouselCard');
+  const img = document.getElementById('logoCarouselImg');
+  const glow = document.getElementById('logoCarouselGlow');
+  const count = document.getElementById('logoCarouselCount');
+  const label = document.getElementById('logoCarouselLabel');
+  const title = document.getElementById('logoCarouselTitle');
+  const desc = document.getElementById('logoCarouselDesc');
+  const dots = document.querySelectorAll('.logo-carousel-dot');
+
+  if (img) {
+    img.src = slide.img;
+    img.alt = slide.alt;
+  }
+  if (glow) {
+    glow.className = `logo-phil-glow ${slide.glow}`;
+  }
+  if (count) {
+    count.textContent = `${String(normalizedIndex + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+  }
+  if (label) label.textContent = slide.label;
+  if (title) title.textContent = slide.title;
+  if (desc) desc.textContent = slide.desc;
+
+  dots.forEach((dot, dotIndex) => {
+    const isActive = dotIndex === normalizedIndex;
+    dot.classList.toggle('active', isActive);
+    dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+  });
+
+  if (card) {
+    card.classList.remove('is-changing');
+    void card.offsetWidth;
+    card.classList.add('is-changing');
+  }
+}
+
+function moveLogoPhilosophy(delta) {
+  showLogoPhilosophySlide(logoPhilosophyIndex + delta);
+}
+
+function goLogoPhilosophy(index) {
+  showLogoPhilosophySlide(index);
+}
+
 // ============================================================
 // INIT
 // ============================================================
@@ -324,6 +470,7 @@ function itsafeInit() {
 
   generateQR();
   schedulePickerMapInit();
+  initLogoPhilosophyCarousel();
 
   // Exposed Globals
   window.navigateTo = navigateTo;
@@ -343,6 +490,8 @@ function itsafeInit() {
   window.openReportEditFromSuccess = openReportEditFromSuccess;
   window.cancelReportEdit = cancelReportEdit;
   window.verifyReportEmail = verifyReportEmail;
+  window.moveLogoPhilosophy = moveLogoPhilosophy;
+  window.goLogoPhilosophy = goLogoPhilosophy;
 }
 
 if (document.readyState === 'loading') {
