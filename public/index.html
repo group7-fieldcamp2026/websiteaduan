@@ -500,9 +500,15 @@
                     <input type="email" id="emailIts" placeholder="nama@gmail.com" required />
                     <div class="email-verify-row">
                       <button type="button" class="btn btn-outline btn-sm email-verify-btn" id="verifyEmailBtn" onclick="verifyReportEmail()">
-                        <i class="fas fa-circle-check"></i> Verifikasi Email
+                        <i class="fas fa-paper-plane"></i> Kirim Kode Email
                       </button>
                       <span id="emailVerifyStatus" class="email-verify-status">Email belum diverifikasi.</span>
+                    </div>
+                    <div class="email-code-row" id="emailCodeRow" hidden>
+                      <input type="text" id="emailVerificationCode" inputmode="numeric" maxlength="6" placeholder="Masukkan kode 6 digit dari email" />
+                      <button type="button" class="btn btn-primary btn-sm" onclick="confirmReportEmailCode()">
+                        <i class="fas fa-circle-check"></i> Cek Kode
+                      </button>
                     </div>
                     <span class="form-hint">Identitasmu tidak akan dipublikasikan. Namun, sangat disarankan menggunakan
                       email dengan nama asli guna memperkuat validitas laporan.</span>

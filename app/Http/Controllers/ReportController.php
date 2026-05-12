@@ -6,6 +6,7 @@ use App\Mail\ReportSubmittedNotification;
 use App\Mail\ReportAdminNotification;
 use App\Models\Report;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,30 @@ use Illuminate\Support\Str;
 
 class ReportController extends Controller
 {
+    private function normalizeEmail(string $email): string
+    {
+        return strtolower(trim($email));
+    }
+
+    private function emailVerificationCodeKey(string $email): string
+    {
+        return 'email_verify_code:' . sha1($this->normalizeEmail($email));
+    }
+
+    private function emailVerificationTokenKey(string $email, string $token): string
+    {
+        return 'email_verify_token:' . sha1($this->normalizeEmail($email) . '|' . $token);
+    }
+
+    private function emailVerificationTokenIsValid(string $email, ?string $token): bool
+    {
+        if (!$token) {
+            return false;
+        }
+
+        return Cache::get($this->emailVerificationTokenKey($email, $token)) === true;
+    }
+
     private function mapReportStatusForHistory(?string $status): string
     {
         return match ($status) {
@@ -278,6 +303,106 @@ class ReportController extends Controller
         }
     }
 
+    public function sendEmailVerification(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $email = $this->normalizeEmail($validated['email']);
+        $code = (string) random_int(100000, 999999);
+        $expiresAt = now()->addMinutes(10);
+        $smtpRuntime = $this->applySmtpRuntimeFallback();
+
+        Cache::put($this->emailVerificationCodeKey($email), [
+            'code' => $code,
+            'attempts' => 0,
+        ], $expiresAt);
+
+        try {
+            Mail::mailer('smtp')->raw(
+                "Kode verifikasi email ITSafe kamu adalah: {$code}\n\nKode ini berlaku selama 10 menit. Abaikan email ini jika kamu tidak sedang membuat laporan.",
+                function ($message) use ($email) {
+                    $message
+                        ->to($email)
+                        ->subject('Kode Verifikasi Email ITSafe');
+                }
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Kode verifikasi sudah dikirim ke email.',
+                'expires_in_minutes' => 10,
+            ]);
+        } catch (\Throwable $e) {
+            Cache::forget($this->emailVerificationCodeKey($email));
+
+            Log::error('Failed to send email verification code', [
+                'email' => $email,
+                'error' => $e->getMessage(),
+                'smtp_host' => $smtpRuntime['host'] ?? null,
+                'smtp_port' => $smtpRuntime['port'] ?? null,
+                'smtp_source' => $smtpRuntime['source'] ?? null,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode verifikasi gagal dikirim. Pastikan email benar dan SMTP server aktif.',
+                'hint' => $this->buildMailErrorHint($e->getMessage()),
+            ], 500);
+        }
+    }
+
+    public function confirmEmailVerification(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'code' => 'required|string|min:6|max:6',
+        ]);
+
+        $email = $this->normalizeEmail($validated['email']);
+        $code = trim($validated['code']);
+        $key = $this->emailVerificationCodeKey($email);
+        $verification = Cache::get($key);
+
+        if (!$verification) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode verifikasi sudah kedaluwarsa. Kirim ulang kode.',
+            ], 422);
+        }
+
+        $attempts = (int) ($verification['attempts'] ?? 0);
+        if ($attempts >= 5) {
+            Cache::forget($key);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terlalu banyak percobaan. Kirim ulang kode verifikasi.',
+            ], 429);
+        }
+
+        if (!hash_equals((string) ($verification['code'] ?? ''), $code)) {
+            $verification['attempts'] = $attempts + 1;
+            Cache::put($key, $verification, now()->addMinutes(10));
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode verifikasi tidak sesuai.',
+            ], 422);
+        }
+
+        Cache::forget($key);
+
+        $token = Str::random(48);
+        Cache::put($this->emailVerificationTokenKey($email, $token), true, now()->addHours(2));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Email berhasil diverifikasi.',
+            'token' => $token,
+        ]);
+    }
+
     // Terima laporan dari form
     public function store(Request $request)
     {
@@ -306,7 +431,17 @@ class ReportController extends Controller
             'fungsi_ruang'         => 'nullable|string',
             'kronologi'            => 'nullable|string',
             'kontak_pelapor'       => 'nullable|string',
+            'email_verification_token' => 'required|string',
         ]);
+
+        if (!$this->emailVerificationTokenIsValid($validated['email_its'], $validated['email_verification_token'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email belum terverifikasi. Kirim dan masukkan kode verifikasi email terlebih dahulu.',
+            ], 422);
+        }
+        Cache::forget($this->emailVerificationTokenKey($validated['email_its'], $validated['email_verification_token']));
+        unset($validated['email_verification_token']);
 
         if ($request->hasFile('foto_lokasi')) {
             $path = $request->file('foto_lokasi')->store('report-photos', 'public');
