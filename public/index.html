@@ -319,7 +319,6 @@
             class="fas fa-location-crosshairs"></i><span>Titik Pengaduan</span></a></li>
       <li><a href="#tentang" class="nav-link" data-page="tentang"><i
             class="fas fa-circle-info"></i><span>Tentang</span></a></li>
-      <li><a href="admin.html" class="nav-admin-link"><i class="fas fa-user-shield"></i><span>Admin</span></a></li>
     </ul>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Mode Gelap/Terang">
       <i class="fas fa-moon" id="themeIcon"></i>
@@ -376,7 +375,7 @@
           </div>
 
           <div class="hc2-stats">
-            <div class="hc2-stat"><span class="hc2-stat-n" id="totalLaporan">0</span><span class="hc2-stat-l">Laporan</span></div>
+            <div class="hc2-stat"><span class="hc2-stat-n" id="totalLaporan">0</span><span class="hc2-stat-l">Laporan Area Rawan</span></div>
             <div class="hc2-stat-div"></div>
             <div class="hc2-stat"><span class="hc2-stat-n" id="bulanIni">0</span><span class="hc2-stat-l">Bulan Ini</span></div>
             <div class="hc2-stat-div"></div>
@@ -410,8 +409,8 @@
       <!-- Chart Tren Banyak Laporan -->
       <div class="section-container reveal" id="chartSection" style="margin-top:2rem">
         <div class="section-header">
-          <h2><i class="fas fa-chart-column"></i> Tren Banyak Laporan Masuk</h2>
-          <p>Grafik laporan yang masuk berdasarkan bulan. Filter laporan berdasarkan waktu rawan di bawah ini.</p>
+          <h2><i class="fas fa-chart-column"></i> Tren Banyak Laporan Area Rawan Masuk</h2>
+          <p>Grafik laporan area rawan yang masuk berdasarkan bulan. Filter laporan berdasarkan waktu rawan di bawah ini.</p>
         </div>
         <div class="trend-chart-card"
           style="background:#fff; border-radius:12px; padding:1.5rem; box-shadow:0 10px 30px rgba(0,0,0,0.05); margin-bottom: 2rem;">
@@ -2368,7 +2367,7 @@
       /* ─── 4. Magnetic / Wiggle Button Effect ─── */
       function initMagnetic() {
         if (ITS_PERF.touch) return;
-        document.querySelectorAll('.btn-primary, .btn-admin-entry, .nav-admin-link').forEach(btn => {
+        document.querySelectorAll('.btn-primary').forEach(btn => {
           btn.addEventListener('mousemove', function (e) {
             const rect = this.getBoundingClientRect();
             const cx = rect.left + rect.width / 2;

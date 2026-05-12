@@ -8716,7 +8716,9 @@ html.perf-lite .nav-links {
   text-transform: uppercase;
   letter-spacing: .08em;
   color: var(--text-muted);
-  white-space: nowrap;
+  line-height: 1.2;
+  max-width: 8.5rem;
+  white-space: normal;
 }
 
 .hc2-stat-div {
