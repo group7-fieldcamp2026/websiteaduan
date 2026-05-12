@@ -625,6 +625,10 @@ function initFloatingMapControls() {
   document.getElementById('mapPanelCloseBtn')?.addEventListener('click', () => toggleMapControls(false));
   document.getElementById('mapFullscreenBtn')?.addEventListener('click', toggleMapFullscreen);
 
+  if (window.matchMedia('(max-width: 820px)').matches) {
+    toggleMapControls(false);
+  }
+
   ['fullscreenchange', 'webkitfullscreenchange', 'MSFullscreenChange'].forEach(eventName => {
     document.addEventListener(eventName, () => {
       const active = getMapFullscreenElement() === container;
