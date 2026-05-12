@@ -11644,43 +11644,54 @@ body {
 .history-status-badge.status-review { background: rgba(132,165,157,.12); color: #4A8078; }
 .history-status-badge.status-rejected { background: rgba(239,68,68,.1); color: #EF4444; }
 
-/* Hero CTA layout: primary action on top, support actions below */
+/* Hero CTA layout: keep all main actions in one row on desktop/tablet */
 .hero-actions.hero-actions-split {
   display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  gap: .65rem !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: .38rem !important;
   width: 100%;
+  flex-wrap: nowrap !important;
 }
 
 .hero-action-primary-row,
 .hero-action-secondary-row {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  flex-wrap: wrap;
+  display: contents;
 }
 
 .hero-actions.hero-actions-split .btn {
+  flex: 0 1 auto;
   width: auto !important;
+  min-width: 0;
   justify-content: center;
+  gap: .34rem;
+  padding: .58rem .58rem;
+  font-size: .72rem;
 }
 
-@media (max-width: 820px) {
+.hero-actions.hero-actions-split .btn i {
+  flex: 0 0 auto;
+  font-size: .9em;
+}
+
+@media (max-width: 560px) {
   .hero-actions.hero-actions-split {
+    display: grid !important;
+    grid-template-columns: 1fr;
     align-items: stretch !important;
+    gap: .55rem !important;
+    flex-wrap: wrap !important;
   }
 
   .hero-action-primary-row,
   .hero-action-secondary-row {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: .55rem;
+    display: contents;
   }
 
   .hero-actions.hero-actions-split .btn {
     width: 100% !important;
+    padding: .75rem 1rem;
+    font-size: .78rem;
   }
 }
 
