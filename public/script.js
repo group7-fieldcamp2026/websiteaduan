@@ -48,7 +48,7 @@ const BASEMAPS = {
   osm: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: 'Â© <a href="https://www.openstreetmap.org">OpenStreetMap</a>', opt: {} },
   satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles Â© Esri', opt: {} },
   dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: 'Â© <a href="https://carto.com">CARTO</a>', opt: { subdomains: 'abcd' } },
-  topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: 'Â© <a href="https://opentopomap.org">OpenTopoMap</a>', opt: {} },
+  topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: 'Â© <a href="https://opentopomap.org">OpenTopoMap</a>', opt: { maxNativeZoom: 17, maxZoom: 20 } },
 };
 
 const ITS = [-7.2756, 112.7951];

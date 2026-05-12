@@ -3962,10 +3962,10 @@
     // ─── ADMIN MAP ───────────────────────────────────────────────
     let adminBaseTile;
     const ADMIN_BASEMAPS = {
-      osm: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: '&copy; OpenStreetMap' },
-      satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles &copy; Esri' },
-      dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: '&copy; CartoDB' },
-      topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: '&copy; OpenTopoMap' }
+      osm: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: '&copy; OpenStreetMap', opt: {} },
+      satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles &copy; Esri', opt: {} },
+      dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: '&copy; CartoDB', opt: { subdomains: 'abcd' } },
+      topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: '&copy; OpenTopoMap', opt: { maxNativeZoom: 17, maxZoom: 20 } }
     };
 
     let adminBoundaryLayer = null;
@@ -3989,7 +3989,8 @@
       });
 
       adminBaseTile = L.tileLayer(ADMIN_BASEMAPS.osm.url, {
-        attribution: ADMIN_BASEMAPS.osm.attr
+        attribution: ADMIN_BASEMAPS.osm.attr,
+        ...ADMIN_BASEMAPS.osm.opt
       }).addTo(adminMap);
 
       adminReportLayer = L.layerGroup().addTo(adminMap);
@@ -4028,7 +4029,7 @@
       if (!adminMap) return;
       adminMap.eachLayer(l => { if (l === adminBaseTile) adminMap.removeLayer(l); });
       const cfg = ADMIN_BASEMAPS[bm];
-      adminBaseTile = L.tileLayer(cfg.url, { attribution: cfg.attr }).addTo(adminMap);
+      adminBaseTile = L.tileLayer(cfg.url, { attribution: cfg.attr, ...(cfg.opt || {}) }).addTo(adminMap);
       adminBaseTile.bringToBack();
     }
 
