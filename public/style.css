@@ -1586,12 +1586,6 @@ main {
   margin-top: .15rem;
 }
 
-.email-verify-btn.verified {
-  border-color: rgba(16, 185, 129, .35);
-  color: #059669;
-  background: rgba(16, 185, 129, .08);
-}
-
 .email-verify-status {
   font-size: .76rem;
   color: var(--text-muted);
@@ -1604,33 +1598,6 @@ main {
 
 .email-verify-status.invalid {
   color: #A87A10;
-}
-
-.email-code-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: .55rem;
-  align-items: center;
-  margin-top: .45rem;
-}
-
-.email-code-row[hidden] {
-  display: none;
-}
-
-.email-code-row input {
-  min-width: 0;
-}
-
-@media (max-width: 520px) {
-  .email-code-row {
-    grid-template-columns: 1fr;
-  }
-
-  .email-code-row .btn {
-    width: 100%;
-    justify-content: center;
-  }
 }
 
 .form-hint {
@@ -5958,12 +5925,6 @@ main {
 [data-theme="dark"] .form-group textarea.filled {
   border-color: rgba(212, 135, 154, .25);
   background: rgba(212, 135, 154, .04);
-}
-
-[data-theme="dark"] .email-verify-btn.verified {
-  background: rgba(16, 185, 129, .12);
-  border-color: rgba(16, 185, 129, .32);
-  color: #7dd3a8;
 }
 
 [data-theme="dark"] .form-group select option {

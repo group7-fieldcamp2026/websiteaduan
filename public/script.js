@@ -40,8 +40,6 @@ let editingReport = null;
 let currentHistoryEmail = '';
 let reportEmailVerified = false;
 let verifiedReportEmail = '';
-let reportEmailVerificationToken = '';
-let reportEmailCodeSent = false;
 
 const BOUNDARY_SRC_CRS = 'EPSG:32749';
 const BOUNDARY_SRC_DEF = '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs';
@@ -345,7 +343,6 @@ function itsafeInit() {
   window.openReportEditFromSuccess = openReportEditFromSuccess;
   window.cancelReportEdit = cancelReportEdit;
   window.verifyReportEmail = verifyReportEmail;
-  window.confirmReportEmailCode = confirmReportEmailCode;
 }
 
 if (document.readyState === 'loading') {
@@ -585,39 +582,24 @@ function isValidEmail(value) {
 
 function isReportEmailVerified() {
   const email = normalizeEmail(document.getElementById('emailIts')?.value || '');
-  return !!email && reportEmailVerified && verifiedReportEmail === email && !!reportEmailVerificationToken;
+  return !!email && isValidEmail(email);
 }
 
 function updateReportEmailVerificationUi() {
   const email = normalizeEmail(document.getElementById('emailIts')?.value || '');
   const status = document.getElementById('emailVerifyStatus');
-  const button = document.getElementById('verifyEmailBtn');
-  const codeRow = document.getElementById('emailCodeRow');
   const verified = isReportEmailVerified();
 
   if (status) {
     status.classList.toggle('verified', verified);
-    status.classList.toggle('invalid', !!email && !verified && !reportEmailCodeSent);
+    status.classList.toggle('invalid', !!email && !verified);
     if (verified) {
-      status.textContent = 'Email terverifikasi. Kamu bisa lanjut.';
-    } else if (reportEmailCodeSent) {
-      status.textContent = 'Kode sudah dikirim. Cek inbox/spam lalu masukkan kode.';
+      status.textContent = 'Format email valid. Kamu bisa lanjut.';
+    } else if (email) {
+      status.textContent = 'Format email belum valid.';
     } else {
-      status.textContent = 'Email belum diverifikasi.';
+      status.textContent = 'Format email akan dicek otomatis.';
     }
-  }
-
-  if (button) {
-    button.classList.toggle('verified', verified);
-    button.innerHTML = verified
-      ? '<i class="fas fa-circle-check"></i> Terverifikasi'
-      : (reportEmailCodeSent
-        ? '<i class="fas fa-paper-plane"></i> Kirim Ulang Kode'
-        : '<i class="fas fa-paper-plane"></i> Kirim Kode Email');
-  }
-
-  if (codeRow) {
-    codeRow.hidden = verified || !reportEmailCodeSent;
   }
 }
 
@@ -625,33 +607,23 @@ function handleReportEmailInput() {
   const email = normalizeEmail(document.getElementById('emailIts')?.value || '');
   if (email !== verifiedReportEmail) {
     reportEmailVerified = false;
-    reportEmailVerificationToken = '';
-    reportEmailCodeSent = false;
-    const codeInput = document.getElementById('emailVerificationCode');
-    if (codeInput) codeInput.value = '';
   }
   updateReportEmailVerificationUi();
 }
 
-function markReportEmailVerified(email, token = '') {
+function markReportEmailVerified(email) {
   verifiedReportEmail = normalizeEmail(email);
   reportEmailVerified = !!verifiedReportEmail;
-  reportEmailVerificationToken = token;
-  reportEmailCodeSent = false;
   updateReportEmailVerificationUi();
 }
 
 function resetReportEmailVerification() {
   reportEmailVerified = false;
   verifiedReportEmail = '';
-  reportEmailVerificationToken = '';
-  reportEmailCodeSent = false;
-  const codeInput = document.getElementById('emailVerificationCode');
-  if (codeInput) codeInput.value = '';
   updateReportEmailVerificationUi();
 }
 
-async function verifyReportEmail() {
+function verifyReportEmail() {
   const input = document.getElementById('emailIts');
   const email = normalizeEmail(input?.value || '');
 
@@ -669,82 +641,9 @@ async function verifyReportEmail() {
     return false;
   }
 
-  try {
-    showToast('Mengirim kode verifikasi email...', 'success');
-    const res = await fetch(`${API_BASE}/email-verification/send`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok || !data.success) {
-      resetReportEmailVerification();
-      showToast(data.message || 'Kode verifikasi gagal dikirim.', 'error');
-      return false;
-    }
-
-    verifiedReportEmail = email;
-    reportEmailVerified = false;
-    reportEmailVerificationToken = '';
-    reportEmailCodeSent = true;
-    updateReportEmailVerificationUi();
-    document.getElementById('emailVerificationCode')?.focus();
-    showToast('Kode verifikasi sudah dikirim ke email.', 'success');
-    return true;
-  } catch (err) {
-    console.error(err);
-    resetReportEmailVerification();
-    showToast('Tidak dapat mengirim kode verifikasi email.', 'error');
-    return false;
-  }
-}
-
-async function confirmReportEmailCode() {
-  const input = document.getElementById('emailIts');
-  const codeInput = document.getElementById('emailVerificationCode');
-  const email = normalizeEmail(input?.value || '');
-  const code = String(codeInput?.value || '').trim();
-
-  if (!email || !isValidEmail(email)) {
-    showToast('Email belum valid.', 'error');
-    input?.focus();
-    return false;
-  }
-  if (!/^\d{6}$/.test(code)) {
-    showToast('Masukkan kode 6 digit dari email.', 'error');
-    codeInput?.focus();
-    return false;
-  }
-
-  try {
-    showToast('Memeriksa kode verifikasi...', 'success');
-    const res = await fetch(`${API_BASE}/email-verification/confirm`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, code }),
-    });
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok || !data.success || !data.token) {
-      showToast(data.message || 'Kode verifikasi tidak sesuai.', 'error');
-      return false;
-    }
-
-    markReportEmailVerified(email, data.token);
-    showToast('Email berhasil diverifikasi.', 'success');
-    return true;
-  } catch (err) {
-    console.error(err);
-    showToast('Tidak dapat memeriksa kode verifikasi.', 'error');
-    return false;
-  }
+  markReportEmailVerified(email);
+  showToast('Format email valid.', 'success');
+  return true;
 }
 
 function initReportWizard() {
@@ -1043,10 +942,6 @@ async function handleSubmit(e) {
   if (fotoFile) {
     formData.append('foto_lokasi', fotoFile);
   }
-  if (!editingReport && reportEmailVerificationToken) {
-    formData.append('email_verification_token', reportEmailVerificationToken);
-  }
-
   try {
     const wasEditing = !!editingReport;
     const editedCode = editingReport?.code || '';
@@ -1192,7 +1087,7 @@ function fillReportFormForEdit(report, verificationEmail) {
   setReportFieldValue('situasiMencurigakan', report.situasi_mencurigakan);
   setReportFieldValue('kronologi', report.kronologi);
   setReportFieldValue('kontakPelapor', report.kontak_pelapor);
-  markReportEmailVerified(report.email_its, 'edit-mode');
+  markReportEmailVerified(report.email_its);
 
   if (!setLocationSelectValue(report.lokasi_kejadian || '')) {
     setLocationSelectValue(getOtherLocationOptionValue());

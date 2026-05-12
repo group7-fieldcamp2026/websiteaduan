@@ -16,8 +16,6 @@ Route::post('/reports/edit/{code}', [ReportController::class, 'updateByReporter'
 Route::put('/reports/{id}', [ReportController::class, 'update']);
 Route::delete('/reports/{id}', [ReportController::class, 'destroy']);
 Route::post('/mail/health-check', [ReportController::class, 'mailHealthCheck'])->middleware('throttle:5,1');
-Route::post('/email-verification/send', [ReportController::class, 'sendEmailVerification'])->middleware('throttle:5,1');
-Route::post('/email-verification/confirm', [ReportController::class, 'confirmEmailVerification'])->middleware('throttle:10,1');
 
 // Google Maps URL resolver
 Route::post('/gmaps/resolve', [GmapsController::class, 'resolve']);
