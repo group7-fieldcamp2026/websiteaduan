@@ -465,6 +465,18 @@
 
         <div class="form-card">
           <form id="reportForm" novalidate>
+            <div id="reportEditNotice" class="report-edit-notice" hidden>
+              <div class="report-edit-notice-main">
+                <span class="report-edit-icon"><i class="fas fa-pen-to-square"></i></span>
+                <div>
+                  <strong>Mode Edit Laporan</strong>
+                  <p>Kode <span id="reportEditCode">-</span>. Perubahan hanya bisa disimpan selama laporan masih menunggu verifikasi.</p>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" onclick="cancelReportEdit()">
+                <i class="fas fa-xmark"></i> Batal Edit
+              </button>
+            </div>
             <div class="form-two-col">
 
               <!-- ===== KOLOM KIRI: IDENTITAS + LOKASI + KONDISI FISIK ===== -->
@@ -892,8 +904,8 @@
                   <span>Saya menyatakan informasi yang diberikan benar dan bersedia digunakan untuk kepentingan
                     penelitian.</span>
                 </label>
-                <button type="submit" class="btn btn-primary btn-lg btn-submit-glow">
-                  <i class="fas fa-paper-plane"></i> Kirim Laporan
+                <button type="submit" class="btn btn-primary btn-lg btn-submit-glow" id="reportSubmitBtn">
+                  <i class="fas fa-paper-plane" id="reportSubmitIcon"></i> <span id="reportSubmitLabel">Kirim Laporan</span>
                 </button>
               </div>
             </div>

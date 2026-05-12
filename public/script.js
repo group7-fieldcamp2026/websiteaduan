@@ -36,6 +36,8 @@ let boundaryLayerPicker = null;
 let boundaryGeoJSON = null;
 let boundaryPolygons = null;
 let currentBm = 'osm';
+let editingReport = null;
+let currentHistoryEmail = '';
 
 const BOUNDARY_SRC_CRS = 'EPSG:32749';
 const BOUNDARY_SRC_DEF = '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs';
@@ -332,6 +334,8 @@ function itsafeInit() {
   window.showReportDetail = showReportDetail;
   window.closeHistoryDetail = closeHistoryDetail;
   window.checkReportStatus = checkReportStatus;
+  window.startReportEdit = startReportEdit;
+  window.cancelReportEdit = cancelReportEdit;
 }
 
 if (document.readyState === 'loading') {
@@ -470,6 +474,19 @@ function stopRealtimeSync() {
 // Kirim laporan ke Laravel
 async function submitToAPI(payload) {
   const isFormData = payload instanceof FormData;
+  const editContext = editingReport ? { ...editingReport } : null;
+  const endpoint = editContext
+    ? `${API_BASE}/reports/edit/${encodeURIComponent(editContext.code)}`
+    : `${API_BASE}/reports`;
+
+  if (editContext) {
+    if (isFormData) {
+      payload.append('verification_email', editContext.email);
+    } else {
+      payload.verification_email = editContext.email;
+    }
+  }
+
   const options = {
     method: 'POST',
     headers: { 'Accept': 'application/json' },
@@ -478,7 +495,7 @@ async function submitToAPI(payload) {
   if (!isFormData) {
     options.headers['Content-Type'] = 'application/json';
   }
-  const res = await fetch(`${API_BASE}/reports`, options);
+  const res = await fetch(endpoint, options);
   return await res.json();
 }
 
@@ -831,27 +848,36 @@ async function handleSubmit(e) {
   }
 
   try {
-    showToast('Mengirim laporan...', 'success');
+    const wasEditing = !!editingReport;
+    const editedCode = editingReport?.code || '';
+    showToast(wasEditing ? 'Menyimpan perubahan laporan...' : 'Mengirim laporan...', 'success');
     const result = await submitToAPI(formData);
     if (result.success) {
       e.target.reset();
       clearPin();
+      syncReportChoiceButtons();
+      exitReportEditMode({ resetForm: false });
       if (typeof window.itsafeResetReportWizard === 'function') window.itsafeResetReportWizard();
+      if (typeof window.itsafeBootUI === 'function') window.itsafeBootUI();
       await fetchReports();
       await fetchStats();
 
-      openSubmitSuccessModal({
-        reportCode: result.report_code,
-        mailSent: result.mail_sent !== false,
-      });
-
-      if (result.mail_sent === false) {
-        showToast(`Laporan tersimpan (kode: ${result.report_code}), tapi email admin belum terkirim.`, 'error');
+      if (wasEditing) {
+        showToast(`Perubahan laporan ${editedCode || result.report_code} berhasil disimpan.`, 'success');
       } else {
-        showToast(`Laporan terkirim! Kode: ${result.report_code}`, 'success');
+        openSubmitSuccessModal({
+          reportCode: result.report_code,
+          mailSent: result.mail_sent !== false,
+        });
+
+        if (result.mail_sent === false) {
+          showToast(`Laporan tersimpan (kode: ${result.report_code}), tapi email admin belum terkirim.`, 'error');
+        } else {
+          showToast(`Laporan terkirim! Kode: ${result.report_code}`, 'success');
+        }
       }
     } else {
-      showToast('Gagal mengirim laporan. Coba lagi.', 'error');
+      showToast(result.message || (editingReport ? 'Gagal menyimpan perubahan laporan.' : 'Gagal mengirim laporan. Coba lagi.'), 'error');
     }
   } catch (err) {
     console.error(err);
@@ -870,6 +896,158 @@ function handleLocationPreset() {
     setPin(parseFloat(lat), parseFloat(lng), { fromPreset: true, center: true });
   } else if (opt && isOtherLocationValue(opt.value || opt.textContent)) {
     clearPin();
+  }
+}
+
+function setReportFieldValue(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = value ?? '';
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+function syncReportChoiceButtons() {
+  document.querySelectorAll('.level-rating-group').forEach(group => {
+    const target = document.getElementById(group.dataset.target);
+    const value = target?.value || '';
+    group.querySelectorAll('.level-card').forEach(card => {
+      card.classList.toggle('active', String(card.dataset.val) === String(value));
+    });
+  });
+
+  document.querySelectorAll('.pill-group').forEach(group => {
+    const firstPill = group.querySelector('.pill-btn');
+    const target = firstPill ? document.getElementById(firstPill.dataset.target) : null;
+    const value = target?.value || '';
+    group.querySelectorAll('.pill-btn').forEach(pill => {
+      pill.classList.toggle('active', String(pill.dataset.val) === String(value));
+    });
+  });
+}
+
+function updateReportEditUi() {
+  const form = document.getElementById('reportForm');
+  const notice = document.getElementById('reportEditNotice');
+  const codeEl = document.getElementById('reportEditCode');
+  const submitIcon = document.getElementById('reportSubmitIcon');
+  const submitLabel = document.getElementById('reportSubmitLabel');
+
+  if (form) form.classList.toggle('is-editing-report', !!editingReport);
+  if (notice) notice.hidden = !editingReport;
+  if (codeEl) codeEl.textContent = editingReport?.code || '-';
+
+  if (submitIcon) {
+    submitIcon.className = editingReport ? 'fas fa-floppy-disk' : 'fas fa-paper-plane';
+  }
+  if (submitLabel) {
+    submitLabel.textContent = editingReport ? 'Simpan Perubahan' : 'Kirim Laporan';
+  }
+}
+
+function exitReportEditMode(opts = {}) {
+  editingReport = null;
+  if (opts.resetForm) {
+    const form = document.getElementById('reportForm');
+    if (form) form.reset();
+    clearPin();
+    syncReportChoiceButtons();
+    if (typeof window.itsafeResetReportWizard === 'function') window.itsafeResetReportWizard();
+    if (typeof window.itsafeBootUI === 'function') window.itsafeBootUI();
+  }
+  updateReportEditUi();
+}
+
+function cancelReportEdit() {
+  exitReportEditMode({ resetForm: true });
+  showToast('Mode edit dibatalkan.', 'success');
+}
+
+function fillReportFormForEdit(report, verificationEmail) {
+  if (!report || !report.report_code) return;
+  editingReport = {
+    code: report.report_code,
+    email: verificationEmail,
+  };
+
+  setReportFieldValue('emailIts', report.email_its);
+  setReportFieldValue('peranKampus', report.peran_kampus);
+  setReportFieldValue('jenisKelamin', report.jenis_kelamin);
+  setReportFieldValue('lokasiDeskripsi', report.lokasi_deskripsi);
+  setReportFieldValue('pencahayaan', report.pencahayaan);
+  setReportFieldValue('kepadatan', report.kepadatan);
+  setReportFieldValue('cctv', report.cctv);
+  setReportFieldValue('petugasKeamanan', report.petugas_keamanan);
+  setReportFieldValue('vegetasi', report.vegetasi);
+  setReportFieldValue('waktuInsiden', report.waktu_rawan);
+  setReportFieldValue('hariRawan', report.hari_rawan);
+  setReportFieldValue('skorNyaman', report.skor_nyaman);
+  setReportFieldValue('alasanTidakNyaman', report.alasan_tidak_nyaman);
+  setReportFieldValue('skorRawan', report.skor_rawan);
+  setReportFieldValue('pernahHindari', report.pernah_hindari);
+  setReportFieldValue('orangLain', report.orang_lain);
+  setReportFieldValue('situasiMencurigakan', report.situasi_mencurigakan);
+  setReportFieldValue('kronologi', report.kronologi);
+  setReportFieldValue('kontakPelapor', report.kontak_pelapor);
+
+  if (!setLocationSelectValue(report.lokasi_kejadian || '')) {
+    setLocationSelectValue(getOtherLocationOptionValue());
+  }
+  document.getElementById('lokasiInsiden')?.dispatchEvent(new Event('change', { bubbles: true }));
+
+  const lat = parseFloat(report.latitude);
+  const lng = parseFloat(report.longitude);
+  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+    document.getElementById('lat').value = lat.toFixed(6);
+    document.getElementById('lng').value = lng.toFixed(6);
+    setTimeout(() => setPin(lat, lng, { fromPreset: true, center: true }), 120);
+  } else {
+    handleLocationPreset();
+  }
+
+  const consent = document.getElementById('consent');
+  if (consent) consent.checked = true;
+  const fotoInput = document.getElementById('fotoLokasi');
+  if (fotoInput) fotoInput.value = '';
+
+  syncReportChoiceButtons();
+  updateReportEditUi();
+  if (typeof window.itsafeResetReportWizard === 'function') window.itsafeResetReportWizard();
+  if (typeof window.itsafeBootUI === 'function') window.itsafeBootUI();
+}
+
+async function startReportEdit(code) {
+  const reportCode = String(code || '').trim();
+  if (!reportCode) return;
+
+  let email = (currentHistoryEmail || document.getElementById('historyEmailInput')?.value || '').trim();
+  if (!email) {
+    email = (window.prompt('Masukkan email pelapor untuk verifikasi edit laporan:') || '').trim();
+  }
+  if (!email) {
+    showToast('Email pelapor diperlukan untuk edit laporan.', 'error');
+    return;
+  }
+
+  try {
+    showToast('Memuat laporan untuk diedit...', 'success');
+    const res = await fetch(`${API_BASE}/reports/edit/${encodeURIComponent(reportCode)}?email=${encodeURIComponent(email)}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      showToast(data.message || 'Laporan tidak bisa diedit.', 'error');
+      return;
+    }
+
+    closeHistoryModal();
+    navigateTo('home');
+    setTimeout(() => {
+      fillReportFormForEdit(data.data, email);
+      document.getElementById('formSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast(`Mode edit aktif untuk ${reportCode}.`, 'success');
+    }, 180);
+  } catch (err) {
+    console.error(err);
+    showToast('Tidak dapat memuat data laporan.', 'error');
   }
 }
 
@@ -2814,6 +2992,7 @@ function openHistoryModal() {
   const res = document.getElementById('historyResult');
   const inp = document.getElementById('historyEmailInput');
   const detailWrap = document.getElementById('historyDetailWrap');
+  currentHistoryEmail = '';
   if (res) { res.style.display = 'none'; res.innerHTML = ''; }
   if (inp) inp.value = '';
   if (detailWrap) detailWrap.style.display = 'none';
@@ -2834,6 +3013,7 @@ function switchHistoryTab(tab) {
     if (panelEmail) panelEmail.style.display = '';
     if (panelCode) panelCode.style.display = 'none';
   } else {
+    currentHistoryEmail = '';
     if (tabCode) tabCode.classList.add('active');
     if (tabEmail) tabEmail.classList.remove('active');
     if (panelCode) panelCode.style.display = '';
@@ -2848,6 +3028,7 @@ async function checkReportsByEmail() {
   if (!input || !result) return;
   const email = input.value.trim();
   if (!email) { showToast('Masukkan email terlebih dahulu.', 'error'); return; }
+  currentHistoryEmail = email;
   if (detailWrap) detailWrap.style.display = 'none';
   result.style.display = 'block';
   result.innerHTML = '<div class="history-loading"><i class="fas fa-spinner fa-spin"></i> Mencari laporan...</div>';
@@ -2914,7 +3095,14 @@ async function showReportDetail(code) {
       const s = statusMap[data.status] || { cls: 'status-pending', icon: 'fa-question-circle', label: data.status || 'Tidak diketahui' };
       const note = data.status === 'valid' ? 'Laporan kamu sudah tampil di peta persebaran ITSafe.' :
                    data.status === 'rejected' ? 'Laporan tidak memenuhi kriteria. Kamu bisa membuat laporan baru dengan data lebih lengkap.' :
+                   data.can_edit ? 'Laporan masih menunggu verifikasi. Kamu masih bisa mengedit sebelum admin mulai meninjau.' :
                    'Tim admin sedang memproses laporanmu. Cek email kamu untuk notifikasi terbaru.';
+      const editAction = data.can_edit ? `
+        <div class="history-action-row">
+          <button type="button" class="btn btn-primary btn-sm" onclick="startReportEdit('${esc(code)}')">
+            <i class="fas fa-pen-to-square"></i> Edit Laporan
+          </button>
+        </div>` : '';
       detailResult.innerHTML = `
         <div class="history-result-card ${s.cls}">
           <div class="history-result-header">
@@ -2927,6 +3115,7 @@ async function showReportDetail(code) {
           ${data.lokasi ? `<div class="history-result-detail"><i class="fas fa-map-pin"></i> ${esc(data.lokasi)}</div>` : ''}
           ${data.createdAt ? `<div class="history-result-detail"><i class="fas fa-calendar"></i> Dilaporkan pada ${new Date(data.createdAt).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
           <p class="history-result-note">${note}</p>
+          ${editAction}
         </div>`;
     } else {
       detailResult.innerHTML = '<div class="history-result-card status-rejected"><i class="fas fa-circle-xmark"></i> Detail laporan tidak dapat dimuat.</div>';
@@ -2970,9 +3159,16 @@ async function checkReportStatus() {
         'rejected': { cls: 'status-rejected', icon: 'fa-circle-xmark',    label: 'Ditolak' },
       };
       const s = statusMap[data.status] || { cls: 'status-pending', icon: 'fa-question-circle', label: data.status || 'Tidak diketahui' };
-      const note = data.status === 'valid' ? '✅ Laporan kamu sudah tampil di peta persebaran ITSafe!' :
+      const note = data.status === 'valid' ? 'Laporan kamu sudah tampil di peta persebaran ITSafe.' :
                    data.status === 'rejected' ? 'Laporan tidak memenuhi kriteria. Kamu bisa membuat laporan baru dengan data lebih lengkap.' :
+                   data.can_edit ? 'Laporan masih menunggu verifikasi. Kamu masih bisa mengedit sebelum admin mulai meninjau.' :
                    'Tim admin sedang memproses laporanmu. Cek email kamu untuk notifikasi terbaru.';
+      const editAction = data.can_edit ? `
+        <div class="history-action-row">
+          <button type="button" class="btn btn-primary btn-sm" onclick="startReportEdit('${esc(code)}')">
+            <i class="fas fa-pen-to-square"></i> Edit Laporan
+          </button>
+        </div>` : '';
       result.innerHTML = `
         <div class="history-result-card ${s.cls}">
           <div class="history-result-header">
@@ -2985,6 +3181,7 @@ async function checkReportStatus() {
           ${data.lokasi ? `<div class="history-result-detail"><i class="fas fa-map-pin"></i> ${esc(data.lokasi)}</div>` : ''}
           ${data.createdAt ? `<div class="history-result-detail"><i class="fas fa-calendar"></i> Dilaporkan: ${new Date(data.createdAt).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
           <p class="history-result-note">${note}</p>
+          ${editAction}
         </div>`;
     } else {
       result.innerHTML = '<div class="history-result-card status-rejected"><i class="fas fa-circle-xmark"></i> Kode laporan tidak ditemukan. Pastikan kode sudah benar.</div>';

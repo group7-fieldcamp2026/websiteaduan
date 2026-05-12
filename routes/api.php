@@ -11,6 +11,8 @@ Route::get('/reports/by-email', [ReportController::class, 'byEmail']);
 Route::get('/reports/admin', [ReportController::class, 'adminIndex']);
 Route::get('/reports/stats', [ReportController::class, 'stats']);
 Route::get('/reports/status/{code}', [ReportController::class, 'checkStatus']);
+Route::get('/reports/edit/{code}', [ReportController::class, 'editByReporter']);
+Route::post('/reports/edit/{code}', [ReportController::class, 'updateByReporter']);
 Route::put('/reports/{id}', [ReportController::class, 'update']);
 Route::delete('/reports/{id}', [ReportController::class, 'destroy']);
 Route::post('/mail/health-check', [ReportController::class, 'mailHealthCheck'])->middleware('throttle:5,1');

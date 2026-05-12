@@ -23,6 +23,46 @@ class ReportController extends Controller
         };
     }
 
+    private function reporterEditPayloadRules(): array
+    {
+        return [
+            'email_its'            => 'required|email',
+            'peran_kampus'         => 'required|in:Mahasiswa,Dosen,Tenaga Kependidikan,Lainnya (non-ITS)',
+            'jenis_kelamin'        => 'nullable|in:Laki-laki,Perempuan,Tidak ingin menyebutkan',
+            'lokasi_kejadian'      => 'required|string',
+            'lokasi_deskripsi'     => 'required|string|max:1000',
+            'latitude'             => 'nullable|numeric',
+            'longitude'            => 'nullable|numeric',
+            'foto_lokasi'          => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'pencahayaan'          => 'required|in:Terang,Remang-remang,Gelap',
+            'kepadatan'            => 'required|in:Ramai,Cukup ramai,Sepi,Sangat sepi',
+            'cctv'                 => 'required|in:Ada dan terlihat jelas,Ada tapi tidak yakin aktif,Tidak ada,Tidak tahu',
+            'petugas_keamanan'     => 'required|in:Sering ada,Kadang ada,Jarang ada,Tidak pernah ada',
+            'vegetasi'             => 'nullable|string',
+            'waktu_rawan'          => 'required|in:Pagi,Siang,Malam,Sepanjang Hari',
+            'hari_rawan'           => 'nullable|string',
+            'skor_nyaman'          => 'required|integer|min:1|max:3',
+            'alasan_tidak_nyaman'  => 'nullable|string',
+            'skor_rawan'           => 'required|integer|min:1|max:3',
+            'pernah_hindari'       => 'nullable|string',
+            'orang_lain'           => 'nullable|string',
+            'situasi_mencurigakan' => 'nullable|string',
+            'fungsi_ruang'         => 'nullable|string',
+            'kronologi'            => 'nullable|string',
+            'kontak_pelapor'       => 'nullable|string',
+        ];
+    }
+
+    private function emailMatchesReport(Report $report, ?string $email): bool
+    {
+        return strtolower(trim((string) $report->email_its)) === strtolower(trim((string) $email));
+    }
+
+    private function reportCanBeEditedByReporter(Report $report): bool
+    {
+        return $report->status === 'pending';
+    }
+
     private function buildMailErrorHint(string $errorMessage): string
     {
         $msg = strtolower($errorMessage);
@@ -383,6 +423,7 @@ class ReportController extends Controller
                     'status' => $this->mapReportStatusForHistory($report->status),
                     'lokasi' => $report->lokasi_kejadian,
                     'created_at' => $report->created_at,
+                    'can_edit' => $this->reportCanBeEditedByReporter($report),
                 ];
             }),
         ]);
@@ -405,7 +446,104 @@ class ReportController extends Controller
             'status' => $this->mapReportStatusForHistory($report->status),
             'lokasi' => $report->lokasi_kejadian,
             'createdAt' => $report->created_at,
+            'can_edit' => $this->reportCanBeEditedByReporter($report),
             // field legacy
+            'data' => $report,
+        ]);
+    }
+
+    // Ambil data lengkap laporan untuk diedit pelapor.
+    // Kunci edit: kode laporan + email pelapor, dan status harus masih pending.
+    public function editByReporter(Request $request, string $code)
+    {
+        $email = trim((string) $request->query('email', ''));
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email verifikasi tidak valid.',
+            ], 400);
+        }
+
+        $report = Report::where('report_code', $code)->first();
+        if (!$report) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode laporan tidak ditemukan.',
+            ], 404);
+        }
+
+        if (!$this->emailMatchesReport($report, $email)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email tidak cocok dengan laporan ini.',
+            ], 403);
+        }
+
+        if (!$this->reportCanBeEditedByReporter($report)) {
+            return response()->json([
+                'success' => false,
+                'can_edit' => false,
+                'message' => 'Laporan sudah masuk proses verifikasi sehingga tidak bisa diedit lagi.',
+            ], 409);
+        }
+
+        return response()->json([
+            'success' => true,
+            'can_edit' => true,
+            'data' => $report,
+        ]);
+    }
+
+    // Simpan revisi laporan dari pelapor. Hanya berlaku saat laporan masih pending.
+    public function updateByReporter(Request $request, string $code)
+    {
+        $verificationEmail = trim((string) $request->input('verification_email', ''));
+        if ($verificationEmail === '' || !filter_var($verificationEmail, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email verifikasi tidak valid.',
+            ], 400);
+        }
+
+        $report = Report::where('report_code', $code)->first();
+        if (!$report) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode laporan tidak ditemukan.',
+            ], 404);
+        }
+
+        if (!$this->emailMatchesReport($report, $verificationEmail)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email tidak cocok dengan laporan ini.',
+            ], 403);
+        }
+
+        if (!$this->reportCanBeEditedByReporter($report)) {
+            return response()->json([
+                'success' => false,
+                'can_edit' => false,
+                'message' => 'Laporan sudah masuk proses verifikasi sehingga tidak bisa diedit lagi.',
+            ], 409);
+        }
+
+        $validated = $request->validate($this->reporterEditPayloadRules());
+
+        if ($request->hasFile('foto_lokasi')) {
+            $path = $request->file('foto_lokasi')->store('report-photos', 'public');
+            $validated['foto_path'] = $path;
+        }
+        unset($validated['foto_lokasi']);
+
+        $report->fill($validated);
+        $report->status = 'pending';
+        $report->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Perubahan laporan berhasil disimpan.',
+            'report_code' => $report->report_code,
             'data' => $report,
         ]);
     }
