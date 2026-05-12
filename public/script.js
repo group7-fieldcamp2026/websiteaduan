@@ -471,6 +471,7 @@ function itsafeInit() {
   generateQR();
   schedulePickerMapInit();
   initLogoPhilosophyCarousel();
+  initFloatingMapControls();
 
   // Exposed Globals
   window.navigateTo = navigateTo;
@@ -492,12 +493,151 @@ function itsafeInit() {
   window.verifyReportEmail = verifyReportEmail;
   window.moveLogoPhilosophy = moveLogoPhilosophy;
   window.goLogoPhilosophy = goLogoPhilosophy;
+  window.toggleMapControls = toggleMapControls;
+  window.toggleMapFullscreen = toggleMapFullscreen;
 }
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', itsafeInit);
 } else {
   itsafeInit();
+}
+
+// ============================================================
+// FLOATING MAP CONTROLS & FULLSCREEN
+// ============================================================
+function getMapFullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+}
+
+function invalidateMainMapSoon() {
+  [80, 260, 620].forEach(delay => {
+    setTimeout(() => {
+      if (leafletMap) leafletMap.invalidateSize();
+    }, delay);
+  });
+}
+
+function setMapFullscreenState(active) {
+  const container = document.getElementById('mapContainer');
+  const btn = document.getElementById('mapFullscreenBtn');
+  if (!container) return;
+
+  container.classList.toggle('is-fullscreen', active);
+  document.body.classList.toggle('map-fullscreen-open', active);
+
+  if (btn) {
+    btn.setAttribute('aria-pressed', String(active));
+    btn.title = active ? 'Keluar fullscreen' : 'Fullscreen peta';
+    btn.innerHTML = active
+      ? '<i class="fas fa-compress"></i><span>Keluar</span>'
+      : '<i class="fas fa-expand"></i><span>Fullscreen</span>';
+  }
+
+  invalidateMainMapSoon();
+}
+
+function toggleMapControls(forceOpen) {
+  const container = document.getElementById('mapContainer');
+  const panel = document.getElementById('floatingMapPanel');
+  const toggle = document.getElementById('mapControlsToggle');
+  if (!container || !panel) return;
+
+  const shouldCollapse = typeof forceOpen === 'boolean'
+    ? !forceOpen
+    : !container.classList.contains('map-controls-collapsed');
+
+  container.classList.toggle('map-controls-collapsed', shouldCollapse);
+  panel.hidden = shouldCollapse;
+
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', String(!shouldCollapse));
+    toggle.title = shouldCollapse ? 'Tampilkan kontrol peta' : 'Sembunyikan kontrol peta';
+  }
+}
+
+async function toggleMapFullscreen() {
+  const container = document.getElementById('mapContainer');
+  if (!container) return;
+
+  const currentFullscreen = getMapFullscreenElement();
+  const requestFullscreen = container.requestFullscreen || container.webkitRequestFullscreen || container.msRequestFullscreen;
+  const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+
+  try {
+    if (currentFullscreen === container) {
+      if (exitFullscreen) await exitFullscreen.call(document);
+      setMapFullscreenState(false);
+      return;
+    }
+
+    if (requestFullscreen) {
+      await requestFullscreen.call(container);
+      setMapFullscreenState(true);
+      return;
+    }
+  } catch (error) {
+    console.warn('Fullscreen API gagal, memakai fallback fixed map.', error);
+  }
+
+  setMapFullscreenState(!container.classList.contains('is-fullscreen'));
+}
+
+function initFloatingMapControls() {
+  const container = document.getElementById('mapContainer');
+  const panel = document.querySelector('.map-panel');
+  if (!container || !panel || container.dataset.floatingControlsReady === 'true') return;
+
+  container.dataset.floatingControlsReady = 'true';
+  container.classList.add('has-floating-map-controls');
+  panel.id = 'floatingMapPanel';
+  panel.classList.add('floating-map-panel');
+
+  const header = document.createElement('div');
+  header.className = 'floating-map-panel-head';
+  header.innerHTML = `
+    <div class="floating-map-panel-title">
+      <i class="fas fa-sliders"></i>
+      <span>Kontrol Peta</span>
+    </div>
+    <button type="button" class="map-icon-btn" id="mapPanelCloseBtn" aria-label="Sembunyikan kontrol peta" title="Sembunyikan kontrol peta">
+      <i class="fas fa-xmark"></i>
+    </button>
+  `;
+  panel.prepend(header);
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'map-floating-toolbar';
+  toolbar.setAttribute('aria-label', 'Aksi peta');
+  toolbar.innerHTML = `
+    <button type="button" class="map-tool-btn" id="mapControlsToggle" aria-controls="floatingMapPanel" aria-expanded="true" title="Sembunyikan kontrol peta">
+      <i class="fas fa-sliders"></i><span>Kontrol</span>
+    </button>
+    <button type="button" class="map-tool-btn" id="mapFullscreenBtn" aria-pressed="false" title="Fullscreen peta">
+      <i class="fas fa-expand"></i><span>Fullscreen</span>
+    </button>
+  `;
+
+  container.appendChild(panel);
+  container.appendChild(toolbar);
+
+  document.getElementById('mapControlsToggle')?.addEventListener('click', () => toggleMapControls());
+  document.getElementById('mapPanelCloseBtn')?.addEventListener('click', () => toggleMapControls(false));
+  document.getElementById('mapFullscreenBtn')?.addEventListener('click', toggleMapFullscreen);
+
+  ['fullscreenchange', 'webkitfullscreenchange', 'MSFullscreenChange'].forEach(eventName => {
+    document.addEventListener(eventName, () => {
+      const active = getMapFullscreenElement() === container;
+      setMapFullscreenState(active);
+    });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (container.classList.contains('is-fullscreen') && getMapFullscreenElement() !== container) {
+      setMapFullscreenState(false);
+    }
+  });
 }
 
 document.addEventListener('visibilitychange', () => {
