@@ -4023,8 +4023,16 @@
 
     function switchAdminBasemap(btn) {
       const bm = btn.dataset.bm;
-      btn.closest('.basemap-row').querySelectorAll('.bm-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      const row = btn.closest('.basemap-row');
+      if (row) {
+        row.querySelectorAll('.bm-btn').forEach(b => {
+          const isActive = b === btn;
+          b.classList.toggle('active', isActive);
+          b.style.background = isActive ? 'rgba(242,132,130,.2)' : 'var(--bg2)';
+          b.style.color = isActive ? '#D56A6A' : 'var(--text)';
+          b.style.fontWeight = isActive ? '700' : '600';
+        });
+      }
 
       if (!adminMap) return;
       adminMap.eachLayer(l => { if (l === adminBaseTile) adminMap.removeLayer(l); });
