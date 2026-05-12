@@ -526,6 +526,14 @@ function setMapFullscreenState(active) {
   container.classList.toggle('is-fullscreen', active);
   document.body.classList.toggle('map-fullscreen-open', active);
 
+  if (leafletMap?.scrollWheelZoom) {
+    if (active) {
+      leafletMap.scrollWheelZoom.enable();
+    } else {
+      leafletMap.scrollWheelZoom.disable();
+    }
+  }
+
   if (btn) {
     btn.setAttribute('aria-pressed', String(active));
     btn.title = active ? 'Keluar fullscreen' : 'Fullscreen peta';

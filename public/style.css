@@ -12414,11 +12414,23 @@ body.map-fullscreen-open {
   }
 
   .floating-map-panel .layer-card {
-    min-width: 118px;
-    max-width: 140px;
+    min-width: max-content;
+    max-width: none;
+    gap: .62rem;
+    padding-right: .62rem;
   }
 
-  .floating-map-panel .layer-card-label,
+  .floating-map-panel .layer-card-label {
+    flex: 0 0 auto;
+    min-width: max-content;
+    white-space: nowrap;
+  }
+
+  .floating-map-panel .layer-card-count {
+    flex: 0 0 auto;
+    margin-left: .2rem;
+  }
+
   .floating-map-panel .bm-btn-label {
     white-space: nowrap;
   }
