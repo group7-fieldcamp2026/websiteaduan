@@ -4451,6 +4451,8 @@ main {
   overflow: hidden;
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   padding: 6rem 6vw;
   border-bottom: 1px solid rgba(var(--primary-rgb), .15);
 }
@@ -4514,6 +4516,8 @@ main {
 .about-hero-content {
   position: relative;
   z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
 }
 
 .about-hero-content h1 {
@@ -4529,6 +4533,8 @@ main {
   line-height: 1.9;
   color: var(--text-soft);
   max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
   font-weight: 400;
   letter-spacing: 0.01em;
   margin-top: 1rem;
@@ -11117,12 +11123,23 @@ body {
 ============================================================ */
 
 /* Hero badge */
+.htfu-hero {
+  justify-content: center;
+  text-align: center;
+}
+
+.htfu-hero-content {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
 .htfu-badge {
   background: linear-gradient(135deg, rgba(var(--primary-rgb),.15), rgba(var(--sage-rgb),.12));
   border-color: rgba(var(--primary-rgb),.25);
 }
 .htfu-hero-ctas {
   display: flex;
+  justify-content: center;
   gap: .85rem;
   margin-top: 1.5rem;
   flex-wrap: wrap;

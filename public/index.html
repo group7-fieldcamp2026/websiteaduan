@@ -8,11 +8,26 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>ITSafe x Satgas PPK ITS</title>
+  <style id="itsafe-boot-hide">
+    html.itsafe-booting {
+      background: #070b1b;
+    }
+
+    html.itsafe-booting body {
+      visibility: hidden;
+    }
+  </style>
   <script>
     (function () {
+      document.documentElement.classList.add('itsafe-booting');
       const rawVersion = '__ASSET_VERSION__';
       const version = rawVersion === '__ASSET_VERSION__' ? String(Date.now()) : rawVersion;
       window.ITSAFE_ASSET_VERSION = version;
+      const showWhenReady = () => {
+        document.documentElement.classList.remove('itsafe-booting');
+        document.documentElement.classList.add('itsafe-css-ready');
+      };
+      window.setTimeout(showWhenReady, 1800);
       try {
         const ua = navigator.userAgent || '';
         const platform = navigator.platform || '';
@@ -29,6 +44,8 @@
       const stylesheet = document.createElement('link');
       stylesheet.rel = 'stylesheet';
       stylesheet.href = `style.css?v=${version}`;
+      stylesheet.onload = showWhenReady;
+      stylesheet.onerror = showWhenReady;
       document.currentScript.after(stylesheet);
     })();
   </script>
@@ -1304,6 +1321,7 @@
           <p>Ikuti alur singkat ini agar laporanmu lebih jelas, aman, dan mudah diverifikasi oleh admin sebelum masuk ke peta.</p>
           <div class="panduan-hero-actions">
             <button class="btn btn-primary" onclick="scrollToForm()"><i class="fas fa-pen-to-square"></i> Mulai Lapor</button>
+            <button class="btn btn-outline" onclick="navigateTo('peta')"><i class="fas fa-map-location-dot"></i> Ke Peta</button>
             <button class="btn btn-outline" onclick="scrollToSection('panduan-video')"><i class="fas fa-circle-play"></i> Tonton Video</button>
           </div>
         </div>
@@ -1410,7 +1428,7 @@
           <div class="shape shape-1"></div>
           <div class="shape shape-2"></div>
         </div>
-        <div class="hero-content" style="position:relative;z-index:2;">
+        <div class="hero-content htfu-hero-content" style="position:relative;z-index:2;">
           <div class="hero-badge htfu-badge"><i class="fas fa-compass"></i> How to Find Us</div>
           <h1>Temukan <span class="gradient-text">ITSafe di Kampus!</span></h1>
           <p>ITSafe tersebar di area-area strategis kampus ITS. Temukan poster kami, scan QR, atau akses langsung lewat website dan laporkan kondisi area secara anonim &amp; gratis kapan saja.</p>
