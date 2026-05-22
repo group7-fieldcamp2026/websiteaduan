@@ -2155,7 +2155,7 @@
                   <th>Alasan Tidak Nyaman</th>
                   <th>Pernah Hindari</th>
                   <th>Tahu Org Lain</th>
-                  <th>Situasi Mencuriga</th>
+                  <th>Situasi Mencurigakan</th>
                   <th>Fungsi Ruang</th>
                   <th>Kronologi</th>
                   <th>Foto</th>
@@ -3711,7 +3711,7 @@
               const json = JSON.parse(text);
               if (json.long_url || json.original) {
                 const url = json.long_url || json.original;
-                const coordMatch = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/) || url.match(/q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+                const coordMatch = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
                 if (coordMatch) {
                   showToast(`Koordinat: ${coordMatch[1]}, ${coordMatch[2]}`, 'success');
                   return;
@@ -4064,7 +4064,7 @@
         } else {
           el.classList.remove('active');
           el.style.background = 'transparent';
-          el.style.color = 'var(--text)';
+          el.style.color = 'var(--text-muted)';
           el.style.fontWeight = '600';
         }
       };
@@ -4316,10 +4316,6 @@
       else if (r.cctv === 'Ada tapi tidak yakin aktif') { score += 2; alasan.push('CCTV belum pasti aktif'); }
       else { score += 1; alasan.push('Tidak ada pengawasan CCTV'); }
 
-      if (r.petugas === 'Sering ada') score += 3;
-      else if (r.petugas === 'Kadang ada' || r.petugas === 'Jarang ada') { score += 2; alasan.push('Jarang ada petugas keamanan'); }
-      else { score += 1; alasan.push('Tidak pernah ada petugas keamanan'); }
-
       if ((r.vegetasi || '').includes('Terbuka')) score += 3;
       else if ((r.vegetasi || '').includes('Tertutup') || (r.vegetasi || '').includes('Ruang tertutup')) {
         score += 1;
@@ -4472,7 +4468,7 @@
             <div class="admin-popup-section">
               <div class="admin-popup-section-title"><i class="fas fa-map-location-dot"></i> Lokasi & Waktu</div>
               <div class="admin-popup-grid">
-                ${adminPopupRow('Koordinat', `${Number(r.lat).toFixed(5)}, ${Number(r.lng).toFixed(5)}`, true)}
+                ${adminPopupRow('Koordinat', \`\${Number(r.lat).toFixed(5)}, \${Number(r.lng).toFixed(5)}\`, true)}
                 ${adminPopupRow('Waktu Rawan', r.waktu)}
                 ${adminPopupRow('Hari Rawan', r.hariRawan === 'Keduanya sama' ? 'Hari Kerja dan Libur' : (r.hariRawan || 'Tidak diisi'))}
                 ${adminPopupRow('Fungsi Ruang', r.fungsiRuang || 'Tidak diisi', true)}
@@ -4498,7 +4494,10 @@
                 ${adminPopupRow('Pernah Hindari', r.pernahHindari || 'Tidak diisi')}
                 ${adminPopupRow('Orang Lain Tidak Nyaman', r.orangLain || 'Tidak diisi')}
                 ${adminPopupRow('Situasi Mencurigakan', r.situasiMencurigakan || 'Tidak diisi', true)}
-                ${adminPopupRow('Kronologi/Keterangan', r.kronologi || 'Tidak diisi', true)}
+                ${isHiddenKronologi ? `<div class="admin-popup-row full" style="background:rgba(239,68,68,.1);color:#D56A6A">
+                  <span class="admin-popup-label"><i class="fas fa-eye-slash"></i> Kritik/Saran</span>
+                  <span class="admin-popup-value">Disembunyikan karena sensitif</span>
+                </div>` : adminPopupRow('Kronologi/Keterangan', r.kronologi || 'Tidak diisi', true)}
               </div>
             </div>
 
@@ -4510,6 +4509,24 @@
           </div>
         </div>
       `;
+    }
+
+    function buildAdminReportPopupWithHide(r) {
+      const isHiddenDeskripsi = r.deskripsiHidden || false;
+      const isHiddenKronologi = r.kronologiHidden || false;
+
+      const originalPopup = buildAdminReportPopup(r);
+
+      // Replace deskripsi section
+      if (isHiddenDeskripsi && r.lokasiDeskripsi) {
+        const deskripsiSection = `<div class="admin-popup-desc">${adminEsc(r.lokasiDeskripsi)}</div>`;
+        const replacement = `<div class="admin-popup-desc" style="background:rgba(239,68,68,.1);color:#D56A6A;font-style:italic">
+          <i class="fas fa-eye-slash"></i> Deskripsi disembunyikan karena sensitif
+        </div>`;
+        // We'll handle this in a different way - update the popup builder more comprehensively
+      }
+
+      return originalPopup;
     }
 
     function renderAdminMap() {
@@ -4534,7 +4551,7 @@
         const reportForPopup = Object.assign({}, r, { lat, lng });
         const marker = L.marker([lat, lng], {
           icon: createAdminReportIcon(getAdminReportVisual(reportForPopup))
-        }).bindPopup(buildAdminReportPopup(reportForPopup), {
+        }).bindPopup(buildAdminReportPopupWithHide(reportForPopup), {
           maxWidth: 360,
           className: 'admin-leaflet-popup'
         });
