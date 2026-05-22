@@ -571,7 +571,7 @@
                     </div>
                     <label>Nama Area / Lokasi yang Dilaporkan <span class="req">*</span></label>
                     <select id="lokasiInsiden" required>
-                      <option value="">-- Pilih Fakultas/Departemen --</option>
+                      <option value="">-- Pilih Fakultas/Departemen/Fasilitas Umum --</option>
                       <optgroup label="FSAD">
                         <option data-lat="-7.284466" data-lng="112.794847">Fisika</option>
                         <option data-lat="-7.285240" data-lng="112.794721">Matematika</option>
@@ -631,7 +631,7 @@
                       </optgroup>
                       <option>Sekitar Kampus (Pilih langsung di MAP)</option>
                     </select>
-                    <span class="form-hint">Jika klik pin berada dalam radius 50 meter dari pin jurusan, lokasi otomatis mengikuti pin terdekat. Di luar radius itu, analisis masuk sebagai Sekitar Kampus.</span>
+                    <span class="form-hint">Jika klik pin berada di polygon Fasilitas Umum, lokasi otomatis mengikuti nama fasum tersebut. Jika dekat pin jurusan dalam radius 50 meter, lokasi mengikuti jurusan terdekat. Di luar itu, analisis masuk sebagai Sekitar Kampus.</span>
                   </div>
                   <div class="form-group full-width" style="margin-top: .5rem; margin-bottom: 0.5rem;">
                     <div class="vis-toggles">
@@ -642,6 +642,10 @@
                       <label class="vis-toggle active" id="tog-jurusan-form">
                         <input type="checkbox" checked onchange="toggleVis('jurusan-form', this)" />
                         <i class="fas fa-graduation-cap"></i> Jurusan
+                      </label>
+                      <label class="vis-toggle active" id="tog-fasum-form">
+                        <input type="checkbox" checked onchange="toggleVis('fasum-form', this)" />
+                        <i class="fas fa-landmark"></i> Fasum
                       </label>
                     </div>
                   </div>
@@ -1144,6 +1148,10 @@
                 <label class="vis-toggle active" id="tog-jurusan">
                   <input type="checkbox" checked onchange="toggleVis('jurusan',this)" />
                   <i class="fas fa-graduation-cap"></i> Jurusan
+                </label>
+                <label class="vis-toggle active" id="tog-fasum">
+                  <input type="checkbox" checked onchange="toggleVis('fasum',this)" />
+                  <i class="fas fa-landmark"></i> Fasum
                 </label>
                 <label class="vis-toggle active" id="tog-fixedpin">
                   <input type="checkbox" checked onchange="toggleVis('fixedpin',this)" />

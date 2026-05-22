@@ -18,8 +18,10 @@ let visPoint = true;
 let visCluster = false;
 let visFixedPinMain = true;
 let visJurusanMain = true;
+let visFasumMain = true;
 let visFixedPinForm = true;
 let visJurusanForm = true;
+let visFasumForm = true;
 
 // --- LEAFLET INSTANCES --------------------------------------
 let leafletMap = null;
@@ -35,6 +37,9 @@ let boundaryLayerMain = null;
 let boundaryLayerPicker = null;
 let boundaryGeoJSON = null;
 let boundaryPolygons = null;
+let fasumGeoJSON = null;
+let fasumAreas = [];
+let fasumLoadPromise = null;
 let currentBm = 'osm';
 let editingReport = null;
 let currentHistoryEmail = '';
@@ -65,6 +70,9 @@ const PICKER_INITIAL_BOUNDS = [
 const QR_URL = 'https://itsafe.geowebgis.id/';
 const OTHER_LOCATION_LABEL = 'Sekitar Kampus';
 const NEARBY_LOCATION_RADIUS_METERS = 50;
+const FASUM_GROUP_LABEL = 'Fasilitas Umum';
+const FASUM_ZIP_PATH = 'assets/Fasum.zip';
+const FASUM_COLOR = '#0EA5A4';
 
 const FACULTY_COLORS = {
   'FSAD': '#4E79A7', // blue
@@ -75,6 +83,7 @@ const FACULTY_COLORS = {
   'FKK': '#B07AA1', // purple
   'FTEIC': '#20B2AA', // cyan
   'FTK': '#BAB0AC', // gray
+  'Fasilitas Umum': FASUM_COLOR,
   'Lainnya': '#D4879A',
 };
 
@@ -459,6 +468,7 @@ function itsafeInit() {
   initNav();
   initForm();
   buildLocationFacultyMap();
+  loadFasumAreas();
 
   // Data Fetching
   fetchReports();       // ambil data dari API
@@ -751,6 +761,215 @@ async function fetchLocations() {
   const active = document.querySelector('.loc-filter-btn.active');
   renderLocationCards(active?.dataset.filter || 'all');
   renderAllFixedLocations();
+}
+
+async function loadFasumAreas() {
+  if (fasumLoadPromise) return fasumLoadPromise;
+
+  fasumLoadPromise = (async () => {
+    if (typeof shp === 'undefined') {
+      console.warn('[fasum] shpjs belum tersedia');
+      return fasumAreas;
+    }
+
+    try {
+      const assetVersion = window.ITSAFE_ASSET_VERSION || '1.2.9';
+      const res = await fetch(`${FASUM_ZIP_PATH}?v=${assetVersion}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const buf = await res.arrayBuffer();
+      if (!isZipBuffer(buf)) throw new Error('Fasum.zip bukan file zip valid');
+
+      const parsed = await shp(buf);
+      let data = getFirstGeoJSONLayer(parsed);
+      if (!data || !data.features || !data.features.length) {
+        throw new Error('GeoJSON fasum kosong');
+      }
+
+      data = reprojectGeoJSONIfNeeded(data);
+      fasumGeoJSON = data;
+      fasumAreas = buildFasumAreas(data);
+      syncFasumQuickOptions();
+      buildLocationFacultyMap();
+      reports = reports.map(r => ({
+        ...r,
+        fakultas: getFacultyFromLocationName(r.lokasi),
+      }));
+      renderAllFixedLocations();
+      if (pickerMap) fitPickerInitialView();
+      if (leafletMap) renderLeafletMap();
+    } catch (e) {
+      console.warn('[fasum] gagal memuat Fasum.zip', e);
+    }
+
+    return fasumAreas;
+  })();
+
+  return fasumLoadPromise;
+}
+
+function getFirstGeoJSONLayer(parsed) {
+  if (!parsed) return null;
+  if (parsed.type) return parsed;
+  if (Array.isArray(parsed)) return parsed.find(item => item && item.type) || null;
+  const firstKey = Object.keys(parsed).find(key => parsed[key] && parsed[key].type);
+  return firstKey ? parsed[firstKey] : null;
+}
+
+function getFasumFeatureName(props, index) {
+  const direct = props?.Nama_Lokasi ?? props?.Nama_Lokas ?? props?.NAMA_LOKAS ?? props?.nama_lokas;
+  if (direct && String(direct).trim()) return String(direct).trim();
+
+  const key = Object.keys(props || {}).find(k => {
+    const clean = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return clean.includes('nama') && clean.includes('lok');
+  });
+  const fallback = key ? props[key] : '';
+  return fallback && String(fallback).trim()
+    ? String(fallback).trim()
+    : `${FASUM_GROUP_LABEL} ${index + 1}`;
+}
+
+function geometryToPolygons(geom) {
+  if (!geom) return [];
+  if (geom.type === 'Polygon') return [geom.coordinates];
+  if (geom.type === 'MultiPolygon') return geom.coordinates || [];
+  if (geom.type === 'GeometryCollection') {
+    return (geom.geometries || []).flatMap(g => geometryToPolygons(g));
+  }
+  return [];
+}
+
+function buildFasumAreas(data) {
+  const features = data.type === 'FeatureCollection'
+    ? (data.features || [])
+    : [{ type: 'Feature', properties: {}, geometry: data }];
+  const areas = [];
+
+  features.forEach((feature, featureIndex) => {
+    const name = getFasumFeatureName(feature.properties || {}, featureIndex);
+    const polygons = geometryToPolygons(feature.geometry);
+    polygons.forEach((polygon, polygonIndex) => {
+      const center = getPolygonCenter(polygon);
+      if (!center || !Number.isFinite(center.lat) || !Number.isFinite(center.lng)) return;
+      const rawId = feature.properties?.OBJECTID ?? feature.properties?.FID ?? featureIndex + 1;
+      areas.push({
+        id: `fasum-${rawId}-${polygonIndex + 1}`,
+        name,
+        lat: center.lat,
+        lng: center.lng,
+        polygon,
+        properties: feature.properties || {},
+      });
+    });
+  });
+
+  return areas;
+}
+
+function getPolygonCenter(polygon) {
+  const ring = polygon?.[0];
+  if (!Array.isArray(ring) || ring.length < 3) return null;
+
+  let twiceArea = 0;
+  let cx = 0;
+  let cy = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const current = ring[i];
+    const next = ring[(i + 1) % ring.length];
+    if (!current || !next) continue;
+    const x0 = parseFloat(current[0]);
+    const y0 = parseFloat(current[1]);
+    const x1 = parseFloat(next[0]);
+    const y1 = parseFloat(next[1]);
+    if (![x0, y0, x1, y1].every(Number.isFinite)) continue;
+    const cross = x0 * y1 - x1 * y0;
+    twiceArea += cross;
+    cx += (x0 + x1) * cross;
+    cy += (y0 + y1) * cross;
+  }
+
+  let center = null;
+  if (Math.abs(twiceArea) > 1e-12) {
+    center = {
+      lng: cx / (3 * twiceArea),
+      lat: cy / (3 * twiceArea),
+    };
+  }
+
+  if (!center || !pointInPolygon([center.lng, center.lat], polygon)) {
+    center = getPolygonBoundsCenter(polygon);
+  }
+  return center;
+}
+
+function getPolygonBoundsCenter(polygon) {
+  const ring = polygon?.[0] || [];
+  let minLng = Infinity;
+  let minLat = Infinity;
+  let maxLng = -Infinity;
+  let maxLat = -Infinity;
+
+  ring.forEach(coord => {
+    const lng = parseFloat(coord?.[0]);
+    const lat = parseFloat(coord?.[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    minLng = Math.min(minLng, lng);
+    maxLng = Math.max(maxLng, lng);
+    minLat = Math.min(minLat, lat);
+    maxLat = Math.max(maxLat, lat);
+  });
+
+  if (![minLng, minLat, maxLng, maxLat].every(Number.isFinite)) return null;
+  return {
+    lng: (minLng + maxLng) / 2,
+    lat: (minLat + maxLat) / 2,
+  };
+}
+
+function syncFasumQuickOptions() {
+  const sel = document.getElementById('lokasiInsiden');
+  if (!sel || !fasumAreas.length) return;
+
+  const selectedValue = sel.value;
+  let group = sel.querySelector('optgroup[data-location-type="fasum"]');
+  if (!group) {
+    group = document.createElement('optgroup');
+    group.label = FASUM_GROUP_LABEL;
+    group.dataset.locationType = 'fasum';
+    const otherOption = Array.from(sel.children)
+      .find(child => child.tagName === 'OPTION' && isOtherLocationValue(child.value || child.textContent));
+    sel.insertBefore(group, otherOption || null);
+  }
+
+  group.innerHTML = '';
+  fasumAreas.forEach(area => {
+    const opt = document.createElement('option');
+    opt.value = area.name;
+    opt.textContent = area.name;
+    opt.dataset.lat = area.lat.toFixed(6);
+    opt.dataset.lng = area.lng.toFixed(6);
+    opt.dataset.locationType = 'fasum';
+    opt.dataset.fasumId = area.id;
+    group.appendChild(opt);
+  });
+
+  if (selectedValue && Array.from(sel.options).some(opt => opt.value === selectedValue)) {
+    sel.value = selectedValue;
+  }
+}
+
+function isFasumOption(opt) {
+  const parent = opt?.parentElement;
+  return opt?.dataset?.locationType === 'fasum'
+    || parent?.dataset?.locationType === 'fasum'
+    || parent?.label === FASUM_GROUP_LABEL;
+}
+
+function getFasumAreaAtPoint(lat, lng) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !fasumAreas.length) return null;
+  const pt = [lng, lat];
+  return fasumAreas.find(area => pointInPolygon(pt, area.polygon)) || null;
 }
 
 // ============================================================
@@ -1503,18 +1722,24 @@ function setLocationSelectValue(value) {
   return true;
 }
 
-function getPresetLocationOptions() {
+function getPresetLocationOptions(opts = {}) {
   const sel = document.getElementById('lokasiInsiden');
   if (!sel) return [];
+  const includeFasum = opts.includeFasum !== false;
+  const includeJurusan = opts.includeJurusan !== false;
   return Array.from(sel.options)
     .map(opt => {
       const lat = parseFloat(opt.dataset?.lat);
       const lng = parseFloat(opt.dataset?.lng);
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      const type = isFasumOption(opt) ? 'fasum' : 'jurusan';
+      if (type === 'fasum' && !includeFasum) return null;
+      if (type !== 'fasum' && !includeJurusan) return null;
       return {
         opt,
         name: opt.value || opt.textContent.trim(),
         faculty: getFacultyFromOption(opt),
+        type,
         lat,
         lng,
       };
@@ -1534,7 +1759,7 @@ function distanceMeters(lat1, lng1, lat2, lng2) {
 
 function getNearestPresetLocation(lat, lng) {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-  return getPresetLocationOptions()
+  return getPresetLocationOptions({ includeFasum: false })
     .map(item => ({ ...item, distance: distanceMeters(lat, lng, item.lat, item.lng) }))
     .sort((a, b) => a.distance - b.distance)[0] || null;
 }
@@ -1547,7 +1772,9 @@ function getNearbyPresetLocation(lat, lng) {
 
 function resolveReportLocationName(currentValue, lat, lng) {
   if (isOtherLocationValue(currentValue)) {
-    return getNearbyPresetLocation(lat, lng)?.name || OTHER_LOCATION_LABEL;
+    return getFasumAreaAtPoint(lat, lng)?.name
+      || getNearbyPresetLocation(lat, lng)?.name
+      || OTHER_LOCATION_LABEL;
   }
   return currentValue;
 }
@@ -1568,6 +1795,18 @@ function createFacultyIcon(color) {
     iconSize: [24, 24],
     iconAnchor: [12, 12],
     popupAnchor: [0, -12],
+  });
+}
+
+function createFasumIcon() {
+  return L.divIcon({
+    className: 'fasum-pin-wrap',
+    html: `<div class="fasum-pin" style="--fasum-color:${FASUM_COLOR}">
+             <i class="fas fa-landmark"></i>
+           </div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -14],
   });
 }
 
@@ -1693,6 +1932,10 @@ function getPickerOverviewBounds() {
     bounds.extend([item.lat, item.lng]);
   });
 
+  fasumAreas.forEach(area => {
+    bounds.extend([area.lat, area.lng]);
+  });
+
   LOCATIONS.forEach(loc => {
     const lat = parseFloat(loc.lat);
     const lng = parseFloat(loc.lng);
@@ -1729,13 +1972,16 @@ function setPin(lat, lng, opts = {}) {
     showToast('Pin berada di luar batas area ITS. Silakan pilih lokasi di dalam boundary.', 'error');
     return;
   }
-  const nearby = fromPreset ? null : getNearbyPresetLocation(lat, lng);
+  const fasumArea = fromPreset ? null : getFasumAreaAtPoint(lat, lng);
+  const nearby = (!fromPreset && !fasumArea) ? getNearbyPresetLocation(lat, lng) : null;
   if (!fromPreset) {
-    setLocationSelectValue(nearby?.name || getOtherLocationOptionValue());
+    setLocationSelectValue(fasumArea?.name || nearby?.name || getOtherLocationOptionValue());
   }
   document.getElementById('lat').value = lat.toFixed(6);
   document.getElementById('lng').value = lng.toFixed(6);
-  const areaStatus = nearby
+  const areaStatus = fasumArea
+    ? ` | Fasilitas Umum: ${fasumArea.name}`
+    : nearby
     ? ` | Area radius ${NEARBY_LOCATION_RADIUS_METERS} m: ${nearby.name} (${Math.round(nearby.distance)} m)`
     : (!fromPreset ? ` | Area: ${OTHER_LOCATION_LABEL}` : '');
   document.getElementById('locStatus').textContent = `Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)}${areaStatus}`;
@@ -2078,6 +2324,7 @@ function updateLegendSymbols(mode, display) {
       <div class="legend-item"><span class="legend-marker legend-marker-shield" style="--case-color:#EA580C"><i class="fas fa-user-shield"></i></span> Layer minim petugas</div>`;
   }
 
+  html += `<div class="legend-item"><span class="legend-marker legend-marker-square" style="--case-color:${FASUM_COLOR}"><i class="fas fa-landmark"></i></span> Fasilitas Umum</div>`;
   html += '<div class="legend-item"><span class="legend-line"></span> Batas Kampus ITS</div>';
   list.innerHTML = html;
 }
@@ -2609,6 +2856,7 @@ function renderFixedLocations(layer) {
 
   const isPicker = (layer === fixedLocationLayerPicker);
   const showJurusan = isPicker ? visJurusanForm : visJurusanMain;
+  const showFasum = isPicker ? visFasumForm : visFasumMain;
   const showFixed = isPicker ? visFixedPinForm : visFixedPinMain;
   const popupOptions = isPicker ? { autoPan: false, keepInView: false } : undefined;
 
@@ -2616,7 +2864,8 @@ function renderFixedLocations(layer) {
   if (showJurusan) {
     const sel = document.getElementById('lokasiInsiden');
     if (sel) {
-      const opts = Array.from(sel.querySelectorAll('option[data-lat][data-lng]'));
+      const opts = Array.from(sel.querySelectorAll('option[data-lat][data-lng]'))
+        .filter(opt => !isFasumOption(opt));
       const seen = new Set();
       opts.forEach(opt => {
         const lat = opt.getAttribute('data-lat');
@@ -2636,6 +2885,16 @@ function renderFixedLocations(layer) {
           .addTo(layer);
       });
     }
+  }
+
+  // Pin titik tengah polygon fasilitas umum
+  if (showFasum) {
+    if (!fasumAreas.length) loadFasumAreas();
+    fasumAreas.forEach(area => {
+      L.marker([area.lat, area.lng], { icon: createFasumIcon() })
+        .bindPopup(`<div class="popup-card"><div class="popup-header"><div class="popup-loc-name">${esc(area.name)}</div><div class="popup-faculty">${esc(FASUM_GROUP_LABEL)}</div></div></div>`, popupOptions)
+        .addTo(layer);
+    });
   }
 
   // Pin Lokasi QR Aduan
@@ -2809,8 +3068,10 @@ function toggleVis(type, cb) {
   // Independent visibility for main and form
   if (type === 'jurusan') visJurusanMain = cb.checked;
   if (type === 'fixedpin') visFixedPinMain = cb.checked;
+  if (type === 'fasum') visFasumMain = cb.checked;
   if (type === 'jurusan-form') visJurusanForm = cb.checked;
   if (type === 'fixedpin-form') visFixedPinForm = cb.checked;
+  if (type === 'fasum-form') visFasumForm = cb.checked;
 
   const el = document.getElementById('tog-' + type);
   if (el) {
