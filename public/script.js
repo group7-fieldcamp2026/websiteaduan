@@ -1806,7 +1806,7 @@ function createFasumIcon() {
   return L.divIcon({
     className: 'fasum-pin-wrap',
     html: `<div class="fasum-pin" style="--fasum-color:${FASUM_COLOR}">
-             <i class="fas fa-landmark"></i>
+             <i class="fas fa-tree-city"></i>
            </div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
@@ -2328,7 +2328,7 @@ function updateLegendSymbols(mode, display) {
       <div class="legend-item"><span class="legend-marker legend-marker-shield" style="--case-color:#EA580C"><i class="fas fa-user-shield"></i></span> Layer minim petugas</div>`;
   }
 
-  html += `<div class="legend-item"><span class="legend-marker legend-marker-square" style="--case-color:${FASUM_COLOR}"><i class="fas fa-landmark"></i></span> Fasilitas Umum</div>`;
+  html += `<div class="legend-item"><span class="legend-marker legend-marker-square" style="--case-color:${FASUM_COLOR}"><i class="fas fa-tree-city"></i></span> Fasilitas Umum</div>`;
   html += '<div class="legend-item"><span class="legend-line"></span> Batas Kampus ITS</div>';
   list.innerHTML = html;
 }
