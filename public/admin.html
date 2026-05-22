@@ -4496,7 +4496,7 @@
           });
 
           L.marker([parseFloat(lat), parseFloat(lng)], { icon })
-            .bindPopup(`<b style="color:#1F2937">${name}</b><br><span style="font-size:0.8rem;color:#6B7280">${faculty}</span>`)
+            .bindPopup(`<b style="color:#1F2937">${name}</b><br><span style="font-size:0.8rem;color:#6B7280">${faculty === 'Fasilitas Umum' ? name : faculty}</span>`)
             .addTo(adminJurusanLayer);
         });
 
