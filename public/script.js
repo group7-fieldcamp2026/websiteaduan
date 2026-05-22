@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    ITSafe - script.js
    Laravel API + Leaflet (OSM / Satelit / Dark / Topo)
    Heatmap - Titik - Cluster - Basemap switcher
@@ -1519,7 +1519,11 @@ function handleLocationPreset() {
 function setReportFieldValue(id, value) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.value = value ?? '';
+  let cleanValue = value ?? '';
+  if (typeof cleanValue === 'string' && cleanValue.startsWith('HIDDEN_')) {
+    cleanValue = cleanValue.substring('HIDDEN_'.length);
+  }
+  el.value = cleanValue;
   el.dispatchEvent(new Event('input', { bubbles: true }));
   el.dispatchEvent(new Event('change', { bubbles: true }));
 }
@@ -2738,9 +2742,15 @@ function buildPopup(r) {
     <div class="popup-coords">${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</div>
   </div>`;
 
-  let descHtml = r.lokasiDeskripsi
-    ? `<div class="popup-desc">${esc(r.lokasiDeskripsi)}</div>`
-    : '';
+  const isDescHidden = typeof r.lokasiDeskripsi === 'string' && r.lokasiDeskripsi.startsWith('HIDDEN_');
+  const isKronologiHidden = typeof r.kronologi === 'string' && r.kronologi.startsWith('HIDDEN_');
+
+  let descHtml = '';
+  if (isDescHidden || isKronologiHidden) {
+    descHtml = `<div class="popup-desc text-muted" style="font-style: italic; color: #888;">Detail laporan telah disembunyikan karena terlalu sensitif.</div>`;
+  } else if (r.lokasiDeskripsi) {
+    descHtml = `<div class="popup-desc">${esc(r.lokasiDeskripsi)}</div>`;
+  }
 
   const summaryHtml = `<div class="popup-output-top">${buildPopupOutputCard(summary)}</div>`;
 

@@ -2340,6 +2340,12 @@
             <label>Deskripsi Lokasi dan Alasan Pelaporan *</label>
             <textarea id="dLokasiDeskripsi" rows="3"
               placeholder="Ciri-ciri lokasi, titik patokan, kondisi sekitar, serta alasan pelapor merasa tidak aman..."></textarea>
+            <div style="display:flex;align-items:center;gap:.5rem;margin-top:.4rem;">
+              <input type="checkbox" id="dHideLokasiDeskripsi" style="width:auto;margin:0;" />
+              <label for="dHideLokasiDeskripsi" style="margin:0;font-size:.8rem;font-weight:normal;text-transform:none;letter-spacing:normal;cursor:pointer;">
+                <i class="fas fa-eye-slash" style="color:var(--primary-dk);margin-right:.25rem;"></i> Sembunyikan dari Publik
+              </label>
+            </div>
           </div>
           <div class="detail-item full">
             <label>Foto Lokasi dari Responden</label>
@@ -2510,6 +2516,12 @@
           <div class="detail-item full">
             <label>Kritik dan Saran Tambahan pada Lokasi (Opsional)</label>
             <textarea id="dKronologi" rows="4" placeholder="Tulis kritik dan saran tambahan pada lokasi ini jika diperlukan..."></textarea>
+            <div style="display:flex;align-items:center;gap:.5rem;margin-top:.4rem;">
+              <input type="checkbox" id="dHideKronologi" style="width:auto;margin:0;" />
+              <label for="dHideKronologi" style="margin:0;font-size:.8rem;font-weight:normal;text-transform:none;letter-spacing:normal;cursor:pointer;">
+                <i class="fas fa-eye-slash" style="color:var(--primary-dk);margin-right:.25rem;"></i> Sembunyikan dari Publik
+              </label>
+            </div>
           </div>
           <div class="detail-item full">
             <label>Kontak Pelapor (opsional)</label>
@@ -3164,7 +3176,17 @@
       setSelect('dKelamin', r.kelamin);
       document.getElementById('dLokasi').value = r.lokasi || '';
       syncReportLocationSelect(r.lokasi || '');
-      document.getElementById('dLokasiDeskripsi').value = r.lokasiDeskripsi || '';
+      // Deskripsi lokasi
+      let isDeskripsiHidden = false;
+      let cleanDeskripsi = r.lokasiDeskripsi || '';
+      if (cleanDeskripsi.startsWith('HIDDEN_')) {
+        isDeskripsiHidden = true;
+        cleanDeskripsi = cleanDeskripsi.substring('HIDDEN_'.length);
+      }
+      document.getElementById('dLokasiDeskripsi').value = cleanDeskripsi;
+      const chkHideDeskripsi = document.getElementById('dHideLokasiDeskripsi');
+      if (chkHideDeskripsi) chkHideDeskripsi.checked = isDeskripsiHidden;
+
       document.getElementById('dLat').value = r.lat || '';
       document.getElementById('dLng').value = r.lng || '';
       setSelect('dPencahayaan', r.pencahayaan);
@@ -3181,7 +3203,18 @@
       setSelect('dOrangLain', r.orangLain);
       setSelect('dSituasi', r.situasiMencurigakan);
       setSelect('dFungsiRuang', r.fungsiRuang);
-      document.getElementById('dKronologi').value = r.kronologi || '';
+
+      // Kronologi
+      let isKronologiHidden = false;
+      let cleanKronologi = r.kronologi || '';
+      if (cleanKronologi.startsWith('HIDDEN_')) {
+        isKronologiHidden = true;
+        cleanKronologi = cleanKronologi.substring('HIDDEN_'.length);
+      }
+      document.getElementById('dKronologi').value = cleanKronologi;
+      const chkHideKronologi = document.getElementById('dHideKronologi');
+      if (chkHideKronologi) chkHideKronologi.checked = isKronologiHidden;
+
       document.getElementById('dKontak').value = r.kontak || '';
       resetReportPhotoInput();
       if (r.fotoPath) {
@@ -3400,11 +3433,28 @@
 
     async function saveReport() {
       if (!editingId) return;
+
+      let lokasiDeskripsiVal = document.getElementById('dLokasiDeskripsi').value;
+      const chkHideDeskripsi = document.getElementById('dHideLokasiDeskripsi');
+      if (chkHideDeskripsi && chkHideDeskripsi.checked && lokasiDeskripsiVal) {
+        if (!lokasiDeskripsiVal.startsWith('HIDDEN_')) {
+          lokasiDeskripsiVal = 'HIDDEN_' + lokasiDeskripsiVal;
+        }
+      }
+
+      let kronologiVal = document.getElementById('dKronologi').value;
+      const chkHideKronologi = document.getElementById('dHideKronologi');
+      if (chkHideKronologi && chkHideKronologi.checked && kronologiVal) {
+        if (!kronologiVal.startsWith('HIDDEN_')) {
+          kronologiVal = 'HIDDEN_' + kronologiVal;
+        }
+      }
+
       const payload = {
         peran_kampus: document.getElementById('dPeran').value,
         jenis_kelamin: document.getElementById('dKelamin').value,
         lokasi_kejadian: document.getElementById('dLokasi').value,
-        lokasi_deskripsi: document.getElementById('dLokasiDeskripsi').value,
+        lokasi_deskripsi: lokasiDeskripsiVal,
         latitude: document.getElementById('dLat').value || null,
         longitude: document.getElementById('dLng').value || null,
         pencahayaan: document.getElementById('dPencahayaan').value,
@@ -3421,7 +3471,7 @@
         orang_lain: document.getElementById('dOrangLain').value,
         situasi_mencurigakan: document.getElementById('dSituasi').value,
         fungsi_ruang: document.getElementById('dFungsiRuang').value,
-        kronologi: document.getElementById('dKronologi').value,
+        kronologi: kronologiVal,
         kontak_pelapor: document.getElementById('dKontak').value,
         status: document.getElementById('dVerifikasi').value,
       };
@@ -4114,25 +4164,35 @@
       }
     }
 
-    // ─── GIS SHAPEFILE LOADING ──────────────────────────────────
-    async function loadAdminGISLayers() {
-      if (typeof shp === 'undefined') return;
+    // ─── GIS SHAPEFILE HELPERS & REPROJECTION ──────────────────
+    function reprojectAdminGeoJSON(gj) {
+      if (!gj || typeof proj4 === 'undefined') return gj;
+      if (typeof proj4.defs('EPSG:32749') === 'undefined') {
+        proj4.defs('EPSG:32749', '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs');
+      }
+      if (typeof proj4.defs('EPSG:4326') === 'undefined') {
+        proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
+      }
 
-      // Reproject utility from UTM49S to WGS84
-      const defs = () => {
-        if (typeof proj4 === 'undefined') return;
-        if (!proj4.defs('EPSG:32749')) proj4.defs('EPSG:32749', '+proj=utm +zone=49 +south +datum=WGS84 +units=m +no_defs');
-        if (!proj4.defs('EPSG:4326')) proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
-      };
+      const from = proj4('EPSG:32749');
+      const to = proj4('EPSG:4326');
 
-      const reproject = (gj) => {
-        if (!gj || !gj.features || typeof proj4 === 'undefined') return gj;
-        defs();
-        const from = proj4('EPSG:32749');
-        const to = proj4('EPSG:4326');
-
-        gj.features.forEach(f => {
-          if (!f.geometry || !f.geometry.coordinates) return;
+      const walk = (geom) => {
+        if (!geom) return;
+        if (geom.type === 'FeatureCollection') {
+          (geom.features || []).forEach(f => walk(f));
+          return;
+        }
+        if (geom.type === 'Feature') {
+          walk(geom.geometry);
+          return;
+        }
+        if (geom.type === 'GeometryCollection') {
+          (geom.geometries || []).forEach(g => walk(g));
+          return;
+        }
+        
+        if (geom.coordinates) {
           const tform = (coords) => {
             if (typeof coords[0] === 'number') {
               const out = proj4(from, to, coords);
@@ -4141,17 +4201,241 @@
             return coords.map(tform);
           };
 
-          // Basic heuristic to check if it's already in WGS84
-          let first = f.geometry.coordinates;
+          let first = geom.coordinates;
           while (first && typeof first[0] !== 'number') first = first[0];
           if (first && (Math.abs(first[0]) > 180 || Math.abs(first[1]) > 90)) {
-            f.geometry.coordinates = tform(f.geometry.coordinates);
+            geom.coordinates = tform(geom.coordinates);
           }
-        });
-        return gj;
+        }
       };
 
+      walk(gj);
+      return gj;
+    }
+
+    function isZipBuffer(buf) {
+      if (!buf || buf.byteLength < 4) return false;
+      const b = new Uint8Array(buf, 0, 4);
+      return b[0] === 0x50 && b[1] === 0x4B; // 'PK'
+    }
+
+    function getFirstGeoJSONLayer(parsed) {
+      if (!parsed) return null;
+      if (parsed.type) return parsed;
+      if (Array.isArray(parsed)) return parsed.find(item => item && item.type) || null;
+      const firstKey = Object.keys(parsed).find(key => parsed[key] && parsed[key].type);
+      return firstKey ? parsed[firstKey] : null;
+    }
+
+    function getFasumFeatureName(props, index) {
+      const direct = props?.Nama_Lokasi ?? props?.Nama_Lokas ?? props?.NAMA_LOKAS ?? props?.nama_lokas;
+      if (direct && String(direct).trim()) return String(direct).trim();
+
+      const key = Object.keys(props || {}).find(k => {
+        const clean = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+        return clean.includes('nama') && clean.includes('lok');
+      });
+      const fallback = key ? props[key] : '';
+      return fallback && String(fallback).trim()
+        ? String(fallback).trim()
+        : `Fasilitas Umum ${index + 1}`;
+    }
+
+    function geometryToPolygons(geom) {
+      if (!geom) return [];
+      if (geom.type === 'Polygon') return [geom.coordinates];
+      if (geom.type === 'MultiPolygon') return geom.coordinates || [];
+      if (geom.type === 'GeometryCollection') {
+        return (geom.geometries || []).flatMap(g => geometryToPolygons(g));
+      }
+      return [];
+    }
+
+    function buildFasumAreas(data) {
+      const features = data.type === 'FeatureCollection'
+        ? (data.features || [])
+        : [{ type: 'Feature', properties: {}, geometry: data }];
+      const areas = [];
+
+      features.forEach((feature, featureIndex) => {
+        const name = getFasumFeatureName(feature.properties || {}, featureIndex);
+        const polygons = geometryToPolygons(feature.geometry);
+        polygons.forEach((polygon, polygonIndex) => {
+          const center = getPolygonCenter(polygon);
+          if (!center || !Number.isFinite(center.lat) || !Number.isFinite(center.lng)) return;
+          const rawId = feature.properties?.OBJECTID ?? feature.properties?.FID ?? featureIndex + 1;
+          areas.push({
+            id: `fasum-${rawId}-${polygonIndex + 1}`,
+            name,
+            lat: center.lat,
+            lng: center.lng,
+            polygon,
+            properties: feature.properties || {},
+          });
+        });
+      });
+
+      return areas;
+    }
+
+    function getPolygonCenter(polygon) {
+      const ring = polygon?.[0];
+      if (!Array.isArray(ring) || ring.length < 3) return null;
+
+      let twiceArea = 0;
+      let cx = 0;
+      let cy = 0;
+      for (let i = 0; i < ring.length; i++) {
+        const current = ring[i];
+        const next = ring[(i + 1) % ring.length];
+        if (!current || !next) continue;
+        const x0 = parseFloat(current[0]);
+        const y0 = parseFloat(current[1]);
+        const x1 = parseFloat(next[0]);
+        const y1 = parseFloat(next[1]);
+        if (![x0, y0, x1, y1].every(Number.isFinite)) continue;
+        const cross = x0 * y1 - x1 * y0;
+        twiceArea += cross;
+        cx += (x0 + x1) * cross;
+        cy += (y0 + y1) * cross;
+      }
+
+      let center = null;
+      if (Math.abs(twiceArea) > 1e-12) {
+        center = {
+          lng: cx / (3 * twiceArea),
+          lat: cy / (3 * twiceArea),
+        };
+      }
+
+      if (!center || !pointInPolygon([center.lng, center.lat], polygon)) {
+        center = getPolygonBoundsCenter(polygon);
+      }
+      return center;
+    }
+
+    function getPolygonBoundsCenter(polygon) {
+      const ring = polygon?.[0] || [];
+      let minLng = Infinity;
+      let minLat = Infinity;
+      let maxLng = -Infinity;
+      let maxLat = -Infinity;
+
+      ring.forEach(coord => {
+        const lng = parseFloat(coord?.[0]);
+        const lat = parseFloat(coord?.[1]);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+        minLng = Math.min(minLng, lng);
+        maxLng = Math.max(maxLng, lng);
+        minLat = Math.min(minLat, lat);
+        maxLat = Math.max(maxLat, lat);
+      });
+
+      if (![minLng, minLat, maxLng, maxLat].every(Number.isFinite)) return null;
+      return {
+        lng: (minLng + maxLng) / 2,
+        lat: (minLat + maxLat) / 2,
+      };
+    }
+
+    function pointInPolygon(pt, polygon) {
+      if (!polygon || !polygon.length) return false;
+      if (!pointInRing(pt, polygon[0])) return false;
+      for (let i = 1; i < polygon.length; i++) {
+        if (pointInRing(pt, polygon[i])) return false;
+      }
+      return true;
+    }
+
+    function pointInRing(pt, ring) {
+      let inside = false;
+      const x = pt[0];
+      const y = pt[1];
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0], yi = ring[i][1];
+        const xj = ring[j][0], yj = ring[j][1];
+        const intersect = ((yi > y) !== (yj > y)) &&
+          (x < (xj - xi) * (y - yi) / (yj - yi + 0.0) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    let fasumAreasAdmin = [];
+    let fasumLoadPromiseAdmin = null;
+
+    async function loadFasumAreasAdmin() {
+      if (fasumLoadPromiseAdmin) return fasumLoadPromiseAdmin;
+
+      fasumLoadPromiseAdmin = (async () => {
+        if (typeof shp === 'undefined') {
+          console.warn('[fasum] shpjs belum tersedia di admin');
+          return fasumAreasAdmin;
+        }
+
+        try {
+          const assetVersion = window.ITSAFE_ASSET_VERSION || String(Date.now());
+          const res = await fetch(`assets/Fasum.zip?v=${assetVersion}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const buf = await res.arrayBuffer();
+          if (!isZipBuffer(buf)) throw new Error('Fasum.zip bukan file zip valid');
+
+          const parsed = await shp(buf);
+          let data = getFirstGeoJSONLayer(parsed);
+          if (!data || !data.features || !data.features.length) {
+            throw new Error('GeoJSON fasum kosong');
+          }
+
+          data = reprojectAdminGeoJSON(data);
+          fasumAreasAdmin = buildFasumAreas(data);
+
+          // sync to lokasiInsidenAdminHidden
+          const source = document.getElementById('lokasiInsidenAdminHidden');
+          if (source) {
+            let group = source.querySelector('optgroup[data-location-type="fasum"]');
+            if (!group) {
+              group = document.createElement('optgroup');
+              group.label = 'Fasilitas Umum';
+              group.dataset.locationType = 'fasum';
+              source.appendChild(group);
+            }
+            group.innerHTML = '';
+            fasumAreasAdmin.forEach(area => {
+              const opt = document.createElement('option');
+              opt.value = area.name;
+              opt.textContent = area.name;
+              opt.dataset.lat = area.lat.toFixed(6);
+              opt.dataset.lng = area.lng.toFixed(6);
+              opt.dataset.locationType = 'fasum';
+              opt.dataset.fasumId = area.id;
+              group.appendChild(opt);
+            });
+
+            // Force rebuild of dLokasiSelect dropdown
+            const select = document.getElementById('dLokasiSelect');
+            if (select) {
+              select.removeAttribute('data-ready');
+              initReportLocationSelect();
+            }
+          }
+        } catch (e) {
+          console.warn('[fasum] gagal memuat Fasum.zip di admin', e);
+        }
+
+        return fasumAreasAdmin;
+      })();
+
+      return fasumLoadPromiseAdmin;
+    }
+
+    // ─── GIS SHAPEFILE LOADING ──────────────────────────────────
+    async function loadAdminGISLayers() {
+      if (typeof shp === 'undefined') return;
+
       try {
+        await loadFasumAreasAdmin();
+
         // Boundary ITS
         const assetVersion = window.ITSAFE_ASSET_VERSION || String(Date.now());
         let bufBoundary = await fetch(`assets/its_boundary.zip?v=${assetVersion}`, { cache: 'no-store' })
@@ -4161,7 +4445,7 @@
         }
         if (bufBoundary) {
           let gjBoundary = await shp(bufBoundary);
-          gjBoundary = reproject(gjBoundary.type ? gjBoundary : gjBoundary[Object.keys(gjBoundary)[0]]);
+          gjBoundary = reprojectAdminGeoJSON(gjBoundary.type ? gjBoundary : gjBoundary[Object.keys(gjBoundary)[0]]);
           adminBoundaryLayer = L.geoJSON(gjBoundary, {
             style: { color: '#EF4444', weight: 3, fill: true, fillOpacity: 0.08, dashArray: '6 4' }
           }).addTo(adminMap);
@@ -4170,7 +4454,7 @@
           if (bounds.isValid()) adminMap.fitBounds(bounds, { padding: [20, 20] });
         }
 
-        // Jurusan Pins (Parsed from injected HTML select DOM)
+        // Jurusan & Fasum Pins (Parsed from injected HTML select DOM)
         adminJurusanLayer = L.layerGroup();
         if (visAdminJurusanLayer) adminJurusanLayer.addTo(adminMap);
 
@@ -4196,11 +4480,16 @@
             'FKK': '#B07AA1', // purple
             'FTEIC': '#20B2AA', // cyan
             'FTK': '#BAB0AC', // gray
+            'Fasilitas Umum': '#0EA5A4', // custom color for fasum
           };
           const color = FACULTY_COLORS[faculty] || '#4B5563';
 
+          const iconHtml = (faculty === 'Fasilitas Umum')
+            ? `<div class="faculty-pin" style="--pin-color:${color}"><i class="fas fa-landmark"></i></div>`
+            : `<div class="faculty-pin" style="--pin-color:${color}"><i class="fas fa-building-columns"></i></div>`;
+
           const icon = L.divIcon({
-            html: `<div class="faculty-pin" style="--pin-color:${color}"><i class="fas fa-building-columns"></i></div>`,
+            html: iconHtml,
             className: 'faculty-pin-wrap',
             iconSize: [20, 20],
             iconAnchor: [10, 10]
@@ -4443,6 +4732,27 @@
           </button>`
         : '<button class="admin-popup-btn warn" disabled style="opacity:.55;cursor:not-allowed"><i class="fas fa-image"></i> Tidak Ada Foto</button>';
 
+      let isDeskripsiHidden = false;
+      let displayDeskripsi = r.lokasiDeskripsi || '';
+      if (displayDeskripsi.startsWith('HIDDEN_')) {
+        isDeskripsiHidden = true;
+        displayDeskripsi = displayDeskripsi.substring('HIDDEN_'.length);
+      }
+
+      let isKronologiHidden = false;
+      let displayKronologi = r.kronologi || '';
+      if (displayKronologi.startsWith('HIDDEN_')) {
+        isKronologiHidden = true;
+        displayKronologi = displayKronologi.substring('HIDDEN_'.length);
+      }
+
+      const descHtml = displayDeskripsi ? `
+        <div class="admin-popup-desc">
+          ${isDeskripsiHidden ? '<span style="color:#D56A6A;font-weight:700;display:block;margin-bottom:4px;font-size:10px;"><i class="fas fa-eye-slash"></i> DESKRIPSI DISEMBUNYIKAN DARI PUBLIK</span>' : ''}
+          ${adminEsc(displayDeskripsi)}
+        </div>
+      ` : '';
+
       return `
         <div class="admin-map-popup" style="--admin-popup-accent:${visual.color}">
           <div class="admin-popup-head">
@@ -4450,7 +4760,7 @@
             <div class="admin-popup-title">${adminEsc(r.lokasi || 'Lokasi tidak diketahui')}</div>
             <div class="admin-popup-sub">#${adminEsc(r.id)} ${r.reportCode ? `- ${adminEsc(r.reportCode)}` : ''} | ${adminEsc(formatDate(r.createdAt))}</div>
           </div>
-          ${r.lokasiDeskripsi ? `<div class="admin-popup-desc">${adminEsc(r.lokasiDeskripsi)}</div>` : ''}
+          ${descHtml}
           <div class="admin-popup-body">
             <div class="admin-popup-badge-row">
               ${adminPopupBadge(rawan)}
@@ -4498,7 +4808,7 @@
                 ${adminPopupRow('Pernah Hindari', r.pernahHindari || 'Tidak diisi')}
                 ${adminPopupRow('Orang Lain Tidak Nyaman', r.orangLain || 'Tidak diisi')}
                 ${adminPopupRow('Situasi Mencurigakan', r.situasiMencurigakan || 'Tidak diisi', true)}
-                ${adminPopupRow('Kronologi/Keterangan', r.kronologi || 'Tidak diisi', true)}
+                ${adminPopupRowHtml('Kronologi/Keterangan', (isKronologiHidden ? '<span style="color:#D56A6A;font-weight:700;display:block;margin-bottom:4px;font-size:10px;"><i class="fas fa-eye-slash"></i> KRONOLOGI DISEMBUNYIKAN DARI PUBLIK</span>' : '') + adminEsc(displayKronologi || 'Tidak diisi'), true)}
               </div>
             </div>
 
