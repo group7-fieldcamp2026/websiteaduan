@@ -2832,7 +2832,7 @@
           <div class="detail-item full">
             <label>Nama Area / Lokasi yang Dilaporkan *</label>
             <select id="dLokasiSelect" onchange="handleReportLocationSelect(this)">
-              <option value="">-- Pilih Fakultas/Departemen --</option>
+              <option value="">-- Pilih Fakultas/Departemen/Fasilitas Umum --</option>
             </select>
             <input type="text" id="dLokasi" placeholder="Nama area / departemen"
               style="margin-top:.55rem" />
@@ -3373,6 +3373,12 @@
       document.getElementById('lIcon').value = 'location-dot';
       updateIconPreview('location-dot');
       initReportLocationSelect();
+      loadFasumAreasAdmin()
+        .then(() => {
+          const currentLocation = document.getElementById('dLokasi')?.value || '';
+          if (currentLocation) syncReportLocationSelect(currentLocation);
+        })
+        .catch(e => console.warn('[fasum] gagal inisialisasi awal admin', e));
       fetchReports();
       fetchLocations();
       startAutoRefresh();
@@ -3784,17 +3790,21 @@
       const source = document.getElementById('lokasiInsidenAdminHidden');
       if (!select || !source || select.dataset.ready === 'true') return;
 
-      select.innerHTML = '<option value="">-- Pilih Fakultas/Departemen --</option>';
+      select.innerHTML = '<option value="">-- Pilih Fakultas/Departemen/Fasilitas Umum --</option>';
       Array.from(source.children).forEach(child => {
         if (child.tagName === 'OPTGROUP') {
           const group = document.createElement('optgroup');
           group.label = child.label;
+          if (child.dataset.locationType) group.dataset.locationType = child.dataset.locationType;
           Array.from(child.children).forEach(opt => {
             const cloned = document.createElement('option');
             cloned.value = opt.textContent.trim();
             cloned.textContent = opt.textContent.trim();
             if (opt.dataset.lat) cloned.dataset.lat = opt.dataset.lat;
             if (opt.dataset.lng) cloned.dataset.lng = opt.dataset.lng;
+            if (opt.dataset.locationType) cloned.dataset.locationType = opt.dataset.locationType;
+            if (opt.dataset.fasumType) cloned.dataset.fasumType = opt.dataset.fasumType;
+            if (opt.dataset.fasumId) cloned.dataset.fasumId = opt.dataset.fasumId;
             group.appendChild(cloned);
           });
           select.appendChild(group);
@@ -5013,18 +5023,146 @@
     let fasumAreasAdmin = [];
     let fasumLoadPromiseAdmin = null;
 
+    const ADMIN_FASUM_FALLBACK_AREAS = [
+      { name: 'Asrama Blok A', jenis_lokasi: 'Asrama', lat: -7.28731, lng: 112.791743 },
+      { name: 'Asrama Blok B', jenis_lokasi: 'Asrama', lat: -7.287661, lng: 112.791065 },
+      { name: 'Asrama Blok C', jenis_lokasi: 'Asrama', lat: -7.287898, lng: 112.791442 },
+      { name: 'Asrama Blok D', jenis_lokasi: 'Asrama', lat: -7.287665, lng: 112.792302 },
+      { name: 'Asrama Blok E', jenis_lokasi: 'Asrama', lat: -7.289008, lng: 112.791695 },
+      { name: 'Asrama Blok F', jenis_lokasi: 'Asrama', lat: -7.287915, lng: 112.791939 },
+      { name: 'Asrama Blok G', jenis_lokasi: 'Asrama', lat: -7.289039, lng: 112.790915 },
+      { name: 'Asrama Blok H', jenis_lokasi: 'Asrama', lat: -7.288638, lng: 112.791446 },
+      { name: 'Asrama Blok I', jenis_lokasi: 'Asrama', lat: -7.288205, lng: 112.790947 },
+      { name: 'Asrama Blok J', jenis_lokasi: 'Asrama', lat: -7.287793, lng: 112.790301 },
+      { name: 'Asrama Blok K', jenis_lokasi: 'Asrama', lat: -7.288577, lng: 112.790256 },
+      { name: 'Asrama Blok M', jenis_lokasi: 'Asrama', lat: -7.288186, lng: 112.790184 },
+      { name: 'Aula Asrama', jenis_lokasi: 'Asrama', lat: -7.288051, lng: 112.792084 },
+      { name: 'Bank ITS', jenis_lokasi: 'Indoor', lat: -7.28445, lng: 112.79302 },
+      { name: 'CCWS', jenis_lokasi: 'Indoor', lat: -7.286884, lng: 112.793859 },
+      { name: 'Gedung Dharma Wanita', jenis_lokasi: 'Indoor', lat: -7.288528, lng: 112.796058 },
+      { name: 'Graha Sepuluh Nopember', jenis_lokasi: 'Indoor', lat: -7.276946, lng: 112.791544 },
+      { name: 'K1-Mart', jenis_lokasi: 'Indoor', lat: -7.286648, lng: 112.794034 },
+      { name: 'Kantin Pusat ITS', jenis_lokasi: 'Indoor', lat: -7.283895, lng: 112.794111 },
+      { name: 'Masjid Manarul Ilmi ITS', jenis_lokasi: 'Indoor', lat: -7.282361, lng: 112.793069 },
+      { name: 'Perpustakaan ITS', jenis_lokasi: 'Indoor', lat: -7.281645, lng: 112.795489 },
+      { name: 'Point Coffe ITS', jenis_lokasi: 'Indoor', lat: -7.289914, lng: 112.796341 },
+      { name: 'Rektorat ITS', jenis_lokasi: 'Indoor', lat: -7.281624, lng: 112.794337 },
+      { name: 'Research Center ITS', jenis_lokasi: 'Indoor', lat: -7.28118, lng: 112.797342 },
+      { name: 'Robotika ITS', jenis_lokasi: 'Indoor', lat: -7.277336, lng: 112.797673 },
+      { name: 'SCC ITS', jenis_lokasi: 'Indoor', lat: -7.283427, lng: 112.7936 },
+      { name: 'TK Sepuluh Nopember', jenis_lokasi: 'Indoor', lat: -7.288888, lng: 112.796231 },
+      { name: 'Tower 1', jenis_lokasi: 'Indoor', lat: -7.285072, lng: 112.794075 },
+      { name: 'Tower 2', jenis_lokasi: 'Indoor', lat: -7.285343, lng: 112.795221 },
+      { name: 'Gor Bulutangkis ITS', jenis_lokasi: 'Olahraga', lat: -7.286729, lng: 112.792974 },
+      { name: 'Gor Pertamina', jenis_lokasi: 'Olahraga', lat: -7.283754, lng: 112.791926 },
+      { name: 'Lapangan Bola Basket', jenis_lokasi: 'Olahraga', lat: -7.285804, lng: 112.793218 },
+      { name: 'Lapangan Futsal ITS', jenis_lokasi: 'Olahraga', lat: -7.287251, lng: 112.792756 },
+      { name: 'Stadion ITS', jenis_lokasi: 'Olahraga', lat: -7.285419, lng: 112.792345 },
+      { name: 'Danau 8 ITS', jenis_lokasi: 'Outdoor', lat: -7.286847, lng: 112.796091 },
+      { name: 'Danau Asrama ITS', jenis_lokasi: 'Outdoor', lat: -7.288286, lng: 112.792508 },
+      { name: 'Danau Graha ITS', jenis_lokasi: 'Outdoor', lat: -7.277233, lng: 112.790606 },
+      { name: 'Lapangan Perpustakaan ITS', jenis_lokasi: 'Outdoor', lat: -7.282005, lng: 112.795153 },
+      { name: 'Lapangan Taman Alumni ITS', jenis_lokasi: 'Outdoor', lat: -7.280656, lng: 112.79212 },
+      { name: 'Parkiran Fasor', jenis_lokasi: 'Outdoor', lat: -7.284289, lng: 112.792411 },
+      { name: 'Parkiran Graha Sepuluh Nopember', jenis_lokasi: 'Outdoor', lat: -7.277807, lng: 112.791168 },
+      { name: 'Taman Busur ITS', jenis_lokasi: 'Outdoor', lat: -7.278218, lng: 112.7979 },
+      { name: 'Taman Gerigi ITS', jenis_lokasi: 'Outdoor', lat: -7.281344, lng: 112.792981 },
+    ];
+
+    function syncAdminFasumAreasToSelect(areas) {
+      const source = document.getElementById('lokasiInsidenAdminHidden');
+      if (!source || !Array.isArray(areas) || !areas.length) return;
+
+      Array.from(source.querySelectorAll('optgroup[data-location-type="fasum"]')).forEach(el => el.remove());
+
+      const groupedFasum = {};
+      areas.forEach(area => {
+        const type = area.jenis_lokasi || 'Lainnya';
+        if (!groupedFasum[type]) groupedFasum[type] = [];
+        groupedFasum[type].push(area);
+      });
+
+      Object.keys(groupedFasum).sort().forEach(type => {
+        const group = document.createElement('optgroup');
+        group.label = `Fasilitas Umum - ${type}`;
+        group.dataset.locationType = 'fasum';
+
+        groupedFasum[type].sort((a, b) => a.name.localeCompare(b.name)).forEach((area, index) => {
+          const opt = document.createElement('option');
+          opt.value = area.name;
+          opt.textContent = area.name;
+          opt.dataset.lat = Number(area.lat).toFixed(6);
+          opt.dataset.lng = Number(area.lng).toFixed(6);
+          opt.dataset.locationType = 'fasum';
+          opt.dataset.fasumType = type;
+          opt.dataset.fasumId = area.id || `fasum-fallback-${type}-${index + 1}`;
+          group.appendChild(opt);
+        });
+
+        source.appendChild(group);
+      });
+
+      const select = document.getElementById('dLokasiSelect');
+      if (select) {
+        select.removeAttribute('data-ready');
+        initReportLocationSelect();
+      }
+    }
+
+    function ensureAdminFasumFallbackAreas() {
+      if (fasumAreasAdmin.length || !ADMIN_FASUM_FALLBACK_AREAS.length) return;
+      fasumAreasAdmin = ADMIN_FASUM_FALLBACK_AREAS.map((area, index) => ({
+        ...area,
+        id: `fasum-fallback-${index + 1}`,
+        polygon: null,
+        properties: {},
+        isFallback: true,
+      }));
+      syncAdminFasumAreasToSelect(fasumAreasAdmin);
+    }
+
+    function areAdminGisLibrariesReady() {
+      return typeof shp !== 'undefined' && typeof proj4 !== 'undefined';
+    }
+
+    function waitForAdminGisLibraries(timeoutMs = 6000) {
+      if (areAdminGisLibrariesReady()) return Promise.resolve(true);
+
+      return new Promise(resolve => {
+        const startedAt = Date.now();
+        const check = () => {
+          if (areAdminGisLibrariesReady()) {
+            resolve(true);
+            return;
+          }
+
+          if (Date.now() - startedAt >= timeoutMs) {
+            resolve(false);
+            return;
+          }
+
+          setTimeout(check, 120);
+        };
+        check();
+      });
+    }
+
     async function loadFasumAreasAdmin() {
       if (fasumLoadPromiseAdmin) return fasumLoadPromiseAdmin;
 
       fasumLoadPromiseAdmin = (async () => {
-        if (typeof shp === 'undefined') {
-          console.warn('[fasum] shpjs belum tersedia di admin');
+        ensureAdminFasumFallbackAreas();
+
+        const librariesReady = await waitForAdminGisLibraries();
+        if (!librariesReady) {
+          console.warn('[fasum] library GIS belum tersedia di admin');
+          fasumLoadPromiseAdmin = null;
           return fasumAreasAdmin;
         }
 
         try {
           const assetVersion = window.ITSAFE_ASSET_VERSION || String(Date.now());
-          const res = await fetch(`assets/Fasum.zip?v=${assetVersion}`);
+          const res = await fetch(`assets/Fasum.zip?v=${assetVersion}`, { cache: 'no-store' });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
           const buf = await res.arrayBuffer();
@@ -5038,51 +5176,10 @@
 
           data = reprojectAdminGeoJSON(data);
           fasumAreasAdmin = buildFasumAreas(data);
-
-          // sync to lokasiInsidenAdminHidden
-          const source = document.getElementById('lokasiInsidenAdminHidden');
-          if (source) {
-            // Remove existing fasum groups
-            Array.from(source.querySelectorAll('optgroup[data-location-type="fasum"]')).forEach(el => el.remove());
-
-            // Group by jenis_lokasi
-            const groupedFasum = {};
-            fasumAreasAdmin.forEach(area => {
-              const type = area.jenis_lokasi || 'Lainnya';
-              if (!groupedFasum[type]) groupedFasum[type] = [];
-              groupedFasum[type].push(area);
-            });
-
-            // Create optgroups
-            Object.keys(groupedFasum).sort().forEach(type => {
-              const group = document.createElement('optgroup');
-              group.label = `Fasilitas Umum - ${type}`;
-              group.dataset.locationType = 'fasum';
-              
-              groupedFasum[type].sort((a, b) => a.name.localeCompare(b.name)).forEach(area => {
-                const opt = document.createElement('option');
-                opt.value = area.name;
-                opt.textContent = area.name;
-                opt.dataset.lat = area.lat.toFixed(6);
-                opt.dataset.lng = area.lng.toFixed(6);
-                opt.dataset.locationType = 'fasum';
-                opt.dataset.fasumType = type;
-                opt.dataset.fasumId = area.id;
-                group.appendChild(opt);
-              });
-              
-              source.appendChild(group);
-            });
-
-            // Force rebuild of dLokasiSelect dropdown
-            const select = document.getElementById('dLokasiSelect');
-            if (select) {
-              select.removeAttribute('data-ready');
-              initReportLocationSelect();
-            }
-          }
+          syncAdminFasumAreasToSelect(fasumAreasAdmin);
         } catch (e) {
           console.warn('[fasum] gagal memuat Fasum.zip di admin', e);
+          fasumLoadPromiseAdmin = null;
         }
 
         return fasumAreasAdmin;
@@ -5093,7 +5190,7 @@
 
     // ─── GIS SHAPEFILE LOADING ──────────────────────────────────
     async function loadAdminGISLayers() {
-      if (typeof shp === 'undefined') return;
+      if (!(await waitForAdminGisLibraries())) return;
 
       try {
         await loadFasumAreasAdmin();
