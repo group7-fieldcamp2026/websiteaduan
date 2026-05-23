@@ -91,10 +91,25 @@ const FASUM_TYPE_COLORS = {
   'Asrama': '#38BDF8', // light blue (biru muda)
   'Fasilitas Akademik': '#8B5CF6', // purple (violet)
   'Fasilitas Umum': '#0EA5A4', // teal
+  'Indoor': '#2563EB', // blue
   'Kantin': '#EC4899', // pink
   'Olahraga': '#F97316', // orange
+  'Outdoor': '#16A34A', // green
   'Lainnya': '#9CA3AF' // gray
 };
+
+const FASUM_TYPE_COLOR_LOOKUP = Object.keys(FASUM_TYPE_COLORS).reduce((lookup, type) => {
+  lookup[normalizeFasumType(type)] = FASUM_TYPE_COLORS[type];
+  return lookup;
+}, {});
+
+function normalizeFasumType(type) {
+  return String(type || 'Lainnya').trim().toLowerCase();
+}
+
+function getFasumTypeColor(type) {
+  return FASUM_TYPE_COLOR_LOOKUP[normalizeFasumType(type)] || FASUM_TYPE_COLORS['Lainnya'];
+}
 
 const RISK_COLORS = {
   1: '#10B981', // Hijau (Rawan Rendah)
@@ -1908,7 +1923,7 @@ function createFacultyIcon(color) {
 }
 
 function createFasumIcon(type) {
-  const color = (type && FASUM_TYPE_COLORS[type]) ? FASUM_TYPE_COLORS[type] : FASUM_TYPE_COLORS['Lainnya'];
+  const color = getFasumTypeColor(type);
   return L.divIcon({
     className: 'fasum-pin-wrap',
     html: `<div class="fasum-pin" style="--fasum-color:${color}">
@@ -2441,7 +2456,9 @@ function updateLegendSymbols(mode, display) {
       <div class="legend-item"><span class="legend-marker legend-marker-shield" style="--case-color:#EA580C"><i class="fas fa-user-shield"></i></span> Layer minim petugas</div>`;
   }
 
-  html += `<div class="legend-item"><span class="legend-marker legend-marker-square" style="--case-color:${FASUM_COLOR}"><i class="fas fa-tree-city"></i></span> Fasilitas Umum</div>`;
+  html += `
+      <div class="legend-item"><span class="legend-marker legend-marker-square" style="--case-color:${getFasumTypeColor('Indoor')}"><i class="fas fa-building"></i></span> Fasum Indoor</div>
+      <div class="legend-item"><span class="legend-marker legend-marker-square" style="--case-color:${getFasumTypeColor('Outdoor')}"><i class="fas fa-tree"></i></span> Fasum Outdoor</div>`;
   html += '<div class="legend-item"><span class="legend-line"></span> Batas Kampus ITS</div>';
   list.innerHTML = html;
 }

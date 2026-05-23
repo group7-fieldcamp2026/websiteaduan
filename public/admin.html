@@ -5559,22 +5559,29 @@
             'FTEIC': '#20B2AA',
             'FTK': '#BAB0AC',
           };
-          
+
           const FASUM_TYPE_COLORS = {
             'Asrama': '#38BDF8', // light blue (biru muda)
             'Fasilitas Akademik': '#8B5CF6', // purple (violet)
             'Fasilitas Umum': '#0EA5A4', // teal
+            'Indoor': '#2563EB', // blue
             'Kantin': '#EC4899', // pink
             'Olahraga': '#F97316', // orange
+            'Outdoor': '#16A34A', // green
             'Lainnya': '#9CA3AF' // gray
           };
+          const normalizeFasumType = (type) => String(type || 'Lainnya').trim().toLowerCase();
+          const fasumTypeColorLookup = Object.keys(FASUM_TYPE_COLORS).reduce((lookup, type) => {
+            lookup[normalizeFasumType(type)] = FASUM_TYPE_COLORS[type];
+            return lookup;
+          }, {});
 
           const isFasum = faculty.startsWith('Fasilitas Umum');
           let color = '#4B5563';
-          
+
           if (isFasum) {
             const type = opt.dataset.fasumType || 'Lainnya';
-            color = FASUM_TYPE_COLORS[type] || FASUM_TYPE_COLORS['Lainnya'];
+            color = fasumTypeColorLookup[normalizeFasumType(type)] || FASUM_TYPE_COLORS['Lainnya'];
           } else {
             color = FACULTY_COLORS[faculty] || '#4B5563';
           }
