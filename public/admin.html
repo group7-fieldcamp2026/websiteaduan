@@ -2023,6 +2023,11 @@
 
     .map-tool-btn {
       transition: all 0.2s ease !important;
+      color: var(--text) !important;
+    }
+
+    [data-theme="dark"] .map-tool-btn {
+      color: #ffffff !important;
     }
 
     .map-tool-btn:hover,
@@ -2030,7 +2035,7 @@
     .map-tool-btn[aria-expanded="true"] {
       background: var(--primary) !important;
       border-color: var(--primary) !important;
-      color: #fff !important;
+      color: #ffffff !important;
       transform: translateY(-1px);
     }
   </style>
