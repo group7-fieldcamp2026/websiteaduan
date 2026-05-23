@@ -3358,22 +3358,79 @@ if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
   Chart.register(ChartDataLabels);
 }
 
+const LAPORAN_CHART_MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+
+function getReportDateEntries(source = reports) {
+  return (source || [])
+    .map(report => ({ report, date: parseReportDate(report) }))
+    .filter(item => item.date && !isNaN(item.date.getTime()));
+}
+
+function syncLaporanChartYearFilter(entries) {
+  const select = document.getElementById('laporanChartYearFilter');
+  if (!select) return '';
+
+  const selectedValue = select.value;
+  const years = [...new Set(entries.map(item => item.date.getFullYear()))].sort((a, b) => b - a);
+  const html = ['<option value="">Semua Tahun</option>']
+    .concat(years.map(year => `<option value="${year}">${year}</option>`))
+    .join('');
+
+  if (select.dataset.years !== years.join(',')) {
+    select.innerHTML = html;
+    select.dataset.years = years.join(',');
+  }
+
+  if (selectedValue && years.includes(parseInt(selectedValue, 10))) {
+    select.value = selectedValue;
+    return selectedValue;
+  }
+
+  select.value = '';
+  return '';
+}
+
+function getDaysInChartMonth(month, year, entries) {
+  const monthNum = parseInt(month, 10);
+  if (!monthNum) return 31;
+
+  if (year) return new Date(parseInt(year, 10), monthNum, 0).getDate();
+
+  const years = [...new Set(entries.map(item => item.date.getFullYear()))];
+  if (!years.length) return new Date(new Date().getFullYear(), monthNum, 0).getDate();
+  return Math.max(...years.map(itemYear => new Date(itemYear, monthNum, 0).getDate()));
+}
+
 function renderLaporanChart() {
   const ctx = document.getElementById('laporanChart');
   if (!ctx) return;
 
   const filterWaktu = document.getElementById('laporanChartFilter')?.value || '';
-  let data = reports;
-  if (filterWaktu) data = data.filter(r => r.waktu === filterWaktu);
+  const filterBulan = document.getElementById('laporanChartMonthFilter')?.value || '';
+  let entries = getReportDateEntries(reports);
+  const filterTahun = syncLaporanChartYearFilter(entries);
 
-  // Hitung jumlah per bulan
-  const monthCounts = new Array(12).fill(0);
-  data.forEach(r => {
-    const d = parseReportDate(r);
-    if (d) monthCounts[d.getMonth()]++;
-  });
+  if (filterWaktu) entries = entries.filter(item => item.report.waktu === filterWaktu);
+  if (filterTahun) entries = entries.filter(item => item.date.getFullYear() === parseInt(filterTahun, 10));
+  if (filterBulan) entries = entries.filter(item => (item.date.getMonth() + 1) === parseInt(filterBulan, 10));
 
-  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+  let chartLabels = LAPORAN_CHART_MONTH_LABELS;
+  let chartCounts = new Array(12).fill(0);
+  let datasetLabel = 'Jumlah Laporan';
+
+  if (filterBulan) {
+    const daysInMonth = getDaysInChartMonth(filterBulan, filterTahun, entries);
+    chartLabels = Array.from({ length: daysInMonth }, (_, index) => String(index + 1));
+    chartCounts = new Array(daysInMonth).fill(0);
+    datasetLabel = `Jumlah Laporan ${getMonthName(filterBulan)}${filterTahun ? ` ${filterTahun}` : ''}`;
+    entries.forEach(item => {
+      chartCounts[item.date.getDate() - 1]++;
+    });
+  } else {
+    entries.forEach(item => {
+      chartCounts[item.date.getMonth()]++;
+    });
+  }
 
   if (typeof Chart === 'undefined' || typeof ChartDataLabels === 'undefined') {
     setTimeout(renderLaporanChart, 500);
@@ -3389,10 +3446,10 @@ function renderLaporanChart() {
   laporanChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: monthLabels,
+      labels: chartLabels,
       datasets: [{
-        label: 'Jumlah Laporan',
-        data: monthCounts,
+        label: datasetLabel,
+        data: chartCounts,
         backgroundColor: '#84A59D',
         borderColor: '#4A615C',
         borderWidth: 1,

@@ -2658,7 +2658,19 @@
     }
 
     [data-theme="dark"] .admin-map-control-panel .map-select {
-      color: var(--text);
+      background-color: rgba(15, 23, 42, .92);
+      color: #F8FAFC;
+      color-scheme: dark;
+    }
+
+    [data-theme="dark"] .admin-map-control-panel .map-select option {
+      background-color: #111827;
+      color: #F8FAFC;
+    }
+
+    [data-theme="dark"] .admin-map-control-panel .map-select option:checked {
+      background-color: #2563EB;
+      color: #FFFFFF;
     }
 
     [data-theme="dark"] .admin-map-control-panel .export-csv {
