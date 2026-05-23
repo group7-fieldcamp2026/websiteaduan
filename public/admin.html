@@ -2191,15 +2191,25 @@
           <h1>Peta Admin</h1>
           <p>Visualisasi titik laporan dan lokasi pengaduan</p>
         </div>
-        <div class="card admin-map-card">
-          <div class="map-panel"
-            style="margin-bottom: 1rem; border: none; box-shadow: none; background: transparent; padding: 0;">
-            <div class="map-panel-section"
-              style="background: var(--bg2); padding: 1rem; border-radius: var(--radius-sm);">
-              <div class="panel-title"
-                style="font-size: .85rem; font-weight: 700; color: var(--text-muted); margin-bottom: .75rem; letter-spacing: 1px;">
-                <i class="fas fa-globe"></i> BASEMAP
-              </div>
+        <div class="card admin-map-card map-container map-surface-main" id="adminMapContainer" style="position:relative; padding:0; border:none; overflow:hidden; border-radius: var(--radius); border: 1px solid var(--border);">
+          <div id="adminMap" style="width:100%; height:620px; border:none; border-radius:0;"></div>
+          
+          <div class="map-panel floating-map-panel" id="floatingAdminMapPanel" hidden style="max-height: calc(100% - 3rem); overflow-y: auto;">
+             <div class="floating-map-panel-head">
+               <div class="floating-map-panel-title">
+                 <i class="fas fa-sliders"></i>
+                 <span>Kontrol Peta</span>
+               </div>
+               <button type="button" class="map-icon-btn" id="adminMapPanelCloseBtn" aria-label="Sembunyikan kontrol peta" title="Sembunyikan kontrol peta" onclick="toggleAdminMapControls(false)">
+                 <i class="fas fa-xmark"></i>
+               </button>
+             </div>
+             
+             <div class="map-panel-section" style="background: transparent; padding: 1rem; border-radius: 0;">
+               <div class="panel-title"
+                 style="font-size: .85rem; font-weight: 700; color: var(--text-muted); margin-bottom: .75rem; letter-spacing: 1px;">
+                 <i class="fas fa-globe"></i> BASEMAP
+               </div>
               <div class="basemap-row" style="display: flex; flex-wrap: wrap; gap: .45rem;">
                 <button class="bm-btn active" data-bm="osm" onclick="switchAdminBasemap(this)"
                   style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .85rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(242,132,130,.2); color:#D56A6A; font-weight:700; cursor:pointer;"><i
@@ -2256,9 +2266,18 @@
                   style="display:inline-flex; align-items:center; gap:.35rem; padding:.45rem .9rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(59,130,246,.12); color:#1D4ED8; font-weight:700; cursor:pointer;"><i
                     class="fas fa-code-branch"></i> Export GeoJSON</button>
               </div>
+              </div>
             </div>
           </div>
-          <div id="adminMap"></div>
+          
+          <div class="map-floating-toolbar" aria-label="Aksi peta" style="z-index: 400; position: absolute; right: 1rem; top: 1rem; display: flex; gap: .5rem;">
+            <button type="button" class="map-tool-btn" id="adminMapControlsToggle" aria-expanded="false" title="Tampilkan kontrol peta" onclick="toggleAdminMapControls()" style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: .6rem 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.08); display: flex; align-items: center; gap: .4rem;">
+              <i class="fas fa-sliders"></i><span>Kontrol</span>
+            </button>
+            <button type="button" class="map-tool-btn" id="adminMapFullscreenBtn" aria-pressed="false" title="Fullscreen peta" onclick="toggleAdminMapFullscreen()" style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: .6rem 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.08); display: flex; align-items: center; gap: .4rem;">
+              <i class="fas fa-expand"></i><span>Fullscreen</span>
+            </button>
+          </div>
         </div>
       </div>
     </div><!-- /main-content -->
@@ -4125,6 +4144,73 @@
 
       renderAdminMap();
     }
+    
+    // Floating controls logic
+    function toggleAdminMapControls(forceOpen) {
+      const container = document.getElementById('adminMapContainer');
+      const panel = document.getElementById('floatingAdminMapPanel');
+      const toggle = document.getElementById('adminMapControlsToggle');
+      if (!container || !panel) return;
+
+      const shouldCollapse = typeof forceOpen === 'boolean'
+        ? !forceOpen
+        : !container.classList.contains('map-controls-collapsed');
+
+      container.classList.toggle('map-controls-collapsed', shouldCollapse);
+      panel.hidden = shouldCollapse;
+
+      if (toggle) {
+        toggle.setAttribute('aria-expanded', String(!shouldCollapse));
+        toggle.title = shouldCollapse ? 'Tampilkan kontrol peta' : 'Sembunyikan kontrol peta';
+      }
+    }
+
+    async function toggleAdminMapFullscreen() {
+      const container = document.getElementById('adminMapContainer');
+      const btn = document.getElementById('adminMapFullscreenBtn');
+      if (!container) return;
+
+      const getFs = () => document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+      const currentFullscreen = getFs();
+      const requestFullscreen = container.requestFullscreen || container.webkitRequestFullscreen || container.msRequestFullscreen;
+      const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+
+      try {
+        if (currentFullscreen === container) {
+          if (exitFullscreen) await exitFullscreen.call(document);
+        } else {
+          if (requestFullscreen) await requestFullscreen.call(container);
+        }
+      } catch (error) {
+        console.warn('Fullscreen API gagal', error);
+      }
+    }
+
+    ['fullscreenchange', 'webkitfullscreenchange', 'MSFullscreenChange'].forEach(eventName => {
+      document.addEventListener(eventName, () => {
+        const container = document.getElementById('adminMapContainer');
+        const btn = document.getElementById('adminMapFullscreenBtn');
+        if (!container) return;
+        const getFs = () => document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+        const active = getFs() === container;
+        
+        container.classList.toggle('is-fullscreen', active);
+        if (btn) {
+          btn.setAttribute('aria-pressed', String(active));
+          btn.title = active ? 'Keluar fullscreen' : 'Fullscreen peta';
+          btn.innerHTML = active
+            ? '<i class="fas fa-compress"></i><span>Keluar</span>'
+            : '<i class="fas fa-expand"></i><span>Fullscreen</span>';
+        }
+        
+        setTimeout(() => { if (adminMap) adminMap.invalidateSize(); }, 200);
+      });
+    });
+
+    // Initialize state
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => toggleAdminMapControls(false), 100);
+    });
 
     function toggleAdminPin(type, el) {
       const isActive = el.dataset.active === 'true';
@@ -4264,9 +4350,11 @@
           const center = getPolygonCenter(polygon);
           if (!center || !Number.isFinite(center.lat) || !Number.isFinite(center.lng)) return;
           const rawId = feature.properties?.OBJECTID ?? feature.properties?.FID ?? featureIndex + 1;
+          const jenisLokasi = feature.properties?.Jenis_Lokasi ?? feature.properties?.jenis_lokasi ?? 'Lainnya';
           areas.push({
             id: `fasum-${rawId}-${polygonIndex + 1}`,
             name,
+            jenis_lokasi: jenisLokasi,
             lat: center.lat,
             lng: center.lng,
             polygon,
@@ -4393,23 +4481,36 @@
           // sync to lokasiInsidenAdminHidden
           const source = document.getElementById('lokasiInsidenAdminHidden');
           if (source) {
-            let group = source.querySelector('optgroup[data-location-type="fasum"]');
-            if (!group) {
-              group = document.createElement('optgroup');
-              group.label = 'Fasilitas Umum';
-              group.dataset.locationType = 'fasum';
-              source.appendChild(group);
-            }
-            group.innerHTML = '';
+            // Remove existing fasum groups
+            Array.from(source.querySelectorAll('optgroup[data-location-type="fasum"]')).forEach(el => el.remove());
+
+            // Group by jenis_lokasi
+            const groupedFasum = {};
             fasumAreasAdmin.forEach(area => {
-              const opt = document.createElement('option');
-              opt.value = area.name;
-              opt.textContent = area.name;
-              opt.dataset.lat = area.lat.toFixed(6);
-              opt.dataset.lng = area.lng.toFixed(6);
-              opt.dataset.locationType = 'fasum';
-              opt.dataset.fasumId = area.id;
-              group.appendChild(opt);
+              const type = area.jenis_lokasi || 'Lainnya';
+              if (!groupedFasum[type]) groupedFasum[type] = [];
+              groupedFasum[type].push(area);
+            });
+
+            // Create optgroups
+            Object.keys(groupedFasum).sort().forEach(type => {
+              const group = document.createElement('optgroup');
+              group.label = `Fasilitas Umum - ${type}`;
+              group.dataset.locationType = 'fasum';
+              
+              groupedFasum[type].sort((a, b) => a.name.localeCompare(b.name)).forEach(area => {
+                const opt = document.createElement('option');
+                opt.value = area.name;
+                opt.textContent = area.name;
+                opt.dataset.lat = area.lat.toFixed(6);
+                opt.dataset.lng = area.lng.toFixed(6);
+                opt.dataset.locationType = 'fasum';
+                opt.dataset.fasumType = type;
+                opt.dataset.fasumId = area.id;
+                group.appendChild(opt);
+              });
+              
+              source.appendChild(group);
             });
 
             // Force rebuild of dLokasiSelect dropdown
@@ -4472,19 +4573,36 @@
           const name = opt.textContent;
 
           const FACULTY_COLORS = {
-            'FSAD': '#4E79A7', // blue
-            'FTIRS': '#F28E2B', // orange
-            'FTSPK': '#76B7B2', // teal
-            'FDKBD': '#59A14F', // green
-            'FV': '#E15759', // red
-            'FKK': '#B07AA1', // purple
-            'FTEIC': '#20B2AA', // cyan
-            'FTK': '#BAB0AC', // gray
-            'Fasilitas Umum': '#0EA5A4', // custom color for fasum
+            'FSAD': '#4E79A7',
+            'FTIRS': '#F28E2B',
+            'FTSPK': '#76B7B2',
+            'FDKBD': '#59A14F',
+            'FV': '#E15759',
+            'FKK': '#B07AA1',
+            'FTEIC': '#20B2AA',
+            'FTK': '#BAB0AC',
           };
-          const color = FACULTY_COLORS[faculty] || '#4B5563';
+          
+          const FASUM_TYPE_COLORS = {
+            'Asrama': '#8B5CF6',
+            'Fasilitas Akademik': '#3B82F6',
+            'Fasilitas Umum': '#0EA5A4',
+            'Kantin': '#F59E0B',
+            'Olahraga': '#10B981',
+            'Lainnya': '#9CA3AF'
+          };
 
-          const iconHtml = (faculty === 'Fasilitas Umum')
+          const isFasum = faculty.startsWith('Fasilitas Umum');
+          let color = '#4B5563';
+          
+          if (isFasum) {
+            const type = opt.dataset.fasumType || 'Lainnya';
+            color = FASUM_TYPE_COLORS[type] || FASUM_TYPE_COLORS['Lainnya'];
+          } else {
+            color = FACULTY_COLORS[faculty] || '#4B5563';
+          }
+
+          const iconHtml = isFasum
             ? `<div class="faculty-pin" style="--pin-color:${color}"><i class="fas fa-tree-city"></i></div>`
             : `<div class="faculty-pin" style="--pin-color:${color}"><i class="fas fa-building-columns"></i></div>`;
 
@@ -4496,7 +4614,7 @@
           });
 
           L.marker([parseFloat(lat), parseFloat(lng)], { icon })
-            .bindPopup(`<b style="color:#1F2937">${name}</b><br><span style="font-size:0.8rem;color:#6B7280">${faculty === 'Fasilitas Umum' ? name : faculty}</span>`)
+            .bindPopup(`<b style="color:#1F2937">${name}</b><br><span style="font-size:0.8rem;color:#6B7280">${isFasum ? faculty : faculty}</span>`)
             .addTo(adminJurusanLayer);
         });
 
@@ -4880,14 +4998,36 @@
         }
 
         if (!lat || !lng) return;
+        
+        const photoPath = l.photo || '';
+        const isHidden = typeof photoPath === 'string' && photoPath.startsWith('HIDDEN_');
+        const displayPhotoPath = isHidden ? photoPath.replace(/^HIDDEN_/, '') : photoPath;
+        
+        const photoHtml = photoPath ? `
+          <div class="admin-popup-foto" style="margin-top:10px;">
+            <img src="${displayPhotoPath}" style="${isHidden ? 'opacity:.45;filter:grayscale(100%);' : ''}width:100%;border-radius:6px;max-height:120px;object-fit:cover;" alt="Foto lokasi" onerror="this.style.display='none'"/>
+            <div style="font-size:10.5px;color:#6B7280;margin-top:5px;text-align:center;">${isHidden ? 'Foto disembunyikan dari publik' : 'Foto tampil untuk publik'}</div>
+          </div>
+        ` : `<div style="font-size:0.8rem;color:#6B7280;margin-top:8px;text-align:center;">Tidak ada foto</div>`;
+
+        const photoButton = photoPath
+          ? `<button onclick="toggleFotoLokasiHide(${l.id}, '${isHidden ? 'unhide' : 'hide'}')" class="admin-popup-btn ${isHidden ? 'ok' : 'warn'}" style="margin-top:8px;width:100%;">
+              ${isHidden ? '<i class="fas fa-eye"></i> Tampilkan Foto' : '<i class="fas fa-eye-slash"></i> Sembunyikan Foto'}
+            </button>`
+          : '';
+
         L.circleMarker([lat, lng], {
           radius: 9, color: '#fff', fillColor: '#3B82F6', fillOpacity: 0.9, weight: 2
         }).addTo(adminLocLayer).bindPopup(`
-      <div style="font-family:'DM Sans',sans-serif;min-width:180px;font-size:0.8rem;text-align:center">
-        <b style="color:#3B82F6;font-size:1rem">${l.name}</b><br>
-        <div style="margin-top:5px;padding:3px;background:#EFF6FF;border-radius:4px;color:#1E3A8A">Titik Lokasi Pengaduan</div>
+      <div style="font-family:'DM Sans',sans-serif;min-width:200px;font-size:0.8rem;">
+        <div style="text-align:center;">
+          <b style="color:#3B82F6;font-size:1rem">${adminEsc(l.name)}</b><br>
+          <div style="margin-top:5px;padding:3px;background:#EFF6FF;border-radius:4px;color:#1E3A8A">Titik Lokasi Pengaduan</div>
+        </div>
+        ${photoHtml}
+        ${photoButton}
       </div>
-    `);
+    `, { className: 'admin-leaflet-popup' });
       });
     }
 
@@ -4916,6 +5056,32 @@
         showToast(`Foto berhasil di-${action === 'hide' ? 'sembunyikan' : 'tampilkan'}`, 'success');
         if (adminMap) adminMap.closePopup();
         fetchReports({ skipIfModal: true });
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function toggleFotoLokasiHide(id, action) {
+      const loc = LOCATIONS.find(x => x.id === id);
+      if (!loc || !loc.photo) return;
+      
+      let newPhoto = loc.photo;
+      if (action === 'hide' && !newPhoto.startsWith('HIDDEN_')) {
+        newPhoto = 'HIDDEN_' + newPhoto;
+      } else if (action === 'unhide' && newPhoto.startsWith('HIDDEN_')) {
+        newPhoto = newPhoto.replace(/^HIDDEN_/, '');
+      }
+
+      try {
+        const res = await fetch(`${LOCATION_ENDPOINT}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photo: newPhoto })
+        });
+        if (!res.ok) throw new Error('Gagal update foto lokasi');
+        showToast(`Foto lokasi berhasil di-${action === 'hide' ? 'sembunyikan' : 'tampilkan'}`, 'success');
+        if (adminMap) adminMap.closePopup();
+        fetchLocations();
       } catch (err) {
         showToast(err.message, 'error');
       }

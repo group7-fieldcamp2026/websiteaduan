@@ -87,6 +87,15 @@ const FACULTY_COLORS = {
   'Lainnya': '#D4879A',
 };
 
+const FASUM_TYPE_COLORS = {
+  'Asrama': '#8B5CF6',
+  'Fasilitas Akademik': '#3B82F6',
+  'Fasilitas Umum': '#0EA5A4',
+  'Kantin': '#F59E0B',
+  'Olahraga': '#10B981',
+  'Lainnya': '#9CA3AF'
+};
+
 const RISK_COLORS = {
   1: '#10B981', // Hijau (Rawan Rendah)
   2: '#F59E0B', // Kuning (Rawan Sedang)
@@ -601,6 +610,48 @@ async function toggleMapFullscreen() {
   setMapFullscreenState(!container.classList.contains('is-fullscreen'));
 }
 
+async function togglePickerFullscreen() {
+  const container = document.getElementById('pickerMapContainer');
+  const btn = document.getElementById('pickerFullscreenBtn');
+  if (!container || !btn) return;
+
+  const getFs = () => document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+  const currentFs = getFs();
+  const requestFs = container.requestFullscreen || container.webkitRequestFullscreen || container.msRequestFullscreen;
+  const exitFs = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+
+  try {
+    if (currentFs === container) {
+      if (exitFs) await exitFs.call(document);
+    } else {
+      if (requestFs) await requestFs.call(container);
+    }
+  } catch (error) {
+    console.warn('Fullscreen API gagal', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  ['fullscreenchange', 'webkitfullscreenchange', 'MSFullscreenChange'].forEach(eventName => {
+    document.addEventListener(eventName, () => {
+      const container = document.getElementById('pickerMapContainer');
+      const btn = document.getElementById('pickerFullscreenBtn');
+      if (!container || !btn) return;
+      
+      const getFs = () => document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+      const active = getFs() === container;
+      
+      container.style.height = active ? '100vh' : '400px';
+      container.style.width = active ? '100vw' : '100%';
+      btn.innerHTML = active
+        ? '<i class="fas fa-compress"></i> Keluar'
+        : '<i class="fas fa-expand"></i> Fullscreen';
+      
+      setTimeout(() => { if (window.pickerMap) window.pickerMap.invalidateSize(); }, 200);
+    });
+  });
+});
+
 function initFloatingMapControls() {
   const container = document.getElementById('mapContainer');
   const panel = document.querySelector('.map-panel');
@@ -853,9 +904,11 @@ function buildFasumAreas(data) {
       const center = getPolygonCenter(polygon);
       if (!center || !Number.isFinite(center.lat) || !Number.isFinite(center.lng)) return;
       const rawId = feature.properties?.OBJECTID ?? feature.properties?.FID ?? featureIndex + 1;
+      const jenisLokasi = feature.properties?.Jenis_Lokasi ?? feature.properties?.jenis_lokasi ?? 'Lainnya';
       areas.push({
         id: `fasum-${rawId}-${polygonIndex + 1}`,
         name,
+        jenis_lokasi: jenisLokasi,
         lat: center.lat,
         lng: center.lng,
         polygon,
@@ -932,29 +985,40 @@ function syncFasumQuickOptions() {
   if (!sel || !fasumAreas.length) return;
 
   const selectedValue = sel.value;
-  let group = sel.querySelector('optgroup[data-location-type="fasum"]');
-  if (!group) {
-    group = document.createElement('optgroup');
-    group.label = FASUM_GROUP_LABEL;
-    group.dataset.locationType = 'fasum';
-    const otherOption = Array.from(sel.children)
-      .find(child => child.tagName === 'OPTION' && isOtherLocationValue(child.value || child.textContent));
-    sel.insertBefore(group, otherOption || null);
-  }
 
-  group.innerHTML = '';
+  Array.from(sel.querySelectorAll('optgroup[data-location-type="fasum"]')).forEach(el => el.remove());
+
+  const otherOption = Array.from(sel.children)
+    .find(child => child.tagName === 'OPTION' && isOtherLocationValue(child.value || child.textContent));
+
+  const groupedFasum = {};
   fasumAreas.forEach(area => {
-    const opt = document.createElement('option');
-    opt.value = area.name;
-    opt.textContent = area.name;
-    opt.dataset.lat = area.lat.toFixed(6);
-    opt.dataset.lng = area.lng.toFixed(6);
-    opt.dataset.locationType = 'fasum';
-    opt.dataset.fasumId = area.id;
-    group.appendChild(opt);
+    const type = area.jenis_lokasi || 'Lainnya';
+    if (!groupedFasum[type]) groupedFasum[type] = [];
+    groupedFasum[type].push(area);
   });
 
-  if (selectedValue && Array.from(sel.options).some(opt => opt.value === selectedValue)) {
+  Object.keys(groupedFasum).sort().forEach(type => {
+    const group = document.createElement('optgroup');
+    group.label = `${FASUM_GROUP_LABEL} - ${type}`;
+    group.dataset.locationType = 'fasum';
+
+    groupedFasum[type].sort((a, b) => a.name.localeCompare(b.name)).forEach(area => {
+      const opt = document.createElement('option');
+      opt.value = area.name;
+      opt.textContent = area.name;
+      opt.dataset.lat = area.lat.toFixed(6);
+      opt.dataset.lng = area.lng.toFixed(6);
+      opt.dataset.fasumType = type;
+      opt.dataset.locationType = 'fasum';
+      opt.dataset.fasumId = area.id;
+      group.appendChild(opt);
+    });
+
+    sel.insertBefore(group, otherOption || null);
+  });
+
+  if (selectedValue && sel.querySelector(`option[value="${selectedValue}"]`)) {
     sel.value = selectedValue;
   }
 }
@@ -1802,10 +1866,11 @@ function createFacultyIcon(color) {
   });
 }
 
-function createFasumIcon() {
+function createFasumIcon(type) {
+  const color = (type && FASUM_TYPE_COLORS[type]) ? FASUM_TYPE_COLORS[type] : FASUM_TYPE_COLORS['Lainnya'];
   return L.divIcon({
     className: 'fasum-pin-wrap',
-    html: `<div class="fasum-pin" style="--fasum-color:${FASUM_COLOR}">
+    html: `<div class="fasum-pin" style="--fasum-color:${color}">
              <i class="fas fa-tree-city"></i>
            </div>`,
     iconSize: [28, 28],
@@ -2901,8 +2966,8 @@ function renderFixedLocations(layer) {
   if (showFasum) {
     if (!fasumAreas.length) loadFasumAreas();
     fasumAreas.forEach(area => {
-      L.marker([area.lat, area.lng], { icon: createFasumIcon() })
-        .bindPopup(`<div class="popup-card"><div class="popup-header"><div class="popup-loc-name">${esc(area.name)}</div><div class="popup-faculty">${esc(FASUM_GROUP_LABEL)}</div></div></div>`, popupOptions)
+      L.marker([area.lat, area.lng], { icon: createFasumIcon(area.jenis_lokasi) })
+        .bindPopup(`<div class="popup-card"><div class="popup-header"><div class="popup-loc-name">${esc(area.name)}</div><div class="popup-faculty">${esc(FASUM_GROUP_LABEL)} - ${esc(area.jenis_lokasi || 'Lainnya')}</div></div></div>`, popupOptions)
         .addTo(layer);
     });
   }
@@ -2931,13 +2996,20 @@ function renderFixedLocations(layer) {
       const markerColor = loc.status === 'terpasang' ? '#10B981' : '#F59E0B';
       const badgeCls = loc.status === 'terpasang' ? 'badge-safe' : 'badge-warning';
       const badgeIcon = loc.status === 'terpasang' ? 'fa-circle-check' : 'fa-clock';
+      
+      const photoPath = loc.photo || '';
+      const isHidden = typeof photoPath === 'string' && photoPath.startsWith('HIDDEN_');
+      const photoHtml = (photoPath && !isHidden) 
+        ? `<div style="margin-top:8px;"><img src="${photoPath}" style="width:100%;border-radius:4px;max-height:100px;object-fit:cover;" alt="Foto Lokasi" onerror="this.style.display='none'"/></div>` 
+        : '';
+
       L.circleMarker([lat, lng], {
         radius: 7,
         color: markerColor,
         fillColor: markerColor,
         fillOpacity: 0.85,
         weight: 2
-      }).bindPopup(`<div class="popup-card"><div class="popup-header"><div class="popup-loc-name">${esc(loc.name || 'Titik Pengaduan')}</div></div><div class="popup-body"><div class="popup-status-badge ${badgeCls}"><i class="fas ${badgeIcon}"></i> ${status}</div></div></div>`, popupOptions).addTo(layer);
+      }).bindPopup(`<div class="popup-card"><div class="popup-header"><div class="popup-loc-name">${esc(loc.name || 'Titik Pengaduan')}</div></div><div class="popup-body"><div class="popup-status-badge ${badgeCls}"><i class="fas ${badgeIcon}"></i> ${status}</div>${photoHtml}</div></div>`, popupOptions).addTo(layer);
     });
   }
 }
