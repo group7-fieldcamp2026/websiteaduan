@@ -2038,6 +2038,328 @@
       color: #ffffff !important;
       transform: translateY(-1px);
     }
+
+    /* Fullscreen map styles for Admin Map */
+    #adminMapContainer:fullscreen #adminMap,
+    #adminMapContainer.is-fullscreen #adminMap {
+      height: 100% !important;
+      width: 100% !important;
+    }
+
+    #adminMapContainer:fullscreen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      border-radius: 0 !important;
+      border: none !important;
+      background: var(--bg2) !important;
+    }
+
+    #adminMapContainer.is-fullscreen {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 9999 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      border-radius: 0 !important;
+      border: none !important;
+      margin: 0 !important;
+      background: var(--bg2) !important;
+    }
+
+    /* Core Basemap & Layer Component styles copied from style.css */
+    .basemap-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+    .bm-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.7rem;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--bg3);
+      color: var(--text);
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+    .bm-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(var(--primary-rgb), 0.3);
+      background: rgba(var(--primary-rgb), 0.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .bm-btn.active {
+      background: var(--bg);
+      border-color: var(--primary);
+      box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.15);
+    }
+    .bm-btn-preview {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(var(--primary-rgb), 0.1);
+      color: var(--primary);
+    }
+    .bm-btn-copy {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .bm-btn-label {
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .bm-btn-meta {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+
+    .layer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: .6rem;
+    }
+    .layer-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .4rem;
+      padding: .75rem .5rem;
+      border-radius: 10px;
+      background: var(--bg3);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: var(--t);
+      text-align: center;
+    }
+    .layer-card input {
+      display: none;
+    }
+    .layer-card:hover {
+      border-color: rgba(var(--ink-rgb), .15);
+    }
+    .layer-card.active {
+      border-color: var(--primary);
+      background: rgba(var(--primary-rgb), .08);
+      box-shadow: var(--shadow-glow);
+    }
+    .layer-card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1rem;
+    }
+    .layer-card-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .layer-card-count {
+      background: rgba(var(--ink-rgb), 0.08);
+      color: var(--text);
+      padding: 0.1rem 0.5rem;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .vis-toggles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .vis-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--bg3);
+      color: var(--text-soft);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--t);
+    }
+    .vis-toggle input {
+      display: none;
+    }
+    .vis-toggle:hover {
+      border-color: rgba(var(--ink-rgb), 0.15);
+    }
+    .vis-toggle.active {
+      background: rgba(var(--primary-rgb), 0.08);
+      border-color: var(--primary);
+      color: var(--primary-dk);
+    }
+    
+    .map-select {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.4rem 0.8rem;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    /* Nested floating-map-panel styles to override layouts */
+    .floating-map-panel::-webkit-scrollbar {
+      width: 5px;
+    }
+    .floating-map-panel::-webkit-scrollbar-thumb {
+      background: rgba(var(--primary-rgb), .5);
+      border-radius: 999px;
+    }
+    .floating-map-panel-head {
+      position: sticky;
+      top: -.78rem;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      margin: -.78rem -.78rem .05rem;
+      padding: .66rem .72rem;
+      border-bottom: 1px solid rgba(var(--ink-rgb), .08);
+      background: rgba(var(--bg-rgb), .94);
+      backdrop-filter: blur(16px) saturate(150%);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
+    }
+    .floating-map-panel-title {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      color: var(--text);
+      font-size: .82rem;
+      font-weight: 900;
+    }
+    .floating-map-panel .map-panel-section {
+      gap: .55rem;
+    }
+    .floating-map-panel .panel-title {
+      font-size: .66rem;
+    }
+    .floating-map-panel .basemap-row {
+      grid-template-columns: 1fr;
+      gap: .42rem;
+    }
+    .floating-map-panel .bm-btn {
+      gap: .48rem;
+      padding: .48rem;
+      border-radius: 10px;
+    }
+    .floating-map-panel .bm-btn-preview {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-size: .86rem;
+    }
+    .floating-map-panel .bm-btn-label {
+      font-size: .74rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .floating-map-panel .bm-btn-meta {
+      display: none;
+    }
+    .floating-map-panel .layer-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .42rem;
+    }
+    .floating-map-panel .layer-card {
+      min-height: 0;
+      flex-direction: row;
+      justify-content: flex-start;
+      text-align: left;
+      gap: .45rem;
+      padding: .46rem .44rem;
+      border-radius: 10px;
+    }
+    .floating-map-panel .layer-card-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-size: .8rem;
+    }
+    .floating-map-panel .layer-card-label {
+      flex: 1;
+      min-width: 0;
+      font-size: .68rem;
+    }
+    .floating-map-panel .layer-card-count {
+      margin-left: auto;
+      padding: .08rem .42rem;
+      font-size: .68rem;
+    }
+    .floating-map-panel .map-panel-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: .85rem;
+    }
+    .floating-map-panel .vis-toggles {
+      gap: .45rem;
+    }
+    .floating-map-panel .vis-toggle,
+    .floating-map-panel .map-select,
+    .floating-map-panel .btn-sm {
+      min-height: 34px;
+      font-size: .72rem;
+    }
+    .floating-map-panel .map-select {
+      flex: 1 1 130px;
+    }
+
+    /* Dark theme overrides for components in admin.html */
+    [data-theme="dark"] .bm-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+    [data-theme="dark"] .bm-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    [data-theme="dark"] .bm-btn.active {
+      background: rgba(242, 132, 130, 0.1);
+      border-color: var(--primary);
+    }
+    [data-theme="dark"] .layer-card {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    [data-theme="dark"] .layer-card.active {
+      background: rgba(242, 132, 130, 0.1);
+      border-color: var(--primary);
+    }
+    [data-theme="dark"] .vis-toggle {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+    [data-theme="dark"] .vis-toggle.active {
+      background: rgba(242, 132, 130, 0.1);
+      border-color: var(--primary);
+      color: #ffffff !important;
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
   <link rel="stylesheet"
@@ -2302,69 +2624,151 @@
                </button>
              </div>
              
-             <div class="map-panel-section" style="background: transparent; padding: 1rem; border-radius: 0;">
-               <div class="panel-title"
-                 style="font-size: .85rem; font-weight: 700; color: var(--text-muted); margin-bottom: .75rem; letter-spacing: 1px;">
-                 <i class="fas fa-globe"></i> BASEMAP
+             <!-- Basemap -->
+             <div class="map-panel-section">
+               <div class="panel-title"><i class="fas fa-globe"></i> Basemap</div>
+               <div class="basemap-row" role="group" aria-label="Pilihan basemap">
+                 <button class="bm-btn active" data-bm="osm" onclick="switchAdminBasemap(this)">
+                   <span class="bm-btn-preview bm-osm"><i class="fas fa-map"></i></span>
+                   <span class="bm-btn-copy">
+                     <span class="bm-btn-label">OpenStreetMap</span>
+                     <span class="bm-btn-meta">Jalan, gedung, dan label utama</span>
+                   </span>
+                 </button>
+                 <button class="bm-btn" data-bm="satellite" onclick="switchAdminBasemap(this)">
+                   <span class="bm-btn-preview bm-satellite"><i class="fas fa-satellite"></i></span>
+                   <span class="bm-btn-copy">
+                     <span class="bm-btn-label">Satelit</span>
+                     <span class="bm-btn-meta">Citra nyata untuk cek konteks lokasi</span>
+                   </span>
+                 </button>
+                 <button class="bm-btn" data-bm="dark" onclick="switchAdminBasemap(this)">
+                   <span class="bm-btn-preview bm-dark"><i class="fas fa-moon"></i></span>
+                   <span class="bm-btn-copy">
+                     <span class="bm-btn-label">Dark</span>
+                     <span class="bm-btn-meta">Kontras tinggi untuk hotspot</span>
+                   </span>
+                 </button>
+                 <button class="bm-btn" data-bm="topo" onclick="switchAdminBasemap(this)">
+                   <span class="bm-btn-preview bm-topo"><i class="fas fa-mountain"></i></span>
+                   <span class="bm-btn-copy">
+                     <span class="bm-btn-label">Topografi</span>
+                     <span class="bm-btn-meta">Kontur dan relief area kampus</span>
+                   </span>
+                 </button>
                </div>
-              <div class="basemap-row" style="display: flex; flex-wrap: wrap; gap: .45rem;">
-                <button class="bm-btn active" data-bm="osm" onclick="switchAdminBasemap(this)"
-                  style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .85rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(242,132,130,.2); color:#D56A6A; font-weight:700; cursor:pointer;"><i
-                    class="fas fa-map"></i> OpenStreetMap</button>
-                <button class="bm-btn" data-bm="satellite" onclick="switchAdminBasemap(this)"
-                  style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .85rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:var(--bg2); color:var(--text); font-weight:600; cursor:pointer;"><i
-                    class="fas fa-satellite"></i> Satelit</button>
-                <button class="bm-btn" data-bm="dark" onclick="switchAdminBasemap(this)"
-                  style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .85rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:var(--bg2); color:var(--text); font-weight:600; cursor:pointer;"><i
-                    class="fas fa-moon"></i> Dark</button>
-                <button class="bm-btn" data-bm="topo" onclick="switchAdminBasemap(this)"
-                  style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .85rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:var(--bg2); color:var(--text); font-weight:600; cursor:pointer;"><i
-                    class="fas fa-mountain"></i> Topografi</button>
-              </div>
+             </div>
 
-              <div style="display:flex; flex-direction:column; gap:0.4rem; margin-top:1rem;">
-                <div id="tog-admin-fixedpin" data-active="true" onclick="toggleAdminPin('fixedpin', this)"
-                  style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; padding:0.4rem 0.8rem; border-radius:6px; font-size:0.85rem; font-weight:600; transition:all .2s; background:rgba(242,132,130,.14); border:1px solid rgba(242,132,130,.45); color:#D56A6A; user-select:none;">
-                  <i class="fas fa-check-circle pin-icon"></i>
-                  <i class="fas fa-location-dot"></i> Pin Lokasi Tetap (Aduan QR)
-                </div>
-                <div id="tog-admin-jurusan" data-active="true" onclick="toggleAdminPin('jurusan', this)"
-                  style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; padding:0.4rem 0.8rem; border-radius:6px; font-size:0.85rem; font-weight:600; transition:all .2s; background:rgba(242,132,130,.14); border:1px solid rgba(242,132,130,.45); color:#D56A6A; user-select:none;">
-                  <i class="fas fa-check-circle pin-icon-jurusan"></i>
-                  <i class="fas fa-building-columns"></i> Pin Penanda Jurusan/Fakultas
-                </div>
-              </div>
+             <!-- Layer Berdasarkan Kondisi -->
+             <div class="map-panel-section">
+               <div class="panel-title"><i class="fas fa-layer-group"></i> Layer Berdasarkan Kondisi</div>
+               <div class="layer-grid">
+                 <label class="layer-card active" data-layer="semua">
+                   <input type="radio" name="adminLayerKategori" value="semua" checked onchange="switchAdminLayer(this)" />
+                   <div class="layer-card-icon" style="background:linear-gradient(135deg,#84A59D,#F6BD60)"><i class="fas fa-layer-group"></i></div>
+                   <span class="layer-card-label">Semua Laporan</span>
+                   <span class="layer-card-count" id="cnt-admin-semua">0</span>
+                 </label>
+                 <label class="layer-card" data-layer="gelap">
+                   <input type="radio" name="adminLayerKategori" value="gelap" onchange="switchAdminLayer(this)" />
+                   <div class="layer-card-icon" style="background:linear-gradient(135deg,#4B5563,#1F2937)"><i class="fas fa-moon"></i></div>
+                   <span class="layer-card-label">Area Gelap</span>
+                   <span class="layer-card-count" id="cnt-admin-gelap">0</span>
+                 </label>
+                 <label class="layer-card" data-layer="sepi">
+                   <input type="radio" name="adminLayerKategori" value="sepi" onchange="switchAdminLayer(this)" />
+                   <div class="layer-card-icon" style="background:linear-gradient(135deg,#60A5FA,#93C5FD)"><i class="fas fa-person-walking"></i></div>
+                   <span class="layer-card-label">Area Sepi</span>
+                   <span class="layer-card-count" id="cnt-admin-sepi">0</span>
+                 </label>
+                 <label class="layer-card" data-layer="nocctv">
+                   <input type="radio" name="adminLayerKategori" value="nocctv" onchange="switchAdminLayer(this)" />
+                   <div class="layer-card-icon" style="background:linear-gradient(135deg,#B9ADA5,#D8CFC8)"><i class="fas fa-video-slash"></i></div>
+                   <span class="layer-card-label">Tanpa CCTV</span>
+                   <span class="layer-card-count" id="cnt-admin-nocctv">0</span>
+                 </label>
+                 <label class="layer-card" data-layer="minim-petugas">
+                   <input type="radio" name="adminLayerKategori" value="minim-petugas" onchange="switchAdminLayer(this)" />
+                   <div class="layer-card-icon" style="background:linear-gradient(135deg,#CFA29B,#F5CAC3)"><i class="fas fa-user-slash"></i></div>
+                   <span class="layer-card-label">Minim Petugas</span>
+                   <span class="layer-card-count" id="cnt-admin-minim">0</span>
+                 </label>
+               </div>
+             </div>
 
-              <div class="panel-title"
-                style="font-size: .85rem; font-weight: 700; color: var(--text-muted); margin-bottom: .75rem; letter-spacing: 1px; margin-top: 1.5rem;">
-                <i class="fas fa-layer-group"></i> TAMPILAN LAYER
-              </div>
-              <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
-                <button id="tog-admin-heatmap" class="bm-btn" onclick="toggleAdminLayerVis('heatmap')"
-                  style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .8rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:transparent; color:var(--text); font-weight:600; cursor:pointer;"><i
-                    class="fas fa-fire" style="color:#EF4444"></i> Heatmap</button>
-                <button id="tog-admin-point" class="bm-btn active" onclick="toggleAdminLayerVis('point')"
-                  style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .8rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(242,132,130,.2); color:#D56A6A; font-weight:700; cursor:pointer;"><i
-                    class="fas fa-dot-circle"></i> Titik</button>
-                <button id="tog-admin-cluster" class="bm-btn" onclick="toggleAdminLayerVis('cluster')"
-                  style="display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .8rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:transparent; color:var(--text); font-weight:600; cursor:pointer;"><i
-                    class="fas fa-share-nodes"></i> Cluster</button>
-              </div>
+             <!-- Tampilan Layer & Filter & Export Row -->
+             <div class="map-panel-row">
+               <div class="map-panel-section flex-1">
+                 <div class="panel-title"><i class="fas fa-sliders"></i> Tampilan Layer</div>
+                 <div class="vis-toggles">
+                   <label class="vis-toggle" id="tog-admin-heatmap">
+                     <input type="checkbox" onchange="toggleAdminVis('heatmap', this)" />
+                     <i class="fas fa-fire"></i> Heatmap
+                   </label>
+                   <label class="vis-toggle active" id="tog-admin-point">
+                     <input type="checkbox" checked onchange="toggleAdminVis('point', this)" />
+                     <i class="fas fa-circle-dot"></i> Titik
+                   </label>
+                   <label class="vis-toggle" id="tog-admin-cluster">
+                     <input type="checkbox" onchange="toggleAdminVis('cluster', this)" />
+                     <i class="fas fa-circle-nodes"></i> Cluster
+                   </label>
+                   <div style="width: 100%; border-top: 1px dashed rgba(var(--ink-rgb), .1); margin: .4rem 0;"></div>
+                   <label class="vis-toggle active" id="tog-admin-jurusan-vis">
+                     <input type="checkbox" checked onchange="toggleAdminVis('jurusan', this)" />
+                     <i class="fas fa-building-columns"></i> Jurusan
+                   </label>
+                   <label class="vis-toggle active" id="tog-admin-fasum-vis">
+                     <input type="checkbox" checked onchange="toggleAdminVis('fasum', this)" />
+                     <i class="fas fa-tree-city"></i> Fasum
+                   </label>
+                   <label class="vis-toggle active" id="tog-admin-fixedpin-vis">
+                     <input type="checkbox" checked onchange="toggleAdminVis('fixedpin', this)" />
+                     <i class="fas fa-location-dot"></i> Pin QR
+                   </label>
+                 </div>
+               </div>
 
-              <div class="panel-title"
-                style="font-size: .85rem; font-weight: 700; color: var(--text-muted); margin-bottom: .75rem; letter-spacing: 1px; margin-top: 1.5rem;">
-                <i class="fas fa-file-export"></i> EXPORT DATA
-              </div>
-              <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
-                <button class="bm-btn" onclick="exportAdminReportsCSV()" title="Unduh semua data laporan dalam CSV"
-                  style="display:inline-flex; align-items:center; gap:.35rem; padding:.45rem .9rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(16,185,129,.12); color:#047857; font-weight:700; cursor:pointer;"><i
-                    class="fas fa-file-csv"></i> Export CSV</button>
-                <button class="bm-btn" onclick="exportAdminReportsGeoJSON()" title="Unduh laporan berkoordinat sebagai GeoJSON"
-                  style="display:inline-flex; align-items:center; gap:.35rem; padding:.45rem .9rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(59,130,246,.12); color:#1D4ED8; font-weight:700; cursor:pointer;"><i
-                    class="fas fa-code-branch"></i> Export GeoJSON</button>
-              </div>
-              </div>
-            </div>
+               <div class="map-panel-section flex-1">
+                 <div class="panel-title"><i class="fas fa-filter"></i> Filter Waktu & Bulan</div>
+                 <div class="vis-toggles">
+                   <select id="filterAdminWaktu" onchange="renderAdminMap()" class="map-select">
+                     <option value="">Semua Waktu</option>
+                     <option value="Pagi">Pagi</option>
+                     <option value="Siang">Siang</option>
+                     <option value="Malam">Malam</option>
+                   </select>
+                   <select id="filterAdminBulan" onchange="renderAdminMap()" class="map-select">
+                     <option value="">Semua Bulan</option>
+                     <option value="1">Januari</option>
+                     <option value="2">Februari</option>
+                     <option value="3">Maret</option>
+                     <option value="4">April</option>
+                     <option value="5">Mei</option>
+                     <option value="6">Juni</option>
+                     <option value="7">Juli</option>
+                     <option value="8">Agustus</option>
+                     <option value="9">September</option>
+                     <option value="10">Oktober</option>
+                     <option value="11">November</option>
+                     <option value="12">Desember</option>
+                   </select>
+                 </div>
+               </div>
+
+               <div class="map-panel-section flex-1">
+                 <div class="panel-title"><i class="fas fa-file-export"></i> Export Data</div>
+                 <div class="vis-toggles" style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+                   <button class="bm-btn" onclick="exportAdminReportsCSV()" title="Unduh semua data laporan dalam CSV"
+                     style="display:inline-flex; align-items:center; gap:.35rem; padding:.45rem .9rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(16,185,129,.12); color:#047857; font-weight:700; cursor:pointer;"><i
+                       class="fas fa-file-csv"></i> Export CSV</button>
+                   <button class="bm-btn" onclick="exportAdminReportsGeoJSON()" title="Unduh laporan berkoordinat sebagai GeoJSON"
+                     style="display:inline-flex; align-items:center; gap:.35rem; padding:.45rem .9rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(59,130,246,.12); color:#1D4ED8; font-weight:700; cursor:pointer;"><i
+                       class="fas fa-code-branch"></i> Export GeoJSON</button>
+                 </div>
+               </div>
+             </div>
+          </div>
           
           <div class="map-floating-toolbar" aria-label="Aksi peta" style="z-index: 400; position: absolute; left: 4rem; top: 1rem; display: flex; gap: .5rem;">
             <button type="button" class="map-tool-btn" id="adminMapControlsToggle" aria-expanded="false" title="Tampilkan kontrol peta" onclick="toggleAdminMapControls()" style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: .6rem 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.08); display: flex; align-items: center; gap: .4rem;">
@@ -4155,6 +4559,9 @@
 
     let adminBoundaryLayer = null;
     let adminJurusanLayer = null;
+    let adminFasumLayer = null;
+    let visAdminFasumLayer = true;
+    let activeAdminLayer = 'semua';
 
     function initAdminMap() {
       if (adminMap) return;
@@ -4233,32 +4640,90 @@
     let visAdminPoint = true;
     let visAdminCluster = false;
 
-    function toggleAdminLayerVis(type) {
-      visAdminHeatmap = (type === 'heatmap');
-      visAdminPoint = (type === 'point');
-      visAdminCluster = (type === 'cluster');
-
-      const updateBtn = (id, active) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        if (active) {
-          el.classList.add('active');
-          el.style.background = 'rgba(242,132,130,.2)';
-          el.style.color = '#D56A6A';
-          el.style.fontWeight = '700';
-        } else {
-          el.classList.remove('active');
-          el.style.background = 'transparent';
-          el.style.color = 'var(--text)';
-          el.style.fontWeight = '600';
+    function toggleAdminVis(type, cb) {
+      if (type === 'heatmap' || type === 'point' || type === 'cluster') {
+        visAdminHeatmap = (type === 'heatmap' && cb.checked);
+        visAdminPoint = (type === 'point' && cb.checked);
+        visAdminCluster = (type === 'cluster' && cb.checked);
+        
+        // If none is checked, default to point
+        if (!visAdminHeatmap && !visAdminPoint && !visAdminCluster) {
+          visAdminPoint = true;
         }
-      };
 
-      updateBtn('tog-admin-heatmap', visAdminHeatmap);
-      updateBtn('tog-admin-point', visAdminPoint);
-      updateBtn('tog-admin-cluster', visAdminCluster);
+        // Update checkboxes in UI
+        const heatmapInp = document.querySelector('#tog-admin-heatmap input');
+        const pointInp = document.querySelector('#tog-admin-point input');
+        const clusterInp = document.querySelector('#tog-admin-cluster input');
+        
+        if (heatmapInp) heatmapInp.checked = visAdminHeatmap;
+        if (pointInp) pointInp.checked = visAdminPoint;
+        if (clusterInp) clusterInp.checked = visAdminCluster;
 
+        document.getElementById('tog-admin-heatmap')?.classList.toggle('active', visAdminHeatmap);
+        document.getElementById('tog-admin-point')?.classList.toggle('active', visAdminPoint);
+        document.getElementById('tog-admin-cluster')?.classList.toggle('active', visAdminCluster);
+      } else {
+        // Independent toggles
+        if (type === 'fixedpin') {
+          visAdminLocLayer = cb.checked;
+          document.getElementById('tog-admin-fixedpin-vis')?.classList.toggle('active', cb.checked);
+          if (adminMap && adminLocLayer) {
+            if (visAdminLocLayer) {
+              if (!adminMap.hasLayer(adminLocLayer)) adminMap.addLayer(adminLocLayer);
+            } else {
+              if (adminMap.hasLayer(adminLocLayer)) adminMap.removeLayer(adminLocLayer);
+            }
+          }
+        }
+        if (type === 'jurusan') {
+          visAdminJurusanLayer = cb.checked;
+          document.getElementById('tog-admin-jurusan-vis')?.classList.toggle('active', cb.checked);
+          if (adminMap && adminJurusanLayer) {
+            if (visAdminJurusanLayer) {
+              if (!adminMap.hasLayer(adminJurusanLayer)) adminMap.addLayer(adminJurusanLayer);
+            } else {
+              if (adminMap.hasLayer(adminJurusanLayer)) adminMap.removeLayer(adminJurusanLayer);
+            }
+          }
+        }
+        if (type === 'fasum') {
+          visAdminFasumLayer = cb.checked;
+          document.getElementById('tog-admin-fasum-vis')?.classList.toggle('active', cb.checked);
+          if (adminMap && adminFasumLayer) {
+            if (visAdminFasumLayer) {
+              if (!adminMap.hasLayer(adminFasumLayer)) adminMap.addLayer(adminFasumLayer);
+            } else {
+              if (adminMap.hasLayer(adminFasumLayer)) adminMap.removeLayer(adminFasumLayer);
+            }
+          }
+        }
+      }
+      
       renderAdminMap();
+    }
+
+    function switchAdminLayer(radio) {
+      activeAdminLayer = radio.value;
+      document.querySelectorAll('#floatingAdminMapPanel .layer-card').forEach(c => {
+        c.classList.toggle('active', c.dataset.layer === activeAdminLayer);
+      });
+      renderAdminMap();
+    }
+
+    function updateAdminLayerCounts() {
+      const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+      
+      const countGelap = reports.filter(r => r.pencahayaan === 'Gelap').length;
+      const countSepi = reports.filter(r => r.kepadatan === 'Sepi' || r.kepadatan === 'Sangat sepi').length;
+      const countNoCCTV = reports.filter(r => r.cctv === 'Tidak ada').length;
+      const countMinim = reports.filter(r => r.petugas === 'Jarang ada' || r.petugas === 'Tidak pernah ada').length;
+
+      set('cnt-admin-semua', reports.length);
+      set('cnt-admin-gelap', countGelap);
+      set('cnt-admin-sepi', countSepi);
+      set('cnt-admin-nocctv', countNoCCTV);
+      set('cnt-admin-minim', countMinim);
     }
     
     // Floating controls logic
@@ -4311,6 +4776,11 @@
         const active = getFs() === container;
         
         container.classList.toggle('is-fullscreen', active);
+        const mapEl = document.getElementById('adminMap');
+        if (mapEl) {
+          mapEl.style.height = active ? '100%' : '';
+        }
+
         if (btn) {
           btn.setAttribute('aria-pressed', String(active));
           btn.title = active ? 'Keluar fullscreen' : 'Fullscreen peta';
@@ -4319,7 +4789,14 @@
             : '<i class="fas fa-expand"></i><span>Fullscreen</span>';
         }
         
-        setTimeout(() => { if (adminMap) adminMap.invalidateSize(); }, 200);
+        const invalidateAdminMapSoon = () => {
+          [80, 260, 620, 1000].forEach(delay => {
+            setTimeout(() => {
+              if (adminMap) adminMap.invalidateSize();
+            }, delay);
+          });
+        };
+        invalidateAdminMapSoon();
       });
     });
 
@@ -4328,43 +4805,7 @@
       setTimeout(() => toggleAdminMapControls(false), 100);
     });
 
-    function toggleAdminPin(type, el) {
-      const isActive = el.dataset.active === 'true';
-      const nextState = !isActive;
-      el.dataset.active = nextState ? 'true' : 'false';
-
-      if (nextState) {
-        el.style.background = 'rgba(242,132,130,.14)';
-        el.style.color = '#D56A6A';
-        el.style.borderColor = 'rgba(242,132,130,.45)';
-        el.querySelector('.fas.fa-circle').className = 'fas fa-check-circle ' + (type === 'jurusan' ? 'pin-icon-jurusan' : 'pin-icon');
-      } else {
-        el.style.background = 'transparent';
-        el.style.color = 'var(--text-muted)';
-        el.style.borderColor = 'var(--border)';
-        el.querySelector('.fas.fa-check-circle').className = 'fas fa-circle ' + (type === 'jurusan' ? 'pin-icon-jurusan' : 'pin-icon');
-      }
-
-      if (type === 'fixedpin') {
-        visAdminLocLayer = nextState;
-        if (adminMap && adminLocLayer) {
-          if (visAdminLocLayer) {
-            if (!adminMap.hasLayer(adminLocLayer)) adminMap.addLayer(adminLocLayer);
-          } else {
-            if (adminMap.hasLayer(adminLocLayer)) adminMap.removeLayer(adminLocLayer);
-          }
-        }
-      } else if (type === 'jurusan') {
-        visAdminJurusanLayer = nextState;
-        if (adminMap && adminJurusanLayer) {
-          if (visAdminJurusanLayer) {
-            if (!adminMap.hasLayer(adminJurusanLayer)) adminMap.addLayer(adminJurusanLayer);
-          } else {
-            if (adminMap.hasLayer(adminJurusanLayer)) adminMap.removeLayer(adminJurusanLayer);
-          }
-        }
-      }
-    }
+    // toggleAdminPin is replaced by toggleAdminVis
 
     // ─── GIS SHAPEFILE HELPERS & REPROJECTION ──────────────────
     function reprojectAdminGeoJSON(gj) {
@@ -4677,7 +5118,9 @@
 
         // Jurusan & Fasum Pins (Parsed from injected HTML select DOM)
         adminJurusanLayer = L.layerGroup();
+        adminFasumLayer = L.layerGroup();
         if (visAdminJurusanLayer) adminJurusanLayer.addTo(adminMap);
+        if (visAdminFasumLayer) adminFasumLayer.addTo(adminMap);
 
         const opts = Array.from(document.querySelectorAll('#lokasiInsidenAdminHidden option[data-lat][data-lng]'));
         const seen = new Set();
@@ -4733,9 +5176,14 @@
             iconAnchor: [10, 10]
           });
 
-          L.marker([parseFloat(lat), parseFloat(lng)], { icon })
-            .bindPopup(`<b style="color:#1F2937">${name}</b><br><span style="font-size:0.8rem;color:#6B7280">${isFasum ? faculty : faculty}</span>`)
-            .addTo(adminJurusanLayer);
+          const marker = L.marker([parseFloat(lat), parseFloat(lng)], { icon })
+            .bindPopup(`<b style="color:#1F2937">${name}</b><br><span style="font-size:0.8rem;color:#6B7280">${isFasum ? faculty : faculty}</span>`);
+          
+          if (isFasum) {
+            marker.addTo(adminFasumLayer);
+          } else {
+            marker.addTo(adminJurusanLayer);
+          }
         });
 
       } catch (e) {
@@ -5060,8 +5508,20 @@
       `;
     }
 
+    function parseAdminReportDate(r) {
+      if (r && r.createdAt) {
+        const d = new Date(r.createdAt);
+        if (!isNaN(d.getTime())) return d;
+      }
+      return null;
+    }
+
     function renderAdminMap() {
       if (!adminMap) return;
+      
+      // Update counters in UI first
+      updateAdminLayerCounts();
+
       if (adminReportLayer) { adminReportLayer.clearLayers(); adminMap.removeLayer(adminReportLayer); }
       if (adminHeatLayer) { adminHeatLayer.setLatLngs([]); adminMap.removeLayer(adminHeatLayer); }
       if (adminClusterLayer) { adminClusterLayer.clearLayers(); adminMap.removeLayer(adminClusterLayer); }
@@ -5069,10 +5529,41 @@
 
       const heatData = [];
 
-      reports.forEach(r => {
+      let filteredReports = reports.filter(r => {
         const lat = Number(r.lat);
         const lng = Number(r.lng);
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+        return Number.isFinite(lat) && Number.isFinite(lng);
+      });
+
+      // 1. Filter activeAdminLayer
+      if (activeAdminLayer && activeAdminLayer !== 'semua') {
+        filteredReports = filteredReports.filter(r => {
+          if (activeAdminLayer === 'gelap') return r.pencahayaan === 'Gelap';
+          if (activeAdminLayer === 'sepi') return r.kepadatan === 'Sepi' || r.kepadatan === 'Sangat sepi';
+          if (activeAdminLayer === 'nocctv') return r.cctv === 'Tidak ada';
+          if (activeAdminLayer === 'minim-petugas') return r.petugas === 'Jarang ada' || r.petugas === 'Tidak pernah ada';
+          return true;
+        });
+      }
+
+      // 2. Filter Waktu
+      const filterWaktu = document.getElementById('filterAdminWaktu')?.value || '';
+      if (filterWaktu) {
+        filteredReports = filteredReports.filter(r => r.waktu === filterWaktu);
+      }
+
+      // 3. Filter Bulan
+      const filterBulan = document.getElementById('filterAdminBulan')?.value || '';
+      if (filterBulan) {
+        filteredReports = filteredReports.filter(r => {
+          const d = parseAdminReportDate(r);
+          return d && (d.getMonth() + 1) === parseInt(filterBulan, 10);
+        });
+      }
+
+      filteredReports.forEach(r => {
+        const lat = Number(r.lat);
+        const lng = Number(r.lng);
 
         if (visAdminHeatmap) {
           heatData.push([lat, lng, getAdminHeatIntensity(r)]);
