@@ -809,9 +809,10 @@
 
     /* MAP PAGE */
     .admin-map-card {
-      width: min(100%, 1080px);
-      margin: 0 auto 1.5rem;
-      padding: 1rem;
+      width: 100% !important;
+      max-width: none !important;
+      margin: 0 0 1.5rem !important;
+      padding: 0 !important;
     }
 
     #adminMap {
@@ -2376,6 +2377,12 @@
               <div id="reportPhotoEmpty">Belum ada foto yang dikirim.</div>
               <input type="file" id="dFoto" accept="image/*" onchange="previewReportPhoto(this)" />
               <div class="photo-note">JPG/PNG/WEBP dengan ukuran maksimal 5 MB.</div>
+              <div id="dHideFotoContainer" style="display:none; align-items:center; gap:.5rem; margin-top:.6rem;">
+                <input type="checkbox" id="dHideFoto" style="width:auto; margin:0;" />
+                <label for="dHideFoto" style="margin:0; font-size:.8rem; font-weight:normal; text-transform:none; letter-spacing:normal; cursor:pointer;">
+                  <i class="fas fa-eye-slash" style="color:var(--primary-dk); margin-right:.25rem;"></i> Sembunyikan Foto dari Publik
+                </label>
+              </div>
             </div>
           </div>
           <div class="detail-item">
@@ -3237,10 +3244,18 @@
       document.getElementById('dKontak').value = r.kontak || '';
       resetReportPhotoInput();
       if (r.fotoPath) {
-        setReportPhoto(getPhotoUrl(r.fotoPath));
+        const cleanFotoPath = r.fotoPath.replace(/^HIDDEN_/, '');
+        setReportPhoto(getPhotoUrl(cleanFotoPath));
       } else {
         clearReportPhoto();
       }
+      
+      const isFotoHidden = typeof r.fotoPath === 'string' && r.fotoPath.startsWith('HIDDEN_');
+      const chkHideFoto = document.getElementById('dHideFoto');
+      if (chkHideFoto) chkHideFoto.checked = isFotoHidden;
+      const chkHideFotoContainer = document.getElementById('dHideFotoContainer');
+      if (chkHideFotoContainer) chkHideFotoContainer.style.display = r.fotoPath ? 'flex' : 'none';
+
       setSelect('dVerifikasi', r.status);
       openModal('detailModal');
       setTimeout(() => {
@@ -3501,6 +3516,12 @@
         formData.append(key, val);
       });
       if (fotoFile) formData.append('foto_lokasi', fotoFile);
+      
+      const chkHideFoto = document.getElementById('dHideFoto');
+      if (chkHideFoto) {
+        formData.append('foto_path_action', chkHideFoto.checked ? 'hide' : 'unhide');
+      }
+
       formData.append('_method', 'PUT');
       let res;
       try {
@@ -4350,7 +4371,11 @@
           const center = getPolygonCenter(polygon);
           if (!center || !Number.isFinite(center.lat) || !Number.isFinite(center.lng)) return;
           const rawId = feature.properties?.OBJECTID ?? feature.properties?.FID ?? featureIndex + 1;
-          const jenisLokasi = feature.properties?.Jenis_Lokasi ?? feature.properties?.jenis_lokasi ?? 'Lainnya';
+          const jenisLokasi = feature.properties?.Jenis_Lokasi 
+            ?? feature.properties?.jenis_lokasi 
+            ?? feature.properties?.Jenis_Loka 
+            ?? feature.properties?.jenis_loka 
+            ?? 'Lainnya';
           areas.push({
             id: `fasum-${rawId}-${polygonIndex + 1}`,
             name,
@@ -4584,12 +4609,12 @@
           };
           
           const FASUM_TYPE_COLORS = {
-            'Asrama': '#8B5CF6',
-            'Fasilitas Akademik': '#3B82F6',
-            'Fasilitas Umum': '#0EA5A4',
-            'Kantin': '#F59E0B',
-            'Olahraga': '#10B981',
-            'Lainnya': '#9CA3AF'
+            'Asrama': '#38BDF8', // light blue (biru muda)
+            'Fasilitas Akademik': '#8B5CF6', // purple (violet)
+            'Fasilitas Umum': '#0EA5A4', // teal
+            'Kantin': '#EC4899', // pink
+            'Olahraga': '#F97316', // orange
+            'Lainnya': '#9CA3AF' // gray
           };
 
           const isFasum = faculty.startsWith('Fasilitas Umum');

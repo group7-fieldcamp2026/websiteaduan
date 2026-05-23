@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    ITSafe â€“ style.css
    Font: DM Sans + DM Serif Display
    Theme: Deep navy/slate dark, coral-rose accent
@@ -12608,4 +12608,30 @@ body.map-fullscreen-open {
   .floating-map-panel .map-panel-row {
     gap: .5rem;
   }
+}
+
+/* Picker Map Fullscreen Adjustment */
+#pickerMapContainer:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  background: var(--bg2) !important;
+}
+#pickerMapContainer:fullscreen #pickerMap {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+#pickerMapContainer.is-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  background: var(--bg2) !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+#pickerMapContainer.is-fullscreen #pickerMap {
+  height: 100% !important;
+  width: 100% !important;
 }

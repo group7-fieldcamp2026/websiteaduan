@@ -88,12 +88,12 @@ const FACULTY_COLORS = {
 };
 
 const FASUM_TYPE_COLORS = {
-  'Asrama': '#8B5CF6',
-  'Fasilitas Akademik': '#3B82F6',
-  'Fasilitas Umum': '#0EA5A4',
-  'Kantin': '#F59E0B',
-  'Olahraga': '#10B981',
-  'Lainnya': '#9CA3AF'
+  'Asrama': '#38BDF8', // light blue (biru muda)
+  'Fasilitas Akademik': '#8B5CF6', // purple (violet)
+  'Fasilitas Umum': '#0EA5A4', // teal
+  'Kantin': '#EC4899', // pink
+  'Olahraga': '#F97316', // orange
+  'Lainnya': '#9CA3AF' // gray
 };
 
 const RISK_COLORS = {
@@ -641,8 +641,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const getFs = () => document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
       const active = getFs() === container;
       
-      container.style.height = active ? '100vh' : '400px';
-      container.style.width = active ? '100vw' : '100%';
+      container.classList.toggle('is-fullscreen', active);
+      container.style.height = active ? '100vh' : '';
+      container.style.width = active ? '100vw' : '';
+      const mapEl = document.getElementById('pickerMap');
+      if (mapEl) {
+        mapEl.style.height = active ? '100%' : '';
+      }
       btn.innerHTML = active
         ? '<i class="fas fa-compress"></i> Keluar'
         : '<i class="fas fa-expand"></i> Fullscreen';
@@ -904,7 +909,11 @@ function buildFasumAreas(data) {
       const center = getPolygonCenter(polygon);
       if (!center || !Number.isFinite(center.lat) || !Number.isFinite(center.lng)) return;
       const rawId = feature.properties?.OBJECTID ?? feature.properties?.FID ?? featureIndex + 1;
-      const jenisLokasi = feature.properties?.Jenis_Lokasi ?? feature.properties?.jenis_lokasi ?? 'Lainnya';
+      const jenisLokasi = feature.properties?.Jenis_Lokasi 
+        ?? feature.properties?.jenis_lokasi 
+        ?? feature.properties?.Jenis_Loka 
+        ?? feature.properties?.jenis_loka 
+        ?? 'Lainnya';
       areas.push({
         id: `fasum-${rawId}-${polygonIndex + 1}`,
         name,
