@@ -23,11 +23,29 @@
       const rawVersion = '__ASSET_VERSION__';
       const version = rawVersion === '__ASSET_VERSION__' ? String(Date.now()) : rawVersion;
       window.ITSAFE_ASSET_VERSION = version;
-      const showWhenReady = () => {
-        document.documentElement.classList.remove('itsafe-booting');
-        document.documentElement.classList.add('itsafe-css-ready');
+      let bootReleased = false;
+      let bootCssReady = false;
+      let bootDomReady = document.readyState !== 'loading';
+      let bootFallback = null;
+      const showWhenReady = (force) => {
+        if (bootReleased) return;
+        if (!force && (!bootCssReady || !bootDomReady)) return;
+        bootReleased = true;
+        if (bootFallback) window.clearTimeout(bootFallback);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            document.documentElement.classList.remove('itsafe-booting');
+            document.documentElement.classList.add('itsafe-css-ready');
+          });
+        });
       };
-      window.setTimeout(showWhenReady, 1800);
+      if (!bootDomReady) {
+        document.addEventListener('DOMContentLoaded', () => {
+          bootDomReady = true;
+          showWhenReady(false);
+        }, { once: true });
+      }
+      bootFallback = window.setTimeout(() => showWhenReady(true), 4500);
       try {
         const ua = navigator.userAgent || '';
         const platform = navigator.platform || '';
@@ -44,8 +62,14 @@
       const stylesheet = document.createElement('link');
       stylesheet.rel = 'stylesheet';
       stylesheet.href = `style.css?v=${version}`;
-      stylesheet.onload = showWhenReady;
-      stylesheet.onerror = showWhenReady;
+      stylesheet.onload = () => {
+        bootCssReady = true;
+        showWhenReady(false);
+      };
+      stylesheet.onerror = () => {
+        bootCssReady = true;
+        showWhenReady(false);
+      };
       document.currentScript.after(stylesheet);
     })();
   </script>
@@ -561,9 +585,39 @@
                         pin</span></label>
                     <div id="pickerMapContainer" class="picker-map-shell" style="position:relative; background:#fff;">
                       <div id="pickerMap" class="picker-map-canvas"></div>
-                      <button type="button" id="pickerFullscreenBtn" class="btn btn-outline btn-sm picker-fullscreen-btn" onclick="togglePickerFullscreen()" style="position:absolute; top:10px; right:10px; z-index:1000; background:#fff; padding:0.4rem 0.6rem; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.15); border:1px solid var(--border);">
-                        <i class="fas fa-expand"></i> Fullscreen
-                      </button>
+                      <div class="picker-map-toolbar" aria-label="Kontrol peta form pelaporan">
+                        <button type="button" id="pickerControlsToggle" class="picker-map-tool-btn" aria-controls="pickerFloatingPanel" aria-expanded="true" title="Kontrol layer peta" onclick="togglePickerMapControls()">
+                          <i class="fas fa-sliders"></i><span>Kontrol</span>
+                        </button>
+                        <button type="button" id="pickerFullscreenBtn" class="picker-map-tool-btn" onclick="togglePickerFullscreen()" title="Fullscreen peta">
+                          <i class="fas fa-expand"></i><span>Fullscreen</span>
+                        </button>
+                      </div>
+                      <div id="pickerFloatingPanel" class="picker-floating-panel">
+                        <div class="picker-floating-panel-head">
+                          <div class="picker-floating-panel-title">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Kontrol Peta</span>
+                          </div>
+                          <button type="button" class="map-icon-btn" aria-label="Sembunyikan kontrol peta" title="Sembunyikan kontrol peta" onclick="togglePickerMapControls(false)">
+                            <i class="fas fa-xmark"></i>
+                          </button>
+                        </div>
+                        <div class="vis-toggles picker-layer-toggles">
+                          <label class="vis-toggle active" id="tog-fixedpin-form">
+                            <input type="checkbox" checked onchange="toggleVis('fixedpin-form', this)" />
+                            <i class="fas fa-qrcode"></i> Pin QR
+                          </label>
+                          <label class="vis-toggle active" id="tog-jurusan-form">
+                            <input type="checkbox" checked onchange="toggleVis('jurusan-form', this)" />
+                            <i class="fas fa-graduation-cap"></i> Jurusan
+                          </label>
+                          <label class="vis-toggle active" id="tog-fasum-form">
+                            <input type="checkbox" checked onchange="toggleVis('fasum-form', this)" />
+                            <i class="fas fa-tree-city"></i> Fasum
+                          </label>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="form-group full-width location-quick-area-wrap">
@@ -635,22 +689,6 @@
                       <option>Sekitar Kampus (Pilih langsung di MAP)</option>
                     </select>
                     <span class="form-hint">Jika klik pin berada di polygon Fasilitas Umum, lokasi otomatis mengikuti nama fasum tersebut. Jika dekat pin jurusan dalam radius 50 meter, lokasi mengikuti jurusan terdekat. Di luar itu, analisis masuk sebagai Sekitar Kampus.</span>
-                  </div>
-                  <div class="form-group full-width" style="margin-top: .5rem; margin-bottom: 0.5rem;">
-                    <div class="vis-toggles">
-                      <label class="vis-toggle active" id="tog-fixedpin-form">
-                        <input type="checkbox" checked onchange="toggleVis('fixedpin-form', this)" />
-                        <i class="fas fa-qrcode"></i> Pin QR
-                      </label>
-                      <label class="vis-toggle active" id="tog-jurusan-form">
-                        <input type="checkbox" checked onchange="toggleVis('jurusan-form', this)" />
-                        <i class="fas fa-graduation-cap"></i> Jurusan
-                      </label>
-                      <label class="vis-toggle active" id="tog-fasum-form">
-                        <input type="checkbox" checked onchange="toggleVis('fasum-form', this)" />
-                        <i class="fas fa-tree-city"></i> Fasum
-                      </label>
-                    </div>
                   </div>
                   <div class="form-group">
                     <label>Latitude</label>

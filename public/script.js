@@ -488,6 +488,7 @@ function itsafeInit() {
   startRealtimeSync();  // sinkronisasi realtime (polling)
 
   generateQR();
+  initPickerFloatingControls();
   schedulePickerMapInit();
   initLogoPhilosophyCarousel();
   initFloatingMapControls();
@@ -514,6 +515,7 @@ function itsafeInit() {
   window.goLogoPhilosophy = goLogoPhilosophy;
   window.toggleMapControls = toggleMapControls;
   window.toggleMapFullscreen = toggleMapFullscreen;
+  window.togglePickerMapControls = togglePickerMapControls;
 }
 
 if (document.readyState === 'loading') {
@@ -649,13 +651,43 @@ document.addEventListener('DOMContentLoaded', () => {
         mapEl.style.height = active ? '100%' : '';
       }
       btn.innerHTML = active
-        ? '<i class="fas fa-compress"></i> Keluar'
-        : '<i class="fas fa-expand"></i> Fullscreen';
+        ? '<i class="fas fa-compress"></i><span>Keluar</span>'
+        : '<i class="fas fa-expand"></i><span>Fullscreen</span>';
+      btn.setAttribute('aria-pressed', String(active));
       
       setTimeout(() => { if (window.pickerMap) window.pickerMap.invalidateSize(); }, 200);
     });
   });
 });
+
+function togglePickerMapControls(forceOpen) {
+  const container = document.getElementById('pickerMapContainer');
+  const panel = document.getElementById('pickerFloatingPanel');
+  const toggle = document.getElementById('pickerControlsToggle');
+  if (!container || !panel) return;
+
+  const shouldCollapse = typeof forceOpen === 'boolean'
+    ? !forceOpen
+    : !container.classList.contains('picker-controls-collapsed');
+
+  container.classList.toggle('picker-controls-collapsed', shouldCollapse);
+  panel.hidden = shouldCollapse;
+
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', String(!shouldCollapse));
+    toggle.title = shouldCollapse ? 'Tampilkan kontrol peta' : 'Sembunyikan kontrol peta';
+  }
+}
+
+function initPickerFloatingControls() {
+  const container = document.getElementById('pickerMapContainer');
+  const panel = document.getElementById('pickerFloatingPanel');
+  if (!container || !panel || container.dataset.pickerFloatingControlsReady === 'true') return;
+
+  container.dataset.pickerFloatingControlsReady = 'true';
+  container.classList.add('has-picker-floating-controls');
+  togglePickerMapControls(!window.matchMedia('(max-width: 820px)').matches);
+}
 
 function initFloatingMapControls() {
   const container = document.getElementById('mapContainer');
@@ -1951,7 +1983,7 @@ function initPickerMap() {
 
   const isMobile = itsafeIsMobileLike();
   pickerMap = L.map('pickerMap', { 
-    zoomControl: true,
+    zoomControl: !isMobile,
     scrollWheelZoom: false,
     keyboard: false,
     // Mobile: one finger scrolls the page, two fingers can zoom the map.
@@ -1960,6 +1992,9 @@ function initPickerMap() {
     touchZoom: true,
     tapTolerance: 15     // Slightly generous for finger accuracy
   }).setView(ITS, PICKER_INITIAL_ZOOM);
+  if (isMobile) {
+    L.control.zoom({ position: 'bottomright' }).addTo(pickerMap);
+  }
   pickerMap.on('dragstart zoomstart', () => {
     if (!pickerMap.__suppressInitialFitFlag) pickerMap.__userAdjustedPickerView = true;
   });
@@ -2104,6 +2139,7 @@ function initLeafletMap() {
   if (leafletMap) return;
   const isMobile = itsafeIsMobileLike();
   leafletMap = L.map('leafletMap', {
+    zoomControl: !isMobile,
     scrollWheelZoom: false,
     keyboard: false,
     // Mobile: one finger scrolls the page, two fingers can zoom the map.
@@ -2111,6 +2147,9 @@ function initLeafletMap() {
     tap: true,
     touchZoom: true
   }).setView(ITS, ZOOM);
+  if (isMobile) {
+    L.control.zoom({ position: 'bottomright' }).addTo(leafletMap);
+  }
   baseTile = L.tileLayer(BASEMAPS.osm.url, { attribution: BASEMAPS.osm.attr }).addTo(leafletMap);
   fixedLocationLayerMain = L.layerGroup().addTo(leafletMap);
   renderFixedLocations(fixedLocationLayerMain);
