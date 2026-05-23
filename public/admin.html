@@ -1942,6 +1942,97 @@
       box-shadow: none !important;
       padding: 0 !important;
     }
+
+    /* Floating Map Panel for Admin Map */
+    .floating-map-panel {
+      position: absolute !important;
+      top: 1rem !important;
+      right: 1rem !important;
+      z-index: 910 !important;
+      width: min(320px, calc(100% - 2rem)) !important;
+      max-height: calc(100% - 2rem) !important;
+      overflow-y: auto !important;
+      margin: 0 !important;
+      padding: 1rem !important;
+      border-radius: 12px !important;
+      background: rgba(247, 237, 226, 0.95) !important;
+      border: 1px solid var(--border) !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+      backdrop-filter: blur(10px) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1rem !important;
+    }
+
+    .floating-map-panel[hidden] {
+      display: none !important;
+    }
+
+    [data-theme="dark"] .floating-map-panel {
+      background: rgba(28, 34, 50, 0.95) !important;
+    }
+
+    @media (max-width: 768px) {
+      .floating-map-panel {
+        top: auto !important;
+        bottom: 1rem !important;
+        left: 1rem !important;
+        right: 1rem !important;
+        width: auto !important;
+        max-height: 40vh !important;
+      }
+    }
+
+    .floating-map-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .floating-map-panel-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--primary-dk);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .map-icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg4);
+      color: var(--text-soft);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--t);
+    }
+
+    .map-icon-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary-dk);
+      background: rgba(var(--primary-rgb), .08);
+    }
+
+    .map-tool-btn {
+      transition: all 0.2s ease !important;
+    }
+
+    .map-tool-btn:hover,
+    .map-tool-btn[aria-pressed="true"],
+    .map-tool-btn[aria-expanded="true"] {
+      background: var(--primary) !important;
+      border-color: var(--primary) !important;
+      color: #fff !important;
+      transform: translateY(-1px);
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
   <link rel="stylesheet"
@@ -2271,7 +2362,7 @@
             </div>
           </div>
           
-          <div class="map-floating-toolbar" aria-label="Aksi peta" style="z-index: 400; position: absolute; right: 1rem; top: 1rem; display: flex; gap: .5rem;">
+          <div class="map-floating-toolbar" aria-label="Aksi peta" style="z-index: 400; position: absolute; left: 4rem; top: 1rem; display: flex; gap: .5rem;">
             <button type="button" class="map-tool-btn" id="adminMapControlsToggle" aria-expanded="false" title="Tampilkan kontrol peta" onclick="toggleAdminMapControls()" style="background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: .6rem 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.08); display: flex; align-items: center; gap: .4rem;">
               <i class="fas fa-sliders"></i><span>Kontrol</span>
             </button>
