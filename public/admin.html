@@ -2328,6 +2328,264 @@
       flex: 1 1 130px;
     }
 
+    .admin-map-control-panel {
+      width: min(360px, calc(100% - 2rem)) !important;
+      padding: 0 !important;
+      gap: 0 !important;
+      border-radius: 14px !important;
+      background: rgba(255, 250, 246, .96) !important;
+      border-color: rgba(var(--ink-rgb), .12) !important;
+      box-shadow: 0 18px 48px rgba(31, 41, 55, .22) !important;
+      scrollbar-gutter: stable;
+    }
+
+    .admin-map-control-panel .floating-map-panel-head {
+      top: 0;
+      margin: 0 !important;
+      padding: .82rem .9rem !important;
+      border-bottom: 1px solid rgba(var(--ink-rgb), .1);
+      background: rgba(255, 250, 246, .96);
+    }
+
+    .admin-map-control-panel .floating-map-panel-title {
+      color: var(--text) !important;
+      font-size: .88rem !important;
+      letter-spacing: 0;
+    }
+
+    .admin-map-control-panel .floating-map-panel-title i {
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgba(var(--primary-rgb), .12);
+      color: var(--primary-dk);
+      font-size: .78rem;
+    }
+
+    .admin-map-control-panel .map-icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+    }
+
+    .admin-map-control-panel .admin-control-section {
+      margin: .72rem .82rem 0;
+      padding: .78rem;
+      border: 1px solid rgba(var(--ink-rgb), .08);
+      border-radius: 12px;
+      background: rgba(var(--bg3-rgb, 255, 255, 255), .58);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, .42) inset;
+    }
+
+    .admin-map-control-panel .admin-control-section:last-child {
+      margin-bottom: .82rem;
+    }
+
+    .admin-map-control-panel .panel-title {
+      display: flex;
+      align-items: center;
+      gap: .42rem;
+      margin: 0 0 .58rem !important;
+      color: var(--text-muted);
+      font-size: .68rem !important;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .admin-map-control-panel .panel-title i {
+      color: var(--primary);
+      font-size: .78rem;
+    }
+
+    .admin-map-control-panel .basemap-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: .5rem !important;
+    }
+
+    .admin-map-control-panel .bm-btn {
+      min-width: 0;
+      min-height: 42px;
+      gap: .52rem !important;
+      padding: .5rem .55rem !important;
+      border-radius: 10px !important;
+      border-width: 1px !important;
+      background: rgba(255, 255, 255, .68);
+      box-shadow: none;
+    }
+
+    .admin-map-control-panel .bm-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(31, 41, 55, .09);
+    }
+
+    .admin-map-control-panel .bm-btn.active {
+      background: rgba(var(--primary-rgb), .1);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .08);
+    }
+
+    .admin-map-control-panel .bm-btn-preview {
+      width: 30px !important;
+      height: 30px !important;
+      flex: 0 0 30px;
+    }
+
+    .admin-map-control-panel .bm-btn-label {
+      font-size: .74rem !important;
+      line-height: 1.18;
+      white-space: normal !important;
+    }
+
+    .admin-map-control-panel .layer-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: .52rem !important;
+    }
+
+    .admin-map-control-panel .layer-card[data-layer="semua"] {
+      grid-column: 1 / -1;
+    }
+
+    .admin-map-control-panel .layer-card {
+      min-height: 44px;
+      padding: .52rem .56rem !important;
+      gap: .48rem !important;
+      border-width: 1px !important;
+      background: rgba(255, 255, 255, .68);
+      box-shadow: none;
+    }
+
+    .admin-map-control-panel .layer-card.active {
+      background: rgba(var(--primary-rgb), .1);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .08);
+    }
+
+    .admin-map-control-panel .layer-card-icon {
+      width: 30px !important;
+      height: 30px !important;
+      flex: 0 0 30px;
+    }
+
+    .admin-map-control-panel .layer-card-label {
+      font-size: .72rem !important;
+      line-height: 1.15;
+    }
+
+    .admin-map-control-panel .layer-card-count {
+      min-width: 28px;
+      text-align: center;
+      padding: .13rem .42rem !important;
+      background: rgba(var(--ink-rgb), .08);
+      border: 1px solid rgba(var(--ink-rgb), .06);
+    }
+
+    .admin-map-control-panel .admin-control-stack {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 0 !important;
+    }
+
+    .admin-map-control-panel .admin-control-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: .48rem !important;
+    }
+
+    .admin-map-control-panel .vis-toggle {
+      width: 100%;
+      min-width: 0;
+      min-height: 38px !important;
+      justify-content: center;
+      gap: .34rem !important;
+      padding: .42rem .36rem !important;
+      border-width: 1px !important;
+      border-radius: 10px !important;
+      background: rgba(255, 255, 255, .68);
+      color: var(--text-soft);
+      font-size: .72rem !important;
+      line-height: 1.1;
+      text-align: center;
+      box-shadow: none;
+    }
+
+    .admin-map-control-panel .vis-toggle i {
+      font-size: .76rem;
+    }
+
+    .admin-map-control-panel .vis-toggle.active {
+      background: rgba(var(--primary-rgb), .11);
+      color: var(--primary-dk);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .08);
+    }
+
+    .admin-map-control-panel .admin-filter-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .5rem;
+    }
+
+    .admin-map-control-panel .map-select {
+      width: 100%;
+      min-width: 0;
+      min-height: 38px !important;
+      padding: .45rem .62rem !important;
+      border-radius: 10px !important;
+      background: rgba(255, 255, 255, .72);
+      font-size: .72rem !important;
+      font-weight: 650;
+    }
+
+    .admin-map-control-panel .admin-export-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .5rem;
+    }
+
+    .admin-map-control-panel .admin-export-btn {
+      justify-content: center;
+      min-height: 40px;
+      padding: .48rem .58rem !important;
+      border-radius: 10px !important;
+      font-size: .74rem;
+      font-weight: 800;
+    }
+
+    .admin-map-control-panel .export-csv {
+      background: rgba(16, 185, 129, .12);
+      border-color: rgba(16, 185, 129, .24);
+      color: #047857;
+    }
+
+    .admin-map-control-panel .export-geojson {
+      background: rgba(59, 130, 246, .12);
+      border-color: rgba(59, 130, 246, .24);
+      color: #1D4ED8;
+    }
+
+    @media (max-width: 640px) {
+      .admin-map-control-panel {
+        max-height: 48vh !important;
+      }
+
+      .admin-map-control-panel .admin-control-section {
+        margin-inline: .66rem;
+        padding: .66rem;
+      }
+
+      .admin-map-control-panel .basemap-row,
+      .admin-map-control-panel .layer-grid,
+      .admin-map-control-panel .admin-filter-grid,
+      .admin-map-control-panel .admin-export-actions {
+        grid-template-columns: 1fr !important;
+      }
+
+      .admin-map-control-panel .layer-card[data-layer="semua"] {
+        grid-column: auto;
+      }
+    }
+
     /* Dark theme overrides for components in admin.html */
     [data-theme="dark"] .bm-btn {
       background: rgba(255, 255, 255, 0.03);
@@ -2359,6 +2617,60 @@
       background: rgba(242, 132, 130, 0.1);
       border-color: var(--primary);
       color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .admin-map-control-panel {
+      background: rgba(18, 23, 39, .96) !important;
+      border-color: rgba(255, 255, 255, .1) !important;
+      box-shadow: 0 18px 54px rgba(0, 0, 0, .42) !important;
+    }
+
+    [data-theme="dark"] .admin-map-control-panel .floating-map-panel-head {
+      background: rgba(18, 23, 39, .96);
+      border-bottom-color: rgba(255, 255, 255, .08);
+    }
+
+    [data-theme="dark"] .admin-map-control-panel .floating-map-panel-title i {
+      background: rgba(242, 132, 130, .14);
+      color: #F4A3A3;
+    }
+
+    [data-theme="dark"] .admin-map-control-panel .admin-control-section {
+      background: rgba(255, 255, 255, .035);
+      border-color: rgba(255, 255, 255, .08);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, .04) inset;
+    }
+
+    [data-theme="dark"] .admin-map-control-panel .bm-btn,
+    [data-theme="dark"] .admin-map-control-panel .layer-card,
+    [data-theme="dark"] .admin-map-control-panel .vis-toggle,
+    [data-theme="dark"] .admin-map-control-panel .map-select {
+      background: rgba(255, 255, 255, .045);
+      border-color: rgba(255, 255, 255, .1);
+    }
+
+    [data-theme="dark"] .admin-map-control-panel .bm-btn.active,
+    [data-theme="dark"] .admin-map-control-panel .layer-card.active,
+    [data-theme="dark"] .admin-map-control-panel .vis-toggle.active {
+      background: rgba(242, 132, 130, .12);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(242, 132, 130, .08);
+    }
+
+    [data-theme="dark"] .admin-map-control-panel .map-select {
+      color: var(--text);
+    }
+
+    [data-theme="dark"] .admin-map-control-panel .export-csv {
+      background: rgba(16, 185, 129, .14);
+      border-color: rgba(16, 185, 129, .28);
+      color: #34D399;
+    }
+
+    [data-theme="dark"] .admin-map-control-panel .export-geojson {
+      background: rgba(96, 165, 250, .14);
+      border-color: rgba(96, 165, 250, .28);
+      color: #93C5FD;
     }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
@@ -2613,7 +2925,7 @@
         <div class="card admin-map-card map-container map-surface-main" id="adminMapContainer" style="position:relative; padding:0; border:none; overflow:hidden; border-radius: var(--radius); border: 1px solid var(--border);">
           <div id="adminMap" style="width:100%; height:620px; border:none; border-radius:0;"></div>
           
-          <div class="map-panel floating-map-panel" id="floatingAdminMapPanel" hidden style="max-height: calc(100% - 3rem); overflow-y: auto;">
+          <div class="map-panel floating-map-panel admin-map-control-panel" id="floatingAdminMapPanel" hidden style="max-height: calc(100% - 3rem); overflow-y: auto;">
              <div class="floating-map-panel-head">
                <div class="floating-map-panel-title">
                  <i class="fas fa-sliders"></i>
@@ -2625,7 +2937,7 @@
              </div>
              
              <!-- Basemap -->
-             <div class="map-panel-section">
+             <div class="map-panel-section admin-control-section admin-basemap-section">
                <div class="panel-title"><i class="fas fa-globe"></i> Basemap</div>
                <div class="basemap-row" role="group" aria-label="Pilihan basemap">
                  <button class="bm-btn active" data-bm="osm" onclick="switchAdminBasemap(this)">
@@ -2660,7 +2972,7 @@
              </div>
 
              <!-- Layer Berdasarkan Kondisi -->
-             <div class="map-panel-section">
+             <div class="map-panel-section admin-control-section admin-condition-section">
                <div class="panel-title"><i class="fas fa-layer-group"></i> Layer Berdasarkan Kondisi</div>
                <div class="layer-grid">
                  <label class="layer-card active" data-layer="semua">
@@ -2697,10 +3009,10 @@
              </div>
 
              <!-- Tampilan Layer & Filter & Export Row -->
-             <div class="map-panel-row">
-               <div class="map-panel-section flex-1">
-                 <div class="panel-title"><i class="fas fa-sliders"></i> Tampilan Layer</div>
-                 <div class="vis-toggles">
+             <div class="map-panel-row admin-control-stack">
+               <div class="map-panel-section admin-control-section">
+                 <div class="panel-title"><i class="fas fa-sliders"></i> Tampilan Laporan</div>
+                 <div class="vis-toggles admin-control-grid admin-report-mode-grid">
                    <label class="vis-toggle" id="tog-admin-heatmap">
                      <input type="checkbox" onchange="toggleAdminVis('heatmap', this)" />
                      <i class="fas fa-fire"></i> Heatmap
@@ -2713,7 +3025,12 @@
                      <input type="checkbox" onchange="toggleAdminVis('cluster', this)" />
                      <i class="fas fa-circle-nodes"></i> Cluster
                    </label>
-                   <div style="width: 100%; border-top: 1px dashed rgba(var(--ink-rgb), .1); margin: .4rem 0;"></div>
+                 </div>
+               </div>
+
+               <div class="map-panel-section admin-control-section">
+                 <div class="panel-title"><i class="fas fa-map-location-dot"></i> Overlay Kampus</div>
+                 <div class="vis-toggles admin-control-grid admin-overlay-grid">
                    <label class="vis-toggle active" id="tog-admin-jurusan-vis">
                      <input type="checkbox" checked onchange="toggleAdminVis('jurusan', this)" />
                      <i class="fas fa-building-columns"></i> Jurusan
@@ -2729,9 +3046,9 @@
                  </div>
                </div>
 
-               <div class="map-panel-section flex-1">
+               <div class="map-panel-section admin-control-section">
                  <div class="panel-title"><i class="fas fa-filter"></i> Filter Waktu & Bulan</div>
-                 <div class="vis-toggles">
+                 <div class="admin-filter-grid">
                    <select id="filterAdminWaktu" onchange="renderAdminMap()" class="map-select">
                      <option value="">Semua Waktu</option>
                      <option value="Pagi">Pagi</option>
@@ -2756,15 +3073,15 @@
                  </div>
                </div>
 
-               <div class="map-panel-section flex-1">
+               <div class="map-panel-section admin-control-section admin-export-section">
                  <div class="panel-title"><i class="fas fa-file-export"></i> Export Data</div>
-                 <div class="vis-toggles" style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
-                   <button class="bm-btn" onclick="exportAdminReportsCSV()" title="Unduh semua data laporan dalam CSV"
-                     style="display:inline-flex; align-items:center; gap:.35rem; padding:.45rem .9rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(16,185,129,.12); color:#047857; font-weight:700; cursor:pointer;"><i
-                       class="fas fa-file-csv"></i> Export CSV</button>
-                   <button class="bm-btn" onclick="exportAdminReportsGeoJSON()" title="Unduh laporan berkoordinat sebagai GeoJSON"
-                     style="display:inline-flex; align-items:center; gap:.35rem; padding:.45rem .9rem; border-radius:8px; border:1px solid rgba(47,42,38,.2); background:rgba(59,130,246,.12); color:#1D4ED8; font-weight:700; cursor:pointer;"><i
-                       class="fas fa-code-branch"></i> Export GeoJSON</button>
+                 <div class="admin-export-actions">
+                   <button class="bm-btn admin-export-btn export-csv" onclick="exportAdminReportsCSV()" title="Unduh semua data laporan dalam CSV">
+                     <i class="fas fa-file-csv"></i> Export CSV
+                   </button>
+                   <button class="bm-btn admin-export-btn export-geojson" onclick="exportAdminReportsGeoJSON()" title="Unduh laporan berkoordinat sebagai GeoJSON">
+                     <i class="fas fa-code-branch"></i> Export GeoJSON
+                   </button>
                  </div>
                </div>
              </div>
