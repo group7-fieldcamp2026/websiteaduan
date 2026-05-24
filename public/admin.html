@@ -3772,7 +3772,7 @@
         isFetchingReports = false;
       }
       renderDashboard();
-      filterTable();
+      filterTable({ resetPage: false });
       renderLocGrid();
       if (adminMap) renderAdminMap();
     }
@@ -3952,7 +3952,8 @@
     }
 
     // ─── LAPORAN TABLE ───────────────────────────────────────────
-    function filterTable() {
+    function filterTable(opts = {}) {
+      const resetPage = opts.resetPage !== false;
       const q = document.getElementById('searchInput').value.toLowerCase();
       const status = document.getElementById('filterStatus').value;
       const peran = document.getElementById('filterPeran').value;
@@ -3967,13 +3968,15 @@
         const matchP = !peran || r.peran === peran;
         return matchQ && matchS && matchP;
       });
-      currentPage = 1;
+      if (resetPage) currentPage = 1;
       renderTable();
     }
 
     function renderTable() {
       const total = filteredReports.length;
       const totalPages = Math.ceil(total / PER_PAGE);
+      const safeTotalPages = Math.max(totalPages, 1);
+      currentPage = Math.min(Math.max(currentPage, 1), safeTotalPages);
       const start = (currentPage - 1) * PER_PAGE;
       const slice = filteredReports.slice(start, start + PER_PAGE);
 
