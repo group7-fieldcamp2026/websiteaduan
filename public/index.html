@@ -59,6 +59,14 @@
         if (ios) document.documentElement.classList.add('ios-device');
       } catch (_) {}
 
+      ['assets/logo/Maskot_Lapor.png', 'assets/logo/logo gelap.png', 'assets/logo/logo terang.png'].forEach((asset) => {
+        const preload = document.createElement('link');
+        preload.rel = 'preload';
+        preload.as = 'image';
+        preload.href = `${asset}?v=${version}`;
+        document.head.appendChild(preload);
+      });
+
       const stylesheet = document.createElement('link');
       stylesheet.rel = 'stylesheet';
       stylesheet.href = `style.css?v=${version}`;
@@ -132,7 +140,7 @@
       }
       .hc2-mobile-mascot .hc2-orbit-stage {
         position: relative !important;
-        width: 340px !important;
+        width: min(340px, 88vw) !important;
         height: 340px !important;
         display: flex !important;
         align-items: center !important;
@@ -156,7 +164,7 @@
       }
       /* Mascot besar */
       .hc2-mobile-mascot .hc2-maskot {
-        width: 360px !important;
+        width: min(360px, 88vw) !important;
         height: auto !important;
         position: relative !important;
         z-index: 5 !important;
@@ -287,12 +295,12 @@
       }
 
       html.perf-lite .hc2-mobile-mascot {
-        height: 210px !important;
-        margin: 0 auto -.75rem !important;
+        height: 300px !important;
+        margin: 0 auto -1.5rem !important;
       }
       html.perf-lite .hc2-mobile-mascot .hc2-orbit-stage {
-        width: min(270px, 76vw) !important;
-        height: 230px !important;
+        width: min(340px, 88vw) !important;
+        height: 340px !important;
       }
       html.perf-lite .hc2-mobile-mascot .hc2-orbit,
       html.perf-lite .hc2-mobile-mascot .hc2-chip {
@@ -304,7 +312,7 @@
         display: none !important;
       }
       html.perf-lite .hc2-mobile-mascot .hc2-maskot {
-        width: min(260px, 76vw) !important;
+        width: min(360px, 88vw) !important;
         animation: none !important;
         transform: none !important;
         filter: drop-shadow(0 8px 18px rgba(212,135,154,0.28)) !important;
@@ -338,7 +346,7 @@
   <nav class="navbar" id="navbar">
     <div class="nav-brand">
       <div class="brand-icon">
-        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=1.1.4" alt="Logo ITSafe" class="logo-img"
+        <img id="navbarLogo" src="assets/logo/logo gelap.png?v=1.1.4" alt="Logo ITSafe" class="logo-img" decoding="async" fetchpriority="high"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
         <div class="logo-fallback" style="display:none;"><i class="fas fa-shield-halved"></i></div>
       </div>
@@ -389,7 +397,7 @@
               <span class="hc2-chip hc2-mobile-chip-safe"><span class="hc2-chip-face"><i class="fas fa-shield"></i> Aman</span></span>
               <span class="hc2-chip hc2-mobile-chip-anon"><span class="hc2-chip-face"><i class="fas fa-eye-slash"></i> Anonim</span></span>
               <span class="hc2-chip hc2-mobile-chip-time"><span class="hc2-chip-face"><i class="fas fa-clock"></i> 24/7</span></span>
-              <img src="assets/logo/Maskot_Lapor.png?v=1.2.0" alt="Mascot ITSafe" class="hc2-maskot" />
+              <img src="assets/logo/Maskot_Lapor.png?v=1.2.0" alt="Mascot ITSafe" class="hc2-maskot" loading="eager" decoding="async" fetchpriority="high" />
             </div>
           </div>
 
@@ -448,7 +456,7 @@
               <span class="hc2-chip hc2-chip-3"><span class="hc2-chip-face"><i class="fas fa-clock"></i> 24/7</span></span>
             </div>
             <div class="hc2-shadow"></div>
-            <img src="assets/logo/Maskot_Lapor.png?v=1.1.4" alt="Mascot ITSafe" class="hc2-maskot" />
+            <img src="assets/logo/Maskot_Lapor.png?v=1.1.4" alt="Mascot ITSafe" class="hc2-maskot" loading="eager" decoding="async" fetchpriority="high" />
           </div>
         </div>
       </div>
@@ -2768,7 +2776,7 @@
         const philHeroImg = document.getElementById('philHeroImg');
         const wiiThemeLogo = document.getElementById('wiiThemeLogo');
         const fieldcampThemeLogo = document.getElementById('fieldcampThemeLogo');
-        const heroMaskot = document.querySelector('.hc2-maskot');
+        const heroMaskots = document.querySelectorAll('.hc2-maskot');
         const assetVersion = window.ITSAFE_ASSET_VERSION || '1.1.4';
         if (!btn || !icon) return;
 
@@ -2793,9 +2801,9 @@
               ? `assets/logo/logo terang.png?v=${assetVersion}`
               : `assets/logo/logo gelap.png?v=${assetVersion}`;
           }
-          if (heroMaskot) {
+          heroMaskots.forEach(heroMaskot => {
             heroMaskot.src = `assets/logo/Maskot_Lapor.png?v=${assetVersion}`;
-          }
+          });
         }
 
         // Load saved theme
