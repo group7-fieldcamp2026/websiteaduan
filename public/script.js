@@ -2463,6 +2463,45 @@ function updateLegendSymbols(mode, display) {
   list.innerHTML = html;
 }
 
+function syncMapYearFilter() {
+  const select = document.getElementById('filterTahun');
+  if (!select) return '';
+
+  const selectedValue = select.value;
+  const years = [...new Set(getReportDateEntries(reports).map(item => item.date.getFullYear()))].sort((a, b) => b - a);
+  const html = ['<option value="">Semua Tahun</option>']
+    .concat(years.map(year => `<option value="${year}">${year}</option>`))
+    .join('');
+
+  if (select.dataset.years !== years.join(',')) {
+    select.innerHTML = html;
+    select.dataset.years = years.join(',');
+  }
+
+  if (selectedValue && years.includes(parseInt(selectedValue, 10))) {
+    select.value = selectedValue;
+    return selectedValue;
+  }
+
+  select.value = '';
+  return '';
+}
+
+function filterReportsByMapPeriod(source, filterWaktu, filterBulan, filterTahun) {
+  return (source || []).filter(r => {
+    if (filterWaktu && r.waktu !== filterWaktu) return false;
+
+    if (filterBulan || filterTahun) {
+      const d = parseReportDate(r);
+      if (!d) return false;
+      if (filterTahun && d.getFullYear() !== parseInt(filterTahun, 10)) return false;
+      if (filterBulan && (d.getMonth() + 1) !== parseInt(filterBulan, 10)) return false;
+    }
+
+    return true;
+  });
+}
+
 function renderLeafletMap() {
   if (!leafletMap) return;
   updateMapOutputUI();
@@ -2474,21 +2513,18 @@ function renderLeafletMap() {
 
   const filterBulan = document.getElementById('filterBulan')?.value || '';
   const filterWaktu = document.getElementById('filterWaktu')?.value || '';
+  const filterTahun = syncMapYearFilter();
 
-  let data = reports.filter(r => r.lat && r.lng);
+  const periodReports = filterReportsByMapPeriod(reports, filterWaktu, filterBulan, filterTahun);
+  updateLayerCounts(periodReports);
+
+  let data = periodReports.filter(r => r.lat && r.lng);
   if (activeLayer !== 'semua') {
     data = data.filter(r => matchesLayer(r, activeLayer));
   }
-  if (filterWaktu) data = data.filter(r => r.waktu === filterWaktu);
-  if (filterBulan) {
-    data = data.filter(r => {
-      const d = parseReportDate(r);
-      return d && (d.getMonth() + 1) === parseInt(filterBulan);
-    });
-  }
 
   updateTopAreas(data);
-  updateHeatmapAnalysis(data, filterWaktu, filterBulan);
+  updateHeatmapAnalysis(data, filterWaktu, filterBulan, filterTahun);
 
   const overlay = document.getElementById('mapOverlay');
   const hasFixed = fixedLocationLayerMain && fixedLocationLayerMain.getLayers().length > 0;
@@ -3268,22 +3304,23 @@ function updateStats() {
   fetchStats();
 }
 
-function updateLayerCounts() {
+function updateLayerCounts(source = reports) {
+  const rows = Array.isArray(source) ? source : reports;
   const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
-  set('cnt-semua', reports.length);
-  set('cnt-semua-2', reports.length);
-  set('cnt-semua-3', reports.length);
-  set('cnt-tinggi', reports.filter(r => isRawanTinggi(r)).length);
-  set('cnt-sedang', reports.filter(r => isRawanSedang(r)).length);
-  set('cnt-rendah', reports.filter(r => isRawanRendah(r)).length);
-  set('cnt-gelap', reports.filter(r => r.pencahayaan === 'Gelap').length);
-  set('cnt-sepi', reports.filter(r => isSepi(r.kepadatan)).length);
-  set('cnt-nocctv', reports.filter(r => r.cctv === 'Tidak ada').length);
-  set('cnt-minim', reports.filter(r => isMinimPetugas(r.petugas)).length);
+  set('cnt-semua', rows.length);
+  set('cnt-semua-2', rows.length);
+  set('cnt-semua-3', rows.length);
+  set('cnt-tinggi', rows.filter(r => isRawanTinggi(r)).length);
+  set('cnt-sedang', rows.filter(r => isRawanSedang(r)).length);
+  set('cnt-rendah', rows.filter(r => isRawanRendah(r)).length);
+  set('cnt-gelap', rows.filter(r => r.pencahayaan === 'Gelap').length);
+  set('cnt-sepi', rows.filter(r => isSepi(r.kepadatan)).length);
+  set('cnt-nocctv', rows.filter(r => r.cctv === 'Tidak ada').length);
+  set('cnt-minim', rows.filter(r => isMinimPetugas(r.petugas)).length);
 
-  set('cnt-layak', reports.filter(r => calcKelayakan(r).status === 'Layak').length);
-  set('cnt-cukup-layak', reports.filter(r => calcKelayakan(r).status === 'Cukup Layak').length);
-  set('cnt-kurang-layak', reports.filter(r => calcKelayakan(r).status === 'Kurang Layak').length);
+  set('cnt-layak', rows.filter(r => calcKelayakan(r).status === 'Layak').length);
+  set('cnt-cukup-layak', rows.filter(r => calcKelayakan(r).status === 'Cukup Layak').length);
+  set('cnt-kurang-layak', rows.filter(r => calcKelayakan(r).status === 'Kurang Layak').length);
 }
 
 function updateTopAreas(data) {
@@ -3309,7 +3346,7 @@ function updateTopAreas(data) {
     </li>`).join('');
 }
 
-function updateHeatmapAnalysis(data, filterWaktu, filterBulan) {
+function updateHeatmapAnalysis(data, filterWaktu, filterBulan, filterTahun) {
   const el = document.getElementById('heatmapAnalysis');
   if (!el) return;
   if (!data || data.length === 0) { el.textContent = 'Belum ada data untuk analisis heatmap.'; return; }
@@ -3328,6 +3365,7 @@ function updateHeatmapAnalysis(data, filterWaktu, filterBulan) {
   const period = [];
   if (filterWaktu) period.push(filterWaktu.toLowerCase());
   if (filterBulan) period.push(`bulan ${getMonthName(filterBulan)}`);
+  if (filterTahun) period.push(`tahun ${filterTahun}`);
   const suffix = period.length ? ` (filter ${period.join(', ')})` : '';
 
   const scores = data.map(r => getCombinedRiskScore(r)).filter(v => typeof v === 'number' && !isNaN(v));

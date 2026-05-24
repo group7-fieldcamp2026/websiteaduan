@@ -2522,7 +2522,7 @@
 
     .admin-map-control-panel .admin-filter-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: .5rem;
     }
 
@@ -3059,7 +3059,7 @@
                </div>
 
                <div class="map-panel-section admin-control-section">
-                 <div class="panel-title"><i class="fas fa-filter"></i> Filter Waktu & Bulan</div>
+                 <div class="panel-title"><i class="fas fa-filter"></i> Filter Waktu, Bulan & Tahun</div>
                  <div class="admin-filter-grid">
                    <select id="filterAdminWaktu" onchange="renderAdminMap()" class="map-select">
                      <option value="">Semua Waktu</option>
@@ -3081,6 +3081,9 @@
                      <option value="10">Oktober</option>
                      <option value="11">November</option>
                      <option value="12">Desember</option>
+                   </select>
+                   <select id="filterAdminTahun" onchange="renderAdminMap()" class="map-select">
+                     <option value="">Semua Tahun</option>
                    </select>
                  </div>
                </div>
@@ -5125,15 +5128,16 @@
       renderAdminMap();
     }
 
-    function updateAdminLayerCounts() {
+    function updateAdminLayerCounts(source = reports) {
+      const rows = Array.isArray(source) ? source : reports;
       const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
       
-      const countGelap = reports.filter(r => r.pencahayaan === 'Gelap').length;
-      const countSepi = reports.filter(r => r.kepadatan === 'Sepi' || r.kepadatan === 'Sangat sepi').length;
-      const countNoCCTV = reports.filter(r => r.cctv === 'Tidak ada').length;
-      const countMinim = reports.filter(r => r.petugas === 'Jarang ada' || r.petugas === 'Tidak pernah ada').length;
+      const countGelap = rows.filter(r => r.pencahayaan === 'Gelap').length;
+      const countSepi = rows.filter(r => r.kepadatan === 'Sepi' || r.kepadatan === 'Sangat sepi').length;
+      const countNoCCTV = rows.filter(r => r.cctv === 'Tidak ada').length;
+      const countMinim = rows.filter(r => r.petugas === 'Jarang ada' || r.petugas === 'Tidak pernah ada').length;
 
-      set('cnt-admin-semua', reports.length);
+      set('cnt-admin-semua', rows.length);
       set('cnt-admin-gelap', countGelap);
       set('cnt-admin-sepi', countSepi);
       set('cnt-admin-nocctv', countNoCCTV);
@@ -6024,11 +6028,52 @@
       return null;
     }
 
+    function syncAdminMapYearFilter() {
+      const select = document.getElementById('filterAdminTahun');
+      if (!select) return '';
+
+      const selectedValue = select.value;
+      const years = [...new Set(
+        reports
+          .map(r => parseAdminReportDate(r))
+          .filter(d => d && !isNaN(d.getTime()))
+          .map(d => d.getFullYear())
+      )].sort((a, b) => b - a);
+      const html = ['<option value="">Semua Tahun</option>']
+        .concat(years.map(year => `<option value="${year}">${year}</option>`))
+        .join('');
+
+      if (select.dataset.years !== years.join(',')) {
+        select.innerHTML = html;
+        select.dataset.years = years.join(',');
+      }
+
+      if (selectedValue && years.includes(parseInt(selectedValue, 10))) {
+        select.value = selectedValue;
+        return selectedValue;
+      }
+
+      select.value = '';
+      return '';
+    }
+
+    function filterAdminReportsByPeriod(source, filterWaktu, filterBulan, filterTahun) {
+      return (source || []).filter(r => {
+        if (filterWaktu && r.waktu !== filterWaktu) return false;
+
+        if (filterBulan || filterTahun) {
+          const d = parseAdminReportDate(r);
+          if (!d) return false;
+          if (filterTahun && d.getFullYear() !== parseInt(filterTahun, 10)) return false;
+          if (filterBulan && (d.getMonth() + 1) !== parseInt(filterBulan, 10)) return false;
+        }
+
+        return true;
+      });
+    }
+
     function renderAdminMap() {
       if (!adminMap) return;
-      
-      // Update counters in UI first
-      updateAdminLayerCounts();
 
       if (adminReportLayer) { adminReportLayer.clearLayers(); adminMap.removeLayer(adminReportLayer); }
       if (adminHeatLayer) { adminHeatLayer.setLatLngs([]); adminMap.removeLayer(adminHeatLayer); }
@@ -6036,8 +6081,14 @@
       if (adminLocLayer) { adminLocLayer.clearLayers(); }
 
       const heatData = [];
+      const filterWaktu = document.getElementById('filterAdminWaktu')?.value || '';
+      const filterBulan = document.getElementById('filterAdminBulan')?.value || '';
+      const filterTahun = syncAdminMapYearFilter();
+      const periodReports = filterAdminReportsByPeriod(reports, filterWaktu, filterBulan, filterTahun);
 
-      let filteredReports = reports.filter(r => {
+      updateAdminLayerCounts(periodReports);
+
+      let filteredReports = periodReports.filter(r => {
         const lat = Number(r.lat);
         const lng = Number(r.lng);
         return Number.isFinite(lat) && Number.isFinite(lng);
@@ -6051,21 +6102,6 @@
           if (activeAdminLayer === 'nocctv') return r.cctv === 'Tidak ada';
           if (activeAdminLayer === 'minim-petugas') return r.petugas === 'Jarang ada' || r.petugas === 'Tidak pernah ada';
           return true;
-        });
-      }
-
-      // 2. Filter Waktu
-      const filterWaktu = document.getElementById('filterAdminWaktu')?.value || '';
-      if (filterWaktu) {
-        filteredReports = filteredReports.filter(r => r.waktu === filterWaktu);
-      }
-
-      // 3. Filter Bulan
-      const filterBulan = document.getElementById('filterAdminBulan')?.value || '';
-      if (filterBulan) {
-        filteredReports = filteredReports.filter(r => {
-          const d = parseAdminReportDate(r);
-          return d && (d.getMonth() + 1) === parseInt(filterBulan, 10);
         });
       }
 
