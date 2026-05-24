@@ -1910,40 +1910,56 @@ function getReportAreaName(report) {
   return String(resolveReportLocationName(rawName, lat, lng) || '').trim();
 }
 
+function isCompactMapMarkerViewport() {
+  try {
+    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+      return window.matchMedia('(max-width: 640px)').matches;
+    }
+  } catch { /* ignore */ }
+  return typeof window !== 'undefined' && (window.innerWidth || 0) <= 640;
+}
+
+function getCenteredMapIconMetrics(desktopSize, mobileSize) {
+  const size = isCompactMapMarkerViewport() ? mobileSize : desktopSize;
+  const half = size / 2;
+  return {
+    iconSize: [size, size],
+    iconAnchor: [half, half],
+    popupAnchor: [0, -half],
+  };
+}
+
 function createFacultyIcon(color) {
+  const metrics = getCenteredMapIconMetrics(24, 16);
   return L.divIcon({
     className: 'faculty-pin-wrap',
     html: `<div class="faculty-pin" style="--pin-color:${color}">
              <i class="fas fa-building-columns"></i>
            </div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12],
+    ...metrics,
   });
 }
 
 function createFasumIcon(type) {
   const color = getFasumTypeColor(type);
+  const metrics = getCenteredMapIconMetrics(28, 18);
   return L.divIcon({
     className: 'fasum-pin-wrap',
     html: `<div class="fasum-pin" style="--fasum-color:${color}">
              <i class="fas fa-tree-city"></i>
            </div>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-    popupAnchor: [0, -14],
+    ...metrics,
   });
 }
 
 function createCaseIcon(color) {
+  const metrics = getCenteredMapIconMetrics(22, 15);
   return L.divIcon({
     className: 'case-dot-wrap',
     html: `<div class="case-dot" style="--case-color:${color}">
              <i class="fas fa-exclamation"></i>
            </div>`,
-    iconSize: [22, 22],
-    iconAnchor: [11, 11],
-    popupAnchor: [0, -11],
+    ...metrics,
   });
 }
 
@@ -1952,15 +1968,14 @@ function createReportIcon(visual) {
   const shape = cfg.shape || 'circle';
   const icon = cfg.icon || 'fa-location-dot';
   const color = cfg.color || '#D56A6A';
+  const metrics = getCenteredMapIconMetrics(34, 24);
 
   return L.divIcon({
     className: `case-dot-wrap report-marker-wrap report-marker-wrap-${shape}`,
     html: `<div class="case-dot report-marker report-marker-${shape}" style="--case-color:${color};--case-glow:${color}">
              <i class="fas ${icon}"></i>
            </div>`,
-    iconSize: [34, 34],
-    iconAnchor: [17, 17],
-    popupAnchor: [0, -17],
+    ...metrics,
   });
 }
 

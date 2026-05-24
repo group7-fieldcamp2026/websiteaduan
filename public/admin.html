@@ -1802,30 +1802,39 @@
     /* Responsive Markers for Mobile (Admin) */
     @media (max-width: 640px) {
       .faculty-pin {
-        width: 15px !important;
-        height: 15px !important;
+        width: 14px !important;
+        height: 14px !important;
+        border-width: 1.5px !important;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, .28) !important;
       }
 
       .faculty-pin i {
-        font-size: 0.45rem !important;
+        font-size: 0.42rem !important;
       }
 
       .case-dot {
         width: 14px !important;
         height: 14px !important;
+        border-width: 1.5px !important;
       }
 
       .case-dot i {
-        font-size: 0.5rem !important;
+        font-size: 0.48rem !important;
       }
 
       .report-marker {
-        width: 28px !important;
-        height: 28px !important;
+        width: 24px !important;
+        height: 24px !important;
+        border-width: 2px !important;
+      }
+
+      .report-marker::after {
+        inset: -4px !important;
+        border-width: 1.5px !important;
       }
 
       .report-marker i {
-        font-size: .78rem !important;
+        font-size: .68rem !important;
       }
 
       .admin-map-popup {
@@ -2543,6 +2552,13 @@
       gap: .5rem;
     }
 
+    .admin-map-control-panel .admin-campus-export-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+      gap: .5rem;
+      margin-top: .5rem;
+    }
+
     .admin-map-control-panel .admin-export-btn {
       justify-content: center;
       min-height: 40px;
@@ -2550,6 +2566,13 @@
       border-radius: 10px !important;
       font-size: .74rem;
       font-weight: 800;
+    }
+
+    .admin-map-control-panel .admin-campus-export-btn {
+      grid-column: 1 / -1;
+      background: rgba(139, 92, 246, .12);
+      border-color: rgba(139, 92, 246, .24);
+      color: #6D28D9;
     }
 
     .admin-map-control-panel .export-csv {
@@ -2577,6 +2600,7 @@
       .admin-map-control-panel .basemap-row,
       .admin-map-control-panel .layer-grid,
       .admin-map-control-panel .admin-filter-grid,
+      .admin-map-control-panel .admin-campus-export-grid,
       .admin-map-control-panel .admin-export-actions {
         grid-template-columns: 1fr !important;
       }
@@ -3092,10 +3116,24 @@
                  <div class="panel-title"><i class="fas fa-file-export"></i> Export Data</div>
                  <div class="admin-export-actions">
                    <button class="bm-btn admin-export-btn export-csv" onclick="exportAdminReportsCSV()" title="Unduh semua data laporan dalam CSV">
-                     <i class="fas fa-file-csv"></i> Export CSV
+                     <i class="fas fa-file-csv"></i> Laporan CSV
                    </button>
                    <button class="bm-btn admin-export-btn export-geojson" onclick="exportAdminReportsGeoJSON()" title="Unduh laporan berkoordinat sebagai GeoJSON">
-                     <i class="fas fa-code-branch"></i> Export GeoJSON
+                     <i class="fas fa-code-branch"></i> Laporan GeoJSON
+                   </button>
+                 </div>
+                 <div class="admin-campus-export-grid">
+                   <select id="adminCampusPinDataset" class="map-select" title="Pilih data pin kampus">
+                     <option value="all">Jurusan + Fasum</option>
+                     <option value="jurusan">Pin Jurusan</option>
+                     <option value="fasum">Pin Fasum</option>
+                   </select>
+                   <select id="adminCampusPinFormat" class="map-select" title="Pilih format export pin kampus">
+                     <option value="csv">CSV</option>
+                     <option value="geojson">GeoJSON</option>
+                   </select>
+                   <button class="bm-btn admin-export-btn admin-campus-export-btn" onclick="exportAdminCampusPins()" title="Export koordinat pin jurusan dan/atau fasilitas umum">
+                     <i class="fas fa-location-crosshairs"></i> Export Pin Kampus
                    </button>
                  </div>
                </div>
@@ -5681,11 +5719,12 @@
             ? `<div class="faculty-pin" style="--pin-color:${color}"><i class="fas fa-tree-city"></i></div>`
             : `<div class="faculty-pin" style="--pin-color:${color}"><i class="fas fa-building-columns"></i></div>`;
 
+          const pinMetrics = getAdminCenteredMapIconMetrics(20, 14);
           const icon = L.divIcon({
             html: iconHtml,
             className: 'faculty-pin-wrap',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
+            iconSize: pinMetrics.iconSize,
+            iconAnchor: pinMetrics.iconAnchor
           });
 
           const marker = L.marker([parseFloat(lat), parseFloat(lng)], { icon })
@@ -5844,16 +5883,34 @@
       };
     }
 
+    function isAdminCompactMapMarkerViewport() {
+      try {
+        if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+          return window.matchMedia('(max-width: 640px)').matches;
+        }
+      } catch (e) { /* ignore */ }
+      return typeof window !== 'undefined' && (window.innerWidth || 0) <= 640;
+    }
+
+    function getAdminCenteredMapIconMetrics(desktopSize, mobileSize) {
+      const size = isAdminCompactMapMarkerViewport() ? mobileSize : desktopSize;
+      const half = size / 2;
+      return {
+        iconSize: [size, size],
+        iconAnchor: [half, half],
+        popupAnchor: [0, -half],
+      };
+    }
+
     function createAdminReportIcon(visual) {
       const cfg = visual || getAdminReportVisual();
+      const metrics = getAdminCenteredMapIconMetrics(34, 24);
       return L.divIcon({
         className: `case-dot-wrap report-marker-wrap report-marker-wrap-${cfg.shape || 'circle'}`,
         html: `<div class="case-dot report-marker report-marker-${cfg.shape || 'circle'}" style="--case-color:${cfg.color}">
           <i class="fas ${cfg.icon || 'fa-location-dot'}"></i>
         </div>`,
-        iconSize: [34, 34],
-        iconAnchor: [17, 17],
-        popupAnchor: [0, -17],
+        ...metrics,
       });
     }
 
@@ -6407,6 +6464,126 @@
       const d = new Date();
       const pad = n => String(n).padStart(2, '0');
       return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
+    }
+
+    function isAdminCampusFasumOption(opt) {
+      const parent = opt?.closest?.('optgroup');
+      return opt?.dataset?.locationType === 'fasum'
+        || parent?.dataset?.locationType === 'fasum'
+        || String(parent?.label || '').startsWith('Fasilitas Umum');
+    }
+
+    function getAdminCampusPinDatasetLabel(dataset) {
+      const labels = {
+        all: 'jurusan + fasum',
+        jurusan: 'pin jurusan',
+        fasum: 'pin fasum',
+      };
+      return labels[dataset] || labels.all;
+    }
+
+    function getAdminCampusPinExportRows(dataset = 'all') {
+      const opts = Array.from(document.querySelectorAll('#lokasiInsidenAdminHidden option[data-lat][data-lng]'));
+      const seen = new Set();
+      const rows = [];
+
+      opts.forEach(opt => {
+        const lat = Number(opt.dataset.lat);
+        const lng = Number(opt.dataset.lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+        const isFasum = isAdminCampusFasumOption(opt);
+        if (dataset === 'jurusan' && isFasum) return;
+        if (dataset === 'fasum' && !isFasum) return;
+
+        const parentLabel = opt.closest('optgroup')?.label || '';
+        const name = opt.textContent.trim();
+        const category = isFasum ? 'fasum' : 'jurusan';
+        const key = `${category}|${lat.toFixed(6)}|${lng.toFixed(6)}|${name}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        const fasumId = opt.dataset.fasumId || '';
+        const fasumArea = fasumId ? fasumAreasAdmin.find(area => area.id === fasumId) : null;
+        rows.push({
+          id_pin: fasumId || `${category}-${rows.length + 1}`,
+          nama_pin: name,
+          kategori_pin: category,
+          kelompok: parentLabel || (isFasum ? 'Fasilitas Umum' : 'Gedung Jurusan'),
+          fakultas: isFasum ? '' : parentLabel,
+          jenis_fasum: isFasum ? (opt.dataset.fasumType || parentLabel.replace(/^Fasilitas Umum\s*-\s*/i, '') || 'Lainnya') : '',
+          longitude: exportNumber(lng),
+          latitude: exportNumber(lat),
+          spatial_reference: 'EPSG:4326',
+          sumber_data: isFasum
+            ? (fasumArea?.isFallback ? 'Fallback Fasum' : 'Fasum.zip')
+            : 'Daftar jurusan admin',
+        });
+      });
+
+      return rows
+        .sort((a, b) =>
+          (a.kategori_pin === 'jurusan' ? 0 : 1) - (b.kategori_pin === 'jurusan' ? 0 : 1)
+          || a.kelompok.localeCompare(b.kelompok)
+          || a.nama_pin.localeCompare(b.nama_pin)
+        )
+        .map((row, index) => ({ no: index + 1, ...row }));
+    }
+
+    async function exportAdminCampusPins() {
+      const dataset = document.getElementById('adminCampusPinDataset')?.value || 'all';
+      const format = document.getElementById('adminCampusPinFormat')?.value || 'csv';
+
+      if (dataset !== 'jurusan') {
+        try {
+          showToast('Menyiapkan data Fasum untuk export...', 'success');
+          await loadFasumAreasAdmin();
+        } catch (e) {
+          console.warn('Gagal memuat ulang data fasum sebelum export:', e);
+        }
+      }
+
+      const rows = getAdminCampusPinExportRows(dataset);
+      if (!rows.length) {
+        showToast(`Tidak ada data ${getAdminCampusPinDatasetLabel(dataset)} untuk diexport.`, 'error');
+        return;
+      }
+
+      const datasetSlug = dataset === 'all' ? 'jurusan_fasum' : dataset;
+      if (format === 'geojson') {
+        const geojson = {
+          type: 'FeatureCollection',
+          name: `itsafe_pin_kampus_${datasetSlug}`,
+          generated_at: new Date().toISOString(),
+          features: rows.map(row => ({
+            type: 'Feature',
+            id: row.id_pin,
+            geometry: {
+              type: 'Point',
+              coordinates: [row.longitude, row.latitude],
+            },
+            properties: row,
+          })),
+        };
+        downloadTextFile(
+          JSON.stringify(geojson, null, 2),
+          `itsafe_pin_kampus_${datasetSlug}_${exportTimestamp()}.geojson`,
+          'application/geo+json;charset=utf-8'
+        );
+      } else {
+        const headers = Object.keys(rows[0]);
+        const csv = [
+          headers.join(','),
+          ...rows.map(row => headers.map(key => csvCell(row[key])).join(','))
+        ].join('\r\n');
+        downloadTextFile(
+          `\uFEFF${csv}`,
+          `itsafe_pin_kampus_${datasetSlug}_${exportTimestamp()}.csv`,
+          'text/csv;charset=utf-8'
+        );
+      }
+
+      showToast(`${format.toUpperCase()} ${getAdminCampusPinDatasetLabel(dataset)} diunduh (${rows.length} pin).`, 'success');
     }
 
     function exportAdminReportsCSV() {
