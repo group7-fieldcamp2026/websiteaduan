@@ -4100,7 +4100,7 @@
         const lat = parseFloat(r.lat);
         const lng = parseFloat(r.lng);
         if (!isNaN(lat) && !isNaN(lng)) {
-          setReportEditPin(lat, lng, { pan: true, silent: true });
+          setReportEditPin(lat, lng, { pan: true, silent: true, syncLocation: false });
         } else {
           clearReportEditPin({ keepLocation: true, silent: true });
           focusReportEditMap();
@@ -4114,6 +4114,7 @@
     }
 
     const REPORT_OTHER_LOCATION_LABEL = 'Sekitar Kampus (Pilih langsung di MAP)';
+    const REPORT_NEARBY_LOCATION_RADIUS_METERS = 50;
     let reportEditMap = null;
     let reportEditMarker = null;
 
@@ -4184,7 +4185,7 @@
       if (!isNaN(lat) && !isNaN(lng)) {
         document.getElementById('dLat').value = lat.toFixed(6);
         document.getElementById('dLng').value = lng.toFixed(6);
-        setReportEditPin(lat, lng, { pan: true, silent: true });
+        setReportEditPin(lat, lng, { pan: true, silent: true, syncLocation: false });
         showToast('Lokasi dan koordinat laporan diperbarui dari daftar.', 'success');
       } else {
         updateReportEditMapStatus('Klik peta untuk menentukan titik lokasi Sekitar Kampus.');
@@ -4211,17 +4212,7 @@
       }).addTo(reportEditMap);
 
       reportEditMap.on('click', e => {
-        const nearest = findNearestReportLocation(e.latlng.lat, e.latlng.lng);
-        const select = document.getElementById('dLokasiSelect');
-        const lokasiInput = document.getElementById('dLokasi');
-        if (nearest) {
-          select.value = nearest.option.value;
-          lokasiInput.value = nearest.option.textContent.trim();
-        } else if (!lokasiInput.value.trim()) {
-          select.value = REPORT_OTHER_LOCATION_LABEL;
-          lokasiInput.value = REPORT_OTHER_LOCATION_LABEL;
-        }
-        setReportEditPin(e.latlng.lat, e.latlng.lng);
+        setReportEditPin(e.latlng.lat, e.latlng.lng, { syncLocation: true });
       });
 
       getReportLocationOptions().forEach(opt => {
@@ -4249,24 +4240,105 @@
         const distance = getDistanceFromLatLonInMeters(lat, lng, optLat, optLng);
         if (!nearest || distance < nearest.distance) nearest = { option: opt, distance };
       });
-      return nearest && nearest.distance <= 50 ? nearest : null;
+      return nearest && nearest.distance <= REPORT_NEARBY_LOCATION_RADIUS_METERS ? nearest : null;
+    }
+
+    function isReportFasumOption(opt) {
+      const parent = opt?.parentElement;
+      return opt?.dataset?.locationType === 'fasum'
+        || parent?.dataset?.locationType === 'fasum'
+        || String(parent?.label || '').startsWith('Fasilitas Umum');
+    }
+
+    function getReportFasumAreaAtPoint(lat, lng) {
+      const pointLat = Number(lat);
+      const pointLng = Number(lng);
+      if (!Number.isFinite(pointLat) || !Number.isFinite(pointLng) || !Array.isArray(fasumAreasAdmin)) return null;
+
+      return fasumAreasAdmin.find(area =>
+        Array.isArray(area?.polygon)
+        && area.polygon.length
+        && pointInPolygon([pointLng, pointLat], area.polygon)
+      ) || null;
+    }
+
+    function resolveReportLocationFromPoint(lat, lng) {
+      const fasumArea = getReportFasumAreaAtPoint(lat, lng);
+      if (fasumArea) {
+        return {
+          name: fasumArea.name,
+          type: 'fasum-polygon',
+          area: fasumArea,
+        };
+      }
+
+      const nearest = findNearestReportLocation(lat, lng);
+      if (nearest) {
+        return {
+          name: nearest.option.textContent.trim(),
+          value: nearest.option.value,
+          type: isReportFasumOption(nearest.option) ? 'fasum-radius' : 'jurusan-radius',
+          option: nearest.option,
+          distance: nearest.distance,
+        };
+      }
+
+      return {
+        name: REPORT_OTHER_LOCATION_LABEL,
+        value: REPORT_OTHER_LOCATION_LABEL,
+        type: 'other',
+      };
+    }
+
+    function applyReportLocationFromPoint(lat, lng) {
+      const result = resolveReportLocationFromPoint(lat, lng);
+      const select = document.getElementById('dLokasiSelect');
+      const lokasiInput = document.getElementById('dLokasi');
+      if (!select || !lokasiInput) return result;
+
+      if (result.option) {
+        select.value = result.option.value;
+      } else {
+        syncReportLocationSelect(result.name);
+        if (result.type === 'other') select.value = REPORT_OTHER_LOCATION_LABEL;
+      }
+      lokasiInput.value = result.name;
+      return result;
+    }
+
+    function getReportLocationStatusText(result) {
+      if (!result) return '';
+      if (result.type === 'fasum-polygon') return ` | Fasilitas Umum: ${result.name}`;
+      if (result.type === 'fasum-radius') {
+        return ` | Radius Fasum ${REPORT_NEARBY_LOCATION_RADIUS_METERS} m: ${result.name} (${Math.round(result.distance)} m)`;
+      }
+      if (result.type === 'jurusan-radius') {
+        return ` | Radius Jurusan ${REPORT_NEARBY_LOCATION_RADIUS_METERS} m: ${result.name} (${Math.round(result.distance)} m)`;
+      }
+      if (result.type === 'other') return ' | Area: Sekitar Kampus';
+      return '';
     }
 
     function setReportEditPin(lat, lng, opts = {}) {
-      document.getElementById('dLat').value = Number(lat).toFixed(6);
-      document.getElementById('dLng').value = Number(lng).toFixed(6);
-      updateReportEditMapStatus(`Koordinat laporan: ${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}`);
+      const pointLat = Number(lat);
+      const pointLng = Number(lng);
+      if (!Number.isFinite(pointLat) || !Number.isFinite(pointLng)) return;
+
+      const locationMatch = opts.syncLocation === false ? null : applyReportLocationFromPoint(pointLat, pointLng);
+      document.getElementById('dLat').value = pointLat.toFixed(6);
+      document.getElementById('dLng').value = pointLng.toFixed(6);
+      updateReportEditMapStatus(`Koordinat laporan: ${pointLat.toFixed(6)}, ${pointLng.toFixed(6)}${getReportLocationStatusText(locationMatch)}`);
 
       initReportEditMap();
       if (!reportEditMap) return;
-      const latlng = [Number(lat), Number(lng)];
+      const latlng = [pointLat, pointLng];
       if (reportEditMarker) {
         reportEditMarker.setLatLng(latlng);
       } else {
         reportEditMarker = L.marker(latlng, { draggable: true }).addTo(reportEditMap);
         reportEditMarker.on('dragend', e => {
           const p = e.target.getLatLng();
-          setReportEditPin(p.lat, p.lng);
+          setReportEditPin(p.lat, p.lng, { syncLocation: true });
         });
       }
       if (opts.pan) reportEditMap.setView(latlng, Math.max(reportEditMap.getZoom(), 17), { animate: false });
