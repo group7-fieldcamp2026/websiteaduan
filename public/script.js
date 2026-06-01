@@ -3793,6 +3793,10 @@ function esc(str) {
   return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function escAttr(str) {
+  return esc(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function jsArg(str) {
   return JSON.stringify(String(str || '')).replace(/</g, '\\u003c');
 }
@@ -4106,7 +4110,7 @@ async function checkEditableReportsByEmail() {
     html += '<div class="history-email-list">';
     editableReports.forEach(r => {
       const tgl = r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Tanggal tidak diketahui';
-      html += `<button type="button" class="history-email-item history-edit-item" onclick="startReportEdit(${jsArg(r.report_code)}, { email: ${jsArg(email)}, prompt: false })">
+      html += `<button type="button" class="history-email-item history-edit-item" data-report-code="${escAttr(r.report_code)}" data-report-email="${escAttr(email)}">
         <div class="history-email-item-left">
           <span class="history-email-code"><i class="fas fa-barcode"></i> ${esc(r.report_code)}</span>
           <span class="history-email-lokasi">${esc(r.lokasi || 'Lokasi tidak tersedia')}</span>
@@ -4120,6 +4124,14 @@ async function checkEditableReportsByEmail() {
     });
     html += '</div>';
     result.innerHTML = html;
+    result.querySelectorAll('.history-edit-item[data-report-code]').forEach(item => {
+      item.addEventListener('click', () => {
+        startReportEdit(item.dataset.reportCode || '', {
+          email: item.dataset.reportEmail || email,
+          prompt: false,
+        });
+      });
+    });
   } catch {
     result.innerHTML = '<div class="history-result-card status-pending"><i class="fas fa-wifi"></i> Tidak dapat terhubung ke server. Coba beberapa saat lagi.</div>';
   }
